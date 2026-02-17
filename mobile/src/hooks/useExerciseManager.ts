@@ -62,18 +62,23 @@ export function useExerciseManager(
 
     if (!validation.valid) return false
 
-    await database.write(async () => {
-      await database.get<Exercise>('exercises').create(e => {
-        e.name = newExerciseName.trim()
-        e.muscles = newExerciseMuscles
-        e.equipment = newExerciseEquipment
-        e.isCustom = true
+    try {
+      await database.write(async () => {
+        await database.get<Exercise>('exercises').create(e => {
+          e.name = newExerciseName.trim()
+          e.muscles = newExerciseMuscles
+          e.equipment = newExerciseEquipment
+          e.isCustom = true
+        })
       })
-    })
 
-    if (onSuccess) onSuccess()
-    resetNewExercise()
-    return true
+      if (onSuccess) onSuccess()
+      resetNewExercise()
+      return true
+    } catch (error) {
+      console.error('[useExerciseManager] createExercise failed:', error)
+      return false
+    }
   }
 
   /**
@@ -91,17 +96,22 @@ export function useExerciseManager(
 
     if (!validation.valid) return false
 
-    await database.write(async () => {
-      await selectedExercise.update(e => {
-        e.name = editExerciseName.trim()
-        e.muscles = editExerciseMuscles
-        e.equipment = editExerciseEquipment
+    try {
+      await database.write(async () => {
+        await selectedExercise.update(e => {
+          e.name = editExerciseName.trim()
+          e.muscles = editExerciseMuscles
+          e.equipment = editExerciseEquipment
+        })
       })
-    })
 
-    if (onSuccess) onSuccess()
-    setSelectedExercise(null)
-    return true
+      if (onSuccess) onSuccess()
+      setSelectedExercise(null)
+      return true
+    } catch (error) {
+      console.error('[useExerciseManager] updateExercise failed:', error)
+      return false
+    }
   }
 
   /**
@@ -111,10 +121,15 @@ export function useExerciseManager(
   const deleteExercise = async (): Promise<boolean> => {
     if (!selectedExercise) return false
 
-    if (onDelete) onDelete()
-    await selectedExercise.deleteAllAssociatedData()
-    setSelectedExercise(null)
-    return true
+    try {
+      if (onDelete) onDelete()
+      await selectedExercise.deleteAllAssociatedData()
+      setSelectedExercise(null)
+      return true
+    } catch (error) {
+      console.error('[useExerciseManager] deleteExercise failed:', error)
+      return false
+    }
   }
 
   /**

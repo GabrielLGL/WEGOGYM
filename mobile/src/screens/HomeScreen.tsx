@@ -164,10 +164,14 @@ const HomeScreen: React.FC<Props> = ({ programs, navigation }) => {
           <DraggableFlatList
             data={programs}
             onDragEnd={async ({ data }) => {
-              await database.write(async () => {
-                const updates = data.map((p, index) => p.position !== index ? p.prepareUpdate(u => { u.position = index }) : null).filter(Boolean)
-                if (updates.length) await database.batch(...(updates as any))
-              })
+              try {
+                await database.write(async () => {
+                  const updates = data.map((p, index) => p.position !== index ? p.prepareUpdate(u => { u.position = index }) : null).filter(Boolean)
+                  if (updates.length) await database.batch(...(updates as any))
+                })
+              } catch (error) {
+                console.error('[HomeScreen] Drag-and-drop batch update failed:', error)
+              }
             }}
             keyExtractor={i => i.id}
             renderItem={renderItem}
