@@ -1,0 +1,61 @@
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.ipa
+*.apk
+
+# Metro
+.metro-health-check*
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Ruby / CocoaPods
+/ios/Pods/
+/vendor/bundle/
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+
+# Android
+/android/build
+/android/app/build
+/android/.gradle
+/android/gradle
+/android/gradlew
+/android/gradlew.bat
+/android/local.properties
+
+# iOS
+/ios/build
+/ios/.xcode.env.local
+
+# Claude Code / AI
+.claude/

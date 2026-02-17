@@ -1,0 +1,48 @@
+# --- Dépendances & Systèmes (Les plus gros consommateurs) ---
+node_modules/
+**/node_modules/
+.git/
+
+# --- IDE & Configuration Editeur (Visible sur ton image) ---
+# Inutile pour l'IA de lire tes configs de fenêtre ou de cache
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- Fichiers de Build & Cache ---
+# Claude a besoin du code source, pas du code compilé
+dist/
+build/
+coverage/
+.expo/
+web-build/
+*.tsbuildinfo
+
+# --- Fichiers de Lock (Gros volume de tokens) ---
+# On garde package.json pour les versions, mais on vire les locks
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- Assets Binaires ---
+# Claude ne peut pas "lire" les images, ça ne fait que du bruit
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.pdf
+*.zip
+*.tar.gz
+
+# --- Configs Locales & Secrets ---
+.env
+.env.local
+settings.local.json
+
+# --- Spécifique Mobile (Android/iOS builds) ---
+# Ces dossiers sont générés et énormes
+mobile/android/
+mobile/ios/

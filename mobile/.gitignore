@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+web-build/
+.jks
+*.jks
+key.json
+*.keystore
+/android
+/ios
+.idea
+.gradle

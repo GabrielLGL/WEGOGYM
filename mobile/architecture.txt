@@ -1,0 +1,44 @@
+WEGOGYM/mobile/
+├── 📁 .expo/                 # Cache et config temporaire d'Expo
+├── 📁 assets/                # Images (icônes, splash screen)
+├── 📁 node_modules/          # Dépendances installées (npm)
+├── 📁 src/                   # CODE SOURCE PRINCIPAL
+│   ├── 📁 components/        # Briques visuelles réutilisables
+│   │   ├── HistoryItem.tsx
+│   │   ├── HistoryList.tsx
+│   │   ├── ProgramSection.tsx
+│   │   ├── RestTimer.tsx
+│   │   ├── SessionItem.tsx
+│   │   └── SetItem.tsx
+│   │
+│   ├── 📁 model/             # Cerveau de la base de données (WatermelonDB)
+│   │   ├── 📁 models/        # Définition des objets (Tables)
+│   │   │   ├── Exercise.ts
+│   │   │   ├── History.ts
+│   │   │   ├── PerformanceLog.ts
+│   │   │   ├── Program.ts
+│   │   │   ├── Session.ts
+│   │   │   ├── SessionExercise.ts
+│   │   │   ├── Set.ts
+│   │   │   └── User.ts
+│   │   ├── constants.ts      # Listes statiques (Muscles, Équipements)
+│   │   ├── index.ts          # Initialisation de la DB (Adapter SQLite)
+│   │   ├── schema.ts         # Structure des tables (Colonnes, versions)
+│   │   └── seed.ts           # Données de démarrage (Exercices de base)
+│   │
+│   ├── 📁 navigation/        # Gestion des routes
+│   │   └── index.tsx         # Stack & Tab Navigator
+│   │
+│   └── 📁 screens/           # Écrans complets (Pages)
+│       ├── ChartsScreen.tsx
+│       ├── ExercisesScreen.tsx
+│       ├── HomeScreen.tsx
+│       ├── SessionDetailScreen.tsx
+│       ├── SessionLiveScreen.tsx
+│       └── SettingsScreen.tsx
+│
+├── app.json                  # Config Expo (Nom, version, plugins Android)
+├── eas.json                  # Config pour le Cloud Build (EAS)
+├── package.json              # Liste des librairies installées
+├── tsconfig.json             # Config TypeScript
+└── babel.config.js           # Config du compilateur Babel
