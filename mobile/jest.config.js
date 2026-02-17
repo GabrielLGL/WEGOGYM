@@ -1,14 +1,6 @@
 module.exports = {
   preset: 'jest-expo',
 
-  // Transform files with babel-jest
-  transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
-  },
-
-  // Module file extensions
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-
   // Setup files
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
 
