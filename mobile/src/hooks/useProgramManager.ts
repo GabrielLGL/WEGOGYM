@@ -171,8 +171,13 @@ export function useProgramManager(onSuccess?: () => void) {
     try {
       await database.write(async () => {
         const parent = await selectedSession.program.fetch()
+        const position = await getNextPosition(
+          'sessions',
+          Q.where('program_id', selectedSession.program.id)
+        )
         const newS = await database.get<Session>('sessions').create((s) => {
           s.name = `${selectedSession.name} (Copie)`
+          s.position = position
           if (parent) s.program.set(parent)
         })
 
