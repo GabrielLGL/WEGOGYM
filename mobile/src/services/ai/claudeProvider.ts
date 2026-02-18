@@ -1,0 +1,35 @@
+import type { AIProvider, AIFormData, DBContext, GeneratedPlan } from './types'
+import { buildPrompt, parseGeneratedPlan } from './providerUtils'
+
+export function createClaudeProvider(apiKey: string): AIProvider {
+  return {
+    async generate(form: AIFormData, context: DBContext): Promise<GeneratedPlan> {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 2048,
+          messages: [
+            { role: 'user', content: buildPrompt(form, context) },
+          ],
+        }),
+        signal: AbortSignal.timeout(30000),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Claude API erreur ${response.status}`)
+      }
+
+      const data = await response.json() as {
+        content: Array<{ type: string; text: string }>
+      }
+      const text = data.content?.find(c => c.type === 'text')?.text ?? ''
+      return parseGeneratedPlan(text)
+    },
+  }
+}
