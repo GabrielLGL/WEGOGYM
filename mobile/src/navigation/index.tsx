@@ -54,6 +54,7 @@ const MyDarkTheme = {
  */
 function GlobalBackHandler({ navigationRef }: { navigationRef: any }) {
   const backPressRef = useRef(0); // Compteur pour le double clic pour quitter
+  const resetTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const backAction = () => {
@@ -75,7 +76,7 @@ function GlobalBackHandler({ navigationRef }: { navigationRef: any }) {
             ToastAndroid.show("Appuyez à nouveau pour quitter", ToastAndroid.SHORT);
           }
           // Réinitialise le compteur après 2 secondes
-          setTimeout(() => { backPressRef.current = 0; }, 2000);
+          resetTimerRef.current = setTimeout(() => { backPressRef.current = 0; }, 2000);
           return true;
         } else {
           // Deuxième clic : on quitte réellement
@@ -95,7 +96,10 @@ function GlobalBackHandler({ navigationRef }: { navigationRef: any }) {
 
     // Ajout de l'écouteur d'événement système
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove(); // Nettoyage lors du démontage
+    return () => {
+      backHandler.remove(); // Nettoyage lors du démontage
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
   }, [navigationRef]);
 
   return null; // Ce composant n'affiche rien visuellement
