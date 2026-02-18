@@ -1,0 +1,40 @@
+# Node modules
+mobile/node_modules/
+
+# Android build artifacts
+mobile/android/
+mobile/.gradle/
+
+# iOS build artifacts
+mobile/ios/build/
+mobile/ios/Pods/
+
+# Expo generated
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+
+# Test coverage
+mobile/coverage/
+
+# BMAD framework internals (templates, workflows)
+_bmad/
+
+# Logs & temp
+*.log
+*.tmp
+*.orig.*
+
+# IDE
+.idea/
+.vscode/
+
+# EAS / secrets
+*.jks
+*.keystore
+key.json
+*.p12
+*.p8
+*.mobileprovision
+.env
+.env.*
