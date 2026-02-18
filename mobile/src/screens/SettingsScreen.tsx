@@ -1,11 +1,20 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Switch } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Switch, Alert, ActivityIndicator } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { map } from 'rxjs/operators'
 import { database } from '../model/index'
 import User from '../model/models/User'
 import { useHaptics } from '../hooks/useHaptics'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
+import { testProviderConnection } from '../services/ai/aiService'
+import type { AIProviderName } from '../services/ai/types'
+
+const PROVIDERS: { key: AIProviderName; label: string }[] = [
+  { key: 'offline', label: 'Offline (défaut)' },
+  { key: 'claude',  label: 'Claude (Anthropic)' },
+  { key: 'openai',  label: 'OpenAI (GPT-4o)' },
+  { key: 'gemini',  label: 'Gemini (Google)' },
+]
 
 interface Props {
   user: User | null
@@ -15,6 +24,9 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
   const haptics = useHaptics()
   const [restDuration, setRestDuration] = useState(user?.restDuration?.toString() || '90')
   const [timerEnabled, setTimerEnabled] = useState(user?.timerEnabled ?? true)
+  const [aiProvider, setAiProvider] = useState<AIProviderName>((user?.aiProvider as AIProviderName) ?? 'offline')
+  const [aiApiKey, setAiApiKey] = useState(user?.aiApiKey ?? '')
+  const [isTesting, setIsTesting] = useState(false)
 
   const handleSaveRestDuration = async () => {
     if (!user) return
@@ -34,6 +46,54 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
       haptics.onSuccess()
     } catch (error) {
       console.error('Failed to update rest duration:', error)
+    }
+  }
+
+  const handleSaveAI = async (provider: AIProviderName, key: string) => {
+    if (!user) return
+    try {
+      await database.write(async () => {
+        await user.update(u => {
+          u.aiProvider = provider
+          u.aiApiKey = key.trim() || null
+        })
+      })
+      haptics.onSuccess()
+    } catch (error) {
+      console.error('Failed to save AI settings:', error)
+    }
+  }
+
+  const handleSelectProvider = (key: AIProviderName) => {
+    haptics.onSelect()
+    setAiProvider(key)
+    handleSaveAI(key, aiApiKey)
+  }
+
+  const handleApiKeyBlur = () => {
+    handleSaveAI(aiProvider, aiApiKey)
+  }
+
+  const handleTestConnection = async () => {
+    if (aiProvider === 'offline') {
+      Alert.alert('Mode Offline', 'Aucune connexion à tester en mode offline.')
+      return
+    }
+    if (!aiApiKey.trim()) {
+      Alert.alert('Clé manquante', 'Entre une clé API avant de tester.')
+      return
+    }
+    haptics.onPress()
+    setIsTesting(true)
+    try {
+      await testProviderConnection(aiProvider, aiApiKey.trim())
+      haptics.onMajorSuccess?.() ?? haptics.onSuccess()
+      Alert.alert('Connexion réussie ✅', `Le provider ${aiProvider} répond correctement.`)
+    } catch (error) {
+      haptics.onError?.() ?? haptics.onDelete()
+      Alert.alert('Erreur de connexion ❌', `Impossible de joindre ${aiProvider}. Vérifie ta clé API.`)
+    } finally {
+      setIsTesting(false)
     }
   }
 
@@ -97,6 +157,56 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
               <Text style={styles.inputUnit}>sec</Text>
             </View>
           </View>
+        </View>
+
+        {/* Section Intelligence Artificielle */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>✨ Intelligence Artificielle</Text>
+
+          <Text style={styles.aiSubLabel}>Provider</Text>
+          <View style={styles.providerList}>
+            {PROVIDERS.map(p => (
+              <TouchableOpacity
+                key={p.key}
+                style={[styles.providerRow, aiProvider === p.key && styles.providerRowActive]}
+                onPress={() => handleSelectProvider(p.key)}
+              >
+                <View style={[styles.radioCircle, aiProvider === p.key && styles.radioCircleActive]} />
+                <Text style={[styles.providerLabel, aiProvider === p.key && styles.providerLabelActive]}>
+                  {p.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {aiProvider !== 'offline' && (
+            <>
+              <Text style={[styles.aiSubLabel, { marginTop: spacing.md }]}>Clé API</Text>
+              <TextInput
+                style={styles.apiKeyInput}
+                value={aiApiKey}
+                onChangeText={setAiApiKey}
+                onBlur={handleApiKeyBlur}
+                placeholder="Colle ta clé API ici"
+                placeholderTextColor={colors.textSecondary}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <TouchableOpacity
+                style={[styles.testButton, isTesting && styles.testButtonDisabled]}
+                onPress={handleTestConnection}
+                disabled={isTesting}
+              >
+                {isTesting ? (
+                  <ActivityIndicator size="small" color={colors.text} />
+                ) : (
+                  <Text style={styles.testButtonText}>Tester la connexion</Text>
+                )}
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         {/* Section À propos */}
@@ -232,6 +342,67 @@ const styles = StyleSheet.create({
   helpBold: {
     color: colors.text,
     fontWeight: 'bold',
+  },
+  aiSubLabel: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+  },
+  providerList: {
+    gap: spacing.xs,
+  },
+  providerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+    gap: spacing.md,
+  },
+  providerRowActive: {
+    backgroundColor: colors.cardSecondary,
+  },
+  radioCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.textSecondary,
+  },
+  radioCircleActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary,
+  },
+  providerLabel: {
+    color: colors.textSecondary,
+    fontSize: fontSize.md,
+  },
+  providerLabelActive: {
+    color: colors.text,
+    fontWeight: '600',
+  },
+  apiKeyInput: {
+    backgroundColor: colors.cardSecondary,
+    borderRadius: borderRadius.sm,
+    padding: spacing.md,
+    color: colors.text,
+    fontSize: fontSize.md,
+    marginBottom: spacing.md,
+  },
+  testButton: {
+    backgroundColor: colors.secondaryButton,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  testButtonDisabled: {
+    opacity: 0.6,
+  },
+  testButtonText: {
+    color: colors.text,
+    fontSize: fontSize.md,
+    fontWeight: '600',
   },
 })
 
