@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, StatusBar, Animated, ScrollView, BackHandler } from 'react-native'
 import { database } from '../model/index'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
+import { map } from 'rxjs/operators'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -11,23 +12,28 @@ import { RootStackParamList } from '../navigation/index'
 import { CustomModal } from '../components/CustomModal'
 import { BottomSheet } from '../components/BottomSheet'
 import { AlertDialog } from '../components/AlertDialog'
+import { OnboardingSheet } from '../components/OnboardingSheet'
 import Program from '../model/models/Program'
 import Session from '../model/models/Session'
+import User from '../model/models/User'
 import ProgramSection from '../components/ProgramSection'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
 import { useMultiModalSync } from '../hooks/useModalState'
 import { useProgramManager } from '../hooks/useProgramManager'
+import { importPresetProgram, markOnboardingCompleted } from '../model/utils/databaseHelpers'
+import type { PresetProgram } from '../model/onboardingPrograms'
 import { colors } from '../theme'
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
 interface Props {
   programs: Program[]
+  user: User | null
   navigation: NavigationProp
 }
 
-const HomeScreen: React.FC<Props> = ({ programs, navigation }) => {
+const HomeScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   // --- HOOKS ---
   const haptics = useHaptics()
   const slideAnim = useKeyboardAnimation(-150)
@@ -61,6 +67,7 @@ const HomeScreen: React.FC<Props> = ({ programs, navigation }) => {
   } = useProgramManager(haptics.onSuccess)
 
   // --- ÉTATS LOCAUX ---
+  const [isOnboardingVisible, setIsOnboardingVisible] = useState(false)
   const [isProgramModalVisible, setIsProgramModalVisible] = useState(false)
   const [isSessionModalVisible, setIsSessionModalVisible] = useState(false)
   const [isOptionsVisible, setIsOptionsVisible] = useState(false)
@@ -71,6 +78,7 @@ const HomeScreen: React.FC<Props> = ({ programs, navigation }) => {
 
   // --- SYNCHRONISATION TAB BAR ---
   useMultiModalSync([
+    isOnboardingVisible,
     isProgramModalVisible,
     isSessionModalVisible,
     isOptionsVisible,
@@ -96,6 +104,32 @@ const HomeScreen: React.FC<Props> = ({ programs, navigation }) => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
     return () => backHandler.remove()
   }, [isOptionsVisible, isSessionOptionsVisible])
+
+  // --- ONBOARDING ---
+
+  useEffect(() => {
+    if (programs.length === 0 && user && !user.onboardingCompleted) {
+      const timer = setTimeout(() => setIsOnboardingVisible(true), 400)
+      return () => clearTimeout(timer)
+    }
+  }, [programs, user])
+
+  const handleProgramSelected = async (preset: PresetProgram) => {
+    try {
+      await importPresetProgram(preset)
+      await markOnboardingCompleted()
+      setIsOnboardingVisible(false)
+      haptics.onSuccess()
+    } catch (error) {
+      console.error('[HomeScreen] Erreur import programme :', error)
+      // Ne pas appeler markOnboardingCompleted en cas d'erreur (AC8)
+    }
+  }
+
+  const handleSkipOnboarding = async () => {
+    await markOnboardingCompleted()
+    setIsOnboardingVisible(false)
+  }
 
   // --- LOGIQUE MÉTIER ---
 
@@ -166,8 +200,10 @@ const HomeScreen: React.FC<Props> = ({ programs, navigation }) => {
             onDragEnd={async ({ data }) => {
               try {
                 await database.write(async () => {
-                  const updates = data.map((p, index) => p.position !== index ? p.prepareUpdate(u => { u.position = index }) : null).filter(Boolean)
-                  if (updates.length) await database.batch(...(updates as any))
+                  const updates = data
+                    .map((p, index) => p.position !== index ? p.prepareUpdate(u => { u.position = index }) : null)
+                    .filter((x): x is Program => x !== null)
+                  if (updates.length) await database.batch(...updates)
                 })
               } catch (error) {
                 console.error('[HomeScreen] Drag-and-drop batch update failed:', error)
@@ -295,6 +331,15 @@ const HomeScreen: React.FC<Props> = ({ programs, navigation }) => {
         />
 
       </SafeAreaView>
+
+      {/* Onboarding premier lancement */}
+      <OnboardingSheet
+        visible={isOnboardingVisible}
+        onClose={() => setIsOnboardingVisible(false)}
+        onProgramSelected={handleProgramSelected}
+        onSkip={handleSkipOnboarding}
+      />
+
     </GestureHandlerRootView>
   )
 }
@@ -376,5 +421,6 @@ const styles = StyleSheet.create({
 })
 
 export default withObservables([], () => ({
-  programs: database.get<Program>('programs').query(Q.sortBy('position', Q.asc)).observe()
+  programs: database.get<Program>('programs').query(Q.sortBy('position', Q.asc)).observe(),
+  user: database.get<User>('users').query().observe().pipe(map(list => list[0] || null)),
 }))(HomeScreen)
