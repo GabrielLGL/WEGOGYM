@@ -16,7 +16,7 @@ export default class User extends Model {
   @field('onboarding_completed') onboardingCompleted!: boolean
 
   // Ajout des champs IA pour la version 16
-  @field('ai_provider') aiProvider!: string | null
+  @text('ai_provider') aiProvider!: string | null
   @text('ai_api_key') aiApiKey!: string | null
 
   @readonly @date('created_at') createdAt!: Date
