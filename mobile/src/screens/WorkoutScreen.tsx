@@ -53,6 +53,7 @@ const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const startTimestampRef = useRef<number>(Date.now())
   const historyRef = useRef<History | null>(null)
   const notificationPermissionRef = useRef<boolean>(false)
+  const summaryWasOpenRef = useRef(false)
 
   const [historyId, setHistoryId] = useState<string>('')
   const [showRestTimer, setShowRestTimer] = useState(false)
@@ -67,6 +68,16 @@ const WorkoutContent: React.FC<WorkoutContentProps> = ({
     useWorkoutState(sessionExercises, historyId)
 
   useMultiModalSync([confirmEndVisible, summaryVisible, abandonVisible])
+
+  // Navigue vers Home quand le résumé se ferme (quelle que soit la source : bouton, retour, overlay)
+  useEffect(() => {
+    if (summaryVisible) {
+      summaryWasOpenRef.current = true
+    } else if (summaryWasOpenRef.current) {
+      summaryWasOpenRef.current = false
+      navigation.navigate('MainTabs', { screen: 'Home' })
+    }
+  }, [summaryVisible, navigation])
 
   const totalSets = Object.keys(validatedSets).length
   const totalPrs = Object.values(validatedSets).filter(s => s.isPr).length
@@ -114,7 +125,8 @@ const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
   const handleClose = () => {
     haptics.onPress()
-    navigation.navigate('MainTabs', { screen: 'Home' })
+    setSummaryVisible(false)
+    // La navigation vers Home est gérée par le useEffect ci-dessus
   }
 
   const handleConfirmEnd = async () => {

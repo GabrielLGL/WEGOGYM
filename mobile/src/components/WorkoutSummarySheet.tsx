@@ -72,7 +72,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
   return (
     <BottomSheet
       visible={visible}
-      onClose={() => {}}
+      onClose={handleClose}
       title="Séance terminée !"
     >
       <View style={styles.statsGrid}>
