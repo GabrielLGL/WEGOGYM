@@ -1,5 +1,117 @@
 # CHANGELOG
 
+## [Non publié] — 2026-02-18 — Passe 3
+
+### Bug Corrigé
+
+#### `importPresetProgram()` — `database.batch()` hors `database.write()` (commit `d17bfba`)
+**Fichier :** `mobile/src/model/utils/databaseHelpers.ts`
+
+La fonction `importPresetProgram()` appelait `await database.batch(...batch)` directement,
+sans l'envelopper dans un bloc `database.write()`. WatermelonDB en mode JSI/SQLite
+exige que toutes les opérations d'écriture (y compris `batch`) se produisent dans un
+contexte `write()` ; sans cela, une erreur `Illegal call (batch) outside of a database.write() context`
+est levée à l'exécution. Même classe de bug que le `deleteSession()` corrigé en Passe 1.
+
+**Correction :** Ajout de `await database.write(async () => { await database.batch(...batch) })`.
+Les lectures préalables (`fetch`, `fetchCount`) restent hors de `write()` pour l'efficacité.
+
+---
+
+### Code Mort Supprimé (commit `8c5673a`)
+
+**`HistoryList.tsx`** et **`HistoryItem.tsx`** — Ces deux composants n'étaient importés
+nulle part dans l'application. `HistoryList` n'était référencé dans aucun écran ni
+composant parent ; `HistoryItem` n'était importé que par `HistoryList`. Les deux fichiers
+constituaient du code mort inaccessible. `HistoryList` contenait de surcroît un bug de
+navigation (passage de `history.id` comme `sessionId`) et des couleurs hardcodées
+(`'white'`, `'gray'`) jamais nettoyées.
+
+---
+
+### Log Production Supprimé (commit `e391fdb`)
+
+**Fichier :** `mobile/src/services/sentry.ts`
+
+`console.log('[Sentry] Initialized successfully')` (ligne 70) s'exécutait
+inconditionnellement en production. Tous les autres appels `console.*` du fichier
+étaient déjà gardés par `if (__DEV__)` ou `beforeSend`, mais ce log de succès avait
+été oublié.
+
+**Correction :** Ajout du guard `if (__DEV__)` avant l'appel.
+
+---
+
+### Amélioration TypeScript (commit `9705776`)
+
+**Fichier :** `mobile/src/screens/HomeScreen.tsx`
+
+Le code de drag-and-drop utilisait `(updates as any)` pour contourner un problème
+de typage du tableau après `.filter(Boolean)` (TypeScript ne sait pas que `Boolean`
+exclut les `null`). Le cast `as any` désactivait silencieusement la vérification de type
+sur l'appel `database.batch()`.
+
+**Correction :** Remplacement par un type predicate explicite :
+`.filter((x): x is Program => x !== null)`, ce qui supprime l'`as any` et conserve
+la sécurité de type.
+
+---
+
+### Dépendance Inutile Supprimée (commit `5d0c090`)
+
+**Fichier :** `mobile/package.json`
+
+`lokijs` était listé comme dépendance de production. C'est l'adaptateur WatermelonDB
+pour les environnements web/Node (in-memory). Ce projet utilise exclusivement
+l'adaptateur SQLite/JSI (`jsi: true`). `lokijs` n'est importé nulle part dans le code
+source et les tests mockent directement la base de données.
+
+---
+
+### Couleur Hardcodée Restante Corrigée (commit `8adcaf8`)
+
+**Fichier :** `mobile/src/components/ProgramSection.tsx`
+
+Le style `emptyButton` contenait `borderRadius: 10` — valeur brute non présente dans le
+thème centralisé. Reliquat de la Passe 2 qui n'avait corrigé que les couleurs de ce fichier.
+
+**Correction :** Remplacement par `borderRadius.md` (12), cohérent avec les autres
+éléments boutons de l'application.
+
+---
+
+### Accessibilité — Gap Systématique Identifié (non corrigé)
+
+Aucun composant interactif de la codebase ne possède d'attributs `accessibilityLabel`,
+`accessibilityHint` ou `accessibilityRole`. Tous les `<TouchableOpacity>` et `<TextInput>`
+de l'application sont inaccessibles aux utilisateurs de lecteurs d'écran (TalkBack Android).
+Gap systématique noté — correction hors périmètre d'une passe chirurgicale (> 30 fichiers).
+
+---
+
+### Schéma WatermelonDB — Cohérence Vérifiée
+
+Toutes les tables du schéma (v15) ont été comparées à leurs modèles :
+`programs`, `sessions`, `session_exercises`, `exercises`, `performance_logs`,
+`users`, `histories`, `sets`. Aucune colonne orpheline ni champ modèle manquant
+détecté (les colonnes `created_at`/`updated_at`/`deleted_at` non exposées dans certains
+modèles sont gérées par WatermelonDB en interne et ne constituent pas des bugs).
+
+---
+
+## Récapitulatif des Commits — Passe 3
+
+| Hash | Type | Description |
+|------|------|-------------|
+| `d17bfba` | fix | `importPresetProgram()` : enveloppe `database.batch()` dans `database.write()` |
+| `8c5673a` | chore | Supprime les composants morts `HistoryList` et `HistoryItem` |
+| `e391fdb` | fix | Guard le `console.log` de `initSentry()` derrière `__DEV__` |
+| `9705776` | refactor | Remplace `as any` par un type predicate dans le batch drag-and-drop de `HomeScreen` |
+| `5d0c090` | chore | Supprime la dépendance de production inutilisée `lokijs` |
+| `8adcaf8` | style | Remplace `borderRadius: 10` par `borderRadius.md` dans `ProgramSection` |
+
+---
+
 ## [Non publié] — 2026-02-18 — Passe 2
 
 ### Bugs Corrigés
