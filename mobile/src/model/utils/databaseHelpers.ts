@@ -456,7 +456,9 @@ export async function importPresetProgram(preset: PresetProgram): Promise<void> 
     })
   })
 
-  await database.batch(...batch)
+  await database.write(async () => {
+    await database.batch(...batch)
+  })
 }
 
 /**
