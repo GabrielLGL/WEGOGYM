@@ -71,7 +71,7 @@ export function useProgramManager(onSuccess?: () => void) {
           })
         } else {
           const position = await getNextPosition('programs')
-          await database.get('programs').create((p: any) => {
+          await database.get<Program>('programs').create((p) => {
             p.name = programNameInput.trim()
             p.position = position
           })

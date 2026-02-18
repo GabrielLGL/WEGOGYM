@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StyleProp, ViewStyle } from 'react-native'
 import { colors, borderRadius, spacing, fontSize } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
 
@@ -9,7 +9,7 @@ interface ChipSelectorProps {
   onChange: (value: string | null) => void
   allowNone?: boolean // Permet de désélectionner (défaut: true)
   noneLabel?: string // Label pour l'option "aucun" (défaut: "Tous")
-  style?: any
+  style?: StyleProp<ViewStyle>
 }
 
 /**

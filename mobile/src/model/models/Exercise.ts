@@ -1,9 +1,7 @@
 // Importation des classes de base de WatermelonDB pour définir un modèle de données
-import { Model } from '@nozbe/watermelondb'
+import { Model, Q } from '@nozbe/watermelondb'
 // Importation des décorateurs pour lier les propriétés de la classe aux colonnes de la base de données
 import { text, field, date, readonly } from '@nozbe/watermelondb/decorators'
-// Importation de l'objet Q pour effectuer des requêtes complexes
-import { Q } from '@nozbe/watermelondb'
 
 // Définition de la classe Exercise qui représente la table 'exercises'
 export default class Exercise extends Model {

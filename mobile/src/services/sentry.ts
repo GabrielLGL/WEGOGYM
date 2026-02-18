@@ -7,7 +7,9 @@ import Constants from 'expo-constants'
  * @docs https://docs.sentry.io/platforms/react-native/
  */
 
-const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || Constants.expoConfig?.extra?.sentryDsn
+const SENTRY_DSN =
+  (process.env as Record<string, string | undefined>).EXPO_PUBLIC_SENTRY_DSN ||
+  Constants.expoConfig?.extra?.sentryDsn
 
 /**
  * Initialise Sentry avec la configuration appropriée
@@ -71,7 +73,7 @@ export function initSentry() {
 /**
  * Capturer une erreur manuellement
  */
-export function captureError(error: Error, context?: Record<string, any>) {
+export function captureError(error: Error, context?: Record<string, unknown>) {
   if (context) {
     Sentry.setContext('additional_context', context)
   }
@@ -106,7 +108,7 @@ export function clearUser() {
 /**
  * Ajouter du contexte supplémentaire à toutes les erreurs
  */
-export function addBreadcrumb(message: string, category: string, data?: Record<string, any>) {
+export function addBreadcrumb(message: string, category: string, data?: Record<string, unknown>) {
   Sentry.addBreadcrumb({
     message,
     category,

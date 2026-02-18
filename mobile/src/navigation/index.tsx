@@ -1,8 +1,8 @@
 // Importation de React et des hooks nécessaires
 import React, { useState, useEffect, useRef } from 'react'
 // Importation des outils de navigation de React Navigation
-import { NavigationContainer, DarkTheme } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { NavigationContainer, DarkTheme, NavigationContainerRef } from '@react-navigation/native'
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 // Importation des composants et utilitaires React Native
 import { View, Text, Keyboard, Animated, Platform, BackHandler, ToastAndroid, DeviceEventEmitter, TouchableOpacity } from 'react-native'
@@ -52,7 +52,7 @@ const MyDarkTheme = {
  * Composant responsable de gérer le bouton retour matériel sur Android.
  * Il assure que l'utilisateur repasse par l'accueil avant de quitter.
  */
-function GlobalBackHandler({ navigationRef }: { navigationRef: any }) {
+function GlobalBackHandler({ navigationRef }: { navigationRef: NavigationContainerRef<RootStackParamList> }) {
   const backPressRef = useRef(0); // Compteur pour le double clic pour quitter
   const resetTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -108,7 +108,7 @@ function GlobalBackHandler({ navigationRef }: { navigationRef: any }) {
 /**
  * Navigateur par onglets situé en bas de l'écran.
  */
-function TabNavigator({ navigation }: any) {
+function TabNavigator(_props: NativeStackScreenProps<RootStackParamList, 'MainTabs'>) {
   // Référence pour l'animation de glissement de la barre d'onglets
   const scrollY = useRef(new Animated.Value(0)).current;
 

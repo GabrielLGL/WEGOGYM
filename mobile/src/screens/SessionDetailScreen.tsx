@@ -17,13 +17,15 @@ import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
 import { useMultiModalSync } from '../hooks/useModalState'
 import { useSessionManager } from '../hooks/useSessionManager'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../navigation'
 import { colors } from '../theme'
 
 interface Props {
   session: Session
   sessionExercises: SessionExercise[]
   user: User | null
-  navigation: any
+  navigation: NativeStackNavigationProp<RootStackParamList>
 }
 
 const SessionDetailContent: React.FC<Props> = ({ session, sessionExercises, user, navigation }) => {
