@@ -13,6 +13,7 @@ import Program from '../model/models/Program'
 import Session from '../model/models/Session'
 // Importation du composant SessionItem pour afficher chaque séance
 import SessionItem from './SessionItem'
+import { colors, borderRadius } from '../theme'
 
 // Définition des propriétés (Props) attendues par le composant
 interface Props {
@@ -115,22 +116,22 @@ const styles = StyleSheet.create({
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   headerRight: { paddingLeft: 15, paddingVertical: 5 },
-  arrowIcon: { fontSize: 14, color: '#888', marginRight: 8, width: 20, textAlign: 'center' },
-  title: { fontSize: 18, fontWeight: 'bold', color: 'white' },
-  count: { color: 'gray', fontSize: 14, fontWeight: 'normal' },
-  moreIcon: { color: 'gray', fontSize: 22, fontWeight: 'bold', letterSpacing: 1 },
+  arrowIcon: { fontSize: 14, color: colors.textSecondary, marginRight: 8, width: 20, textAlign: 'center' },
+  title: { fontSize: 18, fontWeight: 'bold', color: colors.text },
+  count: { color: colors.textSecondary, fontSize: 14, fontWeight: 'normal' },
+  moreIcon: { color: colors.textSecondary, fontSize: 22, fontWeight: 'bold', letterSpacing: 1 },
   list: { paddingLeft: 10 },
   emptyButton: {
     padding: 15,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: colors.border,
     borderStyle: 'dashed', // Style pointillé pour l'aspect "ajouter"
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 5
   },
-  emptyButtonText: { color: '#007AFF', fontWeight: 'bold' }
+  emptyButtonText: { color: colors.primary, fontWeight: 'bold' }
 })
 
 /**

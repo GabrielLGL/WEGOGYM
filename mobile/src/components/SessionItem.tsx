@@ -13,6 +13,7 @@ import Session from '../model/models/Session'
 import Exercise from '../model/models/Exercise'
 // Importation de la bibliothèque haptique pour les vibrations
 import * as Haptics from 'expo-haptics'
+import { colors, borderRadius } from '../theme'
 
 // Définition des propriétés (Props) attendues par le composant
 interface Props {
@@ -72,19 +73,19 @@ const SessionItem: React.FC<Props> = ({ session, onPress, onOptionsPress, exerci
 // Styles CSS-in-JS du composant
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row', // Aligne le contenu et le bouton d'options horizontalement
-    backgroundColor: '#1C1C1E', // Gris très foncé (style iOS)
-    borderRadius: 12,
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
     marginBottom: 10,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2C2C2E'
+    borderColor: colors.cardSecondary,
   },
-  clickableArea: { flex: 1, padding: 15 }, // Prend tout l'espace restant
-  optionsButton: { padding: 15 }, // Zone de clic confortable pour les options
-  title: { fontSize: 17, fontWeight: 'bold', color: 'white' },
-  preview: { fontSize: 13, color: '#888', marginTop: 4 }, // Texte secondaire en gris
-  moreIcon: { color: '#444', fontSize: 16, fontWeight: 'bold' }
+  clickableArea: { flex: 1, padding: 15 },
+  optionsButton: { padding: 15 },
+  title: { fontSize: 17, fontWeight: 'bold', color: colors.text },
+  preview: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  moreIcon: { color: colors.placeholder, fontSize: 16, fontWeight: 'bold' },
 })
 
 /**

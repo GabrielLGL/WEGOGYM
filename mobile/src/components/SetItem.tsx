@@ -7,6 +7,7 @@ import withObservables from '@nozbe/with-observables'
 // Importation des modèles de données
 import Set from '../model/models/Set'
 import Exercise from '../model/models/Exercise'
+import { colors, borderRadius } from '../theme'
 
 // Définition des propriétés attendues
 interface Props {
@@ -47,20 +48,20 @@ const SetItem: React.FC<Props> = ({ set, exercise, onLongPress }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 15,
-    backgroundColor: '#1C1C1E', // Style sombre iOS
+    backgroundColor: colors.card,
     marginBottom: 10,
-    borderRadius: 10,
+    borderRadius: borderRadius.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2C2C2E'
+    borderColor: colors.cardSecondary
   },
   info: { flexDirection: 'column' },
-  exerciseName: { fontSize: 16, fontWeight: 'bold', color: 'white', marginBottom: 2 },
-  setOrder: { fontSize: 12, color: '#888' },
-  perf: { fontSize: 20, fontWeight: 'bold', color: '#007AFF' }, // Couleur bleue pour la performance
-  x: { fontSize: 14, color: '#aaa' }
+  exerciseName: { fontSize: 16, fontWeight: 'bold', color: colors.text, marginBottom: 2 },
+  setOrder: { fontSize: 12, color: colors.textSecondary },
+  perf: { fontSize: 20, fontWeight: 'bold', color: colors.primary },
+  x: { fontSize: 14, color: colors.textSecondary }
 })
 
 /**

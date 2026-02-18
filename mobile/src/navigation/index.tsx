@@ -40,11 +40,11 @@ const MyDarkTheme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    background: '#121212', // Fond noir profond
-    card: '#1C1C1E',       // Couleur des headers et barres
-    text: '#ffffff',       // Texte blanc
-    border: '#2C2C2E',     // Bordures grises
-    primary: '#007AFF',    // Bleu accentuation
+    background: colors.background,
+    card: colors.card,
+    text: colors.text,
+    border: colors.cardSecondary,
+    primary: colors.primary,
   },
 };
 

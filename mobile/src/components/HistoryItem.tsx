@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 // Importation du modèle History pour le typage TypeScript
 import History from '../model/models/History'
+import { colors } from '../theme'
 
 // Définition des propriétés attendues par le composant
 interface Props {
@@ -34,16 +35,16 @@ const HistoryItem: React.FC<Props> = ({ history, onPress }) => (
 const styles = StyleSheet.create({
   item: {
     padding: 15,
-    backgroundColor: 'white',
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.separator,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
-  title: { fontSize: 16, fontWeight: '600', color: '#333' }, // Titre principal en gras sombre
-  subtitle: { fontSize: 12, color: '#888', marginTop: 2 }, // Sous-titre en gris plus petit
-  arrow: { fontSize: 20, color: '#ccc' } // Flèche de navigation discrète
+  title: { fontSize: 16, fontWeight: '600', color: colors.text },
+  subtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  arrow: { fontSize: 20, color: colors.placeholder },
 })
 
 /**
