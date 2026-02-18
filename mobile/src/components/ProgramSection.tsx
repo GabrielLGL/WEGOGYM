@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderStyle: 'dashed', // Style pointillé pour l'aspect "ajouter"
-    borderRadius: 10,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     marginTop: 5
   },
