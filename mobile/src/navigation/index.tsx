@@ -20,6 +20,7 @@ import ExercisesScreen from '../screens/ExercisesScreen'
 import ChartsScreen from '../screens/ChartsScreen'
 import SettingsScreen from '../screens/SettingsScreen'
 import WorkoutScreen from '../screens/WorkoutScreen'
+import AssistantScreen from '../screens/AssistantScreen'
 // Importation de l'ErrorBoundary
 import { ErrorBoundary } from '../components/ErrorBoundary'
 
@@ -29,6 +30,13 @@ export type RootStackParamList = {
   SessionDetail: { sessionId: string };
   Settings: undefined;
   Workout: { sessionId: string };
+};
+
+export type MainTabParamList = {
+  Exercices: undefined;
+  Home: undefined;
+  Assistant: undefined;
+  Stats: undefined;
 };
 
 // Création des navigateurs Stack (empilement) et Tab (onglets du bas)
@@ -172,6 +180,12 @@ function TabNavigator(_props: NativeStackScreenProps<RootStackParamList, 'MainTa
               </TouchableOpacity>
             ),
           })}
+        />
+        {/* Onglet Assistant IA */}
+        <Tab.Screen
+          name="Assistant"
+          component={AssistantScreen}
+          options={{ headerTitle: "Assistant IA", tabBarLabel: 'Assistant', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>✨</Text> }}
         />
         {/* Onglet Statistiques */}
         <Tab.Screen
