@@ -1,5 +1,5 @@
 // Mock the database to avoid SQLiteAdapter JSI initialization in test environment
-jest.mock('../../index', () => ({ database: {} }))
+jest.mock('../../index', () => ({ database: { get: jest.fn() } }))
 
 import {
   parseNumericInput,
@@ -7,8 +7,15 @@ import {
   filterExercises,
   searchExercises,
   filterAndSearchExercises,
+  getExerciseStatsFromSets,
+  importPresetProgram,
+  markOnboardingCompleted,
 } from '../databaseHelpers'
+import { database } from '../../index'
 import Exercise from '../../models/Exercise'
+import type { PresetProgram } from '../../onboardingPrograms'
+
+const mockGet = database.get as jest.Mock
 
 // Mock Exercise objects for testing
 const createMockExercise = (
@@ -211,6 +218,263 @@ describe('databaseHelpers', () => {
         searchQuery: '',
       })
       expect(filtered.length).toBe(4)
+    })
+  })
+
+  describe('getExerciseStatsFromSets', () => {
+    // Helpers pour créer des mocks WatermelonDB
+    const mkSet = (
+      id: string,
+      historyId: string,
+      exerciseId: string,
+      weight: number,
+      reps: number,
+      setOrder: number
+    ) => ({
+      id,
+      history: { id: historyId },
+      exercise: { id: exerciseId },
+      weight,
+      reps,
+      setOrder,
+    })
+
+    const mkHistory = (id: string, startTime: Date, sessionId: string) => ({
+      id,
+      startTime,
+      session: { id: sessionId },
+    })
+
+    const mkSession = (id: string, name: string) => ({ id, name })
+
+    // Fabrique de mock query chain
+    const makeQueryChain = (fetchResult: unknown[]) => ({
+      query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(fetchResult) }),
+    })
+
+    afterEach(() => {
+      mockGet.mockReset()
+    })
+
+    it('cas nominal : 2 sets dans 2 histories différentes → 2 stats triées par date', async () => {
+      const date1 = new Date('2024-01-01')
+      const date2 = new Date('2024-02-01')
+
+      const mockSets = [
+        mkSet('s1', 'h1', 'e1', 80, 8, 1),
+        mkSet('s2', 'h2', 'e1', 90, 6, 1),
+      ]
+      const mockHistories = [
+        mkHistory('h2', date2, 'sess1'),
+        mkHistory('h1', date1, 'sess1'),
+      ]
+      const mockSessions = [mkSession('sess1', 'PPL Push')]
+
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return makeQueryChain(mockSets)
+        if (table === 'histories') return makeQueryChain(mockHistories)
+        if (table === 'sessions') return makeQueryChain(mockSessions)
+        return makeQueryChain([])
+      })
+
+      const stats = await getExerciseStatsFromSets('e1')
+
+      expect(stats).toHaveLength(2)
+      // Tri ASC : h1 (jan) avant h2 (fev)
+      expect(stats[0].historyId).toBe('h1')
+      expect(stats[0].startTime).toEqual(date1)
+      expect(stats[0].sessionName).toBe('PPL Push')
+      expect(stats[1].historyId).toBe('h2')
+      expect(stats[1].startTime).toEqual(date2)
+    })
+
+    it('cas poids max : 3 sets dans la même history → maxWeight = 70', async () => {
+      const mockSets = [
+        mkSet('s1', 'h1', 'e1', 60, 10, 1),
+        mkSet('s2', 'h1', 'e1', 70, 8, 2),
+        mkSet('s3', 'h1', 'e1', 65, 6, 3),
+      ]
+      const mockHistories = [mkHistory('h1', new Date('2024-01-15'), 'sess1')]
+      const mockSessions = [mkSession('sess1', 'Full Body')]
+
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return makeQueryChain(mockSets)
+        if (table === 'histories') return makeQueryChain(mockHistories)
+        if (table === 'sessions') return makeQueryChain(mockSessions)
+        return makeQueryChain([])
+      })
+
+      const stats = await getExerciseStatsFromSets('e1')
+
+      expect(stats).toHaveLength(1)
+      expect(stats[0].maxWeight).toBe(70)
+      expect(stats[0].sets).toHaveLength(3)
+      // Sets triés par setOrder
+      expect(stats[0].sets[0].setOrder).toBe(1)
+      expect(stats[0].sets[1].setOrder).toBe(2)
+      expect(stats[0].sets[2].setOrder).toBe(3)
+    })
+
+    it('cas history soft-deleted : exclue des résultats', async () => {
+      const mockSets = [
+        mkSet('s1', 'h1', 'e1', 80, 8, 1),
+        mkSet('s2', 'h2', 'e1', 90, 6, 1),
+      ]
+      // La query histories avec Q.where('deleted_at', null) ne retourne que h1
+      const mockHistories = [mkHistory('h1', new Date('2024-01-01'), 'sess1')]
+      const mockSessions = [mkSession('sess1', 'Séance A')]
+
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return makeQueryChain(mockSets)
+        if (table === 'histories') return makeQueryChain(mockHistories)
+        if (table === 'sessions') return makeQueryChain(mockSessions)
+        return makeQueryChain([])
+      })
+
+      const stats = await getExerciseStatsFromSets('e1')
+
+      expect(stats).toHaveLength(1)
+      expect(stats[0].historyId).toBe('h1')
+    })
+
+    it('cas aucun set : retourne tableau vide', async () => {
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return makeQueryChain([])
+        return makeQueryChain([])
+      })
+
+      const stats = await getExerciseStatsFromSets('e1')
+
+      expect(stats).toEqual([])
+    })
+  })
+
+  describe('importPresetProgram', () => {
+    const mockBatch = jest.fn().mockResolvedValue(undefined)
+
+    const minimalPreset: PresetProgram = {
+      name: 'Test PPL',
+      description: 'Test',
+      sessions: [
+        {
+          name: 'Push',
+          exercises: [
+            { exerciseName: 'Développé Couché Barre', setsTarget: 3, repsTarget: '8-10', weightTarget: 60 },
+            { exerciseName: 'Exercice Inexistant', setsTarget: 2, repsTarget: '10', weightTarget: 0 },
+          ],
+        },
+      ],
+    }
+
+    const mockExercise = { id: 'exo1', name: 'Développé Couché Barre' }
+
+    beforeEach(() => {
+      mockBatch.mockClear()
+      ;(database as unknown as { batch: jest.Mock }).batch = mockBatch
+      ;(database as unknown as { write: jest.Mock }).write = jest.fn().mockImplementation(async (cb: () => Promise<void>) => cb())
+    })
+
+    afterEach(() => {
+      mockGet.mockReset()
+    })
+
+    it('prépare le programme, la séance et les exercices trouvés en batch', async () => {
+      const mockPrepareCreate = jest.fn().mockImplementation(cb => {
+        const record: Record<string, unknown> = {
+          id: 'new-id',
+          program: { set: jest.fn() },
+          session: { set: jest.fn() },
+          exercise: { set: jest.fn() },
+        }
+        cb(record)
+        return record
+      })
+
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'exercises') {
+          return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([mockExercise]) }) }
+        }
+        if (table === 'programs') {
+          return {
+            query: jest.fn().mockReturnValue({ fetchCount: jest.fn().mockResolvedValue(0) }),
+            prepareCreate: mockPrepareCreate,
+          }
+        }
+        return { query: jest.fn().mockReturnValue({ fetchCount: jest.fn().mockResolvedValue(0) }), prepareCreate: mockPrepareCreate }
+      })
+
+      await importPresetProgram(minimalPreset)
+
+      // database.batch doit avoir été appelé avec les records préparés
+      expect(mockBatch).toHaveBeenCalledTimes(1)
+      // 1 programme + 1 session + 1 exercice trouvé (l'inexistant est ignoré)
+      expect(mockBatch.mock.calls[0].length).toBe(3)
+    })
+
+    it('ignore silencieusement un exercice introuvable sans crash', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const mockPrepareCreate = jest.fn().mockImplementation(cb => {
+        const record: Record<string, unknown> = { id: 'new-id', program: { set: jest.fn() }, session: { set: jest.fn() }, exercise: { set: jest.fn() } }
+        cb(record)
+        return record
+      })
+
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'exercises') {
+          return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) }
+        }
+        return { query: jest.fn().mockReturnValue({ fetchCount: jest.fn().mockResolvedValue(0) }), prepareCreate: mockPrepareCreate }
+      })
+
+      await importPresetProgram(minimalPreset)
+
+      // console.warn pour les 2 exercices introuvables
+      expect(warnSpy).toHaveBeenCalled()
+      // 1 programme + 1 session seulement (pas de session_exercises)
+      expect(mockBatch.mock.calls[0].length).toBe(2)
+      warnSpy.mockRestore()
+    })
+  })
+
+  describe('markOnboardingCompleted', () => {
+    afterEach(() => {
+      mockGet.mockReset()
+    })
+
+    it('met onboardingCompleted à true pour le premier utilisateur', async () => {
+      const mockUpdate = jest.fn().mockImplementation(cb => {
+        const user: Record<string, unknown> = { onboardingCompleted: false }
+        cb(user)
+        return Promise.resolve(user)
+      })
+      const mockUser = { onboardingCompleted: false, update: mockUpdate }
+
+      const mockWrite = jest.fn().mockImplementation(async (cb: () => Promise<void>) => cb())
+      ;(database as unknown as { write: jest.Mock }).write = mockWrite
+
+      mockGet.mockImplementation(() => ({
+        query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([mockUser]) }),
+      }))
+
+      await markOnboardingCompleted()
+
+      expect(mockUpdate).toHaveBeenCalledTimes(1)
+      // Vérifie que le callback a bien setté onboardingCompleted = true
+      const callbackArg = mockUpdate.mock.calls[0][0]
+      const fakeUser: Record<string, unknown> = {}
+      callbackArg(fakeUser)
+      expect(fakeUser.onboardingCompleted).toBe(true)
+    })
+
+    it('ne plante pas si aucun utilisateur en DB', async () => {
+      const mockWrite = jest.fn().mockImplementation(async (cb: () => Promise<void>) => cb())
+      ;(database as unknown as { write: jest.Mock }).write = mockWrite
+
+      mockGet.mockImplementation(() => ({
+        query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }),
+      }))
+
+      await expect(markOnboardingCompleted()).resolves.toBeUndefined()
     })
   })
 })
