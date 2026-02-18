@@ -10,6 +10,7 @@ import User from '../models/User'
 import WorkoutSet from '../models/Set'
 import type { LastPerformance } from '../../types/workout'
 import type { PresetProgram } from '../onboardingPrograms'
+import type { GeneratedPlan, GeneratedSession } from '../../services/ai/types'
 
 /**
  * Stat agregee d'un exercice pour une seance donnee (source : table sets).
@@ -509,4 +510,151 @@ export function filterAndSearchExercises(
   }
 
   return filtered
+}
+
+/**
+ * Résout un nom d'exercice généré par l'IA vers un exercice en DB.
+ * Cherche d'abord exact, puis case-insensitive, puis crée un custom.
+ */
+async function resolveExercise(
+  name: string,
+  exercisesByName: Map<string, Exercise>,
+  exercisesByNameLower: Map<string, Exercise>
+): Promise<Exercise> {
+  const exact = exercisesByName.get(name)
+  if (exact) return exact
+
+  const lower = exercisesByNameLower.get(name.toLowerCase())
+  if (lower) return lower
+
+  // Crée un exercice custom si introuvable
+  return await database.write(async () => {
+    return await database.get<Exercise>('exercises').create(ex => {
+      ex.name = name
+      ex.isCustom = true
+    })
+  })
+}
+
+/**
+ * Importe un plan généré par l'IA en tant que Programme complet.
+ * Crée Program + Sessions + SessionExercises en une transaction atomique.
+ *
+ * @param plan - Plan généré par l'IA
+ * @returns Le Program créé
+ */
+export async function importGeneratedPlan(plan: GeneratedPlan): Promise<Program> {
+  const exercises = await database.get<Exercise>('exercises').query().fetch()
+  const programCount = await database.get<Program>('programs').query().fetchCount()
+  const exercisesByName = new Map(exercises.map(e => [e.name, e]))
+  const exercisesByNameLower = new Map(exercises.map(e => [e.name.toLowerCase(), e]))
+
+  const batch: (Program | Session | SessionExercise)[] = []
+
+  const newProgram = database.get<Program>('programs').prepareCreate(p => {
+    p.name = plan.name
+    p.position = programCount
+  })
+  batch.push(newProgram)
+
+  // Pré-résolution des exercices (hors transaction batch)
+  const resolvedExercises: Map<string, Exercise> = new Map()
+  for (const genSession of plan.sessions) {
+    for (const genEx of genSession.exercises) {
+      if (!resolvedExercises.has(genEx.exerciseName)) {
+        const ex = await resolveExercise(genEx.exerciseName, exercisesByName, exercisesByNameLower)
+        resolvedExercises.set(genEx.exerciseName, ex)
+      }
+    }
+  }
+
+  plan.sessions.forEach((genSession, si) => {
+    const newSession = database.get<Session>('sessions').prepareCreate(s => {
+      s.program.set(newProgram)
+      s.name = genSession.name
+      s.position = si
+    })
+    batch.push(newSession)
+
+    genSession.exercises.forEach((genEx, ei) => {
+      const exercise = resolvedExercises.get(genEx.exerciseName)
+      if (!exercise) return
+      batch.push(
+        database.get<SessionExercise>('session_exercises').prepareCreate(se => {
+          se.session.set(newSession)
+          se.exercise.set(exercise)
+          se.setsTarget = genEx.setsTarget
+          se.repsTarget = genEx.repsTarget
+          se.weightTarget = genEx.weightTarget
+          se.position = ei
+        })
+      )
+    })
+  })
+
+  await database.write(async () => {
+    await database.batch(...batch)
+  })
+
+  return newProgram
+}
+
+/**
+ * Importe une séance générée par l'IA et la rattache à un programme existant.
+ *
+ * @param genSession - Séance générée
+ * @param programId - ID du programme cible
+ * @returns La Session créée
+ */
+export async function importGeneratedSession(
+  genSession: GeneratedSession,
+  programId: string
+): Promise<Session> {
+  const exercises = await database.get<Exercise>('exercises').query().fetch()
+  const program = await database.get<Program>('programs').find(programId)
+  const sessionCount = await database
+    .get<Session>('sessions')
+    .query(Q.where('program_id', programId))
+    .fetchCount()
+
+  const exercisesByName = new Map(exercises.map(e => [e.name, e]))
+  const exercisesByNameLower = new Map(exercises.map(e => [e.name.toLowerCase(), e]))
+
+  // Pré-résolution des exercices
+  const resolvedExercises: Map<string, Exercise> = new Map()
+  for (const genEx of genSession.exercises) {
+    if (!resolvedExercises.has(genEx.exerciseName)) {
+      const ex = await resolveExercise(genEx.exerciseName, exercisesByName, exercisesByNameLower)
+      resolvedExercises.set(genEx.exerciseName, ex)
+    }
+  }
+
+  return await database.write(async () => {
+    const newSession = await database.get<Session>('sessions').create(s => {
+      s.program.set(program)
+      s.name = genSession.name
+      s.position = sessionCount
+    })
+
+    const seBatch = genSession.exercises
+      .map((genEx, ei) => {
+        const exercise = resolvedExercises.get(genEx.exerciseName)
+        if (!exercise) return null
+        return database.get<SessionExercise>('session_exercises').prepareCreate(se => {
+          se.session.set(newSession)
+          se.exercise.set(exercise)
+          se.setsTarget = genEx.setsTarget
+          se.repsTarget = genEx.repsTarget
+          se.weightTarget = genEx.weightTarget
+          se.position = ei
+        })
+      })
+      .filter((se): se is SessionExercise => se !== null)
+
+    if (seBatch.length > 0) {
+      await database.batch(...seBatch)
+    }
+
+    return newSession
+  })
 }
