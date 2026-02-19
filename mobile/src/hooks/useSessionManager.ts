@@ -192,6 +192,29 @@ export function useSessionManager(
     setTargetWeight('')
   }
 
+  /**
+   * Réordonne les exercices d'une session selon l'ordre du tableau reçu
+   * @param items - Tableau de SessionExercise dans le nouvel ordre
+   * @returns true si succès, false sinon
+   */
+  const reorderExercises = async (items: SessionExercise[]): Promise<boolean> => {
+    try {
+      await database.write(async () => {
+        await database.batch(
+          ...items.map((item, index) =>
+            item.prepareUpdate((se) => {
+              se.position = index
+            })
+          )
+        )
+      })
+      return true
+    } catch (error) {
+      console.error('Failed to reorder exercises:', error)
+      return false
+    }
+  }
+
   return {
     // Target inputs states
     targetSets,
@@ -212,5 +235,6 @@ export function useSessionManager(
     removeExercise,
     prepareEditTargets,
     resetTargets,
+    reorderExercises,
   }
 }
