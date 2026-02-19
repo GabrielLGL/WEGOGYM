@@ -24,20 +24,15 @@ Rétrospective du projet. Analyse le score de santé, les commits, les rapports 
 
 ## Journée
 
-### `/task [description]`
-Tâche rapide. Pour tout ce qui n'est ni un bug ni une grosse feature : refactor, ajout d'un spinner, migration de couleurs, etc. Comprend → code → teste → commit.
+### `/do [description]`
+Commande universelle. Détecte automatiquement le type d'action (fix, feat, refactor, style, chore, perf) et exécute en conséquence. Pour les fix, cherche automatiquement dans les rapports verrif pour avoir le contexte.
 ```
-/task refactor RestTimer en hook séparé
-/task ajouter loading spinner sur HomeScreen
-/task migrer les couleurs hardcodées de SettingsScreen
-```
-
-### `/fix [description du problème]`
-Correction ciblée d'un bug. Cherche dans les rapports verrif si le bug est documenté, corrige, vérifie, crée un test si besoin, commit.
-```
-/fix RestTimer fuite mémoire setTimeout
-/fix couleurs hardcodées dans SessionItem
-/fix useProgramManager mutation hors write()
+/do fuite mémoire RestTimer              → fix
+/do refactor RestTimer en hook séparé    → refactor
+/do ajouter loading spinner HomeScreen   → feat
+/do migrer couleurs hardcodées Settings  → style
+/do CR#6 SessionDetail double reload     → fix (avec contexte verrif)
+/do optimiser FlatList HistoryScreen     → perf
 ```
 
 ### `/idee [description de l'idée]`
@@ -206,5 +201,3 @@ Agents appelés automatiquement par `/idee` et `/verrif` :
 | `bmm-dev` | Développeur |
 | `bmm-qa` | QA |
 | `bmm-code-review` | Code Review |
-
-Pas besoin de les lancer directement.

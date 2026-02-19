@@ -1,6 +1,12 @@
 # CLAUDE.md
 > **Guidance for WEGOGYM Project**
 
+## 0. Règle d'or
+
+- **Ne JAMAIS réintroduire un bug listé dans la section 3.1 Known Pitfalls.**
+- Après chaque modification de code → sauvegarder un rapport dans le dossier approprié (cf section 7).
+- Si tu découvres un nouveau pattern de bug récurrent → signale-le pour ajout en section 3.1.
+
 ## 1. Stack & Environment
 - **Core:** React Native (Expo 52) + TypeScript + Fabric (New Arch).
 - **State:** WatermelonDB (SQLite/JSI). **NO Redux/Context for data.**
@@ -196,14 +202,15 @@ Pour la liste détaillée avec exemples, voir `docs/COMMANDS.md`.
 | `/plan` | Affiche le workflow complet (memo) |
 | `/morning` | Briefing du matin |
 | `/retro [période]` | Rétrospective : tendances, santé, recommandations |
-| `/task [desc]` | Tâche rapide |
-| `/fix [desc]` | Correction ciblée |
+| `/do [desc]` | Tâche universelle : fix, feat, refactor, style (détecte auto) |
 | `/status` | État en 10 secondes |
 | `/review` | Review avant push |
+| `/ui [cible]` | Review et amélioration UI (écran, composant, theme) |
 | `/doc [cible]` | Générer/mettre à jour la doc |
 | `/perf` | Analyse performance React Native |
 | `/changelog [période]` | Générer un changelog |
 | `/backup [nom]` | Branche de sauvegarde locale |
+| `/prompt [desc]` | Génère et lance le meilleur prompt |
 | `/gitgo` | Commit + push intelligent |
 
 ### Développement de features
