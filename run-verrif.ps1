@@ -5,13 +5,6 @@
 #   .\run-verrif.ps1 -mode safe   → corrige seulement les critiques
 #   .\run-verrif.ps1 -mode full   → corrige tout (critique > warning > suggestion)
 #   .\run-verrif.ps1 -mode scan   → scan seul, aucune correction
-#
-# NIVEAUX DE CORRECTION (mode full) :
-#   Niveau 1 : Critiques (build, tests, bugs, WatermelonDB)
-#   Niveau 2 : Warnings (any, console.log, hardcoded, code mort)
-#   Niveau 3 : Suggestions (nommage, TODOs, optimisations)
-#   Chaque niveau est verifie avant de passer au suivant
-#   Rollback par niveau si une correction casse le build/tests
 
 param(
     [ValidateSet("safe", "full", "scan")]
@@ -19,6 +12,17 @@ param(
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
+# --- Helpers UTF-8 ---
+function Write-File {
+    param($path, $content)
+    [System.IO.File]::WriteAllText($path, $content, [System.Text.Encoding]::UTF8)
+}
+function Append-File {
+    param($path, $content)
+    [System.IO.File]::AppendAllText($path, "$content`r`n", [System.Text.Encoding]::UTF8)
+}
 
 # --- Desactiver la mise en veille ---
 powercfg /change standby-timeout-ac 0
@@ -32,6 +36,7 @@ mkdir -Force "docs/bmad/git-history" | Out-Null
 
 $statusFile = "$verifDir/STATUS.md"
 $scoreFile = "docs/bmad/verrif/HEALTH.md"
+$tempPrompt = "$env:TEMP\verrif-prompt-$timestamp.txt"
 
 # ============================================================
 # FONCTIONS UTILITAIRES
@@ -39,16 +44,49 @@ $scoreFile = "docs/bmad/verrif/HEALTH.md"
 
 function Write-Status {
     param($phase, $result)
-    Add-Content $statusFile "| $phase | $result | $(Get-Date -Format 'HH:mm:ss') |"
+    Append-File $statusFile "| $phase | $result | $(Get-Date -Format 'HH:mm:ss') |"
 }
 
 function Run-Passe {
-    param($num, $name, $command, $tools)
+    param($num, $name, $promptText, $tools)
     
     Write-Host "`n[$num] $name" -ForegroundColor Yellow
     
     try {
-        $output = Invoke-Expression "claude -p `"$command`" --allowedTools $tools" 2>&1
+        Write-File $tempPrompt $promptText
+        
+        $toolArgs = $tools -split ' ' | ForEach-Object { "--allowedTools"; $_ }
+        $output = & claude -p (Get-Content $tempPrompt -Raw -Encoding UTF8) @toolArgs 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "Exit code: $LASTEXITCODE" }
+        Write-Host $output
+        Write-Status "$num - $name" "OK"
+        return $true
+    }
+    catch {
+        Write-Host "[ERREUR] $num echouee: $_" -ForegroundColor Red
+        Write-Status "$num - $name" "ECHEC - $_"
+        return $false
+    }
+}
+
+function Run-PasseFromFile {
+    param($num, $name, $filePath, $tools)
+    
+    Write-Host "`n[$num] $name" -ForegroundColor Yellow
+    
+    if (-not (Test-Path $filePath)) {
+        Write-Host "[ERREUR] Fichier introuvable: $filePath" -ForegroundColor Red
+        Write-Status "$num - $name" "ECHEC - fichier introuvable"
+        return $false
+    }
+
+    try {
+        $promptContent = Get-Content $filePath -Raw -Encoding UTF8
+        $promptContent = $promptContent -replace '\$timestamp', $timestamp
+        Write-File $tempPrompt $promptContent
+        
+        $toolArgs = $tools -split ' ' | ForEach-Object { "--allowedTools"; $_ }
+        $output = & claude -p (Get-Content $tempPrompt -Raw -Encoding UTF8) @toolArgs 2>&1
         if ($LASTEXITCODE -ne 0) { throw "Exit code: $LASTEXITCODE" }
         Write-Host $output
         Write-Status "$num - $name" "OK"
@@ -65,10 +103,11 @@ function Run-QuickCheck {
     param($label)
     Write-Host "`n--- QUICK CHECK $label ---" -ForegroundColor Cyan
 
-    $cmdCheck = "Lance npx tsc --noEmit et npm test dans mobile/. Si les deux passent sans erreur, reponds exactement CLEAN. Sinon reponds DIRTY suivi de la liste des erreurs. Rien d autre. Ne me pose aucune question."
+    $checkPrompt = "Lance npx tsc --noEmit et npm test dans mobile/. Si les deux passent sans erreur, reponds exactement CLEAN. Sinon reponds DIRTY suivi de la liste des erreurs. Rien d autre. Ne me pose aucune question."
     
     try {
-        $output = claude -p $cmdCheck --allowedTools "Bash(npx:*)" "Bash(npm:*)" "Read" 2>&1
+        Write-File $tempPrompt $checkPrompt
+        $output = & claude -p (Get-Content $tempPrompt -Raw -Encoding UTF8) --allowedTools "Bash(npx:*)" --allowedTools "Bash(npm:*)" --allowedTools "Read" 2>&1
         $outputStr = $output -join " "
         if ($outputStr -match "CLEAN") {
             Write-Host "[CHECK] CLEAN" -ForegroundColor Green
@@ -92,13 +131,17 @@ function Run-FixLevel {
 
     Write-Host "`n========== FIX NIVEAU $level - $levelName ==========" -ForegroundColor Cyan
 
-    # Sauvegarder l'etat avant ce niveau pour rollback
-    git stash push -m "verrif-before-level$level-$timestamp" --include-untracked --quiet 2>$null
-    git stash pop --quiet 2>$null
-    # Sauvegarder la liste des fichiers modifies avant ce niveau
     $filesBefore = git diff --name-only 2>$null
 
-    $cmdFix = "Relis tous les rapports dans docs/bmad/verrif/$timestamp/. Corrige UNIQUEMENT les problemes de niveau $levelName : $description. NE FAIS AUCUN COMMIT. Modifie les fichiers sans commiter. Ne modifie PAS le comportement fonctionnel. Si une correction est risquee, ne la fais pas et note pourquoi. Sauvegarde le rapport dans docs/bmad/verrif/$timestamp/07-fix-niveau$level.md. Ne me pose aucune question."
+    $cmdFix = @"
+Relis tous les rapports dans docs/bmad/verrif/$timestamp/.
+Corrige UNIQUEMENT les problemes de niveau $levelName : $description.
+NE FAIS AUCUN COMMIT. Modifie les fichiers sans commiter.
+Ne modifie PAS le comportement fonctionnel.
+Si une correction est risquee, ne la fais pas et note pourquoi.
+Sauvegarde le rapport dans docs/bmad/verrif/$timestamp/07-fix-niveau$level.md.
+Ne me pose aucune question.
+"@
     
     $fixOk = Run-Passe "FIX-N$level" $levelName $cmdFix '"Bash(mkdir:*)" "Bash(npx:*)" "Bash(npm:*)" "Write" "Read" "Edit"'
     
@@ -107,14 +150,11 @@ function Run-FixLevel {
         return $false
     }
 
-    # Verifier que les corrections n'ont rien casse
     $clean = Run-QuickCheck "apres niveau $level"
     
     if (-not $clean) {
-        # ROLLBACK : annuler les modifications de ce niveau
         Write-Host "[ROLLBACK] Niveau $level a casse le build/tests, annulation..." -ForegroundColor Red
         
-        # Revert les fichiers modifies par ce niveau
         $filesAfter = git diff --name-only 2>$null
         $newFiles = $filesAfter | Where-Object { $filesBefore -notcontains $_ }
         foreach ($f in $newFiles) {
@@ -133,7 +173,8 @@ function Calculate-Score {
     Write-Host "`n========== SCORE DE SANTE ==========" -ForegroundColor Cyan
 
     $cmdScore = @"
-Analyse l'etat du projet et donne un score de sante sur 100. Reponds UNIQUEMENT avec un JSON, rien d'autre :
+Analyse l etat du projet et donne un score de sante sur 100.
+Reponds UNIQUEMENT avec un JSON, rien d autre :
 {"score": X, "build": X, "tests": X, "bugs": X, "qualite": X, "coverage": X}
 
 Criteres (chaque sous-score sur 20) :
@@ -141,16 +182,16 @@ Criteres (chaque sous-score sur 20) :
 - tests : 20 si tous passent, -2 par test fail
 - bugs : 20 si aucun bug silencieux, -3 par bug critique, -1 par warning
 - qualite : 20 si pas de code mort/any/hardcoded, -1 par probleme
-- coverage : 0 a 20 proportionnel au % de couverture (11% = 2, 50% = 10, 100% = 20)
+- coverage : 0 a 20 proportionnel au pourcentage de couverture (11% = 2, 50% = 10, 100% = 20)
 
 Base-toi sur les rapports dans docs/bmad/verrif/$timestamp/. Ne me pose aucune question.
 "@
 
     try {
-        $output = claude -p $cmdScore --allowedTools "Read" 2>&1
+        Write-File $tempPrompt $cmdScore
+        $output = & claude -p (Get-Content $tempPrompt -Raw -Encoding UTF8) --allowedTools "Read" 2>&1
         $outputStr = ($output -join " ").Trim()
         
-        # Extraire le JSON
         if ($outputStr -match '\{[^}]+\}') {
             $json = $Matches[0]
             $scoreData = $json | ConvertFrom-Json
@@ -161,18 +202,18 @@ Base-toi sur les rapports dans docs/bmad/verrif/$timestamp/. Ne me pose aucune q
             
             Write-Status "SCORE" "$score/100"
 
-            # Ajouter au fichier historique des scores
             $scoreEntry = "| $timestamp | $score | $($scoreData.build) | $($scoreData.tests) | $($scoreData.bugs) | $($scoreData.qualite) | $($scoreData.coverage) | $mode |"
             
             if (-not (Test-Path $scoreFile)) {
-                @"
+                $header = @"
 # Historique de sante du projet WEGOGYM
 
 | Run | Score | Build | Tests | Bugs | Qualite | Coverage | Mode |
 |-----|-------|-------|-------|------|---------|----------|------|
-"@ | Set-Content $scoreFile
+"@
+                Write-File $scoreFile $header
             }
-            Add-Content $scoreFile $scoreEntry
+            Append-File $scoreFile $scoreEntry
             
             return $score
         }
@@ -185,38 +226,35 @@ Base-toi sur les rapports dans docs/bmad/verrif/$timestamp/. Ne me pose aucune q
 }
 
 # ============================================================
-# FONCTIONS DE SCAN
+# SCAN
 # ============================================================
 
 function Run-Scan {
     Write-Host "`n========== SCAN ==========" -ForegroundColor Cyan
     
-    $cmd1 = (Get-Content .claude/commands/verrif-build.md -Raw) -replace '"', '\"'
-    $cmd2 = (Get-Content .claude/commands/verrif-tests.md -Raw) -replace '"', '\"'
-    $cmd3 = (Get-Content .claude/commands/verrif-code-review.md -Raw) -replace '"', '\"'
-    $cmd4 = (Get-Content .claude/commands/verrif-bugs.md -Raw) -replace '"', '\"'
-    $cmd5 = (Get-Content .claude/commands/verrif-db.md -Raw) -replace '"', '\"'
-    $cmd6 = (Get-Content .claude/commands/verrif-qualite.md -Raw) -replace '"', '\"'
+    $scanTools = '"Bash(mkdir:*)" "Bash(npx:*)" "Bash(npm:*)" "Write" "Read"'
+    $readTools = '"Write" "Read"'
 
-    Run-Passe "SCAN-1" "Build & TypeScript" $cmd1 '"Bash(mkdir:*)" "Bash(npx:*)" "Bash(npm:*)" "Write" "Read"' | Out-Null
-    Run-Passe "SCAN-2" "Tests" $cmd2 '"Bash(mkdir:*)" "Bash(npx:*)" "Bash(npm:*)" "Write" "Read"' | Out-Null
-    Run-Passe "SCAN-3" "Code Review" $cmd3 '"Bash(mkdir:*)" "Write" "Read"' | Out-Null
-    Run-Passe "SCAN-4" "Bugs silencieux" $cmd4 '"Bash(mkdir:*)" "Write" "Read"' | Out-Null
-    Run-Passe "SCAN-5" "Coherence WatermelonDB" $cmd5 '"Write" "Read"' | Out-Null
-    Run-Passe "SCAN-6" "Code mort & qualite" $cmd6 '"Write" "Read"' | Out-Null
+    Run-PasseFromFile "SCAN-1" "Build et TypeScript" ".claude/commands/verrif-build.md" $scanTools | Out-Null
+    Run-PasseFromFile "SCAN-2" "Tests" ".claude/commands/verrif-tests.md" $scanTools | Out-Null
+    Run-PasseFromFile "SCAN-3" "Code Review" ".claude/commands/verrif-code-review.md" $readTools | Out-Null
+    Run-PasseFromFile "SCAN-4" "Bugs silencieux" ".claude/commands/verrif-bugs.md" $readTools | Out-Null
+    Run-PasseFromFile "SCAN-5" "Coherence WatermelonDB" ".claude/commands/verrif-db.md" $readTools | Out-Null
+    Run-PasseFromFile "SCAN-6" "Code mort et qualite" ".claude/commands/verrif-qualite.md" $readTools | Out-Null
 }
 
 # ============================================================
 # MAIN
 # ============================================================
 
-@"
+$statusHeader = @"
 # Statut du run verrif $timestamp
 # Mode : $mode
 
 | Passe | Resultat | Heure |
 |-------|----------|-------|
-"@ | Set-Content $statusFile
+"@
+Write-File $statusFile $statusHeader
 
 Write-Host "[RUN] Verrif $timestamp - Mode $mode" -ForegroundColor Cyan
 
@@ -228,12 +266,8 @@ $scoreBefore = Calculate-Score
 
 # --- MODE SCAN : on s'arrete la ---
 if ($mode -eq "scan") {
-    Add-Content $statusFile @"
-
-## RESULTAT : SCAN UNIQUEMENT (mode scan)
-## Score : $scoreBefore/100
-Aucune correction appliquee.
-"@
+    Append-File $statusFile "`n## RESULTAT : SCAN UNIQUEMENT (mode scan)`n## Score : $scoreBefore/100`nAucune correction appliquee."
+    Remove-Item $tempPrompt -ErrorAction SilentlyContinue
     powercfg /change standby-timeout-ac 30
     powercfg /change monitor-timeout-ac 10
     Write-Host "`n[NUIT] Mise en veille reactivee (30min)" -ForegroundColor Magenta
@@ -244,10 +278,8 @@ Aucune correction appliquee.
 # --- CORRECTIONS PAR NIVEAU ---
 Write-Host "`n========== CORRECTIONS PAR NIVEAU ==========" -ForegroundColor Cyan
 
-# Niveau 1 : Critiques
 $n1ok = Run-FixLevel 1 "CRITIQUES" "erreurs de build TypeScript, tests qui fail, bugs silencieux (mutations hors write, fuites memoire, async sans catch), incoherences WatermelonDB schema vs modeles"
 
-# Niveau 2 : Warnings (seulement si mode full ET niveau 1 ok)
 $n2ok = $false
 if ($mode -eq "full" -and $n1ok) {
     $n2ok = Run-FixLevel 2 "WARNINGS" "any TypeScript restants, console.log hors __DEV__, couleurs et valeurs hardcodees au lieu des tokens du theme, code mort (imports, fonctions, styles inutilises)"
@@ -256,7 +288,6 @@ if ($mode -eq "full" -and $n1ok) {
     Write-Status "FIX-N2" "SKIP - mode safe"
 }
 
-# Niveau 3 : Suggestions (seulement si mode full ET niveau 2 ok)
 $n3ok = $false
 if ($mode -eq "full" -and $n2ok) {
     $n3ok = Run-FixLevel 3 "SUGGESTIONS" "incoherences de nommage (camelCase/snake_case), code commente ou TODOs oublies, optimisations mineures de performance"
@@ -272,47 +303,57 @@ $finalClean = Run-QuickCheck "FINAL"
 $scoreAfter = Calculate-Score
 
 if ($finalClean) {
-    # --- CLEAN : commit + push ---
-    Write-Host "`n[OK] Projet clean ! Commit & push..." -ForegroundColor Green
+    Write-Host "`n[OK] Projet clean ! Commit et push..." -ForegroundColor Green
 
-    $cmdPush = "Le code a ete verifie et corrige. Commit et push : 1) git add les fichiers corriges + les rapports dans docs/bmad/verrif/ + docs/bmad/git-history/ 2) Ne stage PAS node_modules, .env, builds, keystores, coverage 3) Fais des commits atomiques par type : fix(scope) pour les bugs, refactor(scope) pour la qualite, chore(verrif) pour les rapports 4) git push origin (branche courante) 5) Sauvegarde un rapport dans docs/bmad/git-history/$timestamp-verrif.md. Ne me pose aucune question."
-
-    Run-Passe "PUSH" "Git commit & push" $cmdPush '"Bash(mkdir:*)" "Bash(git:*)" "Bash(npx:*)" "Bash(npm:*)" "Write" "Read"' | Out-Null
-
-    Add-Content $statusFile @"
-
-## RESULTAT : CLEAN ET PUSH
-## Score : $scoreBefore → $scoreAfter / 100
-## Niveaux appliques : N1$(if($n2ok){" + N2"})$(if($n3ok){" + N3"})
-
-Corrections verifiees (build + tests) puis commitees et pushees.
+    $cmdPush = @"
+Le code a ete verifie et corrige.
+Commit et push :
+1) git add les fichiers corriges + les rapports dans docs/bmad/verrif/ + docs/bmad/git-history/
+2) Ne stage PAS node_modules, .env, builds, keystores, coverage
+3) Fais des commits atomiques par type : fix(scope) pour les bugs, refactor(scope) pour la qualite, chore(verrif) pour les rapports
+4) git push origin (branche courante)
+5) Sauvegarde un rapport dans docs/bmad/git-history/$timestamp-verrif.md
+Ne me pose aucune question.
 "@
+
+    Run-Passe "PUSH" "Git commit et push" $cmdPush '"Bash(mkdir:*)" "Bash(git:*)" "Bash(npx:*)" "Bash(npm:*)" "Write" "Read"' | Out-Null
+
+    $niveaux = "N1"
+    if ($n2ok) { $niveaux += " + N2" }
+    if ($n3ok) { $niveaux += " + N3" }
+    Append-File $statusFile "`n## RESULTAT : CLEAN ET PUSH`n## Score : $scoreBefore -> $scoreAfter / 100`n## Niveaux appliques : $niveaux`n`nCorrections verifiees (build + tests) puis commitees et pushees."
     Write-Host "[OK] Run termine. Score: $scoreBefore -> $scoreAfter/100" -ForegroundColor Green
 
 } else {
-    # --- PAS CLEAN : revert code, garder rapports ---
     Write-Host "`n[STOP] Pas clean apres corrections. Annulation du code..." -ForegroundColor Red
     
     git checkout -- mobile/ 2>$null
 
-    Add-Content $statusFile @"
+    $n1s = if ($n1ok) { "OK" } else { "FAIL" }
+    $n2s = if ($n2ok) { "OK" } else { "FAIL/SKIP" }
+    $n3s = if ($n3ok) { "OK" } else { "FAIL/SKIP" }
+    $dirtyResult = @"
 
 ## RESULTAT : PAS CLEAN - AUCUN COMMIT
-## Score : $scoreBefore → $scoreAfter / 100
-## Niveaux tentes : N1$(if($n1ok){" OK"}else{" FAIL"}) | N2$(if($n2ok){" OK"}else{" FAIL/SKIP"}) | N3$(if($n3ok){" OK"}else{" FAIL/SKIP"})
+## Score : $scoreBefore -> $scoreAfter / 100
+## Niveaux tentes : N1 $n1s | N2 $n2s | N3 $n3s
 
-**Les corrections automatiques n'ont pas suffi.**
-**Le code a ete revert. Les rapports sont conserves.**
+Les corrections automatiques n ont pas suffi.
+Le code a ete revert. Les rapports sont conserves.
 
 ### Action requise le matin :
-1. /morning pour voir l'etat
+1. /morning pour voir l etat
 2. Lis les rapports dans docs/bmad/verrif/$timestamp/
-3. /fix [description] pour corriger manuellement
+3. /do [description] pour corriger manuellement
 4. /review pour verifier
-5. /gitgo quand c'est clean
+5. /gitgo quand c est clean
 "@
+    Append-File $statusFile $dirtyResult
     Write-Host "[STOP] Aucun commit. Rapport dans $statusFile" -ForegroundColor Red
 }
+
+# --- Cleanup ---
+Remove-Item $tempPrompt -ErrorAction SilentlyContinue
 
 # --- Reactiver la mise en veille ---
 powercfg /change standby-timeout-ac 30
