@@ -163,6 +163,7 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
   const contentAnim  = useRef(new Animated.Value(1)).current
 
   // ── Derived ───────────────────────────────────────────────────────────────
+  // Réactif via withObservables — mise à jour depuis les settings uniquement
   const providerLabel = PROVIDER_LABELS[user?.aiProvider ?? 'offline'] ?? 'Offline'
 
   const steps      = buildSteps(formData)
@@ -304,12 +305,20 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
       if (currentMode === 'program') {
         await importGeneratedPlan(plan)
         previewModal.close()
+        setCurrentStep(0)
+        setFormData({ equipment: [], musclesFocus: [] })
+        setGeneratedPlan(null)
+        contentAnim.setValue(1)
         navigation.navigate('Home')
       } else {
         if (!currentTargetProgramId) return
         if (!plan.sessions.length) { previewModal.close(); return }
         const session = await importGeneratedSession(plan.sessions[0], currentTargetProgramId)
         previewModal.close()
+        setCurrentStep(0)
+        setFormData({ equipment: [], musclesFocus: [] })
+        setGeneratedPlan(null)
+        contentAnim.setValue(1)
         ;(navigation.getParent() as NavigationProp<RootStackParamList> | undefined)
           ?.navigate('SessionDetail', { sessionId: session.id })
       }
