@@ -24,11 +24,12 @@ function formatDuration(seconds: number): string {
 interface StatBlockProps {
   label: string
   value: string
+  emoji: string
 }
 
-const StatBlock: React.FC<StatBlockProps> = ({ label, value }) => (
+const StatBlock: React.FC<StatBlockProps> = ({ label, value, emoji }) => (
   <View style={styles.statBlock}>
-    <Text style={styles.statValue}>{value}</Text>
+    <Text style={styles.statValue}>{emoji} {value}</Text>
     <Text style={styles.statLabel}>{label}</Text>
   </View>
 )
@@ -75,20 +76,29 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
       onClose={handleClose}
       title="Séance terminée !"
     >
+      {totalPrs > 0 ? (
+        <Text style={styles.celebrationText}>🏅 Nouveau record personnel !</Text>
+      ) : totalSets > 0 ? (
+        <Text style={[styles.celebrationText, { color: colors.success }]}>💪 Beau travail !</Text>
+      ) : null}
+
       <View style={styles.statsGrid}>
-        <StatBlock label="Durée" value={formatDuration(durationSeconds)} />
-        <StatBlock label="Volume" value={`${totalVolume.toFixed(1)} kg`} />
-        <StatBlock label="Séries" value={`${totalSets} validées`} />
-        <StatBlock label="Records" value={`${totalPrs} PR`} />
+        <StatBlock label="Durée" value={formatDuration(durationSeconds)} emoji="⏱" />
+        <StatBlock label="Volume" value={`${totalVolume.toFixed(1)} kg`} emoji="🏋️" />
+        <StatBlock label="Séries" value={`${totalSets} validées`} emoji="✅" />
+        <StatBlock label="Records" value={`${totalPrs} PR`} emoji="🏆" />
       </View>
 
+      <View style={styles.separator} />
+
+      <Text style={styles.noteLabel}>Note de séance</Text>
       <TextInput
         style={styles.noteInput}
         multiline
         numberOfLines={3}
         value={note}
         onChangeText={handleNoteChange}
-        placeholder="Ajouter une note (optionnel)..."
+        placeholder="Ressenti, conditions, progrès..."
         placeholderTextColor={colors.placeholder}
         textAlignVertical="top"
       />
@@ -100,13 +110,19 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         onPress={handleClose}
         enableHaptics={false}
       >
-        Fermer
+        Terminer
       </Button>
     </BottomSheet>
   )
 }
 
 const styles = StyleSheet.create({
+  celebrationText: {
+    color: colors.primary,
+    fontSize: fontSize.sm,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -122,7 +138,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: colors.text,
-    fontSize: fontSize.xxl,
+    fontSize: fontSize.xxxl,
     fontWeight: '700',
     marginBottom: spacing.xs,
   },
@@ -132,9 +148,21 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
+  separator: {
+    height: 1,
+    backgroundColor: colors.separator,
+    marginVertical: spacing.md,
+  },
+  noteLabel: {
+    color: colors.textSecondary,
+    fontSize: fontSize.xs,
+    marginBottom: spacing.xs,
+  },
   noteInput: {
     backgroundColor: colors.cardSecondary,
     borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.separator,
     color: colors.text,
     fontSize: fontSize.md,
     padding: spacing.md,
