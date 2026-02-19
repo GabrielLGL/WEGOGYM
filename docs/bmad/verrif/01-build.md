@@ -3,7 +3,12 @@
 ## Résultat : ✅ OK
 
 ### Erreurs
+
 Aucune erreur TypeScript détectée.
+
+| Fichier | Ligne | Erreur |
+|---------|-------|--------|
+| —       | —     | —      |
 
 ### Détails
 - Commande : `npx tsc --noEmit`

@@ -1,148 +1,113 @@
 # Tests — 2026-02-19
 
-## Résultat : ✅ 117 passed / 🔴 0 failed / ⏭️ 0 skipped
+## Résultat : ✅ 120 passed / 🔴 0 failed / ⏭️ 0 skipped
 
-**Test runner :** Jest
-**Suites :** 8 passed, 8 total
-**Durée :** ~3.9 s
+**9 suites, toutes PASS** — Durée : ~24 min (Jest cold-start + WatermelonDB mock)
 
----
+| Suite | Fichier | Tests |
+|-------|---------|-------|
+| useModalState + useMultiModalSync | `hooks/__tests__/useModalState.test.ts` | 15 |
+| useHaptics | `hooks/__tests__/useHaptics.test.ts` | 8 |
+| validationHelpers | `model/utils/__tests__/validationHelpers.test.ts` | 21 |
+| notificationService | `services/__tests__/notificationService.test.ts` | 7 |
+| Button | `components/__tests__/Button.test.tsx` | 12 |
+| AlertDialog | `components/__tests__/AlertDialog.test.tsx` | 11 |
+| OnboardingSheet | `components/__tests__/OnboardingSheet.test.tsx` | 6 |
+| databaseHelpers | `model/utils/__tests__/databaseHelpers.test.ts` | inclus |
+| SettingsScreen | `screens/__tests__/SettingsScreen.test.tsx` | 3 |
 
 ### Tests en échec
+Aucun.
 
-Aucun test en échec. ✅
-
----
-
-### Avertissements (non-bloquants)
-
-| Type | Fichier | Message |
-|------|---------|---------|
-| `console.warn` | `databaseHelpers.ts:444` | `[importPresetProgram] Exercice introuvable` — attendu dans le test "ignore silencieusement un exercice introuvable" |
-| `console.error` | `OnboardingSheet.test.tsx`, `AlertDialog.test.tsx` | Multiple warnings `"An update to Animated(View) inside a test was not wrapped in act(...)"` — animations RN non wrappées dans `act()`. Non bloquant mais bruyant. |
+### Warnings (non-bloquants)
+| Type | Fichier | Description |
+|------|---------|-------------|
+| `act(...)` warning | `AlertDialog.test.tsx` | Animations RN (`Animated.View`) déclenchent des state updates hors `act()`. Cosmétique, non bloquant. |
 
 ---
 
-### Suites de tests existantes
+## Fichiers critiques sans tests
 
-| Fichier de test | Tests |
-|-----------------|-------|
-| `services/__tests__/notificationService.test.ts` | 7 |
-| `model/utils/__tests__/validationHelpers.test.ts` | 19 |
-| `hooks/__tests__/useHaptics.test.ts` | 8 |
-| `hooks/__tests__/useModalState.test.ts` | 13 |
-| `model/utils/__tests__/databaseHelpers.test.ts` | 12 |
-| `components/__tests__/OnboardingSheet.test.tsx` | 6 |
-| `components/__tests__/Button.test.tsx` | 12 |
-| `components/__tests__/AlertDialog.test.tsx` | 11 |
+### Hooks (logique métier — priorité haute)
+- `hooks/useExerciseManager.ts` — gestion CRUD exercices (0%)
+- `hooks/useSessionManager.ts` — gestion des séances (0%)
+- `hooks/useProgramManager.ts` — gestion des programmes (0%)
+- `hooks/useWorkoutState.ts` — état en temps réel du workout (0%)
+- `hooks/useWorkoutTimer.ts` — timer de repos (0%)
+- `hooks/useKeyboardAnimation.ts` — animation clavier (0%)
+- `hooks/useExerciseFilters.ts` — filtres exercices (0% stmts, 100% branch)
 
----
+### Composants UI (priorité moyenne)
+- `components/BottomSheet.tsx` — bottom sheet global (0%)
+- `components/ChipSelector.tsx` — filtres chips (0%)
+- `components/ExercisePickerModal.tsx` — sélection exercice (0%)
+- `components/RestTimer.tsx` — timer de repos (0%)
+- `components/SessionExerciseItem.tsx` — item exercice en séance (0%)
+- `components/WorkoutExerciseCard.tsx` — carte exercice workout (0%)
+- `components/WorkoutSummarySheet.tsx` — résumé fin workout (0%)
+- `components/SetItem.tsx` — item série (0% stmts/funcs)
+- `components/ProgramSection.tsx`, `SessionItem.tsx`, `ErrorBoundary.tsx`, `CustomModal.tsx` (0%)
 
-### Fichiers critiques sans tests
+### Écrans (priorité haute)
+- `screens/HomeScreen.tsx` — écran principal (0%)
+- `screens/WorkoutScreen.tsx` — workout en cours (0%)
+- `screens/ExercisesScreen.tsx` — bibliothèque exercices (0%)
+- `screens/ChartsScreen.tsx` — statistiques (0%)
+- `screens/SessionDetailScreen.tsx` — détail séance (0%)
+- `screens/AssistantScreen.tsx` — assistant IA (0%)
 
-#### Hooks (0% couverture)
-- `hooks/useExerciseFilters.ts`
-- `hooks/useExerciseManager.ts` — gestion CRUD exercices (critique)
-- `hooks/useKeyboardAnimation.ts`
-- `hooks/useProgramManager.ts` — gestion CRUD programmes (critique)
-- `hooks/useSessionManager.ts` — gestion CRUD séances (critique)
-- `hooks/useWorkoutState.ts` — état session d'entraînement en cours (critique)
-- `hooks/useWorkoutTimer.ts` — timer de repos
+### Modèles WatermelonDB (priorité moyenne)
+- `model/models/Exercise.ts` (0%)
+- `model/models/Program.ts` (0%)
+- `model/models/History.ts`, `Session.ts`, `SessionExercise.ts`, `Set.ts`, `User.ts`, `PerformanceLog.ts` (0% statements)
 
-#### Composants (0% couverture)
-- `components/BottomSheet.tsx` — composant modal principal
-- `components/ChipSelector.tsx`
-- `components/CustomModal.tsx`
-- `components/ErrorBoundary.tsx`
-- `components/ExercisePickerModal.tsx` — sélecteur exercice (critique)
-- `components/ExerciseTargetInputs.tsx`
-- `components/LastPerformanceBadge.tsx`
-- `components/ProgramSection.tsx`
-- `components/RestTimer.tsx` — timer visible utilisateur
-- `components/SessionExerciseItem.tsx`
-- `components/SessionItem.tsx`
-- `components/SetItem.tsx`
-- `components/WorkoutExerciseCard.tsx` — carte exercice entraînement (critique)
-- `components/WorkoutHeader.tsx`
-- `components/WorkoutSummarySheet.tsx`
-- `components/AssistantPreviewSheet.tsx`
+### Services (priorité haute)
+- `services/ai/aiService.ts` — service IA principal (0%)
+- `services/ai/claudeProvider.ts`, `geminiProvider.ts`, `openaiProvider.ts` (0%)
+- `services/ai/offlineEngine.ts` (0%)
+- `services/ai/providerUtils.ts` (0%)
+- `services/sentry.ts` (0%)
 
-#### Écrans (0% couverture — tous)
-- `screens/HomeScreen.tsx`
-- `screens/WorkoutScreen.tsx` (critique)
-- `screens/ExercisesScreen.tsx`
-- `screens/SessionDetailScreen.tsx`
-- `screens/ChartsScreen.tsx`
-- `screens/SettingsScreen.tsx`
-- `screens/AssistantScreen.tsx`
-
-#### Services IA (0% couverture)
-- `services/ai/aiService.ts` — orchestrateur IA (critique)
-- `services/ai/claudeProvider.ts`
-- `services/ai/geminiProvider.ts`
-- `services/ai/offlineEngine.ts` — moteur offline (critique)
-- `services/ai/openaiProvider.ts`
-- `services/ai/providerUtils.ts`
-
-#### Modèles WatermelonDB (0% couverture)
-- `model/models/Exercise.ts`
-- `model/models/Program.ts`
-- `model/models/History.ts`, `Session.ts`, `SessionExercise.ts`, `Set.ts`, `User.ts`
-
-#### Autres
-- `services/sentry.ts`
-- `model/seed.ts`
-- `model/constants.ts`
-- `constants/strings.ts`
+### Utils partiellement couverts
+- `model/utils/databaseHelpers.ts` — 38.19% stmts, 60.65% branch — lignes 142-312 et 521-666 non couvertes
 
 ---
 
-### Couverture globale
+## Couverture globale
 
 | Métrique | Valeur |
 |----------|--------|
-| Statements | **11.64%** |
-| Branches | **14.03%** |
-| Functions | **12.73%** |
-| Lines | **11.97%** |
+| Statements | **12.95%** |
+| Branches | **16.36%** |
+| Functions | **13.60%** |
+| Lines | **13.34%** |
 
-#### Couverture par module (détail)
+### Couverture par zone
 
-| Module | Stmts | Branches | Funcs | Lines |
-|--------|-------|----------|-------|-------|
-| `components/AlertDialog.tsx` | 100% | 100% | 100% | 100% |
-| `components/Button.tsx` | 92.85% | 94.73% | 100% | 100% |
-| `components/OnboardingSheet.tsx` | 90.47% | 80% | 100% | 100% |
-| `hooks/useHaptics.ts` | 100% | 100% | 100% | 100% |
-| `hooks/useModalState.ts` | 100% | 100% | 100% | 100% |
-| `services/notificationService.ts` | 81.48% | 66.66% | 100% | 95.45% |
-| `model/utils/validationHelpers.ts` | 75.67% | 73.17% | 83.33% | 74.28% |
-| `model/utils/databaseHelpers.ts` | 38.26% | 63.15% | 38.66% | 40.7% |
-| Tout le reste | **0%** | **0%** | **0%** | **0%** |
+| Zone | Stmts | Branch | Funcs | Lines |
+|------|-------|--------|-------|-------|
+| `components/` | 15.17% | 16.82% | 11.7% | 16.12% |
+| `hooks/` | 6.57% | 4.9% | 20.45% | 5.58% |
+| `model/` | 3.84% | 0% | 0% | 3.84% |
+| `model/utils/` | 43.33% | 65.68% | 41.97% | 45.53% |
+| `screens/` | 4.15% | 8.8% | 1.45% | 4.48% |
+| `services/` | 47.82% | 23.52% | 62.5% | 53.84% |
+| `services/ai/` | 0% | 0% | 0% | 0% |
 
----
-
-### Priorités de test recommandées
-
-1. **Haute priorité** — Logique métier critique sans tests :
-   - `useWorkoutState.ts` (état entraînement)
-   - `useProgramManager.ts` (CRUD programmes)
-   - `useSessionManager.ts` (CRUD séances)
-   - `useExerciseManager.ts` (CRUD exercices)
-   - `services/ai/aiService.ts` + `offlineEngine.ts`
-
-2. **Moyenne priorité** — Composants UI clés :
-   - `WorkoutExerciseCard.tsx`
-   - `ExercisePickerModal.tsx`
-   - `BottomSheet.tsx`
-   - `RestTimer.tsx`
-
-3. **Basse priorité** — Écrans (intégration complexe) et modèles WatermelonDB
+### Fichiers à 100%
+- `components/AlertDialog.tsx`
+- `hooks/useHaptics.ts`
+- `hooks/useModalState.ts`
+- `model/onboardingPrograms.ts`
+- `services/notificationService.ts` (95.45% lines)
+- `components/OnboardingSheet.tsx` (90.47% stmts)
 
 ---
 
-### Actions recommandées
+## Recommandations prioritaires
 
-- **Corriger les warnings `act()`** dans `OnboardingSheet.test.tsx` et `AlertDialog.test.tsx` (wrapper les assertions avec `act()` ou `waitFor()`)
-- **Ajouter `--detectOpenHandles`** au script de test pour identifier les handles ouverts
-- **Objectif couverture :** viser ≥ 50% statements en ciblant les hooks critiques en priorité
+1. **Hooks métier** — `useWorkoutState`, `useSessionManager`, `useProgramManager`, `useExerciseManager` : logique critique, 0% couverture.
+2. **`databaseHelpers.ts`** — lignes 142-312 (mutations DB) et 521-666 non testées : risque élevé.
+3. **`aiService.ts` + providers** — aucun test sur la couche IA.
+4. **Écrans principaux** — `HomeScreen`, `WorkoutScreen` : flux utilisateur non couverts.
+5. **Warnings `act()`** dans `AlertDialog.test.tsx` — à corriger pour éviter les faux positifs futurs.
