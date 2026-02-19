@@ -2,6 +2,7 @@
 jest.mock('../../model/utils/databaseHelpers', () => ({
   saveWorkoutSet: jest.fn(),
   getMaxWeightForExercise: jest.fn(),
+  deleteWorkoutSet: jest.fn(),
 }))
 jest.mock('../../model/utils/validationHelpers', () => ({
   validateSetInput: jest.fn(),
@@ -9,11 +10,12 @@ jest.mock('../../model/utils/validationHelpers', () => ({
 
 import { renderHook, act } from '@testing-library/react-native'
 import { useWorkoutState } from '../useWorkoutState'
-import { saveWorkoutSet, getMaxWeightForExercise } from '../../model/utils/databaseHelpers'
+import { saveWorkoutSet, getMaxWeightForExercise, deleteWorkoutSet } from '../../model/utils/databaseHelpers'
 import { validateSetInput } from '../../model/utils/validationHelpers'
 
 const mockSaveWorkoutSet = saveWorkoutSet as jest.Mock
 const mockGetMaxWeightForExercise = getMaxWeightForExercise as jest.Mock
+const mockDeleteWorkoutSet = deleteWorkoutSet as jest.Mock
 const mockValidateSetInput = validateSetInput as jest.Mock
 
 const createMockSessionExercise = (
@@ -37,6 +39,7 @@ describe('useWorkoutState', () => {
     mockValidateSetInput.mockReturnValue({ valid: true })
     mockGetMaxWeightForExercise.mockResolvedValue(0)
     mockSaveWorkoutSet.mockResolvedValue(undefined)
+    mockDeleteWorkoutSet.mockResolvedValue(undefined)
   })
 
   // --- Initial state / buildInitialInputs ---
@@ -322,6 +325,114 @@ describe('useWorkoutState', () => {
         expect.objectContaining({ weight: 80 })
       )
       expect(result.current.totalVolume).toBe(800) // 80 * 10
+    })
+  })
+
+  // --- unvalidateSet ---
+
+  describe('unvalidateSet', () => {
+    it('should return false when historyId is empty', async () => {
+      const se1 = createMockSessionExercise('se-1', 1)
+      const { result } = renderHook(() => useWorkoutState([se1 as any], ''))
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.unvalidateSet(se1 as any, 1)
+      })
+
+      expect(success!).toBe(false)
+      expect(mockDeleteWorkoutSet).not.toHaveBeenCalled()
+    })
+
+    it('should return false when set is not validated', async () => {
+      const se1 = createMockSessionExercise('se-1', 1)
+      const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.unvalidateSet(se1 as any, 1)
+      })
+
+      expect(success!).toBe(false)
+      expect(mockDeleteWorkoutSet).not.toHaveBeenCalled()
+    })
+
+    it('should return false when exercise fetch returns null', async () => {
+      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      // First validate the set
+      await act(async () => {
+        await result.current.validateSet(se1 as any, 1)
+      })
+
+      // Make exercise fetch return null
+      ;(se1 as any).exercise.fetch.mockResolvedValue(null)
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.unvalidateSet(se1 as any, 1)
+      })
+
+      expect(success!).toBe(false)
+      expect(mockDeleteWorkoutSet).not.toHaveBeenCalled()
+    })
+
+    it('should delete set from DB and remove from validatedSets', async () => {
+      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      await act(async () => {
+        await result.current.validateSet(se1 as any, 1)
+      })
+      expect(result.current.validatedSets['se-1_1']).toBeDefined()
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.unvalidateSet(se1 as any, 1)
+      })
+
+      expect(success!).toBe(true)
+      expect(mockDeleteWorkoutSet).toHaveBeenCalledWith('history-1', 'ex-se-1', 1)
+      expect(result.current.validatedSets['se-1_1']).toBeUndefined()
+    })
+
+    it('should subtract volume when unvalidating', async () => {
+      const se1 = createMockSessionExercise('se-1', 2, 60, '10')
+      const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      await act(async () => {
+        await result.current.validateSet(se1 as any, 1)
+        await result.current.validateSet(se1 as any, 2)
+      })
+      expect(result.current.totalVolume).toBe(1200) // 2 × 60×10
+
+      await act(async () => {
+        await result.current.unvalidateSet(se1 as any, 1)
+      })
+
+      expect(result.current.totalVolume).toBe(600) // 1 × 60×10
+    })
+
+    it('should return false on deleteWorkoutSet error', async () => {
+      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      await act(async () => {
+        await result.current.validateSet(se1 as any, 1)
+      })
+
+      mockDeleteWorkoutSet.mockRejectedValue(new Error('Delete failed'))
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.unvalidateSet(se1 as any, 1)
+      })
+
+      expect(success!).toBe(false)
+      // State should remain unchanged
+      expect(result.current.validatedSets['se-1_1']).toBeDefined()
+      expect(result.current.totalVolume).toBe(600)
     })
   })
 })

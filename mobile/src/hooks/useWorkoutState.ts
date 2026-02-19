@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import SessionExercise from '../model/models/SessionExercise'
-import { saveWorkoutSet, getMaxWeightForExercise } from '../model/utils/databaseHelpers'
+import { saveWorkoutSet, getMaxWeightForExercise, deleteWorkoutSet } from '../model/utils/databaseHelpers'
 import { validateSetInput } from '../model/utils/validationHelpers'
 import type { SetInputData, ValidatedSetData } from '../types/workout'
 
@@ -26,7 +26,7 @@ function buildInitialInputs(sessionExercises: SessionExercise[]): Record<string,
  * @param historyId - ID de la History en cours (disponible apres creation async)
  *
  * @example
- * const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet }
+ * const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet, unvalidateSet }
  *   = useWorkoutState(sessionExercises, historyId)
  */
 export function useWorkoutState(
@@ -87,11 +87,41 @@ export function useWorkoutState(
     }
   }
 
+  const unvalidateSet = async (
+    sessionExercise: SessionExercise,
+    setOrder: number
+  ): Promise<boolean> => {
+    if (!historyId) return false
+
+    const key = `${sessionExercise.id}_${setOrder}`
+    const validated = validatedSets[key]
+    if (!validated) return false
+
+    try {
+      const exercise = await sessionExercise.exercise.fetch()
+      if (!exercise) return false
+
+      await deleteWorkoutSet(historyId, exercise.id, setOrder)
+
+      setValidatedSets(prev => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+      setTotalVolume(prev => prev - validated.weight * validated.reps)
+      return true
+    } catch (error) {
+      console.error('Failed to delete workout set:', error)
+      return false
+    }
+  }
+
   return {
     setInputs,
     validatedSets,
     totalVolume,
     updateSetInput,
     validateSet,
+    unvalidateSet,
   }
 }
