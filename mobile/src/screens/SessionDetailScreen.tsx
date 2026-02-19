@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native'
+import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
 import { Q } from '@nozbe/watermelondb'
@@ -49,6 +50,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     removeExercise,
     prepareEditTargets,
     resetTargets,
+    reorderExercises,
   } = useSessionManager(session, haptics.onSuccess)
 
   // --- ÉTATS LOCAUX ---
@@ -117,12 +119,14 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.listWrapper}>
-        <FlatList
+        <DraggableFlatList
           data={sessionExercises}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => (
+          renderItem={({ item, drag, isActive }: RenderItemParams<SessionExercise>) => (
             <SessionExerciseItem
               item={item}
+              drag={drag}
+              dragActive={isActive}
               onEditTargets={(se: SessionExercise) => {
                 haptics.onPress()
                 setShowRestTimer(false)
@@ -135,6 +139,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
               }}
             />
           )}
+          onDragEnd={({ data }) => reorderExercises(data)}
           contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 10, paddingBottom: 20 }}
           ListEmptyComponent={<Text style={styles.emptyText}>Ajoutez un exercice pour commencer.</Text>}
         />

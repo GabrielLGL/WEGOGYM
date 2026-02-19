@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from './src/navigation';
 import { seedExercises } from './src/model/seed';
 import { initSentry } from './src/services/sentry';
@@ -13,6 +14,8 @@ export default function App() {
   }, []);
 
   return (
-    <AppNavigator />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppNavigator />
+    </GestureHandlerRootView>
   );
 }
