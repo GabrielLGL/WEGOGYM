@@ -40,6 +40,23 @@ interface WizardStep {
   options?: StepOption[]
 }
 
+interface ChatMsg {
+  id: string
+  role: 'ai' | 'user'
+  text: string
+}
+
+type ChatStepId =
+  | 'goal'
+  | 'level'
+  | 'equipment'
+  | 'duration'
+  | 'mode'
+  | 'daysPerWeek'
+  | 'muscleGroup'
+  | 'targetProgram'
+  | 'done'
+
 // ─── Options ──────────────────────────────────────────────────────────────────
 
 const MODE_OPTIONS: StepOption[] = [
@@ -48,16 +65,16 @@ const MODE_OPTIONS: StepOption[] = [
 ]
 
 const GOAL_OPTIONS: StepOption[] = [
-  { value: 'masse',  label: 'Prise de masse', icon: '💪' },
-  { value: 'force',  label: 'Force',          icon: '🏋️' },
-  { value: 'perte',  label: 'Perte de poids', icon: '🔥' },
-  { value: 'cardio', label: 'Cardio',         icon: '🏃' },
+  { value: 'bodybuilding', label: 'Bodybuilding', icon: '💪' },
+  { value: 'power',        label: 'Power',        icon: '🏋️' },
+  { value: 'renfo',        label: 'Renfo',        icon: '🔥' },
+  { value: 'cardio',       label: 'Cardio',       icon: '🏃' },
 ]
 
 const LEVEL_OPTIONS: StepOption[] = [
-  { value: 'débutant',      label: 'Débutant',       icon: '🌱' },
-  { value: 'intermédiaire', label: 'Intermédiaire',  icon: '📈' },
-  { value: 'avancé',        label: 'Avancé',         icon: '🔝' },
+  { value: 'débutant',      label: 'Débutant',      icon: '🌱' },
+  { value: 'intermédiaire', label: 'Intermédiaire', icon: '📈' },
+  { value: 'avancé',        label: 'Avancé',        icon: '🔝' },
 ]
 
 const EQUIPMENT_OPTIONS = ['Poids du corps', 'Haltères', 'Barre & disques', 'Machines']
@@ -96,15 +113,21 @@ const PROVIDER_LABELS: Record<string, string> = {
   gemini:  'Gemini',
 }
 
+const PROVIDER_DISPLAY: Record<string, string> = {
+  claude: 'Claude',
+  openai: 'GPT-4o',
+  gemini: 'Gemini',
+}
+
 // ─── buildSteps ───────────────────────────────────────────────────────────────
 
 function buildSteps(data: Partial<AIFormData>): WizardStep[] {
   const steps: WizardStep[] = [
-    { id: 'mode',      field: 'mode',      question: 'Que veux-tu générer ?',          kind: 'single', options: MODE_OPTIONS      },
-    { id: 'goal',      field: 'goal',      question: 'Quel est ton objectif ?',         kind: 'single', options: GOAL_OPTIONS      },
-    { id: 'level',     field: 'level',     question: 'Quel est ton niveau ?',           kind: 'single', options: LEVEL_OPTIONS     },
-    { id: 'equipment', field: 'equipment', question: 'Quel équipement as-tu ?',         kind: 'multi'                               },
-    { id: 'duration',  field: 'durationMin', question: 'Combien de temps par séance ?', kind: 'single', options: DURATION_OPTIONS  },
+    { id: 'mode',      field: 'mode',        question: 'Que veux-tu générer ?',          kind: 'single', options: MODE_OPTIONS      },
+    { id: 'goal',      field: 'goal',        question: 'Quel est ton objectif ?',         kind: 'single', options: GOAL_OPTIONS      },
+    { id: 'level',     field: 'level',       question: 'Quel est ton niveau ?',           kind: 'single', options: LEVEL_OPTIONS     },
+    { id: 'equipment', field: 'equipment',   question: 'Quel équipement as-tu ?',         kind: 'multi'                               },
+    { id: 'duration',  field: 'durationMin', question: 'Combien de temps par séance ?',   kind: 'single', options: DURATION_OPTIONS  },
   ]
 
   if (data.mode === 'session') {
@@ -126,20 +149,34 @@ interface AssistantScreenInnerProps {
 }
 
 function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInnerProps) {
-  const haptics     = useHaptics()
+  const haptics      = useHaptics()
   const previewModal = useModalState()
 
-  const [currentStep, setCurrentStep]   = useState(0)
-  const [formData, setFormData]         = useState<Partial<AIFormData>>({ equipment: [] })
-  const [isGenerating, setIsGenerating] = useState(false)
+  // ── Wizard state ──────────────────────────────────────────────────────────
+  const [currentStep, setCurrentStep]     = useState(0)
+  const [formData, setFormData]           = useState<Partial<AIFormData>>({ equipment: [] })
+  const [isGenerating, setIsGenerating]   = useState(false)
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedPlan | null>(null)
 
   const progressAnim = useRef(new Animated.Value(0)).current
+
+  // ── Chat state ────────────────────────────────────────────────────────────
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([])
+  const [chatStep, setChatStep]         = useState<ChatStepId>('goal')
+  const [chatFormData, setChatFormData] = useState<Partial<AIFormData>>({ equipment: [] })
+  const chatScrollRef                   = useRef<ScrollView>(null)
+  const chatInitRef                     = useRef(false)
+
+  // ── Derived ───────────────────────────────────────────────────────────────
+  const isConnectedMode = user?.aiProvider !== 'offline' && user?.aiProvider !== undefined
+  const providerName    = PROVIDER_DISPLAY[user?.aiProvider ?? ''] ?? "l'IA"
+  const providerLabel   = PROVIDER_LABELS[user?.aiProvider ?? 'offline'] ?? 'Offline'
 
   const steps      = buildSteps(formData)
   const totalSteps = steps.length
   const step       = steps[currentStep]
 
+  // ── Wizard progress animation ─────────────────────────────────────────────
   useEffect(() => {
     const progress = totalSteps > 1 ? currentStep / (totalSteps - 1) : 0
     Animated.timing(progressAnim, {
@@ -148,6 +185,26 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
       useNativeDriver: false,
     }).start()
   }, [currentStep, totalSteps, progressAnim])
+
+  // ── Chat init ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isConnectedMode || chatInitRef.current) return
+    chatInitRef.current = true
+    setChatMessages([{
+      id: 'init-0',
+      role: 'ai',
+      text: `Bonjour ! Je suis ${providerName}, ton assistant sportif. 💪\nQuelle est ton ambition ?`,
+    }])
+  }, [isConnectedMode, providerName])
+
+  // ── Chat scroll to bottom ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (chatMessages.length === 0) return
+    const timer = setTimeout(() => {
+      chatScrollRef.current?.scrollToEnd({ animated: true })
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [chatMessages])
 
   // ─── Génération ───────────────────────────────────────────────────────────
 
@@ -207,14 +264,108 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
     setCurrentStep(prev => prev - 1)
   }, [currentStep])
 
+  // ─── Chat handlers ────────────────────────────────────────────────────────
+
+  const toggleChatEquipment = useCallback((item: string) => {
+    haptics.onSelect()
+    setChatFormData(prev => {
+      const eq = prev.equipment ?? []
+      return {
+        ...prev,
+        equipment: eq.includes(item) ? eq.filter(e => e !== item) : [...eq, item],
+      }
+    })
+  }, [haptics])
+
+  const handleChatSelect = useCallback((field: keyof AIFormData, value: FormValue, userLabel: string) => {
+    haptics.onSelect()
+
+    const newFormData: Partial<AIFormData> = { ...chatFormData, [field]: value }
+    setChatFormData(newFormData)
+
+    const userMsg: ChatMsg = { id: `${Date.now()}-u`, role: 'user', text: userLabel }
+
+    let nextStep: ChatStepId
+    let aiText: string
+
+    switch (field) {
+      case 'goal':
+        nextStep = 'level'
+        aiText = "Super choix ! Quel est ton niveau d'entraînement ?"
+        break
+      case 'level':
+        nextStep = 'equipment'
+        aiText = 'De quel équipement disposes-tu ? (plusieurs choix possibles)'
+        break
+      case 'durationMin':
+        nextStep = 'mode'
+        aiText = "Tu veux un programme sur plusieurs semaines ou une séance pour aujourd'hui ?"
+        break
+      case 'mode':
+        if (value === 'program') {
+          nextStep = 'daysPerWeek'
+          aiText = "Combien de jours par semaine tu t'entraînes ?"
+        } else {
+          nextStep = 'muscleGroup'
+          aiText = 'Quel groupe musculaire ?'
+        }
+        break
+      case 'daysPerWeek':
+        nextStep = 'done'
+        aiText = 'Parfait ! Je génère ton programme... ✨'
+        break
+      case 'muscleGroup':
+        nextStep = 'targetProgram'
+        aiText = programs.length === 0
+          ? "Aucun programme disponible. Crée d'abord un programme dans l'onglet Accueil."
+          : 'Dans quel programme ajouter cette séance ?'
+        break
+      case 'targetProgramId':
+        nextStep = 'done'
+        aiText = 'Parfait ! Je génère ton programme... ✨'
+        break
+      default:
+        nextStep = 'done'
+        aiText = 'Parfait ! Je génère ton programme... ✨'
+    }
+
+    const aiMsg: ChatMsg = { id: `${Date.now() + 1}-a`, role: 'ai', text: aiText }
+    setChatMessages(prev => [...prev, userMsg, aiMsg])
+    setChatStep(nextStep)
+
+    if (nextStep === 'done') {
+      // Sync formData so handleValidate has correct mode/targetProgramId
+      setFormData(newFormData)
+      triggerGenerate(newFormData as AIFormData)
+    }
+  }, [chatFormData, haptics, triggerGenerate, programs.length])
+
+  const handleEquipmentChatNext = useCallback(() => {
+    haptics.onPress()
+    const eq    = chatFormData.equipment ?? []
+    const label = eq.length > 0 ? eq.join(', ') : 'Aucun équipement'
+    const userMsg: ChatMsg = { id: `${Date.now()}-u`,     role: 'user', text: label }
+    const aiMsg: ChatMsg   = { id: `${Date.now() + 1}-a`, role: 'ai',  text: 'Combien de temps par séance ?' }
+    setChatMessages(prev => [...prev, userMsg, aiMsg])
+    setChatStep('duration')
+  }, [chatFormData.equipment, haptics])
+
   // ─── Preview actions ──────────────────────────────────────────────────────
 
   const handleModify = useCallback(() => {
     previewModal.close()
     setGeneratedPlan(null)
-    setCurrentStep(0)
-    setFormData({ equipment: [] })
-  }, [previewModal])
+
+    if (isConnectedMode) {
+      const greeting = `Bonjour ! Je suis ${providerName}, ton assistant sportif. 💪\nQuelle est ton ambition ?`
+      setChatStep('goal')
+      setChatFormData({ equipment: [] })
+      setChatMessages([{ id: `${Date.now()}-init`, role: 'ai', text: greeting }])
+    } else {
+      setCurrentStep(0)
+      setFormData({ equipment: [] })
+    }
+  }, [previewModal, isConnectedMode, providerName])
 
   const handleValidate = useCallback(async (plan: GeneratedPlan) => {
     const currentMode            = formData.mode ?? 'program'
@@ -238,13 +389,13 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
     }
   }, [formData.mode, formData.targetProgramId, navigation, previewModal])
 
-  // ─── Rendu du step courant ────────────────────────────────────────────────
+  // ─── Rendu du step courant (wizard) ──────────────────────────────────────
 
   const renderStepContent = () => {
     if (!step) return null
 
     if (step.kind === 'multi') {
-      const selected    = formData.equipment ?? []
+      const selected     = formData.equipment ?? []
       const hasSelection = selected.length > 0
       return (
         <View>
@@ -333,55 +484,182 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
     )
   }
 
-  const providerLabel = PROVIDER_LABELS[user?.aiProvider ?? 'offline'] ?? 'Offline'
+  // ─── Chat options renderer ────────────────────────────────────────────────
 
-  return (
-    <View style={styles.container}>
+  const renderChatOptions = (): React.ReactElement | null => {
+    if (chatStep === 'done') return null
 
-      {/* ── Barre de progression ── */}
-      <View style={styles.progressTrack}>
-        <Animated.View
-          style={[
-            styles.progressFill,
-            {
-              width: progressAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
-            },
-          ]}
-        />
-      </View>
-
-      {/* ── Header : retour + compteur ── */}
-      <View style={styles.header}>
-        {currentStep > 0 ? (
-          <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-            <Text style={styles.backBtnText}>←</Text>
+    const renderSingleChips = (options: StepOption[], field: keyof AIFormData) => (
+      <View style={styles.chatChipsWrap}>
+        {options.map(opt => (
+          <TouchableOpacity
+            key={String(opt.value)}
+            style={styles.chatChip}
+            onPress={() => handleChatSelect(field, opt.value, `${opt.icon ? opt.icon + ' ' : ''}${opt.label}`)}
+          >
+            {opt.icon !== undefined && <Text style={styles.chatChipIcon}>{opt.icon}</Text>}
+            <Text style={styles.chatChipText}>{opt.label}</Text>
           </TouchableOpacity>
-        ) : (
-          <View style={styles.backBtnPlaceholder} />
-        )}
-        <Text style={styles.stepCounter}>{currentStep + 1} / {totalSteps}</Text>
-        <View style={styles.backBtnPlaceholder} />
+        ))}
       </View>
+    )
 
-      {/* ── Contenu ── */}
+    switch (chatStep) {
+      case 'goal':        return renderSingleChips(GOAL_OPTIONS, 'goal')
+      case 'level':       return renderSingleChips(LEVEL_OPTIONS, 'level')
+      case 'duration':    return renderSingleChips(DURATION_OPTIONS, 'durationMin')
+      case 'mode':        return renderSingleChips(MODE_OPTIONS, 'mode')
+      case 'daysPerWeek': return renderSingleChips(DAYS_OPTIONS, 'daysPerWeek')
+      case 'muscleGroup': return renderSingleChips(MUSCLE_OPTIONS, 'muscleGroup')
+
+      case 'equipment': {
+        const selected     = chatFormData.equipment ?? []
+        const hasSelection = selected.length > 0
+        return (
+          <View>
+            <View style={styles.chatChipsWrap}>
+              {EQUIPMENT_OPTIONS.map(eq => {
+                const isSelected = selected.includes(eq)
+                return (
+                  <TouchableOpacity
+                    key={eq}
+                    style={[styles.chatChip, isSelected && styles.chatChipActive]}
+                    onPress={() => toggleChatEquipment(eq)}
+                  >
+                    <Text style={[styles.chatChipText, isSelected && styles.chatChipTextActive]}>{eq}</Text>
+                  </TouchableOpacity>
+                )
+              })}
+            </View>
+            <TouchableOpacity
+              style={[styles.chatNextBtn, !hasSelection && styles.chatNextBtnDisabled]}
+              disabled={!hasSelection}
+              onPress={handleEquipmentChatNext}
+            >
+              <Text style={styles.chatNextBtnText}>C'est tout !</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      }
+
+      case 'targetProgram': {
+        if (programs.length === 0) return null
+        return (
+          <View style={styles.chatChipsWrap}>
+            {programs.map(p => (
+              <TouchableOpacity
+                key={p.id}
+                style={styles.chatChip}
+                onPress={() => handleChatSelect('targetProgramId', p.id, p.name)}
+              >
+                <Text style={styles.chatChipIcon}>📋</Text>
+                <Text style={styles.chatChipText}>{p.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )
+      }
+
+      default: return null
+    }
+  }
+
+  // ─── Chat UI ──────────────────────────────────────────────────────────────
+
+  const renderChatUI = () => (
+    <View style={styles.chatContainer}>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        ref={chatScrollRef}
+        style={styles.chatScroll}
+        contentContainerStyle={styles.chatScrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.question}>{step?.question}</Text>
-        {renderStepContent()}
+        {chatMessages.map(msg => (
+          <View
+            key={msg.id}
+            style={[
+              styles.chatMsgRow,
+              msg.role === 'user' ? styles.chatMsgRowUser : styles.chatMsgRowAi,
+            ]}
+          >
+            {msg.role === 'ai' && (
+              <View style={styles.chatAvatar}>
+                <Text style={styles.chatAvatarText}>🤖</Text>
+              </View>
+            )}
+            <View style={[
+              styles.chatBubble,
+              msg.role === 'user' ? styles.chatBubbleUser : styles.chatBubbleAi,
+            ]}>
+              <Text style={styles.chatBubbleText}>{msg.text}</Text>
+            </View>
+          </View>
+        ))}
       </ScrollView>
 
-      {/* ── Provider hint ── */}
-      <Text style={styles.providerHint}>
-        {providerLabel}
-        {providerLabel === 'Offline' ? ' — configure une clé API dans Paramètres pour booster' : ''}
-      </Text>
+      {chatStep !== 'done' && (
+        <View style={styles.chatOptionsZone}>
+          {renderChatOptions()}
+        </View>
+      )}
+    </View>
+  )
+
+  // ─── Main render ──────────────────────────────────────────────────────────
+
+  return (
+    <View style={styles.container}>
+      {isConnectedMode ? (
+        renderChatUI()
+      ) : (
+        <>
+          {/* ── Barre de progression ── */}
+          <View style={styles.progressTrack}>
+            <Animated.View
+              style={[
+                styles.progressFill,
+                {
+                  width: progressAnim.interpolate({
+                    inputRange:  [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
+          </View>
+
+          {/* ── Header : retour + compteur ── */}
+          <View style={styles.header}>
+            {currentStep > 0 ? (
+              <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
+                <Text style={styles.backBtnText}>←</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.backBtnPlaceholder} />
+            )}
+            <Text style={styles.stepCounter}>{currentStep + 1} / {totalSteps}</Text>
+            <View style={styles.backBtnPlaceholder} />
+          </View>
+
+          {/* ── Contenu ── */}
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={styles.question}>{step?.question}</Text>
+            {renderStepContent()}
+          </ScrollView>
+
+          {/* ── Provider hint ── */}
+          <Text style={styles.providerHint}>
+            {providerLabel}
+            {providerLabel === 'Offline' ? ' — configure une clé API dans Paramètres pour booster' : ''}
+          </Text>
+        </>
+      )}
 
       {/* ── Preview sheet ── */}
       <AssistantPreviewSheet
@@ -411,7 +689,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  // Progress
+  // ── Progress (wizard) ───────────────────────────────────────────────────
   progressTrack: {
     height: 3,
     backgroundColor: colors.card,
@@ -423,7 +701,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
 
-  // Header
+  // ── Header (wizard) ─────────────────────────────────────────────────────
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -455,7 +733,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Scroll
+  // ── Scroll (wizard) ─────────────────────────────────────────────────────
   scroll: {
     flex: 1,
   },
@@ -465,7 +743,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
 
-  // Question
+  // ── Question (wizard) ───────────────────────────────────────────────────
   question: {
     fontSize: 26,
     fontWeight: '700',
@@ -474,7 +752,7 @@ const styles = StyleSheet.create({
     lineHeight: 34,
   },
 
-  // Options single-choice
+  // ── Options single-choice (wizard) ──────────────────────────────────────
   optionsList: {
     gap: spacing.sm,
   },
@@ -513,7 +791,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Chips multi-select (équipement)
+  // ── Chips multi-select (wizard) ─────────────────────────────────────────
   chipsWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -541,7 +819,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Bouton Suivant (multi-select)
+  // ── Bouton Suivant (wizard multi-select) ────────────────────────────────
   nextBtn: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
@@ -557,7 +835,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Empty state (aucun programme)
+  // ── Empty state (wizard) ────────────────────────────────────────────────
   emptyContainer: {
     padding: spacing.lg,
     backgroundColor: colors.card,
@@ -571,12 +849,131 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  // Provider hint
+  // ── Provider hint (wizard) ──────────────────────────────────────────────
   providerHint: {
     color: colors.textSecondary,
     fontSize: fontSize.xs,
     textAlign: 'center',
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
+  },
+
+  // ── Chat container ──────────────────────────────────────────────────────
+  chatContainer: {
+    flex: 1,
+  },
+  chatScroll: {
+    flex: 1,
+  },
+  chatScrollContent: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+
+  // ── Chat message row ────────────────────────────────────────────────────
+  chatMsgRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginBottom: spacing.sm,
+  },
+  chatMsgRowAi: {
+    justifyContent: 'flex-start',
+  },
+  chatMsgRowUser: {
+    justifyContent: 'flex-end',
+  },
+
+  // ── Chat avatar (IA) ────────────────────────────────────────────────────
+  chatAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.card,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.sm,
+    flexShrink: 0,
+  },
+  chatAvatarText: {
+    fontSize: 16,
+  },
+
+  // ── Chat bubble ─────────────────────────────────────────────────────────
+  chatBubble: {
+    maxWidth: '75%',
+    borderRadius: 16,
+    padding: spacing.md,
+  },
+  chatBubbleAi: {
+    backgroundColor: colors.card,
+  },
+  chatBubbleUser: {
+    backgroundColor: colors.primary,
+  },
+  chatBubbleText: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+
+  // ── Chat options zone (bas d'écran) ─────────────────────────────────────
+  chatOptionsZone: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.separator,
+    backgroundColor: colors.background,
+  },
+
+  // ── Chat chips ──────────────────────────────────────────────────────────
+  chatChipsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  chatChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.card,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  chatChipActive: {
+    borderColor: colors.primary,
+  },
+  chatChipIcon: {
+    fontSize: 14,
+  },
+  chatChipText: {
+    color: colors.text,
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+  },
+  chatChipTextActive: {
+    color: colors.text,
+    fontWeight: '700',
+  },
+
+  // ── Chat "C'est tout !" button ──────────────────────────────────────────
+  chatNextBtn: {
+    marginTop: spacing.sm,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  chatNextBtnDisabled: {
+    opacity: 0.4,
+  },
+  chatNextBtnText: {
+    color: colors.text,
+    fontSize: fontSize.md,
+    fontWeight: '700',
   },
 })
