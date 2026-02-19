@@ -181,6 +181,7 @@ const ObservableExerciseStats = withObservables(
     histories: database
       .get<History>('histories')
       .query(
+        Q.experimentalJoinTables(['sets']),
         Q.where('deleted_at', null),
         Q.on('sets', Q.where('exercise_id', exerciseId))
       )
@@ -188,6 +189,8 @@ const ObservableExerciseStats = withObservables(
     sessions: database
       .get<Session>('sessions')
       .query(
+        Q.experimentalJoinTables(['histories']),
+        Q.experimentalNestedJoin('histories', 'sets'),
         Q.on('histories', [
           Q.where('deleted_at', null),
           Q.on('sets', Q.where('exercise_id', exerciseId)),
