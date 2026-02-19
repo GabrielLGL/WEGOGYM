@@ -96,7 +96,7 @@ const WorkoutContent: React.FC<WorkoutContentProps> = ({
         historyRef.current = history
         setHistoryId(history.id)
       })
-      .catch(console.error)
+      .catch(e => { if (__DEV__) console.error('[WorkoutScreen] createWorkoutHistory:', e) })
   }, [])
 
   useEffect(() => {
@@ -105,7 +105,7 @@ const WorkoutContent: React.FC<WorkoutContentProps> = ({
       .then(granted => {
         notificationPermissionRef.current = granted
       })
-      .catch(console.error)
+      .catch(e => { if (__DEV__) console.error('[WorkoutScreen] setupNotificationChannel:', e) })
   }, [])
 
   // Back handler Android : prioritaire sur le GlobalBackHandler (LIFO)

@@ -23,7 +23,7 @@ export function initSentry() {
   }
 
   if (!SENTRY_DSN) {
-    console.warn('[Sentry] DSN not configured. Error monitoring is disabled.')
+    if (__DEV__) console.warn('[Sentry] DSN not configured. Error monitoring is disabled.')
     return
   }
 
@@ -78,43 +78,6 @@ export function captureError(error: Error, context?: Record<string, unknown>) {
     Sentry.setContext('additional_context', context)
   }
   Sentry.captureException(error)
-}
-
-/**
- * Capturer un message personnalisé
- */
-export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info') {
-  Sentry.captureMessage(message, level)
-}
-
-/**
- * Définir des infos utilisateur (optionnel)
- */
-export function setUser(userId: string, email?: string, username?: string) {
-  Sentry.setUser({
-    id: userId,
-    email,
-    username,
-  })
-}
-
-/**
- * Supprimer les infos utilisateur (logout)
- */
-export function clearUser() {
-  Sentry.setUser(null)
-}
-
-/**
- * Ajouter du contexte supplémentaire à toutes les erreurs
- */
-export function addBreadcrumb(message: string, category: string, data?: Record<string, unknown>) {
-  Sentry.addBreadcrumb({
-    message,
-    category,
-    data,
-    level: 'info',
-  })
 }
 
 export default Sentry

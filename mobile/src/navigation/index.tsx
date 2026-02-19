@@ -7,11 +7,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 // Importation des composants et utilitaires React Native
 import { View, Text, Keyboard, Animated, Platform, BackHandler, ToastAndroid, DeviceEventEmitter, TouchableOpacity } from 'react-native'
 import { useNavigationContainerRef } from '@react-navigation/native'
-// Importation de la bibliothèque pour les vibrations
-import * as Haptics from 'expo-haptics'
 // --- AJOUT : Import du Provider pour les Modals ---
 import { PortalProvider } from '@gorhom/portal'
 import { colors } from '../theme'
+import { useHaptics } from '../hooks/useHaptics'
 
 // Importation des écrans de l'application
 import HomeScreen from '../screens/HomeScreen'
@@ -63,6 +62,7 @@ const MyDarkTheme = {
 function GlobalBackHandler({ navigationRef }: { navigationRef: NavigationContainerRefWithCurrent<RootStackParamList> }) {
   const backPressRef = useRef(0); // Compteur pour le double clic pour quitter
   const resetTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const haptics = useHaptics();
 
   useEffect(() => {
     const backAction = () => {
@@ -80,7 +80,7 @@ function GlobalBackHandler({ navigationRef }: { navigationRef: NavigationContain
         // DÉJÀ SUR ACCUEIL -> Logique de double clic pour quitter l'application
         if (backPressRef.current === 0) {
           backPressRef.current = 1;
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Petite vibration
+          haptics.onPress();
           if (Platform.OS === 'android') {
             ToastAndroid.show("Appuyez à nouveau pour quitter", ToastAndroid.SHORT);
           }
@@ -94,7 +94,7 @@ function GlobalBackHandler({ navigationRef }: { navigationRef: NavigationContain
         }
       } else {
         // N'IMPORTE OÙ AILLEURS -> Retour forcé à l'accueil (Prog)
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        haptics.onSelect();
         // On s'assure que la Tab Bar réapparaît si elle était masquée par un clavier ou une modale
         DeviceEventEmitter.emit('SHOW_TAB_BAR');
         // Navigation vers l'onglet Home
@@ -120,6 +120,7 @@ function GlobalBackHandler({ navigationRef }: { navigationRef: NavigationContain
 function TabNavigator(_props: NativeStackScreenProps<RootStackParamList, 'MainTabs'>) {
   // Référence pour l'animation de glissement de la barre d'onglets
   const scrollY = useRef(new Animated.Value(0)).current;
+  const haptics = useHaptics();
 
   useEffect(() => {
     // Écouteurs pour masquer la barre quand le clavier s'ouvre
@@ -176,7 +177,7 @@ function TabNavigator(_props: NativeStackScreenProps<RootStackParamList, 'MainTa
             tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🏠</Text>,
             // Ajout de la roue crantée uniquement sur cet onglet
             headerRight: () => (
-              <TouchableOpacity style={{ marginRight: 20, padding: 5 }} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); nav.getParent()?.navigate('Settings'); }}>
+              <TouchableOpacity style={{ marginRight: 20, padding: 5 }} onPress={() => { haptics.onPress(); nav.getParent()?.navigate('Settings'); }}>
                 <Text style={{ fontSize: 24 }}>⚙️</Text>
               </TouchableOpacity>
             ),

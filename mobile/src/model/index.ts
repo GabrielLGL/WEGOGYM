@@ -15,7 +15,7 @@ const adapter = new SQLiteAdapter({
   schema: mySchema,
   jsi: true,
   onSetUpError: error => {
-    console.error("Erreur chargement DB:", error)
+    if (__DEV__) console.error("Erreur chargement DB:", error)
   }
 })
 

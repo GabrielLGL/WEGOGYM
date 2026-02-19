@@ -443,7 +443,7 @@ export async function importPresetProgram(preset: PresetProgram): Promise<void> 
     presetSession.exercises.forEach((presetEx, ei) => {
       const exercise = exercisesByName.get(presetEx.exerciseName)
       if (!exercise) {
-        console.warn(`[importPresetProgram] Exercice introuvable : "${presetEx.exerciseName}"`)
+        if (__DEV__) console.warn(`[importPresetProgram] Exercice introuvable : "${presetEx.exerciseName}"`)
         return
       }
       batch.push(

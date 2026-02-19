@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Platform } from 'react-native'
-import * as Haptics from 'expo-haptics'
+import { useHaptics } from '../hooks/useHaptics'
 import { colors } from '../theme'
 import {
   scheduleRestEndNotification,
@@ -18,6 +18,7 @@ interface Props {
  * Désormais intégré au flux de la page pour ne pas chevaucher la liste.
  */
 const RestTimer: React.FC<Props> = ({ duration, onClose, notificationEnabled }) => {
+  const haptics = useHaptics()
   const [timeLeft, setTimeLeft] = useState(duration)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const hapticTimer1Ref = useRef<NodeJS.Timeout | null>(null)
@@ -79,9 +80,9 @@ const RestTimer: React.FC<Props> = ({ duration, onClose, notificationEnabled }) 
     }
 
     // Triple vibration forte pour alerter la fin du repos
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-    hapticTimer1Ref.current = setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 400)
-    hapticTimer2Ref.current = setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 800)
+    haptics.onDelete()
+    hapticTimer1Ref.current = setTimeout(() => haptics.onDelete(), 400)
+    hapticTimer2Ref.current = setTimeout(() => haptics.onDelete(), 800)
 
     // Fermeture automatique après 1 secondes
     closeTimerRef.current = setTimeout(closeTimer, 1000)

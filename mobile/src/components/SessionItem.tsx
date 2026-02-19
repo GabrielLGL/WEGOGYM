@@ -11,8 +11,7 @@ import { database } from '../model/index'
 // Importation des modèles pour le typage TypeScript
 import Session from '../model/models/Session'
 import Exercise from '../model/models/Exercise'
-// Importation de la bibliothèque haptique pour les vibrations
-import * as Haptics from 'expo-haptics'
+import { useHaptics } from '../hooks/useHaptics'
 import { colors, borderRadius } from '../theme'
 
 // Définition des propriétés (Props) attendues par le composant
@@ -27,6 +26,7 @@ interface Props {
  * Composant représentant une ligne de séance dans la liste des programmes.
  */
 const SessionItem: React.FC<Props> = ({ session, onPress, onOptionsPress, exercises }) => {
+  const haptics = useHaptics()
 
   // Génération d'un texte de prévisualisation (ex: "Squat, Tractions, Développé...")
   // On prend les 3 premiers exercices de la liste
@@ -57,9 +57,7 @@ const SessionItem: React.FC<Props> = ({ session, onPress, onOptionsPress, exerci
       {/* Bouton d'options (Trois petits points) */}
       <TouchableOpacity
         onPress={() => {
-          // Déclenche une vibration légère lors du clic
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-          // Appelle la fonction passée par le parent pour ouvrir le menu
+          haptics.onPress()
           onOptionsPress()
         }}
         style={styles.optionsButton}
