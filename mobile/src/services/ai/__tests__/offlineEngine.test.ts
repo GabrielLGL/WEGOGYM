@@ -92,28 +92,28 @@ describe('offlineEngine', () => {
       })
     })
 
-    it('objectif force: 5 séries de 5 reps', async () => {
+    it('objectif force: 4 séries, reps range 6-8 (compound sans métadonnée)', async () => {
       const exercises = ['Squat', 'Développé couché', 'Tractions', 'Curl', 'Deadlift']
       const plan = await offlineEngine.generate(makeForm({ goal: 'power', daysPerWeek: 1 }), makeContext(exercises))
       const firstEx = plan.sessions[0].exercises[0]
-      expect(firstEx.setsTarget).toBe(5)
-      expect(firstEx.repsTarget).toBe('5')
+      expect(firstEx.setsTarget).toBe(4)
+      expect(firstEx.repsTarget).toBe('6-8')
     })
 
-    it('objectif renfo: 3 séries de 12 reps', async () => {
+    it('objectif renfo: 3 séries, reps range 10-12 (compound sans métadonnée)', async () => {
       const exercises = ['Squat', 'Développé couché', 'Tractions', 'Curl', 'Deadlift']
       const plan = await offlineEngine.generate(makeForm({ goal: 'renfo', daysPerWeek: 1 }), makeContext(exercises))
       const firstEx = plan.sessions[0].exercises[0]
       expect(firstEx.setsTarget).toBe(3)
-      expect(firstEx.repsTarget).toBe('12')
+      expect(firstEx.repsTarget).toBe('10-12')
     })
 
-    it('objectif cardio: 3 séries de 15 reps', async () => {
+    it('objectif cardio: 3 séries, reps range 12-15 (compound sans métadonnée)', async () => {
       const exercises = ['Squat', 'Développé couché', 'Tractions', 'Curl', 'Deadlift']
       const plan = await offlineEngine.generate(makeForm({ goal: 'cardio', daysPerWeek: 1 }), makeContext(exercises))
       const firstEx = plan.sessions[0].exercises[0]
       expect(firstEx.setsTarget).toBe(3)
-      expect(firstEx.repsTarget).toBe('15')
+      expect(firstEx.repsTarget).toBe('12-15')
     })
 
     it('nombre d\'exercices par séance selon durée 120min → 10', async () => {

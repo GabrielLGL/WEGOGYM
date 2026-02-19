@@ -1,4 +1,8 @@
-import type { AIProvider, AIFormData, DBContext, GeneratedPlan, GeneratedExercise, GeneratedSession, ExerciseInfo, AISplit } from './types'
+import type {
+  AIProvider, AIFormData, DBContext, GeneratedPlan, GeneratedExercise,
+  GeneratedSession, ExerciseInfo, AISplit, AIGoal, AILevel, ExerciseType, ExerciseMetadata,
+} from './types'
+import { getExerciseMetadata } from './exerciseMetadata'
 
 function shuffleArray<T>(arr: T[]): T[] {
   const result = [...arr]
@@ -19,21 +23,9 @@ function getWeightTarget(exerciseName: string, prs: Record<string, number>, goal
     cardio:       { 'débutant': 0.50, 'intermédiaire': 0.55, 'avancé': 0.60 },
   }
   const pct = percentages[goal]?.[level] ?? 0.70
-  return Math.round(pr * pct * 2) / 2 // arrondi au 0.5kg
+  return Math.round(pr * pct * 2) / 2
 }
 
-// Muscles composés (exercices poly-articulaires)
-const COMPOUND_MUSCLES = ['Quadriceps', 'Dos', 'Pecs', 'Ischios', 'Epaules']
-
-// Séries × reps par objectif
-const SETS_REPS: Record<string, { sets: number; reps: string }> = {
-  bodybuilding: { sets: 4, reps: '8'  },
-  power:        { sets: 5, reps: '5'  },
-  renfo:        { sets: 3, reps: '12' },
-  cardio:       { sets: 3, reps: '15' },
-}
-
-// Nombre d'exercices par séance selon la durée
 function exercisesCount(durationMin: number): number {
   if (durationMin <= 45) return 5
   if (durationMin <= 60) return 6
@@ -41,9 +33,10 @@ function exercisesCount(durationMin: number): number {
   return 10
 }
 
-// Groupes musculaires par split
+// ─── Splits & noms de séances ─────────────────────────────────────────────────
+
 const SPLITS: Record<string, string[][]> = {
-  fullbody: [['Pecs', 'Dos', 'Quadriceps', 'Epaules', 'Abdos']],
+  fullbody:   [['Pecs', 'Dos', 'Quadriceps', 'Epaules', 'Abdos']],
   upperlower: [
     ['Pecs', 'Dos', 'Epaules', 'Biceps', 'Triceps'],
     ['Quadriceps', 'Ischios', 'Mollets', 'Abdos'],
@@ -91,7 +84,6 @@ function getSplit(days: number): string[][] {
   return SPLITS.ppl
 }
 
-// Noms de séances selon le split
 const SESSION_NAMES: Record<string, string[]> = {
   fullbody:   ['Full Body A', 'Full Body B', 'Full Body C', 'Full Body D', 'Full Body E', 'Full Body F'],
   upperlower: ['Upper Body', 'Lower Body', 'Upper Body B', 'Lower Body B', 'Upper Body C', 'Lower Body C'],
@@ -111,99 +103,225 @@ function getSplitName(days: number, split?: AISplit): string {
   return 'ppl'
 }
 
-// Construit une séance avec N exercices depuis la liste disponible
-function buildSession(
-  name: string,
-  availableExercises: ExerciseInfo[],
-  count: number,
-  goal: string,
-  level: string,
-  usedExercises: Set<string>,
-  prs: Record<string, number>,
-  musclesFocus?: string[]
-): GeneratedSession {
-  const { sets, reps } = SETS_REPS[goal] ?? SETS_REPS.bodybuilding
-  const pool = availableExercises.filter(e => !usedExercises.has(e.name))
-  const source = pool.length >= count ? pool : availableExercises
-  // Compound-first ou biais musclesFocus
-  let sorted: ExerciseInfo[]
-  if (musclesFocus && musclesFocus.length > 0) {
-    const focusPool       = shuffleArray(source.filter(e => e.muscles.some(m => musclesFocus.includes(m))))
-    const otherCompounds  = shuffleArray(source.filter(e =>
-      !e.muscles.some(m => musclesFocus.includes(m)) &&
-      e.muscles.some(m => COMPOUND_MUSCLES.includes(m))
-    ))
-    const otherIsolations = shuffleArray(source.filter(e =>
-      !e.muscles.some(m => musclesFocus.includes(m)) &&
-      !e.muscles.some(m => COMPOUND_MUSCLES.includes(m))
-    ))
-    sorted = [...focusPool, ...otherCompounds, ...otherIsolations]
-  } else {
-    const compounds  = shuffleArray(source.filter(e => e.muscles.some(m => COMPOUND_MUSCLES.includes(m))))
-    const isolations = shuffleArray(source.filter(e => !e.muscles.some(m => COMPOUND_MUSCLES.includes(m))))
-    sorted = [...compounds, ...isolations]
-  }
-  const picked: GeneratedExercise[] = []
-  for (let i = 0; i < count && i < sorted.length; i++) {
-    const ex = sorted[i]
-    usedExercises.add(ex.name)
-    const weight = getWeightTarget(ex.name, prs, goal, level)
-    picked.push({ exerciseName: ex.name, setsTarget: sets, repsTarget: reps, weightTarget: weight })
-  }
-
-  return { name, exercises: picked }
+const SPLIT_LABELS: Record<string, string> = {
+  fullbody:   'Full Body',
+  upperlower: 'Upper/Lower',
+  ppl:        'PPL',
+  brosplit:   'Bro Split',
+  arnold:     'Arnold Split',
+  phul:       'PHUL',
+  fiveday:    '5 Jours',
+  pushpull:   'Push/Pull',
+  fullbodyhi: 'Full Body HI',
 }
 
-// Génération programme
-function generateProgram(form: AIFormData, context: DBContext): GeneratedPlan {
-  const days = form.daysPerWeek ?? 3
-  const splitName = getSplitName(days, form.split)
-  const splitGroups = (form.split && form.split !== 'auto') ? SPLITS[splitName] : getSplit(days)
-  const sessionNames = SESSION_NAMES[splitName]
-  const count = exercisesCount(form.durationMin)
-  const usedExercises = new Set<string>()
+// ─── Algorithme intelligent ───────────────────────────────────────────────────
 
-  const sessions: GeneratedSession[] = []
-  for (let i = 0; i < days; i++) {
-    const groupIndex = i % splitGroups.length
-    const sessionName = sessionNames[i] ?? `Séance ${i + 1}`
-    // Filtrer les exercices par muscles du split courant
-    const muscles = splitGroups[groupIndex]
-    const pool = context.exercises.length > 0
-      ? context.exercises.filter(ex => ex.muscles.some(m => muscles.includes(m)))
-      : muscles.map(m => ({ name: m, muscles: [m] }))
-    const fallbackPool = context.exercises.length > 0 ? context.exercises : muscles.map(m => ({ name: m, muscles: [m] }))
-    const finalPool = pool.length >= 2 ? pool : fallbackPool
-    sessions.push(buildSession(sessionName, finalPool, count, form.goal, form.level, usedExercises, context.prs, form.musclesFocus))
+const SETS_BY_TYPE_GOAL: Record<ExerciseType, Record<AIGoal, number>> = {
+  compound_heavy: { bodybuilding: 4, power: 5, renfo: 4, cardio: 3 },
+  compound:       { bodybuilding: 4, power: 4, renfo: 3, cardio: 3 },
+  accessory:      { bodybuilding: 3, power: 3, renfo: 3, cardio: 3 },
+  isolation:      { bodybuilding: 3, power: 3, renfo: 3, cardio: 2 },
+}
+
+const REPS_BY_TYPE_GOAL: Record<ExerciseType, Record<AIGoal, string>> = {
+  compound_heavy: { bodybuilding: '6-8',   power: '4-6',   renfo: '8-10',  cardio: '10-12' },
+  compound:       { bodybuilding: '8-10',  power: '6-8',   renfo: '10-12', cardio: '12-15' },
+  accessory:      { bodybuilding: '10-12', power: '8-10',  renfo: '12-15', cardio: '15-20' },
+  isolation:      { bodybuilding: '12-15', power: '10-12', renfo: '15-20', cardio: '20-25' },
+}
+
+const TYPE_ORDER: Record<ExerciseType, number> = {
+  compound_heavy: 0, compound: 1, accessory: 2, isolation: 3,
+}
+
+const LEVEL_ORDER: Record<AILevel, number> = {
+  'débutant': 0, 'intermédiaire': 1, 'avancé': 2,
+}
+
+type CandidateExercise = ExerciseInfo & { meta: ExerciseMetadata | undefined }
+
+function isLevelEligible(meta: ExerciseMetadata, userLevel: AILevel): boolean {
+  return LEVEL_ORDER[meta.minLevel] <= LEVEL_ORDER[userLevel]
+}
+
+function toCandidate(ex: ExerciseInfo, userLevel: AILevel): CandidateExercise | null {
+  const meta = getExerciseMetadata(ex.name)
+  if (meta && !isLevelEligible(meta, userLevel)) return null
+  return { ...ex, meta }
+}
+
+// Allocation d'exercices par muscle : 1 minimum par muscle, bonus focus, round-robin pour le reste
+function allocateExercises(
+  muscles: string[],
+  total: number,
+  focusMuscles: string[],
+): Record<string, number> {
+  const alloc: Record<string, number> = {}
+  let used = 0
+
+  for (const m of muscles) {
+    if (used < total) { alloc[m] = 1; used++ }
+    else { alloc[m] = 0 }
   }
 
-  const goalLabels: Record<string, string> = {
+  for (const m of focusMuscles) {
+    if (alloc[m] !== undefined && used < total) {
+      alloc[m]++; used++
+    }
+  }
+
+  let i = 0
+  while (used < total) {
+    alloc[muscles[i % muscles.length]]++
+    used++; i++
+  }
+
+  return alloc
+}
+
+// Sélection : non-utilisés en premier, puis par type (compound_heavy → isolation), shuffle pour les ex æquo
+function selectExercises(
+  candidates: CandidateExercise[],
+  count: number,
+  usedNames: Set<string>,
+): CandidateExercise[] {
+  const shuffled = shuffleArray([...candidates])
+  const sorted = shuffled.sort((a, b) => {
+    const aUsed = usedNames.has(a.name) ? 1 : 0
+    const bUsed = usedNames.has(b.name) ? 1 : 0
+    if (aUsed !== bUsed) return aUsed - bUsed
+
+    const aOrder = a.meta ? TYPE_ORDER[a.meta.type] : 2
+    const bOrder = b.meta ? TYPE_ORDER[b.meta.type] : 2
+    return aOrder - bOrder
+  })
+  return sorted.slice(0, count)
+}
+
+function buildSession(
+  name: string,
+  muscles: string[],
+  form: AIFormData,
+  context: DBContext,
+  usedNames: Set<string>,
+): GeneratedSession {
+  const { goal, level, durationMin, musclesFocus = [] } = form
+  const total = exercisesCount(durationMin)
+  const alloc = allocateExercises(muscles, total, musclesFocus)
+
+  // Pool complet niveau-filtré (fallback si aucun exercice ne correspond à un muscle)
+  const allCandidates: CandidateExercise[] = context.exercises
+    .map(ex => toCandidate(ex, level))
+    .filter((ex): ex is CandidateExercise => ex !== null)
+
+  const allExercises: GeneratedExercise[] = []
+
+  for (const muscle of muscles) {
+    const count = alloc[muscle] ?? 0
+    if (count === 0) continue
+
+    // Candidats primaires : exercices dont muscles[] contient ce muscle
+    let candidates: CandidateExercise[] = context.exercises
+      .map(ex => toCandidate(ex, level))
+      .filter((ex): ex is CandidateExercise => ex !== null && ex.muscles.includes(muscle))
+
+    // Fallback : aucun exercice spécifique → utiliser tous les exercices niveau-filtrés
+    if (candidates.length === 0) {
+      candidates = allCandidates
+    }
+
+    const chosen = selectExercises(candidates, count, usedNames)
+    const isFocus = musclesFocus.includes(muscle)
+
+    for (const ex of chosen) {
+      usedNames.add(ex.name)
+      const type: ExerciseType = ex.meta?.type ?? 'compound'
+      const baseSets = SETS_BY_TYPE_GOAL[type][goal]
+      const sets = isFocus ? Math.min(baseSets + 1, 5) : baseSets
+      const reps = REPS_BY_TYPE_GOAL[type][goal]
+      const weight = getWeightTarget(ex.name, context.prs, goal, level)
+
+      allExercises.push({
+        exerciseName: ex.name,
+        setsTarget: sets,
+        repsTarget: reps,
+        weightTarget: weight,
+      })
+    }
+  }
+
+  // Tri final : compound_heavy → compound → accessory → isolation
+  allExercises.sort((a, b) => {
+    const aMeta = getExerciseMetadata(a.exerciseName)
+    const bMeta = getExerciseMetadata(b.exerciseName)
+    const aOrder = aMeta ? TYPE_ORDER[aMeta.type] : 2
+    const bOrder = bMeta ? TYPE_ORDER[bMeta.type] : 2
+    return aOrder - bOrder
+  })
+
+  return { name, exercises: allExercises }
+}
+
+// ─── Génération programme ─────────────────────────────────────────────────────
+
+function generateProgram(form: AIFormData, context: DBContext): GeneratedPlan {
+  const { daysPerWeek = 3, musclesFocus = [], split } = form
+  const splitName = getSplitName(daysPerWeek, split)
+  const splitGroups = (split && split !== 'auto') ? SPLITS[splitName] : getSplit(daysPerWeek)
+  const sessionNames = SESSION_NAMES[splitName]
+
+  const rawPlans: Array<[string[], string]> = Array.from(
+    { length: daysPerWeek },
+    (_, i) => [splitGroups[i % splitGroups.length], sessionNames[i] ?? `Séance ${i + 1}`]
+  )
+
+  // Sessions contenant les muscles focus passent en premier (stable sort)
+  let sessionPlans: Array<[string[], string]>
+  if (musclesFocus.length > 0) {
+    const focusPlans = rawPlans.filter(([muscles]) => musclesFocus.some(m => muscles.includes(m)))
+    const otherPlans = rawPlans.filter(([muscles]) => !musclesFocus.some(m => muscles.includes(m)))
+    sessionPlans = [...focusPlans, ...otherPlans]
+  } else {
+    sessionPlans = rawPlans
+  }
+
+  const usedNames = new Set<string>()
+  const sessions: GeneratedSession[] = sessionPlans.map(([muscles, sessionName]) =>
+    buildSession(sessionName, muscles, form, context, usedNames)
+  )
+
+  const goalLabels: Record<AIGoal, string> = {
     bodybuilding: 'Bodybuilding',
     power:        'Power',
     renfo:        'Renfo',
     cardio:       'Cardio',
   }
-  const levelLabels: Record<string, string> = {
+  const levelLabels: Record<AILevel, string> = {
     'débutant':      'Débutant',
     'intermédiaire': 'Intermédiaire',
     'avancé':        'Avancé',
   }
 
   return {
-    name: `${goalLabels[form.goal] ?? form.goal} ${levelLabels[form.level] ?? form.level} ${days}J`,
+    name: `${goalLabels[form.goal]} ${levelLabels[form.level]} – ${SPLIT_LABELS[splitName] ?? splitName} ${daysPerWeek}j/sem`,
     sessions,
   }
 }
 
-// Génération séance unique
+// ─── Génération séance unique ─────────────────────────────────────────────────
+
 function generateSession(form: AIFormData, context: DBContext): GeneratedPlan {
-  const count = exercisesCount(form.durationMin)
-  const usedExercises = new Set<string>()
-  const muscleLabel = form.muscleGroups && form.muscleGroups.length > 0
+  const muscles = (form.muscleGroups && form.muscleGroups.length > 0)
+    ? form.muscleGroups
+    : ['Pecs', 'Dos', 'Quadriceps', 'Epaules', 'Abdos']
+
+  const muscleLabel = (form.muscleGroups && form.muscleGroups.length > 0)
     ? form.muscleGroups.join(' + ')
     : 'Full Body'
-  const pool = context.exercises.length > 0 ? context.exercises : [{ name: muscleLabel, muscles: form.muscleGroups ?? ['Full Body'] }]
-  const session = buildSession(muscleLabel, pool, count, form.goal, form.level, usedExercises, context.prs)
+
+  const usedNames = new Set<string>()
+  const session = buildSession(muscleLabel, muscles, form, context, usedNames)
 
   return {
     name: `Séance ${muscleLabel}`,
