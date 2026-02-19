@@ -26,6 +26,7 @@ const RestTimer: React.FC<Props> = ({ duration, onClose, notificationEnabled }) 
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null)
   const endTimeRef = useRef<number>(Date.now() + duration * 1000) // Heure de fin cible
   const animValue = useRef(new Animated.Value(50)).current // Animation de montée légère
+  const progressAnim = useRef(new Animated.Value(1)).current
   const notificationIdRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -45,6 +46,9 @@ const RestTimer: React.FC<Props> = ({ duration, onClose, notificationEnabled }) 
   useEffect(() => {
     // Animation d'entrée
     Animated.spring(animValue, { toValue: 0, useNativeDriver: true }).start()
+
+    // Barre de progression
+    Animated.timing(progressAnim, { toValue: 0, duration: duration * 1000, useNativeDriver: false }).start()
 
     // Logique du décompte basée sur Date.now() pour éviter le drift
     const updateTimer = () => {
@@ -105,14 +109,31 @@ const RestTimer: React.FC<Props> = ({ duration, onClose, notificationEnabled }) 
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`
   }
 
+  const timerColor = timeLeft <= 10 ? colors.warning : colors.text
+
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY: animValue }] }]}>
+      <View style={styles.progressBarWrapper}>
+        <Animated.View
+          style={[
+            styles.progressBarFill,
+            {
+              width: progressAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
+        />
+      </View>
       <TouchableOpacity style={styles.content} onPress={closeTimer} activeOpacity={0.9}>
         <View style={styles.left}>
           <Text style={styles.label}>REPOS EN COURS</Text>
-          <Text style={styles.timer}>{formatTime(timeLeft)}</Text>
+          <Text style={[styles.timer, { color: timerColor }]}>{formatTime(timeLeft)}</Text>
         </View>
-        <Text style={styles.hint}>Ignorer</Text>
+        <View style={styles.hintChip}>
+          <Text style={styles.hint}>Ignorer</Text>
+        </View>
       </TouchableOpacity>
     </Animated.View>
   )
@@ -122,22 +143,41 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 20,
     marginBottom: 10,
-    marginTop: 5
+    marginTop: 5,
+    backgroundColor: colors.card,
+    borderRadius: 15,
+    elevation: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  progressBarWrapper: {
+    height: 3,
+    backgroundColor: colors.cardSecondary,
+    borderRadius: 2,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    backgroundColor: colors.primary,
+    height: 3,
   },
   content: {
-    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 15,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    elevation: 4
   },
   left: { flexDirection: 'column' },
-  label: { color: 'rgba(255,255,255,0.8)', fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
-  timer: { color: colors.text, fontSize: 22, fontWeight: 'bold', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
-  hint: { color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: '600', textTransform: 'uppercase' }
+  label: { color: colors.textSecondary, fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
+  timer: { fontSize: 22, fontWeight: 'bold', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+  hintChip: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  hint: { color: colors.textSecondary, fontSize: 12, fontWeight: '600' },
 })
 
 export default RestTimer

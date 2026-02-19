@@ -82,7 +82,8 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     }
   }, [summaryVisible, navigation])
 
-  const totalSets = Object.keys(validatedSets).length
+  const completedSets = Object.keys(validatedSets).length
+  const totalSetsTarget = sessionExercises.reduce((sum, se) => sum + (se.setsTarget ?? 0), 0)
   const totalPrs = Object.values(validatedSets).filter(s => s.isPr).length
 
   useLayoutEffect(() => {
@@ -163,7 +164,12 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <WorkoutHeader formattedTime={formattedTime} totalVolume={totalVolume} />
+      <WorkoutHeader
+        formattedTime={formattedTime}
+        totalVolume={totalVolume}
+        completedSets={completedSets}
+        totalSetsTarget={totalSetsTarget}
+      />
 
       <FlatList
         data={sessionExercises}
@@ -240,7 +246,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         onClose={handleClose}
         durationSeconds={durationSeconds}
         totalVolume={totalVolume}
-        totalSets={totalSets}
+        totalSets={completedSets}
         totalPrs={totalPrs}
         historyId={historyId}
       />
