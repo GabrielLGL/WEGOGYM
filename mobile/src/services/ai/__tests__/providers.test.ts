@@ -1,7 +1,7 @@
 import { createClaudeProvider } from '../claudeProvider'
 import { createOpenAIProvider } from '../openaiProvider'
 import { createGeminiProvider, testGeminiConnection } from '../geminiProvider'
-import type { AIFormData, DBContext } from '../types'
+import type { AIFormData, DBContext, ExerciseInfo } from '../types'
 
 // JSON valide conforme à GeneratedPlan
 const VALID_PLAN_JSON =
@@ -19,7 +19,7 @@ const testForm: AIFormData = {
 }
 
 const testContext: DBContext = {
-  exercises: ['Développé couché', 'Squat'],
+  exercises: [{ name: 'Développé couché', muscles: [] }, { name: 'Squat', muscles: [] }],
   recentMuscles: [],
   prs: {},
 }

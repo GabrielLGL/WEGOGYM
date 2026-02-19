@@ -1,5 +1,5 @@
 import { offlineEngine } from '../offlineEngine'
-import type { AIFormData, DBContext } from '../types'
+import type { AIFormData, DBContext, ExerciseInfo } from '../types'
 
 const makeForm = (overrides: Partial<AIFormData> = {}): AIFormData => ({
   mode: 'program',
@@ -11,8 +11,8 @@ const makeForm = (overrides: Partial<AIFormData> = {}): AIFormData => ({
   ...overrides,
 })
 
-const makeContext = (exercises: string[] = []): DBContext => ({
-  exercises,
+const makeContext = (exerciseNames: string[] = []): DBContext => ({
+  exercises: exerciseNames.map(name => ({ name, muscles: [] })),
   recentMuscles: [],
   prs: {},
 })

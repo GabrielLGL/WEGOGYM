@@ -1,5 +1,5 @@
 import { buildPrompt, parseGeneratedPlan } from '../providerUtils'
-import type { AIFormData, DBContext } from '../types'
+import type { AIFormData, DBContext, ExerciseInfo } from '../types'
 
 const makeForm = (overrides: Partial<AIFormData> = {}): AIFormData => ({
   mode: 'program',
@@ -12,7 +12,7 @@ const makeForm = (overrides: Partial<AIFormData> = {}): AIFormData => ({
 })
 
 const makeContext = (overrides: Partial<DBContext> = {}): DBContext => ({
-  exercises: ['Squat', 'Développé couché', 'Tractions'],
+  exercises: [{ name: 'Squat', muscles: [] }, { name: 'Développé couché', muscles: [] }, { name: 'Tractions', muscles: [] }],
   recentMuscles: [],
   prs: {},
   ...overrides,
@@ -30,7 +30,7 @@ describe('buildPrompt', () => {
   })
 
   it('inclut les exercices du contexte dans le prompt', () => {
-    const context = makeContext({ exercises: ['Squat', 'Développé couché', 'Tractions'] })
+    const context = makeContext({ exercises: [{ name: 'Squat', muscles: [] }, { name: 'Développé couché', muscles: [] }, { name: 'Tractions', muscles: [] }] })
     const prompt = buildPrompt(makeForm(), context)
     expect(prompt).toContain('Squat')
     expect(prompt).toContain('Développé couché')
@@ -74,7 +74,7 @@ describe('buildPrompt', () => {
   })
 
   it('tronque les exercices à 60 maximum', () => {
-    const exercises = Array.from({ length: 80 }, (_, i) => `Exercice${i}`)
+    const exercises = Array.from({ length: 80 }, (_, i) => ({ name: `Exercice${i}`, muscles: [] as string[] }))
     const prompt = buildPrompt(makeForm(), makeContext({ exercises }))
     // Les exercices 60+ ne doivent pas apparaître
     expect(prompt).not.toContain('Exercice60')

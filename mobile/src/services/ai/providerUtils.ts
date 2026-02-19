@@ -8,10 +8,17 @@ export function withTimeout(ms: number): { signal: AbortSignal; clear: () => voi
 
 export function buildPrompt(form: AIFormData, context: DBContext): string {
   const modeLabel = form.mode === 'program' ? 'programme d\'entraînement' : 'séance d\'entraînement'
-  const exerciseList = context.exercises.slice(0, 60).join(', ')
-  const prsText = Object.keys(context.prs).length > 0
-    ? `Records personnels connus : ${JSON.stringify(context.prs)}.`
+  const exerciseList = context.exercises.slice(0, 60).map(e => e.name).join(', ')
+  const recentMusclesText = context.recentMuscles.length > 0
+    ? `Muscles travaillés ces 7 derniers jours (éviter de retraviller < 48h) : ${context.recentMuscles.join(', ')}.`
     : ''
+
+  const prsFormatted = Object.entries(context.prs)
+    .map(([name, weight]) => `${name}: ${weight}kg`)
+    .join(', ')
+  const prsDetailedText = prsFormatted
+    ? `Records personnels (utilise ces données pour suggérer des charges réalistes — environ 70-80% pour bodybuilding, 80-90% pour force) : ${prsFormatted}.`
+    : 'Aucun record connu — utilise weightTarget: 0.'
   const modeDetails = form.mode === 'program'
     ? `Jours par semaine : ${form.daysPerWeek ?? 3}.`
     : `Groupe musculaire ciblé : ${form.muscleGroup ?? 'Full Body'}.`
@@ -44,8 +51,15 @@ CONTRAINTES :
 - Durée par séance : ${form.durationMin} minutes
 - Équipement disponible : ${form.equipment.join(', ') || 'tous'}
 - ${modeDetails}
-${prsText}
+- weightTarget doit être basé sur les PRs si disponibles (70-85% du PR selon l'objectif), sinon 0
+${prsDetailedText}
 
+DIRECTIVES SPORT SCIENCE :
+- Commence chaque séance par 1-2 exercices composés (ex: squat, soulevé de terre, développé couché, tractions)
+- Puis 2-3 exercices d'isolation
+- Volume cible : 10-16 sets/semaine pour les grands groupes (Pecs, Dos, Quadriceps), 6-12 pour les petits (Biceps, Triceps)
+- Progressive overload : si un PR est connu, propose une charge légèrement inférieure au PR (75-85%)
+${recentMusclesText}
 Utilise UNIQUEMENT ces exercices disponibles (choisis les plus adaptés) : ${exerciseList}
 
 Si un exercice indispensable n'est pas dans la liste, tu peux en inventer un pertinent.
