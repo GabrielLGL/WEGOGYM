@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, ActivityIndicator, Alert,
 } from 'react-native'
-import { Q } from '@nozbe/watermelondb'
 import withObservables from '@nozbe/with-observables'
+import { map } from 'rxjs/operators'
 import { database } from '../model'
 import { generatePlan } from '../services/ai/aiService'
 import { importGeneratedPlan, importGeneratedSession } from '../model/utils/databaseHelpers'
@@ -330,27 +330,12 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
   )
 }
 
-// ─── withObservables — injecte programs ───────────────────────────────────────
+// ─── withObservables — injecte programs et user ───────────────────────────────
 
-type ExternalProps = Omit<AssistantScreenInnerProps, 'programs'>
-
-const AssistantScreenEnhanced = withObservables([], () => ({
+export default withObservables([], () => ({
   programs: database.get<Program>('programs').query().observe(),
+  user: database.get<User>('users').query().observe().pipe(map(list => list[0] || null)),
 }))(AssistantScreenInner)
-
-// ─── Export avec user récupéré via observable ──────────────────────────────
-
-export default function AssistantScreen(props: BottomTabScreenProps<MainTabParamList, 'Assistant'>) {
-  const [user, setUser] = React.useState<User | null>(null)
-
-  useEffect(() => {
-    const obs = database.get<User>('users').query(Q.take(1)).observe()
-    const sub = obs.subscribe(users => setUser(users[0] ?? null))
-    return () => sub.unsubscribe()
-  }, [])
-
-  return <AssistantScreenEnhanced {...props} user={user} />
-}
 
 // ─── Styles ────────────────────────────────────────────────────────────────────
 

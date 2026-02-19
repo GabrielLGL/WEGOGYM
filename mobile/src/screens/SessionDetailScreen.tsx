@@ -80,7 +80,7 @@ const SessionDetailContent: React.FC<Props> = ({ session, sessionExercises, user
         setExercisesList([]) // Fallback to empty list
       }
     }
-    loadExos()
+    if (isAddModalVisible) loadExos()
   }, [isAddModalVisible])
 
   // --- HANDLERS ---
