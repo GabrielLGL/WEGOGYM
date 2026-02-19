@@ -2,7 +2,7 @@
 jest.mock('@nozbe/watermelondb', () => ({
   Model: class Model {
     static table = ''
-    static associations = {}
+    static associations: Record<string, unknown> = {}
     id = ''
     collections = {
       get: jest.fn().mockReturnValue({
@@ -83,25 +83,25 @@ describe('Exercise', () => {
 
   describe('getter muscles', () => {
     it('retourne un tableau vide quand _muscles est vide', () => {
-      const exercise = new Exercise()
+      const exercise = Object.create(Exercise.prototype) as Exercise
       ;(exercise as unknown as { _muscles: string })._muscles = ''
       expect(exercise.muscles).toEqual([])
     })
 
     it('parse correctement un JSON valide', () => {
-      const exercise = new Exercise()
+      const exercise = Object.create(Exercise.prototype) as Exercise
       ;(exercise as unknown as { _muscles: string })._muscles = '["Pecs","Triceps"]'
       expect(exercise.muscles).toEqual(['Pecs', 'Triceps'])
     })
 
     it('retourne un tableau vide pour un JSON malformé', () => {
-      const exercise = new Exercise()
+      const exercise = Object.create(Exercise.prototype) as Exercise
       ;(exercise as unknown as { _muscles: string })._muscles = 'invalid-json'
       expect(exercise.muscles).toEqual([])
     })
 
     it('retourne un tableau vide quand _muscles est undefined', () => {
-      const exercise = new Exercise()
+      const exercise = Object.create(Exercise.prototype) as Exercise
       ;(exercise as unknown as { _muscles: string | undefined })._muscles = undefined
       expect(exercise.muscles).toEqual([])
     })
@@ -109,13 +109,13 @@ describe('Exercise', () => {
 
   describe('setter muscles', () => {
     it('sérialise un tableau en JSON dans _muscles', () => {
-      const exercise = new Exercise()
+      const exercise = Object.create(Exercise.prototype) as Exercise
       exercise.muscles = ['Dos', 'Biceps']
       expect((exercise as unknown as { _muscles: string })._muscles).toBe('["Dos","Biceps"]')
     })
 
     it('sérialise un tableau vide', () => {
-      const exercise = new Exercise()
+      const exercise = Object.create(Exercise.prototype) as Exercise
       exercise.muscles = []
       expect((exercise as unknown as { _muscles: string })._muscles).toBe('[]')
     })
