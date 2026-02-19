@@ -48,3 +48,15 @@ export interface DBContext {
 export interface AIProvider {
   generate(form: AIFormData, context: DBContext): Promise<GeneratedPlan>
 }
+
+export type ExerciseType = 'compound_heavy' | 'compound' | 'accessory' | 'isolation'
+
+export interface ExerciseMetadata {
+  type: ExerciseType
+  minLevel: AILevel
+  isUnilateral: boolean
+  primaryMuscle: string
+  secondaryMuscles: string[]
+}
+
+export type ExerciseMetadataMap = Record<string, ExerciseMetadata>
