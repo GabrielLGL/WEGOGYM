@@ -71,14 +71,6 @@ const DURATION_OPTIONS: StepOption[] = [
   { value: 120, label: '2h' },
 ]
 
-const DAYS_OPTIONS: StepOption[] = [
-  { value: 2, label: '2j' },
-  { value: 3, label: '3j' },
-  { value: 4, label: '4j' },
-  { value: 5, label: '5j' },
-  { value: 6, label: '6j' },
-]
-
 const MUSCLE_OPTIONS: StepOption[] = [
   { value: 'Pecs',       label: 'Pecs'       },
   { value: 'Dos',        label: 'Dos'        },
@@ -104,6 +96,24 @@ const SPLIT_OPTIONS: StepOption[] = [
   { value: 'fullbodyhi', label: 'Full Body Intensif', sub: '3 séances haute intensité',                 icon: '🔥' },
 ]
 
+const SPLIT_VALID_DAYS: Record<AISplit, number[]> = {
+  auto:       [2, 3, 4, 5, 6],
+  fullbody:   [2, 3, 4, 5, 6],
+  upperlower: [2, 4],
+  ppl:        [3, 6],
+  brosplit:   [5],
+  arnold:     [3, 6],
+  phul:       [4],
+  fiveday:    [5],
+  pushpull:   [2, 4, 6],
+  fullbodyhi: [2, 3, 4, 5, 6],
+}
+
+function getDaysForSplit(split: AISplit | undefined): number[] {
+  if (split === undefined) return [2, 3, 4, 5, 6]
+  return SPLIT_VALID_DAYS[split]
+}
+
 const MUSCLES_FOCUS_OPTIONS = ['Équilibré', 'Pecs', 'Dos', 'Épaules', 'Bras', 'Jambes', 'Abdos']
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -128,7 +138,6 @@ function buildSteps(data: Partial<AIFormData>): WizardStep[] {
     steps.push({ id: 'muscle',        field: 'muscleGroups',    question: 'Quels groupes musculaires ?', kind: 'multi-muscle' })
     steps.push({ id: 'targetProgram', field: 'targetProgramId', question: 'Dans quel programme ?',   kind: 'programs'                           })
   } else {
-    steps.push({ id: 'days', field: 'daysPerWeek', question: 'Combien de jours par semaine ?', kind: 'single', options: DAYS_OPTIONS })
     steps.push({
       id: 'split',
       field: 'split',
@@ -136,6 +145,8 @@ function buildSteps(data: Partial<AIFormData>): WizardStep[] {
       kind: 'single',
       options: SPLIT_OPTIONS,
     })
+    const daysOptions: StepOption[] = getDaysForSplit(data.split).map(d => ({ value: d, label: `${d}j` }))
+    steps.push({ id: 'days', field: 'daysPerWeek', question: 'Combien de jours par semaine ?', kind: 'single', options: daysOptions })
     steps.push({
       id: 'musclesFocus',
       field: 'musclesFocus',
@@ -236,7 +247,16 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
   // ─── Navigation wizard ────────────────────────────────────────────────────
 
   const handleSelect = useCallback((field: keyof AIFormData, value: FormValue) => {
-    const newData: Partial<AIFormData> = { ...formData, [field]: value }
+    let newData: Partial<AIFormData> = { ...formData, [field]: value }
+
+    // Auto-corriger daysPerWeek si le split change et que le nombre de jours courant n'est plus valide
+    if (field === 'split') {
+      const validDays = getDaysForSplit(value as AISplit)
+      if (newData.daysPerWeek !== undefined && !validDays.includes(newData.daysPerWeek)) {
+        newData = { ...newData, daysPerWeek: validDays[0] }
+      }
+    }
+
     setFormData(newData)
     haptics.onSelect()
 
