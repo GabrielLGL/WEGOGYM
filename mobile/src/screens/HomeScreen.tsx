@@ -420,6 +420,8 @@ const styles = StyleSheet.create({
   moveChipText: { color: colors.textSecondary, fontSize: 14, fontWeight: '600' },
 })
 
+export { HomeScreen as HomeContent }
+
 export default withObservables([], () => ({
   programs: database.get<Program>('programs').query(Q.sortBy('position', Q.asc)).observe(),
   user: database.get<User>('users').query().observe().pipe(map(list => list[0] || null)),

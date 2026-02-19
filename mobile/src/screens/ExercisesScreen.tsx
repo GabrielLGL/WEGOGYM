@@ -330,4 +330,5 @@ const ObservableContent = withObservables([], () => ({
 
 const ExercisesScreen = () => (<View style={styles.baseContainer}><ObservableContent /></View>)
 
+export { ExercisesContent }
 export default ExercisesScreen
