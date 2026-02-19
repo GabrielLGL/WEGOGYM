@@ -1,7 +1,7 @@
 import type { AIProvider, AIFormData, DBContext, GeneratedPlan } from './types'
 import { buildPrompt, parseGeneratedPlan, withTimeout } from './providerUtils'
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
 async function throwGeminiError(response: Response): Promise<never> {
   const errorBody = await response.json().catch(() => ({})) as { error?: { message?: string } }
