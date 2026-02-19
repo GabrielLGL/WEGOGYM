@@ -324,8 +324,8 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
 
 type ExternalProps = Omit<AssistantScreenInnerProps, 'programs'>
 
-const AssistantScreenEnhanced = withObservables<ExternalProps, { programs: Program[] }>([], () => ({
-  programs: database.get<Program>('programs').query(),
+const AssistantScreenEnhanced = withObservables([], () => ({
+  programs: database.get<Program>('programs').query().observe(),
 }))(AssistantScreenInner)
 
 // ─── Export avec user récupéré via observable ──────────────────────────────

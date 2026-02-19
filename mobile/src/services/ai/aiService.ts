@@ -69,7 +69,7 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
       .query(Q.where('history_id', Q.oneOf(recentHistoryIds)))
       .fetch()
 
-    const recentExerciseIds = [...new Set(recentSets.map(s => s._raw.exercise_id as string))]
+    const recentExerciseIds = [...new Set(recentSets.map(s => s.exercise.id))]
     if (recentExerciseIds.length > 0) {
       const recentExercises = await database
         .get<Exercise>('exercises')
@@ -77,7 +77,7 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
         .fetch()
 
       recentExercises.forEach(ex => {
-        if (ex.muscles) recentMuscles.push(...ex.muscles.split(',').map((m: string) => m.trim()))
+        if (ex.muscles.length > 0) recentMuscles.push(...ex.muscles)
       })
     }
   }
@@ -88,7 +88,7 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
 
   const exerciseById = new Map(allExercises.map(ex => [ex.id, ex]))
   perfLogs.forEach(log => {
-    const ex = exerciseById.get(log._raw.exercise_id as string)
+    const ex = exerciseById.get(log.exercise.id)
     if (!ex) return
     if (!prs[ex.name] || log.weight > prs[ex.name]) {
       prs[ex.name] = log.weight
