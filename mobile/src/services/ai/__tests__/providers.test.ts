@@ -27,11 +27,6 @@ const testContext: DBContext = {
 const mockFetch = jest.fn()
 
 beforeAll(() => {
-  // Polyfill AbortSignal.timeout si absent (ex: jsdom < Node 18)
-  if (!('timeout' in AbortSignal)) {
-    ;(AbortSignal as Record<string, unknown>).timeout = (_ms: number) =>
-      new AbortController().signal
-  }
   global.fetch = mockFetch as unknown as typeof fetch
 })
 

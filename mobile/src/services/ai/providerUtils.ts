@@ -1,5 +1,11 @@
 import type { AIFormData, DBContext, GeneratedPlan } from './types'
 
+export function withTimeout(ms: number): { signal: AbortSignal; clear: () => void } {
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), ms)
+  return { signal: controller.signal, clear: () => clearTimeout(id) }
+}
+
 export function buildPrompt(form: AIFormData, context: DBContext): string {
   const modeLabel = form.mode === 'program' ? 'programme d\'entraînement' : 'séance d\'entraînement'
   const exerciseList = context.exercises.slice(0, 60).join(', ')
