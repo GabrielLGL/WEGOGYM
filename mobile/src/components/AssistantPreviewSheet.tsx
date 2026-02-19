@@ -9,6 +9,7 @@ interface AssistantPreviewSheetProps {
   visible: boolean
   plan: GeneratedPlan | null
   isLoading: boolean
+  mode: 'program' | 'session'
   onClose: () => void
   onModify: () => void
   onValidate: (plan: GeneratedPlan) => Promise<void>
@@ -18,6 +19,7 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
   visible,
   plan,
   isLoading,
+  mode,
   onClose,
   onModify,
   onValidate,
@@ -46,8 +48,10 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
     onModify()
   }
 
+  const title = mode === 'program' ? 'Programme généré' : 'Séance générée'
+
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Aperçu du plan généré">
+    <BottomSheet visible={visible} onClose={onClose} title={title}>
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -64,6 +68,12 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
             placeholderTextColor={colors.textSecondary}
           />
 
+          {(() => {
+            const totalExercises = plan.sessions.reduce((acc, s) => acc + s.exercises.length, 0)
+            const summary = `${plan.sessions.length} séance${plan.sessions.length > 1 ? 's' : ''} · ${totalExercises} exercice${totalExercises > 1 ? 's' : ''}`
+            return <Text style={styles.summary}>{summary}</Text>
+          })()}
+
           <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
             {plan.sessions.map((session, si) => (
               <View key={`${si}-${session.name}`} style={styles.sessionCard}>
@@ -74,7 +84,7 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
                       {ex.exerciseName}
                     </Text>
                     <Text style={styles.exerciseSets}>
-                      {ex.setsTarget}×{ex.repsTarget}
+                      {ex.setsTarget}×{ex.repsTarget}{ex.weightTarget > 0 ? `  ·  ~${ex.weightTarget} kg` : ''}
                     </Text>
                   </View>
                 ))}
@@ -128,7 +138,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   scrollView: {
-    maxHeight: 320,
+    flex: 1,
     marginBottom: spacing.md,
   },
   sessionCard: {
@@ -159,6 +169,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.sm,
     fontWeight: '600',
+  },
+  summary: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    marginBottom: spacing.md,
   },
   buttonsRow: {
     flexDirection: 'row',

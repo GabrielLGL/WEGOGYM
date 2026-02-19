@@ -20,7 +20,15 @@ export function buildPrompt(form: AIFormData, context: DBContext): string {
     ? `Records personnels (utilise ces données pour suggérer des charges réalistes — environ 70-80% pour bodybuilding, 80-90% pour force) : ${prsFormatted}.`
     : 'Aucun record connu — utilise weightTarget: 0.'
   const modeDetails = form.mode === 'program'
-    ? `Jours par semaine : ${form.daysPerWeek ?? 3}.`
+    ? [
+        `Jours par semaine : ${form.daysPerWeek ?? 3}.`,
+        form.split && form.split !== 'auto'
+          ? `Style de programme souhaité : ${form.split}.`
+          : '',
+        form.musclesFocus && form.musclesFocus.length > 0
+          ? `Muscles prioritaires (plus de volume) : ${form.musclesFocus.join(', ')}.`
+          : '',
+      ].filter(Boolean).join('\n')
     : `Groupe musculaire ciblé : ${form.muscleGroup ?? 'Full Body'}.`
 
   const GOAL_PROMPT: Record<string, string> = {

@@ -1,4 +1,4 @@
-import type { AIProvider, AIFormData, DBContext, GeneratedPlan, GeneratedExercise, GeneratedSession, ExerciseInfo } from './types'
+import type { AIProvider, AIFormData, DBContext, GeneratedPlan, GeneratedExercise, GeneratedSession, ExerciseInfo, AISplit } from './types'
 
 function shuffleArray<T>(arr: T[]): T[] {
   const result = [...arr]
@@ -68,7 +68,8 @@ const SESSION_NAMES: Record<string, string[]> = {
   ppl:        ['Push', 'Pull', 'Legs', 'Push B', 'Pull B', 'Legs B'],
 }
 
-function getSplitName(days: number): string {
+function getSplitName(days: number, split?: AISplit): string {
+  if (split && split !== 'auto') return split
   if (days <= 3) return 'fullbody'
   if (days <= 4) return 'upperlower'
   return 'ppl'
@@ -82,15 +83,30 @@ function buildSession(
   goal: string,
   level: string,
   usedExercises: Set<string>,
-  prs: Record<string, number>
+  prs: Record<string, number>,
+  musclesFocus?: string[]
 ): GeneratedSession {
   const { sets, reps } = SETS_REPS[goal] ?? SETS_REPS.bodybuilding
   const pool = availableExercises.filter(e => !usedExercises.has(e.name))
   const source = pool.length >= count ? pool : availableExercises
-  // Compound-first : trier par nombre de muscles ciblés (desc), puis shuffler à l'intérieur de chaque tier
-  const compounds = shuffleArray(source.filter(e => e.muscles.some(m => COMPOUND_MUSCLES.includes(m))))
-  const isolations = shuffleArray(source.filter(e => !e.muscles.some(m => COMPOUND_MUSCLES.includes(m))))
-  const sorted = [...compounds, ...isolations]
+  // Compound-first ou biais musclesFocus
+  let sorted: ExerciseInfo[]
+  if (musclesFocus && musclesFocus.length > 0) {
+    const focusPool       = shuffleArray(source.filter(e => e.muscles.some(m => musclesFocus.includes(m))))
+    const otherCompounds  = shuffleArray(source.filter(e =>
+      !e.muscles.some(m => musclesFocus.includes(m)) &&
+      e.muscles.some(m => COMPOUND_MUSCLES.includes(m))
+    ))
+    const otherIsolations = shuffleArray(source.filter(e =>
+      !e.muscles.some(m => musclesFocus.includes(m)) &&
+      !e.muscles.some(m => COMPOUND_MUSCLES.includes(m))
+    ))
+    sorted = [...focusPool, ...otherCompounds, ...otherIsolations]
+  } else {
+    const compounds  = shuffleArray(source.filter(e => e.muscles.some(m => COMPOUND_MUSCLES.includes(m))))
+    const isolations = shuffleArray(source.filter(e => !e.muscles.some(m => COMPOUND_MUSCLES.includes(m))))
+    sorted = [...compounds, ...isolations]
+  }
   const picked: GeneratedExercise[] = []
   for (let i = 0; i < count && i < sorted.length; i++) {
     const ex = sorted[i]
@@ -105,7 +121,7 @@ function buildSession(
 // Génération programme
 function generateProgram(form: AIFormData, context: DBContext): GeneratedPlan {
   const days = form.daysPerWeek ?? 3
-  const splitName = getSplitName(days)
+  const splitName = getSplitName(days, form.split)
   const splitGroups = getSplit(days)
   const sessionNames = SESSION_NAMES[splitName]
   const count = exercisesCount(form.durationMin)
@@ -122,7 +138,7 @@ function generateProgram(form: AIFormData, context: DBContext): GeneratedPlan {
       : muscles.map(m => ({ name: m, muscles: [m] }))
     const fallbackPool = context.exercises.length > 0 ? context.exercises : muscles.map(m => ({ name: m, muscles: [m] }))
     const finalPool = pool.length >= 2 ? pool : fallbackPool
-    sessions.push(buildSession(sessionName, finalPool, count, form.goal, form.level, usedExercises, context.prs))
+    sessions.push(buildSession(sessionName, finalPool, count, form.goal, form.level, usedExercises, context.prs, form.musclesFocus))
   }
 
   const goalLabels: Record<string, string> = {
