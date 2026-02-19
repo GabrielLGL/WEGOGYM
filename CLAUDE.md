@@ -188,67 +188,66 @@ Types: feat | fix | refactor | test | docs | chore | style | perf
 
 ## 7. Custom Commands Ecosystem
 
-Pour la liste détaillée, voir `docs/COMMANDS.md`.
+Pour la liste détaillée avec exemples, voir `docs/COMMANDS.md`.
 
 ### Workflow quotidien
 | Commande | Rôle |
 |----------|------|
 | `/plan` | Affiche le workflow complet (memo) |
-| `/morning` | Briefing du matin : état projet, tests, git, plan du jour |
-| `/task [desc]` | Tâche rapide (refactor, ajout, maintenance) |
-| `/fix [desc]` | Correction ciblée d'un bug |
-| `/status` | État du projet en 10 secondes |
-| `/review` | Review du code avant push |
-| `/doc [cible]` | Générer/mettre à jour la documentation |
+| `/morning` | Briefing du matin |
+| `/retro [période]` | Rétrospective : tendances, santé, recommandations |
+| `/task [desc]` | Tâche rapide |
+| `/fix [desc]` | Correction ciblée |
+| `/status` | État en 10 secondes |
+| `/review` | Review avant push |
+| `/doc [cible]` | Générer/mettre à jour la doc |
+| `/perf` | Analyse performance React Native |
+| `/changelog [période]` | Générer un changelog |
+| `/backup [nom]` | Branche de sauvegarde locale |
 | `/gitgo` | Commit + push intelligent |
 
 ### Développement de features
 | Commande | Rôle |
 |----------|------|
-| `/idee [desc]` | Pipeline BMAD complet : brainstorming → dev → QA |
+| `/idee [desc]` | Pipeline BMAD : brainstorming → dev → QA |
 | `/idee-continue` | Reprise après /compact |
 
 ### Qualité & vérification
 | Commande | Rôle |
 |----------|------|
-| `/verrif` | Scan 8 passes + correction par niveaux + push |
-| `/verrif-continue` | Reprise (lit STATUS.md pour les passes échouées) |
-| `/verrif-build` | Build & TypeScript uniquement |
-| `/verrif-tests` | Tests uniquement |
-| `/verrif-code-review` | Code review adversarial |
-| `/verrif-bugs` | Bugs silencieux |
-| `/verrif-db` | Cohérence WatermelonDB |
-| `/verrif-qualite` | Code mort & qualité |
-| `/test-coverage` | Augmenter la couverture de tests |
+| `/verrif` | Scan + correction par niveaux + push |
+| `/verrif-continue` | Reprise (lit STATUS.md) |
+| `/verrif-build/tests/code-review/bugs/db/qualite` | Passes individuelles |
+| `/test-coverage` | Augmenter la couverture |
 | `/test-continue` | Reprise coverage |
 
 ### Script nuit autonome
 ```powershell
-.\run-verrif.ps1              # mode full : scan + fix niveaux 1-2-3 + push
+.\run-verrif.ps1              # full : scan + fix niveaux 1-2-3 + push
 .\run-verrif.ps1 -mode safe   # critiques seulement
-.\run-verrif.ps1 -mode scan   # scan seul, aucune correction
+.\run-verrif.ps1 -mode scan   # scan seul
 ```
 
 ### Rapports et historique
 ```
 docs/bmad/
 ├── verrif/
-│   ├── HEALTH.md                    ← Score de santé au fil du temps
-│   └── [YYYYMMDD-HHmm]/            ← Un dossier par run
-│       ├── 01-build.md → 06-qualite.md  ← Rapports de scan
-│       ├── 07-fix-niveau1/2/3.md    ← Rapports de correction
-│       └── STATUS.md                ← Statut + instructions si échec
-├── git-history/                     ← Rapport de chaque push
-└── brainstorm.md, prd.md, etc.      ← Outputs /idee
+│   ├── HEALTH.md              ← Score de santé (0-100) au fil du temps
+│   └── [YYYYMMDD-HHmm]/      ← Un dossier horodaté par run
+│       ├── 01 → 06            ← Rapports de scan
+│       ├── 07-fix-niveau1/2/3 ← Rapports de correction par niveau
+│       └── STATUS.md          ← Statut + instructions si échec
+├── git-history/               ← Rapport de chaque push
+└── brainstorm, prd, etc.      ← Outputs /idee
 
 docs/stories/
-├── WEGO-001 → WEGO-007             ← Stories manuelles
-└── [nom-feature]/                   ← Stories générées par /idee
+├── WEGO-001 → WEGO-007       ← Stories manuelles
+└── [nom-feature]/             ← Stories générées par /idee
 ```
 
 ### Gestion du contexte
-- Quand une commande dit "⚠️ Contexte chargé" → `/compact` puis la commande `-continue`
-- Les commandes `-continue` relisent les rapports/STATUS.md pour reprendre sans perte
+- "⚠️ Contexte chargé" → `/compact` puis commande `-continue`
+- Les `-continue` relisent rapports/STATUS.md pour reprendre sans perte
 
 ### Score de santé
 Le fichier `docs/bmad/verrif/HEALTH.md` suit l'évolution du projet (0-100) :

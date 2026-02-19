@@ -12,6 +12,14 @@ Affiche le workflow quotidien complet en un coup d'oeil. Le memo de toutes les c
 ### `/morning`
 Briefing du matin. Résume l'état du projet en 2 min : dernier verrif, dernier push, état git, tests, TODOs, et propose un plan du jour avec priorités.
 
+### `/retro [période]`
+Rétrospective du projet. Analyse le score de santé, les commits, les rapports verrif, le ratio feat/fix, et donne les tendances : ce qui va bien, ce qui stagne, ce qui régresse. Par défaut sur 7 jours.
+```
+/retro                → derniers 7 jours
+/retro cette semaine  → cette semaine
+/retro ce mois        → ce mois
+```
+
 ---
 
 ## Journée
@@ -50,6 +58,13 @@ Tu valides chaque phase avant de passer à la suivante. Les stories sont sauvega
 /idee intégrer un mode social avec partage de programmes
 ```
 
+### `/backup [nom]`
+Crée une branche de sauvegarde locale avant un gros changement. Ne push pas, ne change pas de branche.
+```
+/backup                    → backup/main-20260219-1430
+/backup avant-refactor-ia  → backup/main-avant-refactor-ia-20260219
+```
+
 ### `/status`
 État du projet en 10 secondes. Ultra-concis : branche git, fichiers modifiés, build, tests, dernière action, chose la plus urgente. Max 6 lignes.
 
@@ -64,6 +79,17 @@ Génère ou met à jour la documentation.
 /doc claude              → met à jour CLAUDE.md
 /doc commands            → met à jour ce fichier
 /doc all                 → tout documenter d'un coup
+```
+
+### `/perf`
+Analyse de performance React Native. Cherche les re-renders inutiles, FlatList non optimisées, animations JS, queries WatermelonDB lourdes. Génère un rapport avec score perf /10.
+
+### `/changelog [période]`
+Génère un changelog propre basé sur l'historique git. Trie par type, regroupe les commits liés, met en avant les changements visibles.
+```
+/changelog              → depuis le dernier tag ou 20 derniers commits
+/changelog last week    → dernière semaine
+/changelog v1.0..v1.1   → entre deux tags
 ```
 
 ### `/gitgo`
@@ -102,7 +128,7 @@ Script autonome pour la nuit. Lance dans PowerShell avant de dormir.
 ```
 
 ### `/verrif`
-Même chose que le script mais en mode interactif dans Claude Code. 8 passes avec correction + push. Utilise quand t'es devant le PC.
+Même chose que le script mais en mode interactif dans Claude Code. Utilise quand t'es devant le PC.
 
 ---
 
@@ -111,7 +137,7 @@ Même chose que le script mais en mode interactif dans Claude Code. 8 passes ave
 | Commande | Reprend quoi |
 |----------|-------------|
 | `/idee-continue` | Pipeline feature |
-| `/verrif-continue` | Vérification (lit STATUS.md pour voir les passes échouées) |
+| `/verrif-continue` | Vérification (lit STATUS.md pour les passes échouées) |
 | `/test-continue` | Couverture de tests |
 
 ---
@@ -151,14 +177,16 @@ docs/bmad/
 │       ├── 04-bugs-silencieux.md
 │       ├── 05-watermelondb.md
 │       ├── 06-qualite.md
-│       ├── 07-fix-niveau1.md
-│       ├── 07-fix-niveau2.md
-│       ├── 07-fix-niveau3.md
-│       ├── STATUS.md                ← Statut du run + instructions si échec
+│       ├── 07-fix-niveau1/2/3.md
+│       ├── STATUS.md
 │       └── RAPPORT.md
 ├── git-history/
-│   └── [YYYYMMDD-HHmm]-verrif.md   ← Rapport de chaque push
-└── brainstorm.md, prd.md, etc.      ← Outputs /idee
+│   └── [YYYYMMDD-HHmm]-verrif.md
+└── brainstorm.md, prd.md, etc.
+
+docs/stories/
+├── WEGO-001 → WEGO-007
+└── [nom-feature]/
 ```
 
 ---
