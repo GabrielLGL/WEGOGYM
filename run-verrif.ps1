@@ -308,11 +308,15 @@ if ($finalClean) {
     $cmdPush = @"
 Le code a ete verifie et corrige.
 Commit et push :
-1) git add les fichiers corriges + les rapports dans docs/bmad/verrif/ + docs/bmad/git-history/
+1) git add UNIQUEMENT les fichiers corriges + les rapports dans docs/bmad/verrif/$timestamp/ + docs/bmad/git-history/
+   NE FAIS JAMAIS git add . ou git add -A
+   Ajoute chaque fichier individuellement avec git add [fichier]
 2) Ne stage PAS node_modules, .env, builds, keystores, coverage
-3) Fais des commits atomiques par type : fix(scope) pour les bugs, refactor(scope) pour la qualite, chore(verrif) pour les rapports
-4) git push origin (branche courante)
-5) Sauvegarde un rapport dans docs/bmad/git-history/$timestamp-verrif.md
+3) Verifie avec git diff --cached --name-only que seuls tes fichiers sont stages
+4) Fais des commits atomiques par type : fix(scope) pour les bugs, refactor(scope) pour la qualite, chore(verrif) pour les rapports
+5) git push origin (branche courante)
+6) Si le push echoue (remote ahead) alors git pull --rebase puis re-push
+7) Sauvegarde un rapport dans docs/bmad/git-history/$timestamp-verrif.md
 Ne me pose aucune question.
 "@
 

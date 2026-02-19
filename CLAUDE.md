@@ -185,6 +185,14 @@ Types: feat | fix | refactor | test | docs | chore | style | perf
 - Ne jamais mélanger feat et fix dans le même commit
 - Message en anglais, description concise
 
+### 5.2 Git Safety — Travail parallèle
+**Plusieurs Claude Code peuvent travailler en même temps. Règles STRICTES :**
+- **JAMAIS** `git add .` ou `git add -A` ou `git add --all`
+- `git add` UNIQUEMENT les fichiers que TU as modifiés + ton rapport
+- Avant de commit, vérifie avec `git diff --cached --name-only` que seuls tes fichiers sont staged
+- Si un fichier staged n'est pas de toi → `git reset HEAD [fichier]`
+- Si le push échoue (remote ahead) → `git pull --rebase` puis re-push
+
 ## 6. Commands (Root: `mobile/`)
 - `npm start` (Expo)
 - `npm run android` (Build)
