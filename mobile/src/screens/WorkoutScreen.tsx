@@ -133,7 +133,7 @@ const WorkoutContent: React.FC<WorkoutContentProps> = ({
     const now = Date.now()
     setDurationSeconds(Math.floor((now - startTimestampRef.current) / 1000))
     if (historyId) {
-      await completeWorkoutHistory(historyId, now).catch(console.error)
+      await completeWorkoutHistory(historyId, now).catch(e => { if (__DEV__) console.error('[WorkoutScreen] completeWorkoutHistory (end):', e) })
     }
     setConfirmEndVisible(false)
     setSummaryVisible(true)
@@ -142,7 +142,7 @@ const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
   const handleConfirmAbandon = async () => {
     if (historyId) {
-      await completeWorkoutHistory(historyId, Date.now()).catch(console.error)
+      await completeWorkoutHistory(historyId, Date.now()).catch(e => { if (__DEV__) console.error('[WorkoutScreen] completeWorkoutHistory (abandon):', e) })
     }
     setAbandonVisible(false)
     navigation.navigate('MainTabs', { screen: 'Home' })

@@ -13,7 +13,7 @@ export default class Session extends Model {
   } as const
 
   @field('name') name!: string
-  @field('position') position!: number // <--- AJOUT DU CHAMP POSITION
+  @field('position') position!: number
   @relation('programs', 'program_id') program!: Relation<Program>
   
   @children('histories') histories!: Query<History>

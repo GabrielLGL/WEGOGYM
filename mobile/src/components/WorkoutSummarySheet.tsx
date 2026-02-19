@@ -55,7 +55,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     setNote(text)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      if (historyId) updateHistoryNote(historyId, text).catch(console.error)
+      if (historyId) updateHistoryNote(historyId, text).catch(e => { if (__DEV__) console.error('[WorkoutSummarySheet] updateHistoryNote (debounce):', e) })
     }, 500)
   }
 
@@ -63,7 +63,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
       if (historyId && note) {
-        updateHistoryNote(historyId, note).catch(console.error)
+        updateHistoryNote(historyId, note).catch(e => { if (__DEV__) console.error('[WorkoutSummarySheet] updateHistoryNote (flush):', e) })
       }
     }
     onClose()

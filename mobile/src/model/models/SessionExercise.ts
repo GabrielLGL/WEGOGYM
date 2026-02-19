@@ -13,7 +13,7 @@ export default class SessionExercise extends Model {
   @field('position') position!: number
   @field('sets_target') setsTarget?: number
   @field('reps_target') repsTarget?: string
-  @field('weight_target') weightTarget?: number // <--- AJOUT DU POIDS
+  @field('weight_target') weightTarget?: number
 
   @relation('sessions', 'session_id') session!: Relation<Session>
   @relation('exercises', 'exercise_id') exercise!: Relation<Exercise>

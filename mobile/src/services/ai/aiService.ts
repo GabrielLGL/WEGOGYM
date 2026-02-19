@@ -112,7 +112,7 @@ export async function generatePlan(form: AIFormData, user: User | null): Promise
   try {
     return await provider.generate(form, context)
   } catch (error) {
-    console.warn('[aiService] Provider cloud échoué, fallback offline:', error)
+    if (__DEV__) console.warn('[aiService] Provider cloud échoué, fallback offline:', error)
     return await offlineEngine.generate(form, context)
   }
 }

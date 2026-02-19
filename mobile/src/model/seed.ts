@@ -93,6 +93,6 @@ export const seedExercises = async () => {
       }
     })
   } catch (error) {
-    console.error("❌ Erreur Seed:", error);
+    if (__DEV__) console.error("❌ Erreur Seed:", error);
   }
 }
