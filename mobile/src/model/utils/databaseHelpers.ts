@@ -242,6 +242,36 @@ export async function saveWorkoutSet(params: {
 }
 
 /**
+ * Supprime une serie enregistree pendant une seance en direct.
+ *
+ * Utile pour devalider une serie si l'utilisateur s'est trompe.
+ *
+ * @param historyId - ID de la History en cours
+ * @param exerciseId - ID de l'exercice
+ * @param setOrder - Ordre de la serie (1-based)
+ */
+export async function deleteWorkoutSet(
+  historyId: string,
+  exerciseId: string,
+  setOrder: number
+): Promise<void> {
+  const sets = await database
+    .get<WorkoutSet>('sets')
+    .query(
+      Q.where('history_id', historyId),
+      Q.where('exercise_id', exerciseId),
+      Q.where('set_order', setOrder)
+    )
+    .fetch()
+
+  if (sets.length === 0) return
+
+  await database.write(async () => {
+    await sets[0].destroyPermanently()
+  })
+}
+
+/**
  * Retourne la derniere performance enregistree pour un exercice
  * en excluant la seance en cours.
  *
