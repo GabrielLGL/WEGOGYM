@@ -300,10 +300,13 @@ export async function getLastPerformanceForExercise(
   const historyIdSet = new Set(sets.map(s => s.history.id))
   const historyIds = Array.from(historyIdSet)
 
-  // Fetch toutes les Histories pour comparer les start_time
-  const histories = await Promise.all(
-    historyIds.map(id => database.get<History>('histories').find(id))
-  )
+  // Fetch toutes les Histories via query filtrée (évite RecordNotFound si history supprimée)
+  const histories = await database
+    .get<History>('histories')
+    .query(Q.where('id', Q.oneOf(historyIds)))
+    .fetch()
+
+  if (histories.length === 0) return null
 
   // La History la plus recente (tri desc par start_time)
   const mostRecent = histories.sort(

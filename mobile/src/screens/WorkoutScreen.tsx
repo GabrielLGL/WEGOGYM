@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   BackHandler,
   Animated,
+  Alert,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
@@ -100,7 +101,14 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         historyRef.current = history
         setHistoryId(history.id)
       })
-      .catch(e => { if (__DEV__) console.error('[WorkoutScreen] createWorkoutHistory:', e) })
+      .catch(e => {
+        if (__DEV__) console.error('[WorkoutScreen] createWorkoutHistory:', e)
+        Alert.alert(
+          'Erreur',
+          'Impossible de démarrer la séance. Veuillez réessayer.',
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        )
+      })
   }, [])
 
   useEffect(() => {

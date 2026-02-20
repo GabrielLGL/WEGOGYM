@@ -66,6 +66,9 @@ export function useWorkoutState(
 
     return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Intentionnel : initialisation unique au mount. Si sessionExercises change
+  // après le mount (re-render HOC), on ne réinitialise PAS les inputs pour
+  // ne pas écraser les saisies en cours de l'utilisateur.
   }, [])
 
   const updateSetInput = (key: string, field: 'weight' | 'reps', value: string) => {

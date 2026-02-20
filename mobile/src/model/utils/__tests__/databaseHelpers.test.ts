@@ -769,9 +769,7 @@ describe('databaseHelpers', () => {
           return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }) }
         }
         if (table === 'histories') {
-          return { find: jest.fn().mockImplementation((id: string) => {
-            return Promise.resolve(id === 'h1' ? hist1 : hist2)
-          })}
+          return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([hist1, hist2]) }) }
         }
         return {}
       })
@@ -797,10 +795,8 @@ describe('databaseHelpers', () => {
           return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }) }
         }
         if (table === 'histories') {
-          // find returns a history but its id doesn't match any set's history.id
-          // after sort, recentSets filter would be empty if mostRecent.id != any set's history.id
-          const fakeHistory = { id: 'h-other', startTime: new Date() }
-          return { find: jest.fn().mockResolvedValue(fakeHistory) }
+          // query retourne vide : histories supprimées physiquement → guard histories.length === 0 → null
+          return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) }
         }
         return {}
       })
