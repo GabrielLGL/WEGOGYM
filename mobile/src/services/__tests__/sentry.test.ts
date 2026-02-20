@@ -60,7 +60,7 @@ describe('sentry', () => {
       // SENTRY_DSN est une constante module-level : isolateModules recharge le module
       // avec la variable d'env déjà positionnée
       jest.isolateModules(() => {
-        process.env.EXPO_PUBLIC_SENTRY_DSN = 'https://test@o123.ingest.sentry.io/123'
+        ;(process.env as Record<string, string>).EXPO_PUBLIC_SENTRY_DSN = 'https://test@o123.ingest.sentry.io/123'
 
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { initSentry: initSentryFresh } = require('../sentry')
@@ -75,13 +75,13 @@ describe('sentry', () => {
           })
         )
 
-        delete process.env.EXPO_PUBLIC_SENTRY_DSN
+        delete (process.env as Record<string, string | undefined>).EXPO_PUBLIC_SENTRY_DSN
       })
     })
 
     it('Sentry.init est configuré avec les bonnes valeurs (tracesSampleRate, environment, etc.)', () => {
       jest.isolateModules(() => {
-        process.env.EXPO_PUBLIC_SENTRY_DSN = 'https://test@sentry.io/999'
+        ;(process.env as Record<string, string>).EXPO_PUBLIC_SENTRY_DSN = 'https://test@sentry.io/999'
 
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { initSentry: initSentryFresh } = require('../sentry')
@@ -97,13 +97,13 @@ describe('sentry', () => {
         expect(initCall.debug).toBe(true)
         expect(typeof initCall.beforeSend).toBe('function')
 
-        delete process.env.EXPO_PUBLIC_SENTRY_DSN
+        delete (process.env as Record<string, string | undefined>).EXPO_PUBLIC_SENTRY_DSN
       })
     })
 
     it('beforeSend retourne null en développement et log l\'événement', () => {
       jest.isolateModules(() => {
-        process.env.EXPO_PUBLIC_SENTRY_DSN = 'https://test@sentry.io/999'
+        ;(process.env as Record<string, string>).EXPO_PUBLIC_SENTRY_DSN = 'https://test@sentry.io/999'
 
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { initSentry: initSentryFresh } = require('../sentry')
@@ -122,7 +122,7 @@ describe('sentry', () => {
         expect(result).toBeNull()
         consoleSpy.mockRestore()
 
-        delete process.env.EXPO_PUBLIC_SENTRY_DSN
+        delete (process.env as Record<string, string | undefined>).EXPO_PUBLIC_SENTRY_DSN
       })
     })
   })
