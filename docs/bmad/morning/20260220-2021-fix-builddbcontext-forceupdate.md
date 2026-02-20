@@ -27,4 +27,7 @@
 - AssistantScreen : aucun `forceUpdate` ou `setState({})` hack visible
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260220-2021
+
+## Résolution
+Rapport do : docs/bmad/do/20260220-2021-fix-aiservice-assistantscreen.md

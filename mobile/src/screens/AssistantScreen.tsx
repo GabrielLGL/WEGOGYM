@@ -176,7 +176,6 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
   const [isGenerating, setIsGenerating]         = useState(false)
   const [generatedPlan, setGeneratedPlan]       = useState<GeneratedPlan | null>(null)
   const [isResetAlertVisible, setIsResetAlertVisible] = useState(false)
-  const [, forceUpdate] = useState(0)
 
   const progressAnim = useRef(new Animated.Value(0)).current
   const contentAnim  = useRef(new Animated.Value(1)).current
@@ -206,8 +205,6 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
       setCurrentStep(0)
       setFormData({ equipment: [], musclesFocus: [], muscleGroups: [] })
       contentAnim.setValue(1)
-      // Force re-render pour badge provider (bug WatermelonDB instance réutilisée)
-      forceUpdate(n => n + 1)
     }, [contentAnim])
   )
 

@@ -82,11 +82,16 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
     }
   }
 
-  // 3. PRs depuis performance_logs (top 500 par poids desc — suffit pour capturer les PRs)
+  // 3. PRs depuis performance_logs (30 derniers jours, top 50 par poids desc)
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
   const prs: Record<string, number> = {}
   const perfLogs = await database
     .get<PerformanceLog>('performance_logs')
-    .query(Q.sortBy('weight', Q.desc), Q.take(500))
+    .query(
+      Q.where('created_at', Q.gte(thirtyDaysAgo)),
+      Q.sortBy('weight', Q.desc),
+      Q.take(50)
+    )
     .fetch()
 
   const exerciseById = new Map(allExercises.map(ex => [ex.id, ex]))
