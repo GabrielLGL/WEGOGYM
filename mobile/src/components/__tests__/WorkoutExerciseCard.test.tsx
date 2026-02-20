@@ -390,6 +390,42 @@ describe('WorkoutExerciseCard', () => {
       expect(getByText('kg')).toBeTruthy()
       expect(getByText('reps')).toBeTruthy()
     })
+
+    it('flush le debounce et valide avec les valeurs locales si validate tapé < 300ms après la saisie', async () => {
+      const onUpdateInput = jest.fn()
+      const onValidateSet = jest.fn().mockResolvedValue(undefined)
+      // setInputs avec valeurs vides (état parent "stale")
+      const setInputs: Record<string, SetInputData> = {
+        'se-1_1': { weight: '', reps: '' },
+      }
+      mockValidateSetInput.mockReturnValue({ valid: true })
+
+      const { getAllByDisplayValue, getByText } = render(
+        <WorkoutExerciseCard
+          sessionExercise={makeSessionExercise({ setsTarget: 1 })}
+          exercise={makeExercise()}
+          lastPerformance={null}
+          historyId="hist-1"
+          setInputs={setInputs}
+          validatedSets={{}}
+          onUpdateInput={onUpdateInput}
+          onValidateSet={onValidateSet}
+          onUnvalidateSet={jest.fn()}
+        />
+      )
+
+      // L'utilisateur tape une valeur
+      const weightInput = getAllByDisplayValue('')[0]
+      fireEvent.changeText(weightInput, '100')
+      // Immédiatement (< 300ms), tape sur le bouton de validation
+      fireEvent.press(getByText('✓'))
+
+      // Le debounce doit avoir été flushé : onUpdateInput appelé immédiatement
+      expect(onUpdateInput).toHaveBeenCalledWith('se-1_1', 'weight', '100')
+      // La validation doit utiliser '100' (local), pas '' (parent stale)
+      const lastCall = mockValidateSetInput.mock.calls[mockValidateSetInput.mock.calls.length - 1]
+      expect(lastCall[0]).toBe('100')
+    })
   })
 
   describe('gestion des inputs manquants', () => {

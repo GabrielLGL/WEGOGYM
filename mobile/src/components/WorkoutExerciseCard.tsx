@@ -18,7 +18,7 @@ interface WorkoutSetRowProps {
   input: SetInputData
   validated: ValidatedSetData | undefined
   onUpdateInput: (key: string, field: 'weight' | 'reps', value: string) => void
-  onValidate: () => Promise<void>
+  onValidate: (weight: string, reps: string) => Promise<void>
   onUnvalidate: () => Promise<void>
   repsTarget?: string
 }
@@ -90,6 +90,21 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     repsTimerRef.current = setTimeout(() => onUpdateInput(inputKey, 'reps', v), 300)
   }
 
+  const handleValidate = () => {
+    // Flush debounce immédiatement : évite le desync si le user valide < 300ms après avoir tapé
+    if (weightTimerRef.current) {
+      clearTimeout(weightTimerRef.current)
+      weightTimerRef.current = null
+      onUpdateInput(inputKey, 'weight', localWeight)
+    }
+    if (repsTimerRef.current) {
+      clearTimeout(repsTimerRef.current)
+      repsTimerRef.current = null
+      onUpdateInput(inputKey, 'reps', localReps)
+    }
+    onValidate(localWeight, localReps)
+  }
+
   const weightNum = Number(localWeight)
   const repsNum = Number(localReps)
   const weightHasValue = localWeight.trim() !== ''
@@ -129,7 +144,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
       </View>
       <TouchableOpacity
         style={[styles.validateBtn, !valid && styles.validateBtnDisabled]}
-        onPress={onValidate}
+        onPress={handleValidate}
         disabled={!valid}
         activeOpacity={0.7}
       >
@@ -194,8 +209,8 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
               validated={validated}
               onUpdateInput={onUpdateInput}
               repsTarget={sessionExercise.repsTarget}
-              onValidate={async () => {
-                const { valid } = validateSetInput(input.weight, input.reps)
+              onValidate={async (weight, reps) => {
+                const { valid } = validateSetInput(weight, reps)
                 if (!valid) {
                   haptics.onError()
                   return
