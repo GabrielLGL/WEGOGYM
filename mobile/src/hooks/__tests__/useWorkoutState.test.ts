@@ -3,6 +3,7 @@ jest.mock('../../model/utils/databaseHelpers', () => ({
   saveWorkoutSet: jest.fn(),
   getMaxWeightForExercise: jest.fn(),
   deleteWorkoutSet: jest.fn(),
+  getLastSetsForExercises: jest.fn(),
 }))
 jest.mock('../../model/utils/validationHelpers', () => ({
   validateSetInput: jest.fn(),
@@ -10,25 +11,26 @@ jest.mock('../../model/utils/validationHelpers', () => ({
 
 import { renderHook, act } from '@testing-library/react-native'
 import { useWorkoutState } from '../useWorkoutState'
-import { saveWorkoutSet, getMaxWeightForExercise, deleteWorkoutSet } from '../../model/utils/databaseHelpers'
+import {
+  saveWorkoutSet,
+  getMaxWeightForExercise,
+  deleteWorkoutSet,
+  getLastSetsForExercises,
+} from '../../model/utils/databaseHelpers'
 import { validateSetInput } from '../../model/utils/validationHelpers'
 
 const mockSaveWorkoutSet = saveWorkoutSet as jest.Mock
 const mockGetMaxWeightForExercise = getMaxWeightForExercise as jest.Mock
 const mockDeleteWorkoutSet = deleteWorkoutSet as jest.Mock
+const mockGetLastSetsForExercises = getLastSetsForExercises as jest.Mock
 const mockValidateSetInput = validateSetInput as jest.Mock
 
-const createMockSessionExercise = (
-  id: string,
-  setsTarget = 3,
-  weightTarget: number | null = 60,
-  repsTarget: string | null = '10'
-) => ({
+// exercise.id doit être accessible directement (buildInitialInputs) ET via fetch (validateSet)
+const createMockSessionExercise = (id: string, setsTarget = 3) => ({
   id,
   setsTarget,
-  weightTarget,
-  repsTarget,
   exercise: {
+    id: `ex-${id}`,
     fetch: jest.fn().mockResolvedValue({ id: `ex-${id}` }),
   },
 })
@@ -40,6 +42,7 @@ describe('useWorkoutState', () => {
     mockGetMaxWeightForExercise.mockResolvedValue(0)
     mockSaveWorkoutSet.mockResolvedValue(undefined)
     mockDeleteWorkoutSet.mockResolvedValue(undefined)
+    mockGetLastSetsForExercises.mockResolvedValue({})
   })
 
   // --- Initial state / buildInitialInputs ---
@@ -60,38 +63,69 @@ describe('useWorkoutState', () => {
       expect(result.current).toHaveProperty('validateSet')
     })
 
-    it('should build initial inputs from session exercises', () => {
-      const se1 = createMockSessionExercise('se-1', 3, 60, '10')
+    it('should build initial inputs with empty weight and reps synchronously', () => {
+      const se1 = createMockSessionExercise('se-1', 3)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
-      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '60', reps: '10' })
-      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '60', reps: '10' })
-      expect(result.current.setInputs['se-1_3']).toEqual({ weight: '60', reps: '10' })
+      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '', reps: '' })
+      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '', reps: '' })
+      expect(result.current.setInputs['se-1_3']).toEqual({ weight: '', reps: '' })
     })
 
-    it('should handle null weightTarget and repsTarget as empty strings', () => {
-      const se1 = createMockSessionExercise('se-1', 2, null, null)
+    it('should prefill weights from getLastSetsForExercises after mount', async () => {
+      mockGetLastSetsForExercises.mockResolvedValue({ 'ex-se-1': { 1: 80, 2: 80, 3: 80 } })
+      const se1 = createMockSessionExercise('se-1', 3)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      await act(async () => {})
+
+      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '80', reps: '' })
+      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '80', reps: '' })
+      expect(result.current.setInputs['se-1_3']).toEqual({ weight: '80', reps: '' })
+    })
+
+    it('should keep reps always empty even when history provides weights', async () => {
+      mockGetLastSetsForExercises.mockResolvedValue({ 'ex-se-1': { 1: 60 } })
+      const se1 = createMockSessionExercise('se-1', 1)
+      const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      await act(async () => {})
+
+      expect(result.current.setInputs['se-1_1'].reps).toBe('')
+    })
+
+    it('should leave weight empty when no history data available', async () => {
+      // mockGetLastSetsForExercises returns {} by default
+      const se1 = createMockSessionExercise('se-1', 2)
+      const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      await act(async () => {})
 
       expect(result.current.setInputs['se-1_1']).toEqual({ weight: '', reps: '' })
       expect(result.current.setInputs['se-1_2']).toEqual({ weight: '', reps: '' })
     })
 
     it('should handle 0 setsTarget (no keys created)', () => {
-      const se1 = createMockSessionExercise('se-1', 0, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 0)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       expect(result.current.setInputs['se-1_1']).toBeUndefined()
     })
 
-    it('should build inputs for multiple exercises', () => {
-      const se1 = createMockSessionExercise('se-1', 2, 50, '8')
-      const se2 = createMockSessionExercise('se-2', 1, 100, '5')
+    it('should prefill weights for multiple exercises from history', async () => {
+      mockGetLastSetsForExercises.mockResolvedValue({
+        'ex-se-1': { 1: 50, 2: 50 },
+        'ex-se-2': { 1: 100 },
+      })
+      const se1 = createMockSessionExercise('se-1', 2)
+      const se2 = createMockSessionExercise('se-2', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any, se2 as any], 'history-1'))
 
-      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '50', reps: '8' })
-      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '50', reps: '8' })
-      expect(result.current.setInputs['se-2_1']).toEqual({ weight: '100', reps: '5' })
+      await act(async () => {})
+
+      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '50', reps: '' })
+      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '50', reps: '' })
+      expect(result.current.setInputs['se-2_1']).toEqual({ weight: '100', reps: '' })
     })
   })
 
@@ -99,7 +133,7 @@ describe('useWorkoutState', () => {
 
   describe('updateSetInput', () => {
     it('should update the weight field for a specific key', () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       act(() => {
@@ -107,11 +141,11 @@ describe('useWorkoutState', () => {
       })
 
       expect(result.current.setInputs['se-1_1'].weight).toBe('75')
-      expect(result.current.setInputs['se-1_1'].reps).toBe('10') // unchanged
+      expect(result.current.setInputs['se-1_1'].reps).toBe('') // unchanged
     })
 
     it('should update the reps field for a specific key', () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       act(() => {
@@ -119,18 +153,18 @@ describe('useWorkoutState', () => {
       })
 
       expect(result.current.setInputs['se-1_1'].reps).toBe('12')
-      expect(result.current.setInputs['se-1_1'].weight).toBe('60') // unchanged
+      expect(result.current.setInputs['se-1_1'].weight).toBe('') // unchanged
     })
 
     it('should preserve other set inputs when updating one', () => {
-      const se1 = createMockSessionExercise('se-1', 2, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 2)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       act(() => {
         result.current.updateSetInput('se-1_1', 'weight', '80')
       })
 
-      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '60', reps: '10' })
+      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '', reps: '' })
     })
 
     it('should create a new key entry when key does not exist', () => {
@@ -175,7 +209,7 @@ describe('useWorkoutState', () => {
 
     it('should return false when input validation fails', async () => {
       mockValidateSetInput.mockReturnValue({ valid: false })
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       let success: boolean
@@ -188,7 +222,7 @@ describe('useWorkoutState', () => {
     })
 
     it('should return false when exercise fetch returns null', async () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       ;(se1 as any).exercise.fetch.mockResolvedValue(null)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
@@ -202,8 +236,13 @@ describe('useWorkoutState', () => {
     })
 
     it('should save workout set and update validatedSets + totalVolume', async () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+      })
 
       let success: boolean
       await act(async () => {
@@ -225,8 +264,13 @@ describe('useWorkoutState', () => {
 
     it('should mark set as PR when weight exceeds previous max', async () => {
       mockGetMaxWeightForExercise.mockResolvedValue(50) // previous max is 50
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10') // new weight is 60
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+      })
 
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
@@ -240,8 +284,13 @@ describe('useWorkoutState', () => {
 
     it('should not mark as PR when weight equals previous max', async () => {
       mockGetMaxWeightForExercise.mockResolvedValue(60) // same as current weight
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+      })
 
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
@@ -252,8 +301,13 @@ describe('useWorkoutState', () => {
 
     it('should not mark as PR when maxWeight is 0 (no history)', async () => {
       mockGetMaxWeightForExercise.mockResolvedValue(0)
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+      })
 
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
@@ -263,8 +317,18 @@ describe('useWorkoutState', () => {
     })
 
     it('should accumulate totalVolume across multiple validated sets', async () => {
-      const se1 = createMockSessionExercise('se-1', 2, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 2)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
+
+      // Flush the initial async effect before setting inputs (effect resets setInputs via getLastSetsForExercises)
+      await act(async () => {})
+
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+        result.current.updateSetInput('se-1_2', 'weight', '60')
+        result.current.updateSetInput('se-1_2', 'reps', '10')
+      })
 
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
@@ -278,9 +342,19 @@ describe('useWorkoutState', () => {
     })
 
     it('should validate sets for different exercises independently', async () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
-      const se2 = createMockSessionExercise('se-2', 1, 100, '5')
+      const se1 = createMockSessionExercise('se-1', 1)
+      const se2 = createMockSessionExercise('se-2', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any, se2 as any], 'history-1'))
+
+      // Flush the initial async effect before setting inputs
+      await act(async () => {})
+
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+        result.current.updateSetInput('se-2_1', 'weight', '100')
+        result.current.updateSetInput('se-2_1', 'reps', '5')
+      })
 
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
@@ -294,7 +368,7 @@ describe('useWorkoutState', () => {
 
     it('should return false on saveWorkoutSet error', async () => {
       mockSaveWorkoutSet.mockRejectedValue(new Error('Save failed'))
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       let success: boolean
@@ -308,13 +382,14 @@ describe('useWorkoutState', () => {
       expect(result.current.totalVolume).toBe(0)
     })
 
-    it('should validate set using updated weight from updateSetInput', async () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+    it('should validate set using updated weight and reps from updateSetInput', async () => {
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
-      // User changes weight to 80
+      // User sets weight to 80 and reps to 10
       act(() => {
         result.current.updateSetInput('se-1_1', 'weight', '80')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
       })
 
       await act(async () => {
@@ -357,16 +432,20 @@ describe('useWorkoutState', () => {
       expect(mockDeleteWorkoutSet).not.toHaveBeenCalled()
     })
 
-    it('should return false when exercise fetch returns null', async () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+    it('should return false when exercise fetch returns null on unvalidate', async () => {
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
-      // First validate the set
+      // Set inputs and validate first
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+      })
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
       })
 
-      // Make exercise fetch return null
+      // Make exercise fetch return null for the unvalidate call
       ;(se1 as any).exercise.fetch.mockResolvedValue(null)
 
       let success: boolean
@@ -379,9 +458,13 @@ describe('useWorkoutState', () => {
     })
 
     it('should delete set from DB and remove from validatedSets', async () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+      })
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
       })
@@ -398,9 +481,18 @@ describe('useWorkoutState', () => {
     })
 
     it('should subtract volume when unvalidating', async () => {
-      const se1 = createMockSessionExercise('se-1', 2, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 2)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
+      // Flush the initial async effect before setting inputs
+      await act(async () => {})
+
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+        result.current.updateSetInput('se-1_2', 'weight', '60')
+        result.current.updateSetInput('se-1_2', 'reps', '10')
+      })
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
         await result.current.validateSet(se1 as any, 2)
@@ -415,9 +507,13 @@ describe('useWorkoutState', () => {
     })
 
     it('should return false on deleteWorkoutSet error', async () => {
-      const se1 = createMockSessionExercise('se-1', 1, 60, '10')
+      const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
+      act(() => {
+        result.current.updateSetInput('se-1_1', 'weight', '60')
+        result.current.updateSetInput('se-1_1', 'reps', '10')
+      })
       await act(async () => {
         await result.current.validateSet(se1 as any, 1)
       })
