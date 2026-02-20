@@ -55,6 +55,76 @@ describe('sentry', () => {
         initSentry()
       }).not.toThrow()
     })
+
+    it('appelle Sentry.init quand EXPO_PUBLIC_SENTRY_DSN est fourni', () => {
+      // SENTRY_DSN est une constante module-level : isolateModules recharge le module
+      // avec la variable d'env déjà positionnée
+      jest.isolateModules(() => {
+        process.env.EXPO_PUBLIC_SENTRY_DSN = 'https://test@o123.ingest.sentry.io/123'
+
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { initSentry: initSentryFresh } = require('../sentry')
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const SentryFresh = require('@sentry/react-native')
+
+        initSentryFresh()
+
+        expect((SentryFresh.init as jest.Mock)).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dsn: 'https://test@o123.ingest.sentry.io/123',
+          })
+        )
+
+        delete process.env.EXPO_PUBLIC_SENTRY_DSN
+      })
+    })
+
+    it('Sentry.init est configuré avec les bonnes valeurs (tracesSampleRate, environment, etc.)', () => {
+      jest.isolateModules(() => {
+        process.env.EXPO_PUBLIC_SENTRY_DSN = 'https://test@sentry.io/999'
+
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { initSentry: initSentryFresh } = require('../sentry')
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const SentryFresh = require('@sentry/react-native')
+
+        initSentryFresh()
+
+        const initCall = (SentryFresh.init as jest.Mock).mock.calls[0][0]
+        // __DEV__ is true in Jest → development environment
+        expect(initCall.environment).toBe('development')
+        expect(initCall.tracesSampleRate).toBe(1.0)
+        expect(initCall.debug).toBe(true)
+        expect(typeof initCall.beforeSend).toBe('function')
+
+        delete process.env.EXPO_PUBLIC_SENTRY_DSN
+      })
+    })
+
+    it('beforeSend retourne null en développement et log l\'événement', () => {
+      jest.isolateModules(() => {
+        process.env.EXPO_PUBLIC_SENTRY_DSN = 'https://test@sentry.io/999'
+
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { initSentry: initSentryFresh } = require('../sentry')
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const SentryFresh = require('@sentry/react-native')
+
+        initSentryFresh()
+
+        const initCall = (SentryFresh.init as jest.Mock).mock.calls[0][0]
+        const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+        const fakeEvent = { message: 'test' }
+        const result = initCall.beforeSend(fakeEvent, {})
+
+        // In DEV mode, beforeSend returns null (don't send to Sentry)
+        expect(result).toBeNull()
+        consoleSpy.mockRestore()
+
+        delete process.env.EXPO_PUBLIC_SENTRY_DSN
+      })
+    })
   })
 
   describe('captureError', () => {

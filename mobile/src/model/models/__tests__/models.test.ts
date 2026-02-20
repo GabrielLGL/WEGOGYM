@@ -178,6 +178,225 @@ describe('Program', () => {
       })
     })
   })
+
+  describe('duplicate', () => {
+    const buildMockDB = ({
+      programCount = 2,
+      sessions = [] as Array<{ id: string; name: string; position: number }>,
+      sessionExercises = [] as Array<{
+        position: number
+        setsTarget: number
+        repsTarget: string
+        weightTarget: number
+        exercise: { fetch: jest.Mock }
+      }>,
+    } = {}) => {
+      const mockCreate = jest.fn().mockImplementation(
+        async (fn: (r: Record<string, unknown>) => void) => {
+          const record: Record<string, unknown> = {
+            id: 'new-id',
+            program: { set: jest.fn() },
+            session: { set: jest.fn() },
+            exercise: { set: jest.fn() },
+          }
+          fn(record)
+          return record
+        }
+      )
+
+      const mockDB = {
+        write: jest.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+        get: jest.fn().mockImplementation((table: string) => {
+          if (table === 'programs') {
+            return {
+              query: jest.fn().mockReturnValue({
+                fetchCount: jest.fn().mockResolvedValue(programCount),
+              }),
+              create: mockCreate,
+            }
+          }
+          if (table === 'sessions') {
+            return { create: mockCreate }
+          }
+          if (table === 'session_exercises') {
+            return {
+              query: jest.fn().mockReturnValue({
+                fetch: jest.fn().mockResolvedValue(sessionExercises),
+              }),
+              create: mockCreate,
+            }
+          }
+          return { create: mockCreate }
+        }),
+      }
+
+      return { mockDB, mockCreate }
+    }
+
+    it('crée un nouveau programme nommé "[Nom] (Copie)" à la position courante', async () => {
+      const { mockDB, mockCreate } = buildMockDB({ programCount: 3 })
+
+      const program = Object.create(Program.prototype) as Program
+      ;(program as unknown as Record<string, unknown>).name = 'PPL'
+      ;(program as unknown as Record<string, unknown>).database = mockDB
+      ;(program as unknown as Record<string, unknown>).sessions = {
+        fetch: jest.fn().mockResolvedValue([]),
+      }
+
+      await program.duplicate()
+
+      expect(mockDB.write).toHaveBeenCalledTimes(1)
+      // Only 1 create: the new program (no sessions)
+      expect(mockCreate).toHaveBeenCalledTimes(1)
+      const createCallback = mockCreate.mock.calls[0][0]
+      const captured: Record<string, unknown> = {}
+      createCallback(captured)
+      expect(captured.name).toBe('PPL (Copie)')
+      expect(captured.position).toBe(3)
+    })
+
+    it('duplique les sessions du programme original', async () => {
+      const mockSessions = [
+        { id: 'sess-1', name: 'Push', position: 0 },
+        { id: 'sess-2', name: 'Pull', position: 1 },
+      ]
+      const { mockDB, mockCreate } = buildMockDB({ sessions: mockSessions })
+
+      const program = Object.create(Program.prototype) as Program
+      ;(program as unknown as Record<string, unknown>).name = 'PPL'
+      ;(program as unknown as Record<string, unknown>).database = mockDB
+      ;(program as unknown as Record<string, unknown>).sessions = {
+        fetch: jest.fn().mockResolvedValue(mockSessions),
+      }
+
+      await program.duplicate()
+
+      // 1 program + 2 sessions = 3 creates (no session_exercises mock returned)
+      expect(mockCreate).toHaveBeenCalledTimes(3)
+    })
+
+    it('duplique les exercices de chaque session', async () => {
+      const mockExercise = { id: 'ex-1' }
+      const mockSE = {
+        position: 0,
+        setsTarget: 3,
+        repsTarget: '10',
+        weightTarget: 60,
+        exercise: { fetch: jest.fn().mockResolvedValue(mockExercise) },
+      }
+      const mockSessions = [{ id: 'sess-1', name: 'Push', position: 0 }]
+      const { mockDB, mockCreate } = buildMockDB({
+        sessions: mockSessions,
+        sessionExercises: [mockSE],
+      })
+
+      const program = Object.create(Program.prototype) as Program
+      ;(program as unknown as Record<string, unknown>).name = 'PPL'
+      ;(program as unknown as Record<string, unknown>).database = mockDB
+      ;(program as unknown as Record<string, unknown>).sessions = {
+        fetch: jest.fn().mockResolvedValue(mockSessions),
+      }
+
+      await program.duplicate()
+
+      // 1 program + 1 session + 1 session_exercise = 3 creates
+      expect(mockCreate).toHaveBeenCalledTimes(3)
+    })
+
+    it("n'inclut pas un session_exercise si exercise.fetch retourne null", async () => {
+      const mockSENull = {
+        position: 0,
+        setsTarget: 3,
+        repsTarget: '10',
+        weightTarget: 60,
+        exercise: { fetch: jest.fn().mockResolvedValue(null) },
+      }
+      const mockSessions = [{ id: 'sess-1', name: 'Push', position: 0 }]
+      const { mockDB, mockCreate } = buildMockDB({
+        sessions: mockSessions,
+        sessionExercises: [mockSENull],
+      })
+
+      const program = Object.create(Program.prototype) as Program
+      ;(program as unknown as Record<string, unknown>).name = 'PPL'
+      ;(program as unknown as Record<string, unknown>).database = mockDB
+      ;(program as unknown as Record<string, unknown>).sessions = {
+        fetch: jest.fn().mockResolvedValue(mockSessions),
+      }
+
+      await program.duplicate()
+
+      // 1 program + 1 session = 2 creates (no session_exercise because exercise is null)
+      expect(mockCreate).toHaveBeenCalledTimes(2)
+    })
+
+    it('copie correctement les champs setsTarget, repsTarget, weightTarget', async () => {
+      const mockExercise = { id: 'ex-1' }
+      const mockSE = {
+        position: 2,
+        setsTarget: 4,
+        repsTarget: '8-12',
+        weightTarget: 80,
+        exercise: { fetch: jest.fn().mockResolvedValue(mockExercise) },
+      }
+      const mockSessions = [{ id: 'sess-1', name: 'Push', position: 0 }]
+
+      let seCreateCallback: ((r: Record<string, unknown>) => void) | null = null
+      const mockCreate = jest.fn().mockImplementation(
+        async (fn: (r: Record<string, unknown>) => void) => {
+          seCreateCallback = fn
+          const record: Record<string, unknown> = {
+            id: 'new-id',
+            program: { set: jest.fn() },
+            session: { set: jest.fn() },
+            exercise: { set: jest.fn() },
+          }
+          fn(record)
+          return record
+        }
+      )
+
+      const mockDB = {
+        write: jest.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+        get: jest.fn().mockImplementation((table: string) => {
+          if (table === 'programs') {
+            return {
+              query: jest.fn().mockReturnValue({ fetchCount: jest.fn().mockResolvedValue(1) }),
+              create: mockCreate,
+            }
+          }
+          if (table === 'sessions') return { create: mockCreate }
+          if (table === 'session_exercises') {
+            return {
+              query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([mockSE]) }),
+              create: mockCreate,
+            }
+          }
+          return { create: mockCreate }
+        }),
+      }
+
+      const program = Object.create(Program.prototype) as Program
+      ;(program as unknown as Record<string, unknown>).name = 'Test'
+      ;(program as unknown as Record<string, unknown>).database = mockDB
+      ;(program as unknown as Record<string, unknown>).sessions = {
+        fetch: jest.fn().mockResolvedValue(mockSessions),
+      }
+
+      await program.duplicate()
+
+      // The last create call should be for the session_exercise
+      const lastCallRecord: Record<string, unknown> = {
+        session: { set: jest.fn() },
+        exercise: { set: jest.fn() },
+      }
+      if (seCreateCallback) (seCreateCallback as (r: Record<string, unknown>) => void)(lastCallRecord)
+      expect(lastCallRecord.position).toBe(2)
+      expect(lastCallRecord.setsTarget).toBe(4)
+      expect(lastCallRecord.repsTarget).toBe('8-12')
+      expect(lastCallRecord.weightTarget).toBe(80)
+    })
+  })
 })
 
 // --- Session ---
