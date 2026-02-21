@@ -28,6 +28,30 @@ export function createOpenAIProvider(apiKey: string): AIProvider {
         clear()
       }
 
+      if (response.status === 429) {
+        await new Promise<void>(r => setTimeout(r, 1000))
+        const retry = withTimeout(30000)
+        try {
+          response = await fetch(OPENAI_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model: 'gpt-4.1-mini',
+              max_tokens: 2048,
+              messages: [
+                { role: 'user', content: buildPrompt(form, context) },
+              ],
+            }),
+            signal: retry.signal,
+          })
+        } finally {
+          retry.clear()
+        }
+      }
+
       if (!response.ok) {
         throw new Error(`OpenAI API erreur ${response.status}`)
       }
