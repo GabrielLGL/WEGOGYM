@@ -58,4 +58,7 @@ Le prop `animationSpeed` n'a plus de sens avec timing → le remplacer par `anim
 Aucune dépendance — groupe unique.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260221-1000
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1000-fix-bottomsheet-animation.md

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Easing, Dimensions } from 'react-native'
 import { Portal } from '@gorhom/portal'
 import { colors, borderRadius, spacing, fontSize } from '../theme'
 
@@ -10,7 +10,7 @@ interface BottomSheetProps {
   onClose: () => void
   title?: string
   children: React.ReactNode
-  animationSpeed?: number // Vitesse du spring (défaut: 12)
+  animationDuration?: number // Durée de l'animation en ms (défaut: 250)
 }
 
 /**
@@ -23,7 +23,7 @@ interface BottomSheetProps {
  * @param onClose - Callback appelé quand l'utilisateur ferme le sheet
  * @param title - Titre optionnel affiché en haut du sheet
  * @param children - Contenu du bottom sheet
- * @param animationSpeed - Vitesse de l'animation spring (défaut: 12)
+ * @param animationDuration - Durée de l'animation en ms (défaut: 250)
  *
  * @example
  * const [isVisible, setIsVisible] = useState(false)
@@ -46,7 +46,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   onClose,
   title,
   children,
-  animationSpeed = 12,
+  animationDuration = 250,
 }) => {
   const [showContent, setShowContent] = useState(visible)
   const slideAnim = useRef(new Animated.Value(screenHeight)).current
@@ -61,11 +61,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           duration: 200,
           useNativeDriver: true,
         }),
-        Animated.spring(slideAnim, {
+        Animated.timing(slideAnim, {
           toValue: 0,
+          duration: animationDuration,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
-          bounciness: 4,
-          speed: animationSpeed,
         }),
       ]).start()
     } else {
@@ -82,7 +82,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         }),
       ]).start(() => setShowContent(false))
     }
-  }, [visible, animationSpeed])
+  }, [visible, animationDuration])
 
   if (!showContent) return null
 

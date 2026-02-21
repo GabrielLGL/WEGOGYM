@@ -66,10 +66,10 @@ describe('BottomSheet', () => {
       expect(getByText('Option 2')).toBeTruthy()
     })
 
-    it('se rend sans crash avec animationSpeed personnalisé', () => {
+    it('se rend sans crash avec animationDuration personnalisé', () => {
       expect(() =>
         render(
-          <BottomSheet visible={true} onClose={jest.fn()} animationSpeed={20}>
+          <BottomSheet visible={true} onClose={jest.fn()} animationDuration={300}>
             <Text>Contenu</Text>
           </BottomSheet>
         )
