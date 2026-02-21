@@ -112,4 +112,7 @@ Lancer mentalement `npx tsc --noEmit` — s'assurer que :
 Ce groupe dépend de : **Groupe C** (programGenerator/index.ts doit exister)
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260221-1725
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1725-feat-programgenerator-integration.md

@@ -10,6 +10,8 @@ import { createClaudeProvider } from './claudeProvider'
 import { createOpenAIProvider, testOpenAIConnection } from './openaiProvider'
 import { createGeminiProvider, testGeminiConnection } from './geminiProvider'
 import type { AIFormData, AIProvider, DBContext, GeneratedPlan } from './types'
+import { generateProgram, toDatabasePlan } from './programGenerator'
+import type { UserProfile } from './programGenerator'
 
 function selectProvider(aiProvider: string | null, apiKey: string | null): AIProvider {
   if (!apiKey || !aiProvider || aiProvider === 'offline') return offlineEngine
@@ -151,3 +153,22 @@ export async function testProviderConnection(
   }
   await provider.generate(testForm, { exercises: [{ name: 'Développé couché', muscles: ['Pecs'] }], recentMuscles: [], prs: {} })
 }
+
+/**
+ * Génère un plan depuis un profil utilisateur structuré (programGenerator).
+ * Alternative offline à generatePlan() qui utilise l'offlineEngine.
+ * Utilisable depuis n'importe quel écran sans AIFormData.
+ *
+ * @param profile - Profil utilisateur typé (goal, level, equipment, injuries, etc.)
+ * @param programName - Nom du programme à créer
+ * @returns GeneratedPlan compatible avec importGeneratedPlan()
+ */
+export async function generateFromProfile(
+  profile: UserProfile,
+  programName: string,
+): Promise<GeneratedPlan> {
+  const program = await generateProgram(profile, database)
+  return toDatabasePlan(program, programName)
+}
+
+export type { UserProfile }
