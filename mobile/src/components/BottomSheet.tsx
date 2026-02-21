@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Easing, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Easing, Dimensions, BackHandler } from 'react-native'
 import { Portal } from '@gorhom/portal'
 import { colors, borderRadius, spacing, fontSize } from '../theme'
 
@@ -51,6 +51,15 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const [showContent, setShowContent] = useState(visible)
   const slideAnim = useRef(new Animated.Value(screenHeight)).current
   const fadeAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    if (!visible) return
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      onClose()
+      return true
+    })
+    return () => subscription.remove()
+  }, [visible, onClose])
 
   useEffect(() => {
     if (visible) {

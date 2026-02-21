@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text } from 'react-native'
+import { Text, BackHandler } from 'react-native'
 import { render, act } from '@testing-library/react-native'
 import { BottomSheet } from '../BottomSheet'
 
@@ -74,6 +74,41 @@ describe('BottomSheet', () => {
           </BottomSheet>
         )
       ).not.toThrow()
+    })
+  })
+
+  describe('bouton retour Android (BackHandler)', () => {
+    it('appelle onClose quand hardwareBackPress est déclenché et visible=true', () => {
+      const onClose = jest.fn()
+      let capturedHandler: (() => boolean) | null = null
+      jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_event, handler) => {
+        capturedHandler = handler as () => boolean
+        return { remove: jest.fn() }
+      })
+
+      render(
+        <BottomSheet visible={true} onClose={onClose}>
+          <Text>Contenu</Text>
+        </BottomSheet>
+      )
+
+      act(() => { capturedHandler?.() })
+
+      expect(onClose).toHaveBeenCalledTimes(1)
+      jest.restoreAllMocks()
+    })
+
+    it('n\'enregistre pas de handler quand visible=false', () => {
+      const addSpy = jest.spyOn(BackHandler, 'addEventListener')
+
+      render(
+        <BottomSheet visible={false} onClose={jest.fn()}>
+          <Text>Contenu</Text>
+        </BottomSheet>
+      )
+
+      expect(addSpy).not.toHaveBeenCalled()
+      jest.restoreAllMocks()
     })
   })
 

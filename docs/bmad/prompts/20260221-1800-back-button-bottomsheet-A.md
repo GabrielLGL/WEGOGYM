@@ -51,4 +51,7 @@ useEffect(() => {
 Aucune dépendance sur d'autres groupes.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260221-1800
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1800-fix-back-button-bottomsheet.md
