@@ -102,11 +102,20 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
       const isGemini403 = aiProvider === 'gemini' && (errorMessage.includes('403') || errorMessage.includes('API_NOT_ENABLED'))
       const isGemini429 = aiProvider === 'gemini' && errorMessage.includes('429')
+      const isOpenAI429 = aiProvider === 'openai' && errorMessage.includes('429')
+      const isOpenAI401 = aiProvider === 'openai' && errorMessage.includes('401')
+      const isClaude401 = aiProvider === 'claude' && errorMessage.includes('401')
       const hint = isGemini403
         ? '\n\nVérifiez que l\'API Generative Language est activée dans Google Cloud Console.'
         : isGemini429
           ? '\n\nFree tier Gemini non disponible en Europe (restriction Google depuis déc. 2025).\n\n• Activez la facturation sur console.cloud.google.com (coût très faible)\n• OU utilisez le provider Claude ou OpenAI'
-          : ''
+          : isOpenAI429
+            ? '\n\nQuota OpenAI insuffisant.\n\n• Ajoutez des crédits sur platform.openai.com/settings/billing (min. $5)\n• OU utilisez Claude ou Gemini'
+            : isOpenAI401
+              ? '\n\nClé API OpenAI invalide.\n\nGénérez une nouvelle clé sur platform.openai.com/api-keys'
+              : isClaude401
+                ? '\n\nClé API Claude invalide.\n\nGénérez une nouvelle clé sur console.anthropic.com'
+                : ''
       Alert.alert('Erreur de connexion ❌', `Impossible de joindre ${aiProvider}.\n\n${errorMessage}${hint}`)
     } finally {
       setIsTesting(false)

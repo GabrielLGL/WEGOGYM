@@ -302,6 +302,63 @@ describe('SettingsContent — section IA', () => {
       expect(Alert.alert).toHaveBeenCalledWith('Erreur de connexion ❌', expect.stringContaining('gemini'))
     })
   })
+
+  it('affiche un hint billing quand OpenAI retourne 429', async () => {
+    mockTestProviderConnection.mockRejectedValue(new Error('Error 429 Too Many Requests'))
+    jest.spyOn(Alert, 'alert')
+    const mockUpdate = jest.fn()
+    const user = makeUser({ aiProvider: 'openai', aiApiKey: 'sk-openai-key', update: mockUpdate })
+
+    const { findByText } = render(<SettingsContent user={user as never} />)
+
+    const testButton = await findByText('Tester la connexion')
+    fireEvent.press(testButton)
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Erreur de connexion ❌',
+        expect.stringContaining('platform.openai.com/settings/billing')
+      )
+    })
+  })
+
+  it('affiche un hint api-keys quand OpenAI retourne 401', async () => {
+    mockTestProviderConnection.mockRejectedValue(new Error('Error 401 Unauthorized'))
+    jest.spyOn(Alert, 'alert')
+    const mockUpdate = jest.fn()
+    const user = makeUser({ aiProvider: 'openai', aiApiKey: 'sk-invalid', update: mockUpdate })
+
+    const { findByText } = render(<SettingsContent user={user as never} />)
+
+    const testButton = await findByText('Tester la connexion')
+    fireEvent.press(testButton)
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Erreur de connexion ❌',
+        expect.stringContaining('platform.openai.com/api-keys')
+      )
+    })
+  })
+
+  it('affiche un hint console.anthropic.com quand Claude retourne 401', async () => {
+    mockTestProviderConnection.mockRejectedValue(new Error('Error 401 Unauthorized'))
+    jest.spyOn(Alert, 'alert')
+    const mockUpdate = jest.fn()
+    const user = makeUser({ aiProvider: 'claude', aiApiKey: 'sk-ant-invalid', update: mockUpdate })
+
+    const { findByText } = render(<SettingsContent user={user as never} />)
+
+    const testButton = await findByText('Tester la connexion')
+    fireEvent.press(testButton)
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Erreur de connexion ❌',
+        expect.stringContaining('console.anthropic.com')
+      )
+    })
+  })
 })
 
 describe('SettingsContent — section À propos', () => {
