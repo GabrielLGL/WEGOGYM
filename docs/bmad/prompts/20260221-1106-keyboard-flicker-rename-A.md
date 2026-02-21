@@ -91,4 +91,7 @@ cd mobile && npx tsc --noEmit
 Aucune dépendance inter-groupes. Seul groupe.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260221-1115
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1115-fix-keyboard-flicker-rename.md

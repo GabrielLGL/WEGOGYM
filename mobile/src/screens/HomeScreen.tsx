@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, StatusBar, Animated, ScrollView, BackHandler, Alert } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, StatusBar, Animated, ScrollView, BackHandler, Alert, InteractionManager } from 'react-native'
 import { database } from '../model/index'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
@@ -281,7 +281,7 @@ const HomeScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           onClose={() => setIsOptionsVisible(false)} 
           title={selectedProgram?.name}
         >
-          <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); if (selectedProgram) prepareRenameProgram(selectedProgram); setIsProgramModalVisible(true) }}>
+          <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedProgram) prepareRenameProgram(selectedProgram); setIsOptionsVisible(false); InteractionManager.runAfterInteractions(() => { setIsProgramModalVisible(true) }) }}>
             <Text style={styles.sheetOptionIcon}>✏️</Text><Text style={styles.sheetOptionText}>Renommer le Programme</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateProgram}>
@@ -298,7 +298,7 @@ const HomeScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           onClose={() => setIsSessionOptionsVisible(false)}
           title={selectedSession?.name}
         >
-          <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsSessionOptionsVisible(false); if (selectedSession) prepareRenameSession(selectedSession); setIsSessionModalVisible(true) }}>
+          <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedSession) prepareRenameSession(selectedSession); setIsSessionOptionsVisible(false); InteractionManager.runAfterInteractions(() => { setIsSessionModalVisible(true) }) }}>
             <Text style={styles.sheetOptionIcon}>✏️</Text><Text style={styles.sheetOptionText}>Renommer la Séance</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateSession}>
