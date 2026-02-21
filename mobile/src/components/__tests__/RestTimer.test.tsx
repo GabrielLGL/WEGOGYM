@@ -119,6 +119,60 @@ describe('RestTimer', () => {
 
       expect(mockCancel).toHaveBeenCalledWith('notif-id-123')
     })
+
+    it('gère l\'erreur de scheduleRestEndNotification sans crash', async () => {
+      mockSchedule.mockRejectedValueOnce(new Error('schedule failed'))
+
+      render(<RestTimer duration={60} onClose={jest.fn()} notificationEnabled={true} />)
+
+      // Flush la promesse rejetée — le .catch handler ne doit pas throw
+      await act(async () => {
+        jest.advanceTimersByTime(0)
+      })
+
+      expect(mockSchedule).toHaveBeenCalledWith(60)
+    })
+
+    it('annule la notification dans finishTimer quand notificationIdRef est défini', async () => {
+      const { unmount } = render(
+        <RestTimer duration={1} onClose={jest.fn()} notificationEnabled={true} />
+      )
+
+      // Laisser la promesse se résoudre pour que notificationIdRef soit défini
+      await act(async () => {
+        jest.advanceTimersByTime(0)
+      })
+
+      // Avancer le timer jusqu'à la fin du décompte (> 1000ms)
+      await act(async () => {
+        jest.advanceTimersByTime(1100)
+      })
+
+      expect(mockCancel).toHaveBeenCalledWith('notif-id-123')
+      unmount()
+    })
+
+    it('annule la notification dans closeTimer quand notificationIdRef est défini', async () => {
+      const { getByText, unmount } = render(
+        <RestTimer duration={60} onClose={jest.fn()} notificationEnabled={true} />
+      )
+
+      // Laisser la promesse se résoudre
+      await act(async () => {
+        jest.advanceTimersByTime(0)
+      })
+
+      // Appuyer sur "Ignorer" → closeTimer appelé
+      fireEvent.press(getByText('Ignorer'))
+
+      // Laisser l'animation de fermeture (200ms)
+      await act(async () => {
+        jest.advanceTimersByTime(300)
+      })
+
+      expect(mockCancel).toHaveBeenCalledWith('notif-id-123')
+      unmount()
+    })
   })
 
   describe('interaction utilisateur', () => {

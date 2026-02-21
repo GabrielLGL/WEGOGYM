@@ -120,6 +120,65 @@ describe('Exercise', () => {
       expect((exercise as unknown as { _muscles: string })._muscles).toBe('[]')
     })
   })
+
+  describe('deleteAllAssociatedData', () => {
+    it('supprime session_exercises, logs et l\'exercice en batch unique', async () => {
+      const exercise = Object.create(Exercise.prototype) as Exercise
+      const mockSe1 = { prepareDestroyPermanently: jest.fn().mockReturnValue('destroy-se-1') }
+      const mockLog1 = { prepareDestroyPermanently: jest.fn().mockReturnValue('destroy-log-1') }
+      const mockBatch = jest.fn()
+
+      ;(exercise as unknown as Record<string, unknown>).id = 'ex-1'
+      ;(exercise as unknown as Record<string, unknown>).collections = {
+        get: jest.fn().mockImplementation((table: string) => ({
+          query: jest.fn().mockReturnValue({
+            fetch: jest.fn().mockResolvedValue(
+              table === 'session_exercises' ? [mockSe1] : [mockLog1]
+            ),
+          }),
+        })),
+      }
+      ;(exercise as unknown as Record<string, unknown>).database = {
+        write: jest.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+        batch: mockBatch,
+      }
+      ;(exercise as unknown as Record<string, unknown>).prepareDestroyPermanently =
+        jest.fn().mockReturnValue('destroy-self')
+
+      await exercise.deleteAllAssociatedData()
+
+      expect(mockBatch).toHaveBeenCalledTimes(1)
+      const batchArgs = mockBatch.mock.calls[0]
+      expect(batchArgs).toContain('destroy-se-1')
+      expect(batchArgs).toContain('destroy-log-1')
+      expect(batchArgs).toContain('destroy-self')
+    })
+
+    it("fonctionne quand il n'y a aucun lien (collections vides)", async () => {
+      const exercise = Object.create(Exercise.prototype) as Exercise
+      const mockBatch = jest.fn()
+
+      ;(exercise as unknown as Record<string, unknown>).id = 'ex-2'
+      ;(exercise as unknown as Record<string, unknown>).collections = {
+        get: jest.fn().mockReturnValue({
+          query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }),
+        }),
+      }
+      ;(exercise as unknown as Record<string, unknown>).database = {
+        write: jest.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+        batch: mockBatch,
+      }
+      ;(exercise as unknown as Record<string, unknown>).prepareDestroyPermanently =
+        jest.fn().mockReturnValue('destroy-self')
+
+      await exercise.deleteAllAssociatedData()
+
+      expect(mockBatch).toHaveBeenCalledTimes(1)
+      const batchArgs = mockBatch.mock.calls[0]
+      expect(batchArgs).toHaveLength(1)
+      expect(batchArgs).toContain('destroy-self')
+    })
+  })
 })
 
 // --- History ---

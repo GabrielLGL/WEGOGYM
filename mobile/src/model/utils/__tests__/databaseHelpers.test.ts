@@ -20,6 +20,9 @@ import {
   getLastPerformanceForExercise,
   importGeneratedPlan,
   importGeneratedSession,
+  getNextPosition,
+  deleteWorkoutSet,
+  getLastSetsForExercises,
 } from '../databaseHelpers'
 import { database } from '../../index'
 import Exercise from '../../models/Exercise'
@@ -1181,6 +1184,152 @@ describe('databaseHelpers', () => {
       }))
 
       await expect(markOnboardingCompleted()).resolves.toBeUndefined()
+    })
+  })
+
+  describe('getNextPosition', () => {
+    afterEach(() => mockGet.mockReset())
+
+    it('retourne 0 quand la collection est vide', async () => {
+      const mockFetchCount = jest.fn().mockResolvedValue(0)
+      mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetchCount: mockFetchCount }) })
+
+      const result = await getNextPosition('sessions')
+
+      expect(result).toBe(0)
+      expect(mockGet).toHaveBeenCalledWith('sessions')
+    })
+
+    it('retourne le count de la collection', async () => {
+      const mockFetchCount = jest.fn().mockResolvedValue(5)
+      mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetchCount: mockFetchCount }) })
+
+      const result = await getNextPosition('programs')
+
+      expect(result).toBe(5)
+    })
+
+    it('passe les clauses à la query', async () => {
+      const mockQuery = jest.fn().mockReturnValue({ fetchCount: jest.fn().mockResolvedValue(3) })
+      mockGet.mockReturnValue({ query: mockQuery })
+
+      const clause = { type: 'where', left: 'program_id', comparison: { operator: '=', right: { type: 'value', value: 'prog-1' } } }
+      await getNextPosition('sessions', clause as Parameters<typeof getNextPosition>[1])
+
+      expect(mockQuery).toHaveBeenCalledWith(clause)
+    })
+  })
+
+  describe('deleteWorkoutSet', () => {
+    afterEach(() => mockGet.mockReset())
+
+    it('supprime le set correspondant aux critères', async () => {
+      const mockDestroyPermanently = jest.fn().mockResolvedValue(undefined)
+      const mockSet = { destroyPermanently: mockDestroyPermanently }
+      const mockFetch = jest.fn().mockResolvedValue([mockSet])
+      mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetch: mockFetch }) })
+
+      const mockWrite = jest.fn().mockImplementation(async (fn: () => Promise<unknown>) => fn())
+      ;(database as unknown as { write: jest.Mock }).write = mockWrite
+
+      await deleteWorkoutSet('hist-1', 'ex-1', 1)
+
+      expect(mockDestroyPermanently).toHaveBeenCalledTimes(1)
+      expect(mockWrite).toHaveBeenCalledTimes(1)
+    })
+
+    it('ne fait rien si aucun set trouvé', async () => {
+      const mockFetch = jest.fn().mockResolvedValue([])
+      mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetch: mockFetch }) })
+
+      const mockWrite = jest.fn()
+      ;(database as unknown as { write: jest.Mock }).write = mockWrite
+
+      await deleteWorkoutSet('hist-1', 'ex-1', 99)
+
+      expect(mockWrite).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('getLastSetsForExercises', () => {
+    afterEach(() => mockGet.mockReset())
+
+    it('retourne {} si exerciseIds est vide', async () => {
+      const result = await getLastSetsForExercises([])
+      expect(result).toEqual({})
+      expect(mockGet).not.toHaveBeenCalled()
+    })
+
+    it('retourne {} si aucun set trouvé', async () => {
+      mockGet.mockReturnValue({
+        query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }),
+      })
+
+      const result = await getLastSetsForExercises(['ex-1'])
+      expect(result).toEqual({})
+    })
+
+    it('retourne {} si aucune history trouvée', async () => {
+      const mockSets = [{ history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80 }]
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }) }
+        if (table === 'histories') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) }
+        return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) }
+      })
+
+      const result = await getLastSetsForExercises(['ex-1'])
+      expect(result).toEqual({})
+    })
+
+    it('retourne les poids de la dernière séance par exercice', async () => {
+      const mockSets = [
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80 },
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 2, weight: 75 },
+      ]
+      const mockHistories = [{ id: 'hist-1', startTime: new Date(1000), deletedAt: null }]
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }) }
+        if (table === 'histories') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockHistories) }) }
+        return {}
+      })
+
+      const result = await getLastSetsForExercises(['ex-1'])
+      expect(result).toEqual({ 'ex-1': { 1: 80, 2: 75 } })
+    })
+
+    it('choisit la history la plus récente parmi plusieurs', async () => {
+      const mockSets = [
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 60 },
+        { history: { id: 'hist-2' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 90 },
+      ]
+      const mockHistories = [
+        { id: 'hist-1', startTime: new Date(1000), deletedAt: null },
+        { id: 'hist-2', startTime: new Date(2000), deletedAt: null },
+      ]
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }) }
+        if (table === 'histories') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockHistories) }) }
+        return {}
+      })
+
+      const result = await getLastSetsForExercises(['ex-1'])
+      expect(result['ex-1'][1]).toBe(90)
+    })
+
+    it('ignore les exercices sans sets', async () => {
+      const mockSets = [
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80 },
+      ]
+      const mockHistories = [{ id: 'hist-1', startTime: new Date(1000), deletedAt: null }]
+      mockGet.mockImplementation((table: string) => {
+        if (table === 'sets') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }) }
+        if (table === 'histories') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockHistories) }) }
+        return {}
+      })
+
+      const result = await getLastSetsForExercises(['ex-1', 'ex-2'])
+      expect(result['ex-1']).toBeDefined()
+      expect(result['ex-2']).toBeUndefined()
     })
   })
 })

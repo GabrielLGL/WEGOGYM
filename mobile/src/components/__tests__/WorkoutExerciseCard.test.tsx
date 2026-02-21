@@ -426,6 +426,64 @@ describe('WorkoutExerciseCard', () => {
       const lastCall = mockValidateSetInput.mock.calls[mockValidateSetInput.mock.calls.length - 1]
       expect(lastCall[0]).toBe('100')
     })
+
+    it('appelle onUpdateInput après 300ms pour les reps (debounce reps)', () => {
+      const onUpdateInput = jest.fn()
+      const setInputs: Record<string, SetInputData> = {
+        'se-1_1': { weight: '60', reps: '10' },
+      }
+
+      const { getAllByDisplayValue } = render(
+        <WorkoutExerciseCard
+          sessionExercise={makeSessionExercise({ setsTarget: 1 })}
+          exercise={makeExercise()}
+          lastPerformance={null}
+          historyId="hist-1"
+          setInputs={setInputs}
+          validatedSets={{}}
+          onUpdateInput={onUpdateInput}
+          onValidateSet={jest.fn()}
+          onUnvalidateSet={jest.fn()}
+        />
+      )
+
+      const repsInput = getAllByDisplayValue('10')[0]
+      fireEvent.changeText(repsInput, '12')
+
+      expect(onUpdateInput).not.toHaveBeenCalled()
+
+      jest.advanceTimersByTime(300)
+
+      expect(onUpdateInput).toHaveBeenCalledWith('se-1_1', 'reps', '12')
+    })
+
+    it('flush le debounce reps si validate tapé < 300ms après changement reps', () => {
+      const onUpdateInput = jest.fn()
+      const onValidateSet = jest.fn().mockResolvedValue(undefined)
+      const setInputs: Record<string, SetInputData> = {
+        'se-1_1': { weight: '60', reps: '' },
+      }
+
+      const { getAllByDisplayValue, getByText } = render(
+        <WorkoutExerciseCard
+          sessionExercise={makeSessionExercise({ setsTarget: 1 })}
+          exercise={makeExercise()}
+          lastPerformance={null}
+          historyId="hist-1"
+          setInputs={setInputs}
+          validatedSets={{}}
+          onUpdateInput={onUpdateInput}
+          onValidateSet={onValidateSet}
+          onUnvalidateSet={jest.fn()}
+        />
+      )
+
+      const repsInput = getAllByDisplayValue('')[0]
+      fireEvent.changeText(repsInput, '8')
+      fireEvent.press(getByText('✓'))
+
+      expect(onUpdateInput).toHaveBeenCalledWith('se-1_1', 'reps', '8')
+    })
   })
 
   describe('gestion des inputs manquants', () => {
@@ -446,6 +504,68 @@ describe('WorkoutExerciseCard', () => {
 
       // La série est quand même affichée
       expect(getByText('Série 1')).toBeTruthy()
+    })
+  })
+
+  describe('validation — input invalide', () => {
+    it('ne valide pas quand validateSetInput retourne invalid', () => {
+      const onValidateSet = jest.fn().mockResolvedValue(undefined)
+      const setInputs: Record<string, SetInputData> = {
+        'se-1_1': { weight: '60', reps: '10' },
+      }
+      // First call (WorkoutSetRow render): valid=true so button is enabled
+      // Second call (onValidate callback): valid=false so validation stops
+      mockValidateSetInput
+        .mockReturnValueOnce({ valid: true })
+        .mockReturnValue({ valid: false })
+
+      const { getByText } = render(
+        <WorkoutExerciseCard
+          sessionExercise={makeSessionExercise({ setsTarget: 1 })}
+          exercise={makeExercise()}
+          lastPerformance={null}
+          historyId="hist-1"
+          setInputs={setInputs}
+          validatedSets={{}}
+          onUpdateInput={jest.fn()}
+          onValidateSet={onValidateSet}
+          onUnvalidateSet={jest.fn()}
+        />
+      )
+
+      fireEvent.press(getByText('✓'))
+
+      expect(onValidateSet).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('série validée — dé-validation', () => {
+    it('appelle onUnvalidateSet quand la série validée est pressée', async () => {
+      const onUnvalidateSet = jest.fn().mockResolvedValue(undefined)
+      const setInputs: Record<string, SetInputData> = {
+        'se-1_1': { weight: '60', reps: '10' },
+      }
+      const validatedSets: Record<string, ValidatedSetData> = {
+        'se-1_1': { weight: 60, reps: 10, isPr: false },
+      }
+
+      const { getByText } = render(
+        <WorkoutExerciseCard
+          sessionExercise={makeSessionExercise({ setsTarget: 1 })}
+          exercise={makeExercise()}
+          lastPerformance={null}
+          historyId="hist-1"
+          setInputs={setInputs}
+          validatedSets={validatedSets}
+          onUpdateInput={jest.fn()}
+          onValidateSet={jest.fn()}
+          onUnvalidateSet={onUnvalidateSet}
+        />
+      )
+
+      fireEvent.press(getByText('✓'))
+
+      expect(onUnvalidateSet).toHaveBeenCalledTimes(1)
     })
   })
 })

@@ -428,4 +428,83 @@ describe('useSessionManager', () => {
       expect(result.current.targetWeight).toBe('')
     })
   })
+
+  // --- reorderExercises ---
+
+  describe('reorderExercises', () => {
+    let mockBatch: jest.Mock
+
+    beforeEach(() => {
+      mockBatch = jest.fn().mockResolvedValue(undefined)
+      ;(database as unknown as { batch: jest.Mock }).batch = mockBatch
+    })
+
+    it('should call database.write and database.batch with prepared updates', async () => {
+      const mockPrepareUpdate = jest.fn().mockImplementation((fn: (se: Record<string, unknown>) => void) => {
+        const se: Record<string, unknown> = { position: -1 }
+        fn(se)
+        return se
+      })
+      const items = [
+        { id: 'se-1', prepareUpdate: mockPrepareUpdate },
+        { id: 'se-2', prepareUpdate: mockPrepareUpdate },
+      ]
+      const { result } = renderHook(() => useSessionManager(mockSession as any))
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.reorderExercises(items as any)
+      })
+
+      expect(success!).toBe(true)
+      expect(mockWrite).toHaveBeenCalled()
+      expect(mockBatch).toHaveBeenCalledTimes(1)
+      expect(mockPrepareUpdate).toHaveBeenCalledTimes(2)
+    })
+
+    it('should set position = index for each item', async () => {
+      const capturedPositions: number[] = []
+      const mockPrepareUpdate = jest.fn().mockImplementation((fn: (se: Record<string, unknown>) => void) => {
+        const se: Record<string, unknown> = { position: -1 }
+        fn(se)
+        capturedPositions.push(se.position as number)
+        return se
+      })
+      const items = [
+        { id: 'se-1', prepareUpdate: mockPrepareUpdate },
+        { id: 'se-2', prepareUpdate: mockPrepareUpdate },
+        { id: 'se-3', prepareUpdate: mockPrepareUpdate },
+      ]
+      const { result } = renderHook(() => useSessionManager(mockSession as any))
+
+      await act(async () => {
+        await result.current.reorderExercises(items as any)
+      })
+
+      expect(capturedPositions).toEqual([0, 1, 2])
+    })
+
+    it('should return true with an empty items array', async () => {
+      const { result } = renderHook(() => useSessionManager(mockSession as any))
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.reorderExercises([])
+      })
+
+      expect(success!).toBe(true)
+    })
+
+    it('should return false on error', async () => {
+      mockWrite.mockRejectedValueOnce(new Error('Write failed'))
+      const { result } = renderHook(() => useSessionManager(mockSession as any))
+
+      let success: boolean
+      await act(async () => {
+        success = await result.current.reorderExercises([])
+      })
+
+      expect(success!).toBe(false)
+    })
+  })
 })
