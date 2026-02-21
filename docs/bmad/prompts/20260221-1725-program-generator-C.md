@@ -389,4 +389,7 @@ export { calcWeeklyVolumeByMuscle, distributeVolumeToSessions } from './volumeCa
 Ce groupe dépend de : **Groupe A** (types.ts, tables.ts) + **Groupe B** (splitStrategy.ts, volumeCalculator.ts)
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260221-1730
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1730-feat-program-generator-C.md
