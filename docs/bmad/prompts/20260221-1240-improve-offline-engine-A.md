@@ -179,4 +179,7 @@ Après les modifications, s'assurer que :
 Aucune dépendance externe.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260221-1240
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1240-feat-offline-engine-improvements.md

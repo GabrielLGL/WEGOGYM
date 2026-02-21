@@ -180,17 +180,22 @@ function allocateExercises(
   return alloc
 }
 
-// Sélection : non-utilisés en premier, puis par type (compound_heavy → isolation), shuffle pour les ex æquo
+// Sélection : non-utilisés en premier, muscles non-récents avant récents, puis par type (compound_heavy → isolation)
 function selectExercises(
   candidates: CandidateExercise[],
   count: number,
   usedNames: Set<string>,
+  recentMuscles: string[],
 ): CandidateExercise[] {
   const shuffled = shuffleArray([...candidates])
   const sorted = shuffled.sort((a, b) => {
     const aUsed = usedNames.has(a.name) ? 1 : 0
     const bUsed = usedNames.has(b.name) ? 1 : 0
     if (aUsed !== bUsed) return aUsed - bUsed
+
+    const aRecent = (a.meta && recentMuscles.includes(a.meta.primaryMuscle)) ? 1 : 0
+    const bRecent = (b.meta && recentMuscles.includes(b.meta.primaryMuscle)) ? 1 : 0
+    if (aRecent !== bRecent) return aRecent - bRecent
 
     const aOrder = a.meta ? TYPE_ORDER[a.meta.type] : 2
     const bOrder = b.meta ? TYPE_ORDER[b.meta.type] : 2
@@ -231,7 +236,7 @@ function buildSession(
       candidates = allCandidates
     }
 
-    const chosen = selectExercises(candidates, count, usedNames)
+    const chosen = selectExercises(candidates, count, usedNames, context.recentMuscles)
     const isFocus = musclesFocus.includes(muscle)
 
     for (const ex of chosen) {
@@ -259,6 +264,22 @@ function buildSession(
     const bOrder = bMeta ? TYPE_ORDER[bMeta.type] : 2
     return aOrder - bOrder
   })
+
+  // Goal cardio : ajouter un exercice cardio en dernière position si disponible
+  if (form.goal === 'cardio') {
+    const cardioEx = context.exercises.find(
+      ex => ex.muscles.includes('Cardio') && !usedNames.has(ex.name)
+    )
+    if (cardioEx) {
+      usedNames.add(cardioEx.name)
+      allExercises.push({
+        exerciseName: cardioEx.name,
+        setsTarget: 1,
+        repsTarget: '20-30 min',
+        weightTarget: 0,
+      })
+    }
+  }
 
   return { name, exercises: allExercises }
 }
@@ -323,8 +344,15 @@ function generateSession(form: AIFormData, context: DBContext): GeneratedPlan {
   const usedNames = new Set<string>()
   const session = buildSession(muscleLabel, muscles, form, context, usedNames)
 
+  const goalPrefix: Record<AIGoal, string> = {
+    bodybuilding: 'Hypertrophie',
+    power:        'Force',
+    renfo:        'Renforcement',
+    cardio:       'Cardio',
+  }
+
   return {
-    name: `Séance ${muscleLabel}`,
+    name: `Séance ${goalPrefix[form.goal]} – ${muscleLabel}`,
     sessions: [session],
   }
 }
