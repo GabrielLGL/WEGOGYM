@@ -242,4 +242,7 @@ export function distributeVolumeToSessions(
 Ce groupe dépend de : **Groupe A** (types.ts + tables.ts doivent exister)
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260221-1730
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1730-feat-programGenerator-B.md
