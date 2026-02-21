@@ -56,4 +56,5 @@ aucune (pas de nouveau composant/hook/pattern)
 ✅ Résolu — 20260221-1600
 
 ## Commit
-[sera rempli à l'étape 7]
+edd5cc0 feat(wizard): add 4 new program questions + extend AIFormData
+(inclus dans le commit du Groupe A — parallélisme de travail)
