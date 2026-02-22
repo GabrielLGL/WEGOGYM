@@ -1,5 +1,5 @@
 // Importation de React et des hooks nécessaires
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 // Importation des outils de navigation de React Navigation
 import { NavigationContainer, DarkTheme, NavigationContainerRefWithCurrent } from '@react-navigation/native'
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack'

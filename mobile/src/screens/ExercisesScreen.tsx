@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, UIManager, BackHandler, Keyboard } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'

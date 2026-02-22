@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
+import { Q } from '@nozbe/watermelondb'
 import { BarChart } from 'react-native-chart-kit'
 
 import { database } from '../model'
@@ -58,6 +59,11 @@ function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
     [sets, exercises, histories, period]
   )
 
+  const hasChartData = useMemo(
+    () => stats.perWeek.some(w => w.volume > 0),
+    [stats.perWeek]
+  )
+
   const chartData = useMemo(() => ({
     labels: stats.perWeek.map(w => w.weekLabel),
     datasets: [{ data: stats.perWeek.map(w => Math.max(w.volume, 0)) }],
@@ -90,20 +96,26 @@ function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
       </View>
 
       <Text style={styles.sectionTitle}>Volume par semaine (12 dernières)</Text>
-      <View style={styles.chartWrapper}>
-        <BarChart
-          data={chartData}
-          width={screenWidth - spacing.md * 2}
-          height={200}
-          chartConfig={chartConfig}
-          style={styles.chart}
-          fromZero
-          showValuesOnTopOfBars={false}
-          yAxisLabel=""
-          yAxisSuffix="kg"
-          withInnerLines={false}
-        />
-      </View>
+      {hasChartData ? (
+        <View style={styles.chartWrapper}>
+          <BarChart
+            data={chartData}
+            width={screenWidth - spacing.md * 2}
+            height={200}
+            chartConfig={chartConfig}
+            style={styles.chart}
+            fromZero
+            showValuesOnTopOfBars={false}
+            yAxisLabel=""
+            yAxisSuffix="kg"
+            withInnerLines={false}
+          />
+        </View>
+      ) : (
+        <View style={styles.emptyChart}>
+          <Text style={styles.emptyText}>Aucun volume enregistré sur cette période.</Text>
+        </View>
+      )}
 
       {stats.topExercises.length > 0 && (
         <>
@@ -202,12 +214,24 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.textSecondary,
   },
+  emptyChart: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  emptyText: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
 })
 
 const enhance = withObservables([], () => ({
   sets: database.get<WorkoutSet>('sets').query().observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
-  histories: database.get<History>('histories').query().observe(),
+  histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
 }))
 
 export default enhance(StatsVolumeScreenBase)

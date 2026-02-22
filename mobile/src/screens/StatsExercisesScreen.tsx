@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
+import { Q } from '@nozbe/watermelondb'
 
 import { database } from '../model'
 import History from '../model/models/History'
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
 const enhance = withObservables([], () => ({
   sets: database.get<WorkoutSet>('sets').query().observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
-  histories: database.get<History>('histories').query().observe(),
+  histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
 }))
 
 export default enhance(StatsExercisesScreenBase)

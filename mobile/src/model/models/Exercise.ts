@@ -55,29 +55,33 @@ export default class Exercise extends Model {
   // --- LOGIQUE DE SUPPRESSION EN CASCADE AMÉLIORÉE ---
   // Cette méthode permet de supprimer un exercice ET toutes les données qui y sont liées
   async deleteAllAssociatedData() {
-    // 1. Récupération de tous les liens entre cet exercice et les séances programmées
-    const sessionExos = await this.collections
-      .get('session_exercises')
-      .query(Q.where('exercise_id', this.id))
-      .fetch();
-
-    // 2. Récupération de tout l'historique de progression lié à cet exercice
-    const logs = await this.collections
-      .get('performance_logs')
-      .query(Q.where('exercise_id', this.id))
-      .fetch();
-
-    // 3. Exécution d'une transaction d'écriture groupée (batch) pour garantir l'intégrité
+    // Exécution d'une transaction d'écriture groupée (batch) pour garantir l'intégrité
+    // Toutes les fetches sont dans le write() pour éviter les race conditions
     await this.database.write(async () => {
+      // 1. Récupération de tous les liens entre cet exercice et les séances programmées
+      const sessionExos = await this.collections
+        .get('session_exercises')
+        .query(Q.where('exercise_id', this.id))
+        .fetch();
+
+      // 2. Récupération de tout l'historique de progression lié à cet exercice
+      const logs = await this.collections
+        .get('performance_logs')
+        .query(Q.where('exercise_id', this.id))
+        .fetch();
+
+      // 3. Récupération de toutes les séries liées à cet exercice
+      const exerciseSets = await this.collections
+        .get('sets')
+        .query(Q.where('exercise_id', this.id))
+        .fetch();
+
       const batch = [
-        // On prépare la destruction de chaque lien de séance
         ...sessionExos.map(se => se.prepareDestroyPermanently()),
-        // On prépare la destruction de chaque log de performance
         ...logs.map(l => l.prepareDestroyPermanently()),
-        // On prépare enfin la destruction de l'exercice lui-même
+        ...exerciseSets.map(s => s.prepareDestroyPermanently()),
         this.prepareDestroyPermanently()
       ];
-      // On envoie toutes les destructions d'un coup à la base de données
       await this.database.batch(...batch);
     });
   }

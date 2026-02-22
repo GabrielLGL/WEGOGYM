@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   View,
   Text,
@@ -72,8 +72,8 @@ function StatsScreenBase({ users, histories, sets }: Props) {
   const haptics = useHaptics()
 
   const user = users[0] ?? null
-  const kpis = computeGlobalKPIs(histories, sets)
-  const motivationalPhrase = computeMotivationalPhrase(histories, sets)
+  const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
+  const motivationalPhrase = useMemo(() => computeMotivationalPhrase(histories, sets), [histories, sets])
 
   const handleNavigate = (route: StatRoute) => {
     haptics.onPress()
