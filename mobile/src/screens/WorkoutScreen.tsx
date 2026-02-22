@@ -26,7 +26,6 @@ import { useWorkoutTimer } from '../hooks/useWorkoutTimer'
 import { useWorkoutState } from '../hooks/useWorkoutState'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
-import { useMultiModalSync } from '../hooks/useModalState'
 import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
 import { WorkoutSummarySheet } from '../components/WorkoutSummarySheet'
@@ -71,15 +70,13 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet, unvalidateSet } =
     useWorkoutState(sessionExercises, historyId)
 
-  useMultiModalSync([confirmEndVisible, summaryVisible, abandonVisible])
-
   // Navigue vers Home quand le résumé se ferme (quelle que soit la source : bouton, retour, overlay)
   useEffect(() => {
     if (summaryVisible) {
       summaryWasOpenRef.current = true
     } else if (summaryWasOpenRef.current) {
       summaryWasOpenRef.current = false
-      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] })
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
     }
   }, [summaryVisible, navigation])
 
@@ -157,7 +154,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       await completeWorkoutHistory(historyId, Date.now()).catch(e => { if (__DEV__) console.error('[WorkoutScreen] completeWorkoutHistory (abandon):', e) })
     }
     setAbandonVisible(false)
-    navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] })
+    navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
   }
 
   const handleValidateSet = async (

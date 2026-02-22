@@ -20,7 +20,6 @@ import ProgramSection from '../components/ProgramSection'
 import ProgramDetailBottomSheet from '../components/ProgramDetailBottomSheet'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
-import { useMultiModalSync } from '../hooks/useModalState'
 import { useProgramManager } from '../hooks/useProgramManager'
 import { importPresetProgram, markOnboardingCompleted } from '../model/utils/databaseHelpers'
 import type { PresetProgram } from '../model/onboardingPrograms'
@@ -81,15 +80,6 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
   const renameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const renameSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // --- SYNCHRONISATION TAB BAR ---
-  // BottomSheets (isOnboardingVisible, isOptionsVisible, isSessionOptionsVisible, isDetailVisible)
-  // sont exclues : Portal + zIndex:999 les rend déjà au-dessus de la tab bar.
-  useMultiModalSync([
-    isProgramModalVisible,
-    isSessionModalVisible,
-    isAlertVisible,
-  ])
 
   // --- GESTION BOUTON RETOUR ANDROID ---
   useEffect(() => {

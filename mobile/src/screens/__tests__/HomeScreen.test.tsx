@@ -171,7 +171,7 @@ describe('HomeScreen Dashboard', () => {
       />
     )
     fireEvent.press(getByText('Assistant'))
-    expect(mockNavigate).toHaveBeenCalledWith('MainTabs', { screen: 'Assistant' })
+    expect(mockNavigate).toHaveBeenCalledWith('Assistant')
   })
 
   it('affiche la phrase de motivation', () => {

@@ -10,7 +10,7 @@
 ## 1. Stack & Environment
 - **Core:** React Native (Expo 52) + TypeScript + Fabric (New Arch).
 - **State:** WatermelonDB (SQLite/JSI). **NO Redux/Context for data.**
-- **Nav:** React Navigation 7 (Native Stack + Bottom Tabs).
+- **Nav:** React Navigation 7 (Native Stack only — no Bottom Tabs). HomeScreen dashboard is the navigation hub.
 - **Target:** Android Priority. Dark Mode Only (`#121212` bg, `#1C1C1E` cards).
 - **Lang:** App language is French (fr-FR).
 
@@ -35,7 +35,7 @@ mobile/src/
 │   ├── ChipSelector.tsx  # Filter chips (muscle/equipment)
 │   └── CustomModal.tsx   # Base modal component
 ├── hooks/                # Custom React hooks
-│   ├── useModalState.ts  # Modal state + auto tab bar sync
+│   ├── useModalState.ts  # Modal state management (open/close/toggle)
 │   ├── useHaptics.ts     # Semantic haptic feedback API
 │   └── useKeyboardAnimation.ts  # Keyboard show/hide animations
 ├── model/
@@ -54,7 +54,7 @@ mobile/src/
 
 ### 2.2 Key Patterns
 - **Modals:** MUST use `<Portal>` from `@gorhom/portal` (PortalProvider in navigation/index.tsx).
-- **State Sync:** Use `useMultiModalSync()` hook to auto-hide tab bar when modals open.
+- **Modal State:** Use `useModalState()` hook for modal open/close/toggle state management.
 - **Haptics:** Use `useHaptics()` hook for semantic feedback (`onPress`, `onDelete`, `onSuccess`, `onSelect`).
 - **Validation:** Use helpers from `model/utils/validationHelpers.ts` (never inline).
 - **DB Operations:** Use helpers from `model/utils/databaseHelpers.ts` (getNextPosition, filterExercises, etc.).
@@ -126,15 +126,10 @@ These are bugs that have been found and fixed before. **Never reintroduce them:*
   ```
 
 ### 4.2 Custom Hooks (in `hooks/`)
-- **`useModalState()`**: Manages modal state with auto tab bar sync.
+- **`useModalState()`**: Manages modal state (open/close/toggle).
   ```tsx
   const modal = useModalState()
   // Returns: { isOpen, open, close, toggle, setIsOpen }
-  ```
-
-- **`useMultiModalSync(states: boolean[])`**: Syncs multiple modals with tab bar.
-  ```tsx
-  useMultiModalSync([isAlertVisible, isBottomSheetVisible])
   ```
 
 - **`useHaptics()`**: Semantic haptic feedback API.

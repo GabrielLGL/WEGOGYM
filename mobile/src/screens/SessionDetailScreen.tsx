@@ -16,7 +16,6 @@ import { map } from 'rxjs/operators'
 import { CustomModal } from '../components/CustomModal'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
-import { useMultiModalSync } from '../hooks/useModalState'
 import { useSessionManager } from '../hooks/useSessionManager'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../navigation'
@@ -64,9 +63,6 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     onConfirm: () => void | Promise<void>
   }>({ title: '', message: '', onConfirm: async () => {} })
   const [showRestTimer, setShowRestTimer] = useState(false)
-
-  // --- SYNCHRONISATION TAB BAR ---
-  useMultiModalSync([isAddModalVisible, isEditModalVisible, isAlertVisible])
 
   useLayoutEffect(() => { navigation.setOptions({ title: session.name, headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text }) }, [navigation, session.name])
 

@@ -20,7 +20,6 @@ import { ChipSelector } from '../components/ChipSelector'
 import { Button } from '../components/Button'
 import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
-import { useMultiModalSync } from '../hooks/useModalState'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { parseNumericInput } from '../model/utils/databaseHelpers'
@@ -70,8 +69,6 @@ function StatsMeasurementsScreenBase({ measurements }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<BodyMeasurement | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [selectedMetric, setSelectedMetric] = useState<string>('Poids')
-
-  useMultiModalSync([addSheet.isOpen, deleteTarget !== null])
 
   // Donnée la plus récente
   const latest = measurements[0] ?? null

@@ -8,8 +8,7 @@ import {
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
-import { useNavigation, CompositeNavigationProp } from '@react-navigation/native'
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
+import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { database } from '../model'
@@ -19,14 +18,11 @@ import User from '../model/models/User'
 import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume } from '../model/utils/statsHelpers'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
-import type { RootStackParamList, MainTabParamList } from '../navigation'
+import type { RootStackParamList } from '../navigation'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
-type HomeNavigation = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, 'Home'>,
-  NativeStackNavigationProp<RootStackParamList>
->
+type HomeNavigation = NativeStackNavigationProp<RootStackParamList, 'Home'>
 
 // ─── Sections & Tuiles ───────────────────────────────────────────────────────
 
@@ -70,8 +66,7 @@ const SECTIONS: Section[] = [
   },
 ]
 
-/** Routes that live inside the tab navigator (not the root stack) */
-const TAB_ROUTES = new Set<string>(['Exercices', 'Assistant', 'Stats', 'Home'])
+/** All navigable routes from the dashboard */
 
 // ─── KPI Item ─────────────────────────────────────────────────────────────────
 
@@ -106,13 +101,7 @@ function HomeScreenBase({ users, histories, sets }: Props) {
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
     try {
-      if (TAB_ROUTES.has(tile.route)) {
-        // Navigate to a tab screen
-        navigation.navigate('MainTabs', { screen: tile.route })
-      } else {
-        // Navigate to a stack screen
-        navigation.navigate(tile.route as keyof RootStackParamList as never)
-      }
+      navigation.navigate(tile.route as never)
     } catch {
       if (__DEV__) console.warn(`[HomeScreen] Route "${tile.route}" non disponible`)
     }

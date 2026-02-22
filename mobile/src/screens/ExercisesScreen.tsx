@@ -12,7 +12,6 @@ import { AlertDialog } from '../components/AlertDialog'
 import { ChipSelector } from '../components/ChipSelector'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
-import { useMultiModalSync } from '../hooks/useModalState'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { useExerciseManager } from '../hooks/useExerciseManager'
 import { colors } from '../theme'
@@ -51,10 +50,6 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [isAlertVisible, setIsAlertVisible] = useState(false)
   const [isSearchVisible, setIsSearchVisible] = useState(false)
-
-  // Synchronisation tab bar
-  // isOptionsVisible (BottomSheet) exclu : Portal + zIndex:999 le rend déjà au-dessus de la tab bar.
-  useMultiModalSync([isAddModalVisible, isEditModalVisible, isAlertVisible])
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {

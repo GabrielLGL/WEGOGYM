@@ -16,10 +16,9 @@ import { colors, spacing, fontSize, borderRadius } from '../theme'
 import type Program from '../model/models/Program'
 import type User from '../model/models/User'
 import type { AIFormData, AIGoal, AILevel, AIDuration, AISplit, GeneratedPlan } from '../services/ai/types'
-import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
 import { useFocusEffect } from '@react-navigation/native'
-import type { NavigationProp } from '@react-navigation/native'
-import type { MainTabParamList, RootStackParamList } from '../navigation/index'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import type { RootStackParamList } from '../navigation/index'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -196,7 +195,7 @@ function buildSteps(data: Partial<AIFormData>): WizardStep[] {
 interface AssistantScreenInnerProps {
   programs: Program[]
   user: User | null
-  navigation: BottomTabScreenProps<MainTabParamList, 'Assistant'>['navigation']
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Assistant'>
 }
 
 function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInnerProps) {
@@ -424,8 +423,7 @@ function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInn
         setFormData({ equipment: [], musclesFocus: [], muscleGroups: [], injuries: [] })
         setGeneratedPlan(null)
         contentAnim.setValue(1)
-        ;(navigation.getParent() as NavigationProp<RootStackParamList> | undefined)
-          ?.navigate('SessionDetail', { sessionId: session.id })
+        navigation.navigate('SessionDetail', { sessionId: session.id })
       }
     } catch {
       previewModal.close()

@@ -130,4 +130,7 @@ Les events emis par ces hooks ne sont plus ecoutes (TabNavigator supprime par Gr
 Idealement, lancer apres le Groupe A pour eviter des warnings temporaires.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260222-2320
+
+## Résolution
+Rapport do : docs/bmad/do/20260222-2320-refactor-remove-tabbar-hooks.md

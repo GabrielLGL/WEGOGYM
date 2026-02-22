@@ -21,7 +21,6 @@ import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
 import { ChipSelector } from '../components/ChipSelector'
 import { useHaptics } from '../hooks/useHaptics'
-import { useMultiModalSync } from '../hooks/useModalState'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { colors } from '../theme'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
@@ -51,8 +50,6 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
   const haptics = useHaptics()
   const [isAlertVisible, setIsAlertVisible] = useState(false)
   const [selectedStat, setSelectedStat] = useState<ExerciseSessionStat | null>(null)
-
-  useMultiModalSync([isAlertVisible])
 
   const statsForSelectedExo = useMemo(
     () => buildExerciseStatsFromData(setsForExercise, histories, sessions),

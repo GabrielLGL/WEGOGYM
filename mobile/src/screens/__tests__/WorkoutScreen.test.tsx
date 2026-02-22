@@ -78,7 +78,6 @@ jest.mock('../../hooks/useHaptics', () => ({
 }))
 
 jest.mock('../../hooks/useModalState', () => ({
-  useMultiModalSync: jest.fn(),
   useModalState: jest.fn().mockReturnValue({
     isOpen: false,
     open: jest.fn(),

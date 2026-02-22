@@ -139,4 +139,7 @@ Apres suppression du TabNavigator, retirer les imports devenus inutiles :
 Aucune dependance — ce groupe peut etre lance en premier.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260222-2315
+
+## Résolution
+Rapport do : docs/bmad/do/20260222-2315-refactor-navigation.md

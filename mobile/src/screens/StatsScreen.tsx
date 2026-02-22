@@ -8,8 +8,7 @@ import {
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
-import { useNavigation, CompositeNavigationProp } from '@react-navigation/native'
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
+import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { database } from '../model'
@@ -19,14 +18,11 @@ import User from '../model/models/User'
 import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume } from '../model/utils/statsHelpers'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
-import type { RootStackParamList, MainTabParamList } from '../navigation'
+import type { RootStackParamList } from '../navigation'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
-type StatsNavigation = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, 'Stats'>,
-  NativeStackNavigationProp<RootStackParamList>
->
+type StatsNavigation = NativeStackNavigationProp<RootStackParamList, 'Stats'>
 
 // ─── Boutons de la grille ─────────────────────────────────────────────────────
 
