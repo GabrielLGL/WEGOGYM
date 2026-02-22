@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Dimensions,
+  useWindowDimensions,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native'
@@ -24,22 +24,10 @@ import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
 import { useMultiModalSync } from '../hooks/useModalState'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
+import { createChartConfig } from '../theme/chartConfig'
 import { parseNumericInput } from '../model/utils/databaseHelpers'
 
-const screenWidth = Dimensions.get('window').width
-const PRIMARY_RGB = '0, 122, 255'
-const TEXT_RGB = '255, 255, 255'
-
-const chartConfig = {
-  backgroundColor: colors.card,
-  backgroundGradientFrom: colors.card,
-  backgroundGradientTo: colors.card,
-  decimalPlaces: 1,
-  color: (opacity = 1) => `rgba(${PRIMARY_RGB}, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(${TEXT_RGB}, ${opacity})`,
-  style: { borderRadius: 16 },
-  propsForDots: { r: '4', strokeWidth: '2', stroke: colors.primary },
-}
+const chartConfig = createChartConfig({ decimalPlaces: 1, showDots: true })
 
 // ─── Métrique selector ────────────────────────────────────────────────────────
 
@@ -78,6 +66,7 @@ interface Props {
 }
 
 function StatsMeasurementsScreenBase({ measurements }: Props) {
+  const { width: screenWidth } = useWindowDimensions()
   const haptics = useHaptics()
   const addSheet = useModalState()
   const [deleteTarget, setDeleteTarget] = useState<BodyMeasurement | null>(null)

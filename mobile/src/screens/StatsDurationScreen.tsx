@@ -4,7 +4,7 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  Dimensions,
+  useWindowDimensions,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
@@ -14,21 +14,9 @@ import { database } from '../model'
 import History from '../model/models/History'
 import { computeDurationStats, formatDuration } from '../model/utils/statsHelpers'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
+import { createChartConfig } from '../theme/chartConfig'
 
-const screenWidth = Dimensions.get('window').width
-const PRIMARY_RGB = '0, 122, 255'
-const TEXT_RGB = '255, 255, 255'
-
-const chartConfig = {
-  backgroundColor: colors.card,
-  backgroundGradientFrom: colors.card,
-  backgroundGradientTo: colors.card,
-  decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(${PRIMARY_RGB}, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(${TEXT_RGB}, ${opacity})`,
-  style: { borderRadius: 16 },
-  propsForDots: { r: '4', strokeWidth: '2', stroke: colors.primary },
-}
+const chartConfig = createChartConfig({ showDots: true })
 
 function KpiCard({ label, value }: { label: string; value: string }) {
   return (
@@ -44,6 +32,7 @@ interface Props {
 }
 
 function StatsDurationScreenBase({ histories }: Props) {
+  const { width: screenWidth } = useWindowDimensions()
   const stats = useMemo(() => computeDurationStats(histories), [histories])
 
   const chartData = useMemo(() => {

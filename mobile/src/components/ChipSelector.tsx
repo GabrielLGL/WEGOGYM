@@ -4,7 +4,7 @@ import { colors, borderRadius, spacing, fontSize } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
 
 interface ChipSelectorProps {
-  items: string[]
+  items: readonly string[]
   selectedValue: string | null
   onChange: (value: string | null) => void
   allowNone?: boolean // Permet de désélectionner (défaut: true)

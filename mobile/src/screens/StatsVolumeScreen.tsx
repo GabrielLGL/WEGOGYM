@@ -4,7 +4,7 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  Dimensions,
+  useWindowDimensions,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
@@ -17,32 +17,14 @@ import Exercise from '../model/models/Exercise'
 import {
   computeVolumeStats,
   formatVolume,
-  type StatsPeriod,
+  PERIOD_LABELS,
+  labelToPeriod,
 } from '../model/utils/statsHelpers'
 import { ChipSelector } from '../components/ChipSelector'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
+import { createChartConfig } from '../theme/chartConfig'
 
-const screenWidth = Dimensions.get('window').width
-const PRIMARY_RGB = '0, 122, 255'
-const TEXT_RGB = '255, 255, 255'
-
-const chartConfig = {
-  backgroundColor: colors.card,
-  backgroundGradientFrom: colors.card,
-  backgroundGradientTo: colors.card,
-  decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(${PRIMARY_RGB}, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(${TEXT_RGB}, ${opacity})`,
-  style: { borderRadius: 16 },
-}
-
-const PERIOD_LABELS = ['1 mois', '3 mois', 'Tout']
-
-function labelToPeriod(label: string | null): StatsPeriod {
-  if (label === '3 mois') return '3m'
-  if (label === 'Tout') return 'all'
-  return '1m'
-}
+const chartConfig = createChartConfig()
 
 interface Props {
   sets: WorkoutSet[]
@@ -51,6 +33,7 @@ interface Props {
 }
 
 function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
+  const { width: screenWidth } = useWindowDimensions()
   const [periodLabel, setPeriodLabel] = useState<string>('1 mois')
   const period = labelToPeriod(periodLabel)
 
@@ -159,7 +142,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   totalValue: {
-    fontSize: 32,
+    fontSize: fontSize.hero,
     fontWeight: '700',
     color: colors.primary,
     marginTop: spacing.xs,

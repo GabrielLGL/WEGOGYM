@@ -71,5 +71,12 @@ export const fontSize = {
   xl: 20,
   xxl: 24,
   xxxl: 28,
+  hero: 32,
 }
+
+/**
+ * Couleurs d'intensité pour le calendrier heatmap
+ * Index 0 = repos, 1 = 1 séance, 2 = 2 séances, 3 = 3+ séances
+ */
+export const intensityColors = ['#2C2C2E', '#1E4D2B', '#2D7A47', '#34C759'] as const
 

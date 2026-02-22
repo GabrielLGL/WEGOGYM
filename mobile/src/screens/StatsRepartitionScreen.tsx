@@ -15,18 +15,11 @@ import Exercise from '../model/models/Exercise'
 import {
   computeMuscleRepartition,
   formatVolume,
-  type StatsPeriod,
+  PERIOD_LABELS,
+  labelToPeriod,
 } from '../model/utils/statsHelpers'
 import { ChipSelector } from '../components/ChipSelector'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
-
-const PERIOD_LABELS = ['1 mois', '3 mois', 'Tout']
-
-function labelToPeriod(label: string | null): StatsPeriod {
-  if (label === '3 mois') return '3m'
-  if (label === 'Tout') return 'all'
-  return '1m'
-}
 
 interface Props {
   sets: WorkoutSet[]

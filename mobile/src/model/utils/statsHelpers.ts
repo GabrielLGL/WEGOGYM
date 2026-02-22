@@ -69,8 +69,18 @@ function getPeriodStart(period: StatsPeriod): number {
 
 // ─── Date key helper ─────────────────────────────────────────────────────────
 
-function toDateKey(date: Date): string {
+export function toDateKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+// ─── Period Labels (partagés avec les écrans Stats) ───────────────────────────
+
+export const PERIOD_LABELS = ['1 mois', '3 mois', 'Tout'] as const
+
+export function labelToPeriod(label: string | null): StatsPeriod {
+  if (label === '3 mois') return '3m'
+  if (label === 'Tout') return 'all'
+  return '1m'
 }
 
 // ─── KPIs ─────────────────────────────────────────────────────────────────────

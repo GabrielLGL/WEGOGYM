@@ -15,8 +15,9 @@ import {
   computeCalendarData,
   computeCurrentStreak,
   computeRecordStreak,
+  toDateKey,
 } from '../model/utils/statsHelpers'
-import { colors, spacing, borderRadius, fontSize } from '../theme'
+import { colors, spacing, borderRadius, fontSize, intensityColors } from '../theme'
 
 // ─── Constantes calendrier ────────────────────────────────────────────────────
 
@@ -24,13 +25,11 @@ const DAY_SIZE = 12
 const DAY_GAP = 2
 const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
-const INTENSITY_COLORS = ['#2C2C2E', '#1E4D2B', '#2D7A47', '#34C759']
-
 function getIntensityColor(count: number): string {
-  if (count <= 0) return INTENSITY_COLORS[0]
-  if (count === 1) return INTENSITY_COLORS[1]
-  if (count === 2) return INTENSITY_COLORS[2]
-  return INTENSITY_COLORS[3]
+  if (count <= 0) return intensityColors[0]
+  if (count === 1) return intensityColors[1]
+  if (count === 2) return intensityColors[2]
+  return intensityColors[3]
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -78,7 +77,7 @@ function generateCalendarWeeks(calendarData: Map<string, number>): WeekData[] {
       const day = new Date(current)
       day.setDate(current.getDate() + d)
       const isFuture = day > today
-      const dateKey = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`
+      const dateKey = toDateKey(day)
       days.push({
         dateKey,
         date: day,
@@ -210,7 +209,7 @@ function StatsCalendarScreenBase({ histories }: Props) {
       {/* Légende */}
       <View style={styles.legend}>
         <Text style={styles.legendText}>Repos</Text>
-        {INTENSITY_COLORS.map((color, i) => (
+        {intensityColors.map((color, i) => (
           <View key={i} style={[styles.legendBox, { backgroundColor: color }]} />
         ))}
         <Text style={styles.legendText}>Actif</Text>
