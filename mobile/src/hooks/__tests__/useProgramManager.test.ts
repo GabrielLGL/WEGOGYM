@@ -3,6 +3,7 @@ jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn(),
     write: jest.fn(),
+    batch: jest.fn().mockResolvedValue(undefined),
   },
 }))
 jest.mock('../../model/utils/databaseHelpers', () => ({
@@ -12,7 +13,7 @@ jest.mock('../../model/utils/validationHelpers', () => ({
   isValidText: jest.fn(),
 }))
 jest.mock('@nozbe/watermelondb', () => ({
-  Q: { where: jest.fn().mockReturnValue({}) },
+  Q: { where: jest.fn().mockReturnValue({}), oneOf: jest.fn().mockReturnValue({}) },
 }))
 
 import { renderHook, act } from '@testing-library/react-native'
@@ -33,7 +34,9 @@ const createMockProgram = (id = 'prog-1', name = 'Program 1') => ({
     fn({ name: '', position: 0 })
   }),
   destroyPermanently: jest.fn().mockResolvedValue(undefined),
+  prepareDestroyPermanently: jest.fn().mockReturnValue({ type: 'destroy', id }),
   duplicate: jest.fn().mockResolvedValue(undefined),
+  sessions: { fetch: jest.fn().mockResolvedValue([]) },
 })
 
 const createMockSession = (id = 'sess-1', name = 'Session 1', programId = 'prog-1') => {
@@ -50,6 +53,8 @@ const createMockSession = (id = 'sess-1', name = 'Session 1', programId = 'prog-
       fn({ name: '', position: 0, program: { set: jest.fn() } })
     }),
     destroyPermanently: jest.fn().mockResolvedValue(undefined),
+    prepareDestroyPermanently: jest.fn().mockReturnValue({ type: 'destroy', id }),
+    sessionExercises: { fetch: jest.fn().mockResolvedValue([]) },
   }
 }
 
@@ -315,7 +320,8 @@ describe('useProgramManager', () => {
 
       expect(success!).toBe(true)
       expect(mockWrite).toHaveBeenCalled()
-      expect(mockProgram.destroyPermanently).toHaveBeenCalled()
+      expect(mockProgram.sessions.fetch).toHaveBeenCalled()
+      expect(mockProgram.prepareDestroyPermanently).toHaveBeenCalled()
     })
 
     it('should clear selectedProgram after deletion', async () => {
@@ -335,7 +341,7 @@ describe('useProgramManager', () => {
 
     it('should return false on error', async () => {
       const mockProgram = createMockProgram()
-      mockProgram.destroyPermanently.mockRejectedValue(new Error('Delete failed'))
+      mockProgram.sessions.fetch.mockRejectedValue(new Error('Delete failed'))
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
@@ -556,13 +562,14 @@ describe('useProgramManager', () => {
 
       expect(success!).toBe(true)
       expect(mockWrite).toHaveBeenCalled()
-      expect(mockSession.destroyPermanently).toHaveBeenCalled()
+      expect(mockSession.sessionExercises.fetch).toHaveBeenCalled()
+      expect(mockSession.prepareDestroyPermanently).toHaveBeenCalled()
       expect(result.current.selectedSession).toBeNull()
     })
 
     it('should return false on error', async () => {
       const mockSession = createMockSession()
-      mockSession.destroyPermanently.mockRejectedValue(new Error('Delete failed'))
+      mockSession.sessionExercises.fetch.mockRejectedValue(new Error('Delete failed'))
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {

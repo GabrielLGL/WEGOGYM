@@ -255,18 +255,18 @@ export async function deleteWorkoutSet(
   exerciseId: string,
   setOrder: number
 ): Promise<void> {
-  const sets = await database
-    .get<WorkoutSet>('sets')
-    .query(
-      Q.where('history_id', historyId),
-      Q.where('exercise_id', exerciseId),
-      Q.where('set_order', setOrder)
-    )
-    .fetch()
-
-  if (sets.length === 0) return
-
   await database.write(async () => {
+    const sets = await database
+      .get<WorkoutSet>('sets')
+      .query(
+        Q.where('history_id', historyId),
+        Q.where('exercise_id', exerciseId),
+        Q.where('set_order', setOrder)
+      )
+      .fetch()
+
+    if (sets.length === 0) return
+
     await sets[0].destroyPermanently()
   })
 }

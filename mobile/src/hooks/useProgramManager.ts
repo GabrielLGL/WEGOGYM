@@ -115,7 +115,17 @@ export function useProgramManager(onSuccess?: () => void) {
 
     try {
       await database.write(async () => {
-        await selectedProgram.destroyPermanently()
+        const sessions = await selectedProgram.sessions.fetch()
+        const sessionExercises = sessions.length > 0
+          ? await database.get<SessionExercise>('session_exercises')
+              .query(Q.where('session_id', Q.oneOf(sessions.map(s => s.id))))
+              .fetch()
+          : []
+        await database.batch(
+          ...sessionExercises.map(se => se.prepareDestroyPermanently()),
+          ...sessions.map(s => s.prepareDestroyPermanently()),
+          selectedProgram.prepareDestroyPermanently(),
+        )
       })
 
       setSelectedProgram(null)
@@ -220,7 +230,11 @@ export function useProgramManager(onSuccess?: () => void) {
 
     try {
       await database.write(async () => {
-        await selectedSession.destroyPermanently()
+        const sessionExercises = await selectedSession.sessionExercises.fetch()
+        await database.batch(
+          ...sessionExercises.map(se => se.prepareDestroyPermanently()),
+          selectedSession.prepareDestroyPermanently(),
+        )
       })
       setSelectedSession(null)
       return true

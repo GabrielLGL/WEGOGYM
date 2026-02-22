@@ -17,12 +17,13 @@
 ## 2. Architecture & Data Flow
 - **Pattern:** Offline-first, Reactive.
 - **Data Access:** MUST use `withObservables` HOC from `@nozbe/with-observables`.
-- **Schema:** v16 (`mobile/src/model/schema.ts`).
+- **Schema:** v17 (`mobile/src/model/schema.ts`).
 - **Models:**
   - `Program` (1:N) `Session` (1:N) `SessionExercise`
   - `History` (Soft-delete `deleted_at`) -> `Set`
-  - `User` (Single row preferences)
+  - `User` (Single row preferences, `name` field)
   - `Exercise` -> `PerformanceLog` (historical data)
+  - `BodyMeasurement` (weight, waist, hips, chest, arms)
 - **Updates:** Data changes propagate automatically. Do not manually refresh UI.
 
 ### 2.1 Project Structure

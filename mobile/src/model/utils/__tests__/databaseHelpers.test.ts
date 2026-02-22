@@ -1242,12 +1242,13 @@ describe('databaseHelpers', () => {
       const mockFetch = jest.fn().mockResolvedValue([])
       mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetch: mockFetch }) })
 
-      const mockWrite = jest.fn()
+      const mockWrite = jest.fn().mockImplementation(async (fn: () => Promise<unknown>) => fn())
       ;(database as unknown as { write: jest.Mock }).write = mockWrite
 
       await deleteWorkoutSet('hist-1', 'ex-1', 99)
 
-      expect(mockWrite).not.toHaveBeenCalled()
+      expect(mockWrite).toHaveBeenCalledTimes(1)
+      expect(mockFetch).toHaveBeenCalledTimes(1)
     })
   })
 
