@@ -55,4 +55,7 @@ ni les types actuels).
 - **Vague 4** : Groupe D — intégration aiService, dépend de C
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260222-0000
+
+## Résolution
+Rapport do : docs/bmad/do/20260222-0000-feat-programGenerator-index.md
