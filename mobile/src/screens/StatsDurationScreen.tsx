@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
+  Pressable,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
@@ -31,9 +32,16 @@ interface Props {
   histories: History[]
 }
 
+interface SelectedPoint {
+  index: number
+  x: number
+  y: number
+}
+
 function StatsDurationScreenBase({ histories }: Props) {
   const { width: screenWidth } = useWindowDimensions()
   const stats = useMemo(() => computeDurationStats(histories), [histories])
+  const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null)
 
   const chartData = useMemo(() => {
     if (stats.perSession.length < 2) return null
@@ -46,6 +54,30 @@ function StatsDurationScreenBase({ histories }: Props) {
       datasets: [{ data: stats.perSession.map(s => s.durationMin) }],
     }
   }, [stats.perSession])
+
+  const handleDataPointClick = useCallback(
+    (point: { index: number; value: number; x: number; y: number }) => {
+      setSelectedPoint(prev =>
+        prev?.index === point.index ? null : { index: point.index, x: point.x, y: point.y }
+      )
+    },
+    []
+  )
+
+  const tooltipData = useMemo(() => {
+    if (!selectedPoint || !stats.perSession[selectedPoint.index]) return null
+    const session = stats.perSession[selectedPoint.index]
+    const dateStr = new Date(session.date).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+    return {
+      date: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
+      duration: `${Math.round(session.durationMin)} min`,
+    }
+  }, [selectedPoint, stats.perSession])
 
   return (
     <ScrollView
@@ -65,18 +97,38 @@ function StatsDurationScreenBase({ histories }: Props) {
       </Text>
 
       {chartData ? (
-        <View style={styles.chartWrapper}>
-          <LineChart
-            data={chartData}
-            width={screenWidth - spacing.md * 2}
-            height={200}
-            chartConfig={chartConfig}
-            style={styles.chart}
-            fromZero
-            formatYLabel={val => `${val}m`}
-            formatXLabel={val => val}
-          />
-        </View>
+        <Pressable onPress={() => setSelectedPoint(null)}>
+          <View style={styles.chartWrapper}>
+            <LineChart
+              data={chartData}
+              width={screenWidth - spacing.md * 2}
+              height={200}
+              chartConfig={chartConfig}
+              style={styles.chart}
+              fromZero
+              formatYLabel={val => `${val}m`}
+              formatXLabel={val => val}
+              onDataPointClick={handleDataPointClick}
+            />
+            {selectedPoint && tooltipData && (
+              <View
+                style={[
+                  styles.tooltip,
+                  {
+                    left: Math.min(
+                      Math.max(selectedPoint.x - 80, spacing.sm),
+                      screenWidth - spacing.md * 2 - 160 - spacing.sm
+                    ),
+                    top: Math.max(selectedPoint.y - 60, spacing.sm),
+                  },
+                ]}
+              >
+                <Text style={styles.tooltipDate}>{tooltipData.date}</Text>
+                <Text style={styles.tooltipDuration}>{tooltipData.duration}</Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
       ) : (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>
@@ -144,6 +196,29 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     textAlign: 'center',
+  },
+  tooltip: {
+    position: 'absolute',
+    backgroundColor: colors.cardSecondary,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    minWidth: 160,
+    elevation: 4,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  tooltipDate: {
+    fontSize: fontSize.xs,
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  tooltipDuration: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.primary,
   },
 })
 
