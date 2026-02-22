@@ -97,4 +97,7 @@ Cela remplace le comportement actuel où le clic ouvre directement le modal de s
 Aucune dépendance — peut être exécuté en parallèle avec Groupe A.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260222-2330
+
+## Résolution
+Rapport do : docs/bmad/do/20260222-2330-feat-programs-create-choice.md

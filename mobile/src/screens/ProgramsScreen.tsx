@@ -73,6 +73,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   const [isOptionsVisible, setIsOptionsVisible] = useState(false)
   const [isSessionOptionsVisible, setIsSessionOptionsVisible] = useState(false)
   const [selectedSessionProgramId, setSelectedSessionProgramId] = useState<string | null>(null)
+  const [isCreateChoiceVisible, setIsCreateChoiceVisible] = useState(false)
   const [isAlertVisible, setIsAlertVisible] = useState(false)
   const [alertConfig, setAlertConfig] = useState({ title: '', message: '', onConfirm: async () => {} })
   const [selectedProgramForDetail, setSelectedProgramForDetail] = useState<Program | null>(null)
@@ -85,6 +86,10 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   useEffect(() => {
     const backAction = () => {
       // Si un BottomSheet est ouvert, le fermer au lieu de naviguer
+      if (isCreateChoiceVisible) {
+        setIsCreateChoiceVisible(false)
+        return true
+      }
       if (isDetailVisible) {
         setIsDetailVisible(false)
         return true
@@ -102,7 +107,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
     return () => backHandler.remove()
-  }, [isDetailVisible, isOptionsVisible, isSessionOptionsVisible])
+  }, [isCreateChoiceVisible, isDetailVisible, isOptionsVisible, isSessionOptionsVisible])
 
   // --- CLEANUP TIMERS RENOMMAGE ---
   useEffect(() => {
@@ -224,7 +229,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
             style={styles.bigButton}
             onPress={() => {
               haptics.onPress()
-              setIsProgramModalVisible(true)
+              setIsCreateChoiceVisible(true)
             }}
           >
             <Text style={styles.btnText}>📂 Créer un Programme</Text>
@@ -232,6 +237,38 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
         </Animated.View>
 
         {/* --- MODALES --- */}
+
+        {/* Choix création programme BottomSheet */}
+        <BottomSheet
+          visible={isCreateChoiceVisible}
+          onClose={() => setIsCreateChoiceVisible(false)}
+          title="Créer un programme"
+        >
+          <TouchableOpacity
+            style={styles.sheetOption}
+            onPress={() => {
+              haptics.onPress()
+              setIsCreateChoiceVisible(false)
+              setIsRenamingProgram(false)
+              setProgramNameInput('')
+              setIsProgramModalVisible(true)
+            }}
+          >
+            <Text style={styles.sheetOptionIcon}>✏️</Text>
+            <Text style={styles.sheetOptionText}>Soi-même</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.sheetOption}
+            onPress={() => {
+              haptics.onPress()
+              setIsCreateChoiceVisible(false)
+              navigation.navigate('Assistant')
+            }}
+          >
+            <Text style={styles.sheetOptionIcon}>✨</Text>
+            <Text style={styles.sheetOptionText}>Automatique</Text>
+          </TouchableOpacity>
+        </BottomSheet>
 
         {/* Programme Modal (Création / Renommage) */}
         <CustomModal
