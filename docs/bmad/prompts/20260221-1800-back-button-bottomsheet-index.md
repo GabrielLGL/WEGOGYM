@@ -12,10 +12,14 @@
 ## Groupes générés
 | Groupe | Rapport | Fichiers | Vague | Statut |
 |--------|---------|----------|-------|--------|
-| A | 20260221-1800-back-button-bottomsheet-A.md | BottomSheet.tsx | 1 | ⏳ |
+| A | 20260221-1800-back-button-bottomsheet-A.md | BottomSheet.tsx | 1 | ✅ |
 
 ## Ordre d'exécution
 Un seul groupe, pas de dépendances.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260222-1000
+
+## Résolution
+Rapport do : docs/bmad/do/20260221-1800-fix-back-button-bottomsheet.md
+Fix appliqué : commit ea84e8a — BackHandler déjà en place dans BottomSheet.tsx
