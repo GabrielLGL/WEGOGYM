@@ -200,7 +200,10 @@ describe('WorkoutContent', () => {
         />
       )
 
-      expect(getByText('Aucun exercice dans cette séance.')).toBeTruthy()
+      // Wait for historyId to be set (async createWorkoutHistory resolves)
+      await waitFor(() => {
+        expect(getByText('Aucun exercice dans cette séance.')).toBeTruthy()
+      })
     })
 
     it('affiche le bouton Terminer la séance', () => {
@@ -231,7 +234,7 @@ describe('WorkoutContent', () => {
       })
     })
 
-    it('affiche les cards pour chaque exercice', () => {
+    it('affiche les cards pour chaque exercice', async () => {
       const exercises = [
         makeSessionExercise({ id: 'se-1' }),
         makeSessionExercise({ id: 'se-2' }),
@@ -246,8 +249,11 @@ describe('WorkoutContent', () => {
         />
       )
 
-      expect(getByText('Card-se-1')).toBeTruthy()
-      expect(getByText('Card-se-2')).toBeTruthy()
+      // Wait for historyId to be set (async createWorkoutHistory resolves)
+      await waitFor(() => {
+        expect(getByText('Card-se-1')).toBeTruthy()
+        expect(getByText('Card-se-2')).toBeTruthy()
+      })
     })
   })
 

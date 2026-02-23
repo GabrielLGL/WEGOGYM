@@ -35,7 +35,8 @@
         }
       ],
       "@sentry/react-native/expo",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-secure-store"
     ],
     "web": {
       "favicon": "./assets/favicon.png"

@@ -17,15 +17,19 @@
 | **Total** | **93/100** | ↓ -2 (qualité -2 vs 95 précédent) |
 
 ## Problèmes restants (non corrigés)
-| # | Problème | Fichiers | Effort | Groupe |
-|---|----------|----------|--------|--------|
-| 1 | API key en clair dans SQLite → expo-secure-store | User.ts, SettingsScreen.tsx, providers | 60min | A |
-| 2 | Alert.alert → AlertDialog (4 usages) | WorkoutScreen, ProgramsScreen, AssistantScreen | 30min | B |
-| 3 | WorkoutExerciseCard: from() one-shot observable | WorkoutExerciseCard.tsx, WorkoutScreen.tsx | 20min | C |
-| 4 | SessionDetailScreen: fetch impératif → withObservables | SessionDetailScreen.tsx | 15min | C |
+| # | Problème | Fichiers | Effort | Groupe | Statut |
+|---|----------|----------|--------|--------|--------|
+| 1 | API key en clair dans SQLite → expo-secure-store | User.ts, SettingsScreen.tsx, providers | 60min | A | ✅ Résolu |
+| 2 | Alert.alert → AlertDialog (4 usages) | WorkoutScreen, ProgramsScreen, AssistantScreen | 30min | B | ✅ Déjà résolu |
+| 3 | WorkoutExerciseCard: from() one-shot observable | WorkoutExerciseCard.tsx, WorkoutScreen.tsx | 20min | C | ✅ Résolu |
+| 4 | SessionDetailScreen: fetch impératif → withObservables | SessionDetailScreen.tsx | 15min | C | ✅ Déjà résolu |
 
 ## Parallélisation
 Les mêmes lettres = mêmes fichiers (séquentiel). Lettres différentes = parallèle.
 - Claude Code 1 : Groupe A — sécurité API keys
 - Claude Code 2 : Groupe B — Alert.alert → AlertDialog
 - Claude Code 3 : Groupe C — patterns réactifs (WorkoutExerciseCard + SessionDetailScreen)
+
+## Résolution
+✅ Résolu — 20260223-0100
+Rapport do : docs/bmad/do/20260223-0100-fix-verrif-rapport-remaining.md

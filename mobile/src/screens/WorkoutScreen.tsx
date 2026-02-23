@@ -172,26 +172,32 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         totalSetsTarget={totalSetsTarget}
       />
 
-      <FlatList
-        data={sessionExercises}
-        keyExtractor={item => item.id}
-        keyboardShouldPersistTaps="handled"
-        renderItem={({ item }) => (
-          <WorkoutExerciseCard
-            sessionExercise={item}
-            historyId={historyId}
-            setInputs={setInputs}
-            validatedSets={validatedSets}
-            onUpdateInput={updateSetInput}
-            onValidateSet={handleValidateSet}
-            onUnvalidateSet={unvalidateSet}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Aucun exercice dans cette séance.</Text>
-        }
-      />
+      {historyId ? (
+        <FlatList
+          data={sessionExercises}
+          keyExtractor={item => item.id}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }) => (
+            <WorkoutExerciseCard
+              sessionExercise={item}
+              historyId={historyId}
+              setInputs={setInputs}
+              validatedSets={validatedSets}
+              onUpdateInput={updateSetInput}
+              onValidateSet={handleValidateSet}
+              onUnvalidateSet={unvalidateSet}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Aucun exercice dans cette séance.</Text>
+          }
+        />
+      ) : (
+        <View style={styles.listContent}>
+          <Text style={styles.emptyText}>Chargement...</Text>
+        </View>
+      )}
 
       {showRestTimer && (
         <View style={styles.timerContainer}>

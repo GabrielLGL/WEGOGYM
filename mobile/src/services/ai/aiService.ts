@@ -12,6 +12,7 @@ import { createGeminiProvider, testGeminiConnection } from './geminiProvider'
 import type { AIFormData, AIProvider, DBContext, GeneratedPlan, GeneratePlanResult } from './types'
 import { generateProgram, toDatabasePlan } from './programGenerator'
 import type { UserProfile } from './programGenerator'
+import { getApiKey } from '../secureKeyStore'
 
 function selectProvider(aiProvider: string | null, apiKey: string | null): AIProvider {
   if (!apiKey || !aiProvider || aiProvider === 'offline') return offlineEngine
@@ -114,7 +115,8 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
 
 export async function generatePlan(form: AIFormData, user: User | null): Promise<GeneratePlanResult> {
   const context = await buildDBContext(form)
-  const provider = selectProvider(user?.aiProvider ?? null, user?.aiApiKey ?? null)
+  const apiKey = await getApiKey()
+  const provider = selectProvider(user?.aiProvider ?? null, apiKey)
 
   if (provider === offlineEngine) {
     const plan = await offlineEngine.generate(form, context)
