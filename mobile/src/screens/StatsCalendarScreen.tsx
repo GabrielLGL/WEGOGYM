@@ -112,7 +112,7 @@ interface TooltipInfo {
   sessions: SessionDetail[]
 }
 
-function StatsCalendarScreenBase({ histories }: Props) {
+export function StatsCalendarScreenBase({ histories }: Props) {
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null)
 
   const calendarData = useMemo(() => computeCalendarData(histories), [histories])

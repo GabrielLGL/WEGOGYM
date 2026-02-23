@@ -27,7 +27,7 @@ interface Props {
   histories: History[]
 }
 
-function StatsRepartitionScreenBase({ sets, exercises, histories }: Props) {
+export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props) {
   const [periodLabel, setPeriodLabel] = useState<string>('1 mois')
   const period = labelToPeriod(periodLabel)
 

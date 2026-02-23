@@ -63,7 +63,7 @@ interface Props {
   sets: WorkoutSet[]
 }
 
-function StatsScreenBase({ users, histories, sets }: Props) {
+export function StatsScreenBase({ users, histories, sets }: Props) {
   const navigation = useNavigation<StatsNavigation>()
   const haptics = useHaptics()
 

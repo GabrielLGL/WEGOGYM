@@ -38,7 +38,7 @@ interface SelectedPoint {
   y: number
 }
 
-function StatsDurationScreenBase({ histories }: Props) {
+export function StatsDurationScreenBase({ histories }: Props) {
   const { width: screenWidth } = useWindowDimensions()
   const stats = useMemo(() => computeDurationStats(histories), [histories])
   const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null)

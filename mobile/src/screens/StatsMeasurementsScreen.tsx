@@ -62,7 +62,7 @@ interface Props {
   measurements: BodyMeasurement[]
 }
 
-function StatsMeasurementsScreenBase({ measurements }: Props) {
+export function StatsMeasurementsScreenBase({ measurements }: Props) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   const haptics = useHaptics()
   const addSheet = useModalState()

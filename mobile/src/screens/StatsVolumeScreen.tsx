@@ -32,7 +32,7 @@ interface Props {
   histories: History[]
 }
 
-function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
+export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   const { width: screenWidth } = useWindowDimensions()
   const [periodLabel, setPeriodLabel] = useState<string>('1 mois')
   const period = labelToPeriod(periodLabel)

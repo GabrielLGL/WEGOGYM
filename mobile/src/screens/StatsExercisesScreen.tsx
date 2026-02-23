@@ -29,7 +29,7 @@ interface Props {
   histories: History[]
 }
 
-function StatsExercisesScreenBase({ sets, exercises, histories }: Props) {
+export function StatsExercisesScreenBase({ sets, exercises, histories }: Props) {
   const {
     searchQuery,
     setSearchQuery,
