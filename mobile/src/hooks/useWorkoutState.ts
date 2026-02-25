@@ -11,17 +11,17 @@ import type { SetInputData, ValidatedSetData } from '../types/workout'
 
 function buildInitialInputs(
   sessionExercises: SessionExercise[],
-  initialWeights: Record<string, Record<number, number>>
+  initialData: Record<string, Record<number, { weight: number; reps: number }>>
 ): Record<string, SetInputData> {
   const initial: Record<string, SetInputData> = {}
   for (const se of sessionExercises) {
     const exerciseId = se.exercise.id
     for (let i = 1; i <= (se.setsTarget ?? 0); i++) {
       const key = `${se.id}_${i}`
-      const historyWeight = initialWeights[exerciseId]?.[i]
+      const lastData = initialData[exerciseId]?.[i]
       initial[key] = {
-        weight: historyWeight != null ? String(historyWeight) : '',
-        reps: '',
+        weight: lastData?.weight != null ? String(lastData.weight) : '',
+        reps: lastData?.reps != null ? String(lastData.reps) : '',
       }
     }
   }

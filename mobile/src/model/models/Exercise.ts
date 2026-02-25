@@ -30,6 +30,9 @@ export default class Exercise extends Model {
   // Colonne 'equipment' optionnelle (ex: Poids libre, Machine)
   @text('equipment') equipment?: string
 
+  // Colonne 'notes' optionnelle — notes persistantes par exercice (grip, tempo, sensation)
+  @text('notes') notes?: string
+
   // Colonne de date de création, gérée automatiquement et en lecture seule
   @readonly @date('created_at') createdAt!: Date
 

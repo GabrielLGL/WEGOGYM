@@ -1,13 +1,15 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 17, // <--- ON PASSE EN VERSION 17 (ajout name sur users + table body_measurements)
+  version: 20, // v20 : ajout user_level/user_goal sur users + equipment/frequency sur programs
   tables: [
     tableSchema({
       name: 'programs',
       columns: [
         { name: 'name', type: 'string' },
         { name: 'position', type: 'number', isOptional: true },
+        { name: 'equipment', type: 'string', isOptional: true },
+        { name: 'frequency', type: 'number', isOptional: true },
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' },
       ]
@@ -43,6 +45,7 @@ export const mySchema = appSchema({
         { name: 'is_custom', type: 'boolean' },
         { name: 'muscles', type: 'string', isOptional: true },
         { name: 'equipment', type: 'string', isOptional: true },
+        { name: 'notes', type: 'string', isOptional: true },
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' }
       ]
@@ -65,8 +68,17 @@ export const mySchema = appSchema({
             {name: 'timer_enabled', type: 'boolean'},
             {name: 'rest_duration', type: 'number'},
             {name: 'onboarding_completed', type: 'boolean'},
+            {name: 'user_level', type: 'string', isOptional: true},
+            {name: 'user_goal', type: 'string', isOptional: true},
             {name: 'ai_provider', type: 'string', isOptional: true},
             {name: 'ai_api_key', type: 'string', isOptional: true},
+            {name: 'total_xp', type: 'number'},
+            {name: 'level', type: 'number'},
+            {name: 'current_streak', type: 'number'},
+            {name: 'best_streak', type: 'number'},
+            {name: 'streak_target', type: 'number'},
+            {name: 'total_tonnage', type: 'number'},
+            {name: 'last_workout_week', type: 'string', isOptional: true},
             {name: 'created_at', type: 'number'},
             {name: 'updated_at', type: 'number'}
         ]

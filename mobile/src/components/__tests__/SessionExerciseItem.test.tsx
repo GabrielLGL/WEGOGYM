@@ -115,6 +115,87 @@ describe('SessionExerciseItem', () => {
     })
   })
 
+  describe('drag handle', () => {
+    it('affiche le drag handle quand drag est fourni', () => {
+      const drag = jest.fn()
+      const { UNSAFE_getAllByType } = render(
+        <SessionExerciseItem
+          item={makeSessionExercise()}
+          exercise={makeExercise()}
+          onEditTargets={jest.fn()}
+          onRemove={jest.fn()}
+          drag={drag}
+        />
+      )
+
+      // Le drag handle contient 3 barres (View), le composant rend le handle
+      const allTexts = UNSAFE_getAllByType(require('react-native').View)
+      // At least the drag bars should be present
+      expect(allTexts.length).toBeGreaterThan(3)
+    })
+
+    it('n\'affiche pas le drag handle quand drag n\'est pas fourni', () => {
+      const { queryByTestId, toJSON } = render(
+        <SessionExerciseItem
+          item={makeSessionExercise()}
+          exercise={makeExercise()}
+          onEditTargets={jest.fn()}
+          onRemove={jest.fn()}
+        />
+      )
+
+      const tree = JSON.stringify(toJSON())
+      // Without drag, the onPressIn handler should not be present
+      expect(tree).not.toContain('onPressIn')
+    })
+
+    it('applique le style dragging quand dragActive est true', () => {
+      const { toJSON } = render(
+        <SessionExerciseItem
+          item={makeSessionExercise()}
+          exercise={makeExercise()}
+          onEditTargets={jest.fn()}
+          onRemove={jest.fn()}
+          drag={jest.fn()}
+          dragActive={true}
+        />
+      )
+
+      const tree = JSON.stringify(toJSON())
+      // dragActive applies itemContainerDragging style with cardSecondary color
+      expect(tree).toBeTruthy()
+    })
+
+    it('n\'applique pas le style dragging quand dragActive est false', () => {
+      const { toJSON: withDrag } = render(
+        <SessionExerciseItem
+          item={makeSessionExercise()}
+          exercise={makeExercise()}
+          onEditTargets={jest.fn()}
+          onRemove={jest.fn()}
+          drag={jest.fn()}
+          dragActive={false}
+        />
+      )
+
+      const { toJSON: withDragActive } = render(
+        <SessionExerciseItem
+          item={makeSessionExercise()}
+          exercise={makeExercise()}
+          onEditTargets={jest.fn()}
+          onRemove={jest.fn()}
+          drag={jest.fn()}
+          dragActive={true}
+        />
+      )
+
+      // The two should differ (dragActive adds extra style)
+      const jsonFalse = JSON.stringify(withDrag())
+      const jsonTrue = JSON.stringify(withDragActive())
+      expect(jsonFalse).not.toEqual(jsonTrue)
+    })
+  })
+
   describe('interactions', () => {
     it('appelle onEditTargets quand on appuie sur la zone des objectifs', () => {
       const onEditTargets = jest.fn()

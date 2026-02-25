@@ -7,6 +7,8 @@ import SessionExercise from '../model/models/SessionExercise'
 import Exercise from '../model/models/Exercise'
 import { validateSetInput } from '../model/utils/validationHelpers'
 import { getLastPerformanceForExercise } from '../model/utils/databaseHelpers'
+import { suggestProgression } from '../model/utils/progressionHelpers'
+import { database } from '../model/index'
 import { useHaptics } from '../hooks/useHaptics'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
 import type { SetInputData, ValidatedSetData, LastPerformance } from '../types/workout'
@@ -168,12 +170,34 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
   onUnvalidateSet,
 }) => {
   const haptics = useHaptics()
+  const [isEditingNote, setIsEditingNote] = React.useState(false)
+  const [noteText, setNoteText] = React.useState(exercise.notes ?? '')
+
   const setsCount = sessionExercise.setsTarget ?? 0
   const setOrders = Array.from({ length: setsCount }, (_, i) => i + 1)
   const completedCount = setOrders.filter(
     i => validatedSets[`${sessionExercise.id}_${i}`]
   ).length
   const isComplete = completedCount === setsCount && setsCount > 0
+
+  const suggestion = lastPerformance
+    ? suggestProgression(
+        lastPerformance.avgWeight,
+        lastPerformance.avgReps,
+        sessionExercise.repsTarget
+      )
+    : null
+
+  const handleSaveNote = async () => {
+    setIsEditingNote(false)
+    if (noteText !== (exercise.notes ?? '')) {
+      await database.write(async () => {
+        await exercise.update(e => {
+          e.notes = noteText
+        })
+      })
+    }
+  }
 
   return (
     <View
@@ -183,6 +207,26 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
       ]}
     >
       <Text style={styles.exerciseName}>{exercise.name}</Text>
+      {isEditingNote ? (
+        <TextInput
+          value={noteText}
+          onChangeText={setNoteText}
+          onBlur={handleSaveNote}
+          placeholder="Ajouter une note (grip, tempo, sensation...)"
+          placeholderTextColor={colors.placeholder}
+          style={styles.noteInput}
+          autoFocus
+          multiline
+        />
+      ) : exercise.notes ? (
+        <TouchableOpacity onPress={() => setIsEditingNote(true)}>
+          <Text style={styles.noteText}>{exercise.notes}</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity onPress={() => setIsEditingNote(true)}>
+          <Text style={styles.addNoteLink}>+ Ajouter une note</Text>
+        </TouchableOpacity>
+      )}
       {sessionExercise.setsTarget != null && (
         <Text style={styles.target}>
           Objectif : {sessionExercise.setsTarget}×{sessionExercise.repsTarget ?? '?'} reps
@@ -191,6 +235,11 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
       {lastPerformance && (
         <Text style={styles.lastPerfText}>
           Dernière : Moy. {lastPerformance.avgWeight} kg × {lastPerformance.avgReps} sur {lastPerformance.setsCount} série{lastPerformance.setsCount > 1 ? 's' : ''}
+        </Text>
+      )}
+      {suggestion && (
+        <Text style={styles.suggestionText}>
+          Suggestion : {suggestion.label}
         </Text>
       )}
       {setsCount === 0 ? (
@@ -273,7 +322,33 @@ const styles = StyleSheet.create({
   lastPerfText: {
     color: colors.textSecondary,
     fontSize: fontSize.xs,
+    marginBottom: 2,
+  },
+  suggestionText: {
+    color: colors.success,
+    fontSize: fontSize.xs,
+    fontWeight: '600',
     marginBottom: spacing.sm,
+  },
+  noteText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.xs,
+    fontStyle: 'italic',
+    marginBottom: spacing.xs,
+  },
+  noteInput: {
+    color: colors.text,
+    fontSize: fontSize.xs,
+    backgroundColor: colors.cardSecondary,
+    borderRadius: borderRadius.sm,
+    padding: spacing.sm,
+    marginBottom: spacing.xs,
+    minHeight: 32,
+  },
+  addNoteLink: {
+    color: colors.textSecondary,
+    fontSize: fontSize.xs,
+    marginBottom: spacing.xs,
   },
   noSetsText: {
     color: colors.textSecondary,

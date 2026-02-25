@@ -661,11 +661,11 @@ export async function importGeneratedPlan(plan: GeneratedPlan): Promise<Program>
  * Utilisé pour pré-remplir les inputs poids au lancement d'une séance.
  *
  * @param exerciseIds - IDs des exercices de la séance
- * @returns { [exerciseId]: { [setOrder]: weight } }
+ * @returns { [exerciseId]: { [setOrder]: { weight, reps } } }
  */
 export async function getLastSetsForExercises(
   exerciseIds: string[]
-): Promise<Record<string, Record<number, number>>> {
+): Promise<Record<string, Record<number, { weight: number; reps: number }>>> {
   if (exerciseIds.length === 0) return {}
 
   const sets = await database
@@ -687,7 +687,7 @@ export async function getLastSetsForExercises(
 
   const historiesById = new Map(histories.map(h => [h.id, h]))
 
-  const result: Record<string, Record<number, number>> = {}
+  const result: Record<string, Record<number, { weight: number; reps: number }>> = {}
 
   for (const exerciseId of exerciseIds) {
     const exerciseSets = sets.filter(s => s.exercise.id === exerciseId)
@@ -709,12 +709,12 @@ export async function getLastSetsForExercises(
     if (!mostRecentHistory) continue
 
     const recentSets = exerciseSets.filter(s => s.history.id === mostRecentHistory!.id)
-    const setWeights: Record<number, number> = {}
+    const setData: Record<number, { weight: number; reps: number }> = {}
     recentSets.forEach(s => {
-      setWeights[s.setOrder] = s.weight
+      setData[s.setOrder] = { weight: s.weight, reps: s.reps }
     })
 
-    result[exerciseId] = setWeights
+    result[exerciseId] = setData
   }
 
   return result

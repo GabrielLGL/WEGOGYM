@@ -1271,7 +1271,7 @@ describe('databaseHelpers', () => {
     })
 
     it('retourne {} si aucune history trouvée', async () => {
-      const mockSets = [{ history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80 }]
+      const mockSets = [{ history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80, reps: 10 }]
       mockGet.mockImplementation((table: string) => {
         if (table === 'sets') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }) }
         if (table === 'histories') return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) }
@@ -1282,10 +1282,10 @@ describe('databaseHelpers', () => {
       expect(result).toEqual({})
     })
 
-    it('retourne les poids de la dernière séance par exercice', async () => {
+    it('retourne les poids et reps de la dernière séance par exercice', async () => {
       const mockSets = [
-        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80 },
-        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 2, weight: 75 },
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80, reps: 10 },
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 2, weight: 75, reps: 8 },
       ]
       const mockHistories = [{ id: 'hist-1', startTime: new Date(1000), deletedAt: null }]
       mockGet.mockImplementation((table: string) => {
@@ -1295,13 +1295,13 @@ describe('databaseHelpers', () => {
       })
 
       const result = await getLastSetsForExercises(['ex-1'])
-      expect(result).toEqual({ 'ex-1': { 1: 80, 2: 75 } })
+      expect(result).toEqual({ 'ex-1': { 1: { weight: 80, reps: 10 }, 2: { weight: 75, reps: 8 } } })
     })
 
     it('choisit la history la plus récente parmi plusieurs', async () => {
       const mockSets = [
-        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 60 },
-        { history: { id: 'hist-2' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 90 },
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 60, reps: 10 },
+        { history: { id: 'hist-2' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 90, reps: 5 },
       ]
       const mockHistories = [
         { id: 'hist-1', startTime: new Date(1000), deletedAt: null },
@@ -1314,12 +1314,12 @@ describe('databaseHelpers', () => {
       })
 
       const result = await getLastSetsForExercises(['ex-1'])
-      expect(result['ex-1'][1]).toBe(90)
+      expect(result['ex-1'][1]).toEqual({ weight: 90, reps: 5 })
     })
 
     it('ignore les exercices sans sets', async () => {
       const mockSets = [
-        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80 },
+        { history: { id: 'hist-1' }, exercise: { id: 'ex-1' }, setOrder: 1, weight: 80, reps: 10 },
       ]
       const mockHistories = [{ id: 'hist-1', startTime: new Date(1000), deletedAt: null }]
       mockGet.mockImplementation((table: string) => {

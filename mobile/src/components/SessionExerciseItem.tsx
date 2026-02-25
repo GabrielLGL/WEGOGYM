@@ -34,6 +34,7 @@ const SessionExerciseItemComponent: React.FC<EnhancedProps> = ({ item, exercise,
       <View style={styles.itemInfo}>
         <Text style={styles.itemTitle}>{exercise.name}</Text>
         <Text style={styles.itemTags}>{exercise.muscles?.join(', ')} • {exercise.equipment}</Text>
+        {exercise.notes ? <Text style={styles.noteIndicator}>Notes</Text> : null}
         <TouchableOpacity style={styles.targetRow} onPress={() => onEditTargets(item)}>
           <View style={styles.targetBox}>
             <Text style={styles.targetValue}>{item.setsTarget || 0}</Text>
@@ -93,6 +94,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.xs,
     marginBottom: spacing.ms,
+  },
+  noteIndicator: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontStyle: 'italic',
+    marginBottom: spacing.xs,
   },
   targetRow: {
     flexDirection: 'row',

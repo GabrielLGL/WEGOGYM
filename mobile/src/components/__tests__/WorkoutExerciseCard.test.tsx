@@ -15,6 +15,17 @@ jest.mock('../../model/utils/databaseHelpers', () => ({
   getLastPerformanceForExercise: jest.fn().mockResolvedValue(null),
 }))
 
+jest.mock('../../model/utils/progressionHelpers', () => ({
+  suggestProgression: jest.fn().mockReturnValue(null),
+}))
+
+jest.mock('../../model/index', () => ({
+  database: {
+    write: jest.fn((fn: () => Promise<void>) => fn()),
+    get: jest.fn(),
+  },
+}))
+
 jest.mock('../../model/utils/validationHelpers', () => ({
   validateSetInput: jest.fn().mockReturnValue({ valid: true }),
 }))

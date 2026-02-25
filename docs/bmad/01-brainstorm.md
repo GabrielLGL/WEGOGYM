@@ -1,62 +1,66 @@
-# Brainstorm — Statistiques Globales Utilisateur — 2026-02-21
+# Brainstorm — Templates intelligents + Notes exercice — 2026-02-24
 
-## Idée reformulée
-En tant qu'utilisateur, je veux remplacer l'écran Historique par un Dashboard Stats personnalisé qui affiche mes KPIs, ma régularité et mes records, avec des accès rapides vers des vues détaillées (durée, volume, répartition, calendrier, exercices, mesures corporelles).
+## Idee reformulee
+En tant que pratiquant, quand j'ouvre ma seance, je veux que mes poids/reps de la derniere fois soient deja la ET qu'une suggestion de progression intelligente me guide — et que mes notes personnelles par exercice (grip, douleur, focus) me suivent d'une seance a l'autre sans effort.
 
 ## Persona cible
-**Intermédiaire** (prioritaire) — pratique régulière depuis 6-24 mois, veut voir sa progression de manière concrète et rester motivé. Secondairement : **Avancé** pour les analytics granulaires.
+Intermediaire (6-24 mois) — pratiquant regulier qui veut progresser sans paperasse. Debutant et avance en profitent aussi.
 
-## Idées explorées
-1. Dashboard global KPIs (total séances, volume total, séries)
-2. Streak de régularité (jours consécutifs)
-3. Calendrier d'activité façon GitHub contributions (grille de carrés colorés par intensité)
-4. Progression par exercice (poids max, volume) → graphiques
-5. Records personnels centralisés (flag `is_pr` existant, non encore affiché globalement)
-6. Volume par groupe musculaire (répartition, équilibre)
-7. Durée moyenne des séances (min/max/moyenne)
-8. Top exercices les plus pratiqués (fréquence)
-9. Comparaison semaine actuelle vs précédente
-10. 1RM estimé par exercice (formule Epley : poids × (1 + reps/30))
-11. Heatmap de la fréquence d'entraînement
-12. Bilan hebdomadaire automatique
-13. Score de cohérence (indice de régularité)
-14. Tendances temporelles (semaine / mois / trimestre)
-15. Évolution du volume par séance dans le temps
-16. Mesures corporelles (poids, tour de taille, hanches, bras, poitrine) avec graphique évolution
+## Idees explorees
+
+### Templates intelligents (#23)
+1. Pre-remplir poids + reps de la derniere seance identique
+2. Suggestion +2.5kg si les reps cibles ont ete atteintes la derniere fois
+3. Suggestion +1 rep si le poids max est atteint ou progression lineaire stagne
+4. Indicateur visuel discret (petite fleche verte +2.5kg) a cote du champ poids
+5. Possibilite d'accepter la suggestion en 1 tap
+6. Historique multi-seances : si 3 seances consecutives au meme poids -> suggerer changement
+7. Fallback gracieux : si pas d'historique, champs vides comme aujourd'hui
+8. Suggestion basee sur la derniere History de la MEME session
+9. Double progression adaptative : range -> +reps puis +poids / fixe -> +poids uniquement
+10. Badge "Progression acceptee" quand l'utilisateur suit la suggestion et reussit
+
+### Notes par exercice (#22)
+11. Champ notes sur le modele Exercise (global, pas par seance)
+12. Affichage automatique dans SessionExerciseItem quand une note existe
+13. Editable pendant la seance (tap pour ouvrir, sauvegarder au blur)
+14. Exemples d'usage : "Grip pronation", "Douleur epaule droite -> leger", "Focus excentrique"
+15. Icone indicatrice quand une note existe (sans prendre de place)
+16. Notes consultables aussi dans la bibliotheque d'exercices
+17. Pas de limite de caracteres (text field)
+18. Placeholder contextuel : "Ajouter une note (grip, tempo, sensation...)"
+
+### Idees rejetees
+19. Suggestion de progression par IA — over-engineering, l'algo simple suffit
+20. Notes par seance ET par exercice — trop complexe, notes globales suffisent
+21. Historique des notes (versionning) — pas MVP
+22. Auto-detection du type de progression — pas MVP
 
 ## Top 5 Insights
-1. **Dashboard synthétique** — Point d'entrée unique avec KPIs clés (séances totales, volume cumulé, PRs) + phrase d'accroche dynamique contextuelle | Risque : surcharge d'information, hiérarchiser clairement
-2. **Régularité & Streaks** — Calendrier GitHub-style + streak actif : mécanisme de rétention le plus puissant, visualise la constance | Risque : pression négative si streak brisé
-3. **Records personnels centralisés** — Flag `is_pr` déjà sur `sets` mais jamais affiché globalement — quick win motivant, 0 migration | Risque : faible
-4. **Volume par muscle** — Répartition tonnage par groupe musculaire depuis `sets` × `exercises.muscles` — détecte déséquilibres | Risque : muscles en string → parsing
-5. **Mesures corporelles** — Nouvelle table `body_measurements` + champ `name` sur `users` — suivi physique complet | Risque : migration schéma v17
+1. **Double progression adaptative** — Range (6-8) : +reps puis +poids. Fixe (5) : +poids uniquement. Vide : pas de suggestion. Parse reps_target (string) pour determiner le mode. | Risque : edge cases non couverts (periodisation ondulee, etc.)
+2. **Notes sur Exercise (global)** — Une seule note persistante par exercice, pas par seance. Schema plus simple, meilleure UX. | Risque : utilisateur pourrait vouloir notes differentes selon programme (rare)
+3. **Suggestion discrete, pas imposee** — Petite indication visuelle (+2.5kg), utilisateur choisit. Pas de popup. | Risque : trop discret = pas remarque
+4. **Reutilisation de l'existant** — getLastSetsForExercises() existe deja. Etendre pour reps + ajouter logique suggestion. | Risque : scope "meme session" vs "meme exercice tous programmes" a bien definir
+5. **Migration schema v18** — Ajouter colonne `notes` (text, optional) sur `exercises`. Simple addColumns. | Risque : migration non-triviale mais non-destructive
+
+## Decisions prises
+- Double progression adaptative selon le type de reps_target
+- Range ("6-8") : d'abord +reps jusqu'au haut, puis +poids et reset au bas
+- Fixe ("5") : uniquement +poids, jamais de suggestion de reps
+- Vide/null : pre-remplissage seul, pas de suggestion
+- Notes sur Exercise (global), pas sur SessionExercise
+- Suggestion discrète, jamais imposee (indicateur visuel, pas de modal)
+- App non publique : schema v17 -> v18 direct, reset DB OK
 
 ## Questions ouvertes
-- Mode de saisie des mesures : manuelle à chaque fois ou rappel périodique ?
-- Période par défaut du dashboard : 30 jours ou tout l'historique ?
-- Bouton "Voir l'historique" : écran séparé ou modale ?
+- Scope exact de "derniere seance" : meme session_id ou meme exercice globalement ?
+- Increment de poids configurable ? (2.5kg par defaut, mais certains veulent 1.25kg)
 
-## Contraintes techniques identifiées
-- Schéma v17 requis : ajout `name` sur `users` + nouvelle table `body_measurements`
-- Muscles stockés en string JSON → parsing nécessaire pour répartition
-- `is_pr` existant sur `sets` → exploitable directement
-- Composants existants : `ChipSelector`, `BottomSheet`, `Button`, `AlertDialog`
-- Charts : déjà fondation sur `sets` (WEGO-007)
-- Offline-first : toutes les stats calculées depuis WatermelonDB local
+## Contraintes techniques identifiees
+- Schema migration v17 -> v18 (ajout colonne notes sur exercises)
+- reps_target est un string : parsing "6-8" vs "5" vs null
+- getLastSetsForExercises() existe deja dans databaseHelpers.ts
+- Mutations dans database.write(), withObservables pour reactivite
 
-## Décisions utilisateur
-- Mesures corporelles : poids + tour de taille + hanches + bras + poitrine
-- Nom utilisateur : nouveau champ `name` dans table `users`
-- Phrase d'accroche : dynamique selon contexte (streak, PR, volume, retour après gap, début de mois)
-- Historique : accessible via bouton depuis le Dashboard
-
-## Exemples de phrases d'accroche
-- Streak actif → "🔥 7 jours consécutifs — ne lâche rien !"
-- Nouveau PR → "💥 Nouveau record cette semaine — tu progresses !"
-- Volume fun → "🚀 Ce mois : 12 400 kg soulevés. L'équivalent de 2 voitures."
-- Régularité → "⚡ 4 séances/semaine en moyenne — niveau sérieux."
-- Retour après gap → "😤 De retour après 5 jours — l'important c'est de revenir."
-- Début de mois → "🎯 Nouveau mois, nouvelles perfs. C'est parti !"
-
-## Prêt pour Phase 2 ?
+## Pret pour Phase 2 ?
 OUI

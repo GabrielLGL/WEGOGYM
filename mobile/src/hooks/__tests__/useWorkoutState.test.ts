@@ -72,26 +72,34 @@ describe('useWorkoutState', () => {
       expect(result.current.setInputs['se-1_3']).toEqual({ weight: '', reps: '' })
     })
 
-    it('should prefill weights from getLastSetsForExercises after mount', async () => {
-      mockGetLastSetsForExercises.mockResolvedValue({ 'ex-se-1': { 1: 80, 2: 80, 3: 80 } })
+    it('should prefill weights and reps from getLastSetsForExercises after mount', async () => {
+      mockGetLastSetsForExercises.mockResolvedValue({
+        'ex-se-1': {
+          1: { weight: 80, reps: 10 },
+          2: { weight: 80, reps: 10 },
+          3: { weight: 80, reps: 10 },
+        },
+      })
       const se1 = createMockSessionExercise('se-1', 3)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       await act(async () => {})
 
-      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '80', reps: '' })
-      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '80', reps: '' })
-      expect(result.current.setInputs['se-1_3']).toEqual({ weight: '80', reps: '' })
+      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '80', reps: '10' })
+      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '80', reps: '10' })
+      expect(result.current.setInputs['se-1_3']).toEqual({ weight: '80', reps: '10' })
     })
 
-    it('should keep reps always empty even when history provides weights', async () => {
-      mockGetLastSetsForExercises.mockResolvedValue({ 'ex-se-1': { 1: 60 } })
+    it('should prefill reps from history', async () => {
+      mockGetLastSetsForExercises.mockResolvedValue({
+        'ex-se-1': { 1: { weight: 60, reps: 8 } },
+      })
       const se1 = createMockSessionExercise('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1 as any], 'history-1'))
 
       await act(async () => {})
 
-      expect(result.current.setInputs['se-1_1'].reps).toBe('')
+      expect(result.current.setInputs['se-1_1'].reps).toBe('8')
     })
 
     it('should leave weight empty when no history data available', async () => {
@@ -112,10 +120,10 @@ describe('useWorkoutState', () => {
       expect(result.current.setInputs['se-1_1']).toBeUndefined()
     })
 
-    it('should prefill weights for multiple exercises from history', async () => {
+    it('should prefill weights and reps for multiple exercises from history', async () => {
       mockGetLastSetsForExercises.mockResolvedValue({
-        'ex-se-1': { 1: 50, 2: 50 },
-        'ex-se-2': { 1: 100 },
+        'ex-se-1': { 1: { weight: 50, reps: 10 }, 2: { weight: 50, reps: 10 } },
+        'ex-se-2': { 1: { weight: 100, reps: 5 } },
       })
       const se1 = createMockSessionExercise('se-1', 2)
       const se2 = createMockSessionExercise('se-2', 1)
@@ -123,9 +131,9 @@ describe('useWorkoutState', () => {
 
       await act(async () => {})
 
-      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '50', reps: '' })
-      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '50', reps: '' })
-      expect(result.current.setInputs['se-2_1']).toEqual({ weight: '100', reps: '' })
+      expect(result.current.setInputs['se-1_1']).toEqual({ weight: '50', reps: '10' })
+      expect(result.current.setInputs['se-1_2']).toEqual({ weight: '50', reps: '10' })
+      expect(result.current.setInputs['se-2_1']).toEqual({ weight: '100', reps: '5' })
     })
   })
 
