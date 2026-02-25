@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TextInput, SafeAreaView, ScrollView, Switch } from 'react-native'
+import { View, Text, StyleSheet, TextInput, SafeAreaView, ScrollView, Switch, TouchableOpacity } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { map } from 'rxjs/operators'
 import { database } from '../model/index'
 import User from '../model/models/User'
 import { useHaptics } from '../hooks/useHaptics'
+import { OnboardingCard } from '../components/OnboardingCard'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
+import {
+  USER_LEVELS,
+  USER_GOALS,
+  USER_LEVEL_LABELS,
+  USER_LEVEL_DESCRIPTIONS,
+  USER_GOAL_LABELS,
+  USER_GOAL_DESCRIPTIONS,
+  type UserLevel,
+  type UserGoal,
+} from '../model/constants'
 
 interface Props {
   user: User | null
@@ -16,6 +27,8 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
   const [restDuration, setRestDuration] = useState(user?.restDuration?.toString() ?? '90')
   const [timerEnabled, setTimerEnabled] = useState(user?.timerEnabled ?? true)
   const [userName, setUserName] = useState(user?.name ?? '')
+  const [editingLevel, setEditingLevel] = useState(false)
+  const [editingGoal, setEditingGoal] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -56,6 +69,32 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
       haptics.onSuccess()
     } catch (error) {
       if (__DEV__) console.error('Failed to update name:', error)
+    }
+  }
+
+  const handleUpdateLevel = async (level: UserLevel) => {
+    if (!user) return
+    try {
+      await database.write(async () => {
+        await user.update(u => { u.userLevel = level })
+      })
+      haptics.onSuccess()
+      setEditingLevel(false)
+    } catch (error) {
+      if (__DEV__) console.error('Failed to update level:', error)
+    }
+  }
+
+  const handleUpdateGoal = async (goal: UserGoal) => {
+    if (!user) return
+    try {
+      await database.write(async () => {
+        await user.update(u => { u.userGoal = goal })
+      })
+      haptics.onSuccess()
+      setEditingGoal(false)
+    } catch (error) {
+      if (__DEV__) console.error('Failed to update goal:', error)
     }
   }
 
@@ -101,6 +140,66 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
               maxLength={30}
             />
           </View>
+
+          {/* Niveau */}
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => setEditingLevel(!editingLevel)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Niveau</Text>
+              <Text style={styles.settingDescription}>
+                Influence la difficulté des exercices suggérés
+              </Text>
+            </View>
+            <Text style={styles.infoValue}>
+              {user?.userLevel ? USER_LEVEL_LABELS[user.userLevel as UserLevel] : 'Non défini'}
+            </Text>
+          </TouchableOpacity>
+          {editingLevel && (
+            <View style={styles.profileCards}>
+              {USER_LEVELS.map(level => (
+                <OnboardingCard
+                  key={level}
+                  label={USER_LEVEL_LABELS[level]}
+                  description={USER_LEVEL_DESCRIPTIONS[level]}
+                  selected={user?.userLevel === level}
+                  onPress={() => handleUpdateLevel(level)}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* Objectif */}
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => setEditingGoal(!editingGoal)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Objectif</Text>
+              <Text style={styles.settingDescription}>
+                Influence les plages de répétitions recommandées
+              </Text>
+            </View>
+            <Text style={styles.infoValue}>
+              {user?.userGoal ? USER_GOAL_LABELS[user.userGoal as UserGoal] : 'Non défini'}
+            </Text>
+          </TouchableOpacity>
+          {editingGoal && (
+            <View style={styles.profileCards}>
+              {USER_GOALS.map(goal => (
+                <OnboardingCard
+                  key={goal}
+                  label={USER_GOAL_LABELS[goal]}
+                  description={USER_GOAL_DESCRIPTIONS[goal]}
+                  selected={user?.userGoal === goal}
+                  onPress={() => handleUpdateGoal(goal)}
+                />
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Section Minuteur */}
@@ -141,6 +240,52 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
               />
               <Text style={styles.inputUnit}>sec</Text>
             </View>
+          </View>
+        </View>
+
+        {/* Section Gamification */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{'\u2B50'} Gamification</Text>
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Objectif hebdomadaire</Text>
+              <Text style={styles.settingDescription}>
+                Nombre de s{'\u00E9'}ances par semaine pour maintenir le streak
+              </Text>
+            </View>
+          </View>
+          <View style={styles.streakTargetRow}>
+            {[2, 3, 4, 5].map(target => (
+              <TouchableOpacity
+                key={target}
+                style={[
+                  styles.streakTargetBtn,
+                  (user?.streakTarget ?? 3) === target && styles.streakTargetBtnActive,
+                ]}
+                onPress={async () => {
+                  if (!user || user.streakTarget === target) return
+                  haptics.onSelect()
+                  try {
+                    await database.write(async () => {
+                      await user.update(u => { u.streakTarget = target })
+                    })
+                  } catch (error) {
+                    if (__DEV__) console.error('Failed to update streak target:', error)
+                  }
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.streakTargetText,
+                    (user?.streakTarget ?? 3) === target && styles.streakTargetTextActive,
+                  ]}
+                >
+                  {target}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            <Text style={styles.streakTargetLabel}>s{'\u00E9'}ances/sem</Text>
           </View>
         </View>
 
@@ -278,6 +423,10 @@ const styles = StyleSheet.create({
     width: 140,
     textAlign: 'right',
   },
+  profileCards: {
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+  },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -362,6 +511,36 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.textSecondary,
     fontStyle: 'italic',
+  },
+  streakTargetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
+  streakTargetBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.cardSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  streakTargetBtnActive: {
+    backgroundColor: colors.primary,
+  },
+  streakTargetText: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.textSecondary,
+  },
+  streakTargetTextActive: {
+    color: colors.text,
+  },
+  streakTargetLabel: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginLeft: spacing.xs,
   },
 })
 

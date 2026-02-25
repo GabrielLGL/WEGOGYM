@@ -21,6 +21,15 @@ import {
   createWorkoutHistory,
   completeWorkoutHistory,
 } from '../model/utils/databaseHelpers'
+import {
+  calculateSessionXP,
+  calculateSessionTonnage,
+  calculateLevel,
+  updateStreak,
+  getCurrentISOWeek,
+  detectMilestones,
+  type MilestoneEvent,
+} from '../model/utils/gamificationHelpers'
 import { useWorkoutTimer } from '../hooks/useWorkoutTimer'
 import { useWorkoutState } from '../hooks/useWorkoutState'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
@@ -28,6 +37,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
 import { WorkoutSummarySheet } from '../components/WorkoutSummarySheet'
+import { MilestoneCelebration } from '../components/MilestoneCelebration'
 import { AlertDialog } from '../components/AlertDialog'
 import RestTimer from '../components/RestTimer'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -63,6 +73,8 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const [abandonVisible, setAbandonVisible] = useState(false)
   const [startErrorVisible, setStartErrorVisible] = useState(false)
   const [durationSeconds, setDurationSeconds] = useState(0)
+  const [milestones, setMilestones] = useState<MilestoneEvent[]>([])
+  const [milestoneVisible, setMilestoneVisible] = useState(false)
 
   const haptics = useHaptics()
   const footerSlide = useKeyboardAnimation(120)
@@ -70,15 +82,27 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet, unvalidateSet } =
     useWorkoutState(sessionExercises, historyId)
 
-  // Navigue vers Home quand le résumé se ferme (quelle que soit la source : bouton, retour, overlay)
+  // Quand le resume se ferme, montrer le milestone si present, sinon naviguer Home
   useEffect(() => {
     if (summaryVisible) {
       summaryWasOpenRef.current = true
     } else if (summaryWasOpenRef.current) {
       summaryWasOpenRef.current = false
+      if (milestones.length > 0) {
+        setMilestoneVisible(true)
+        haptics.onSuccess()
+      } else {
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
+      }
+    }
+  }, [summaryVisible, navigation, milestones.length, haptics])
+
+  // Quand le milestone se ferme, naviguer Home
+  useEffect(() => {
+    if (!milestoneVisible && milestones.length > 0 && !summaryVisible && summaryWasOpenRef.current === false) {
       navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
     }
-  }, [summaryVisible, navigation])
+  }, [milestoneVisible, milestones.length, summaryVisible, navigation])
 
   const completedSets = Object.keys(validatedSets).length
   const totalSetsTarget = sessionExercises.reduce((sum, se) => sum + (se.setsTarget ?? 0), 0)
@@ -140,9 +164,103 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     if (historyId) {
       await completeWorkoutHistory(historyId, now).catch(e => { if (__DEV__) console.error('[WorkoutScreen] completeWorkoutHistory (end):', e) })
     }
+
+    // ── Gamification ──
+    if (user && completedSets > 0) {
+      try {
+        const setsArray = Object.values(validatedSets).map(s => ({
+          weight: s.weight,
+          reps: s.reps,
+        }))
+        const sessionTonnage = calculateSessionTonnage(setsArray)
+        const isComplete = completedSets >= totalSetsTarget
+        const sessionXP = calculateSessionXP(totalPrs, isComplete)
+        const newTotalXp = (user.totalXp || 0) + sessionXP
+        const newLevel = calculateLevel(newTotalXp)
+        const newTotalTonnage = (user.totalTonnage || 0) + sessionTonnage
+
+        // Streak : compter les seances de la semaine courante
+        const currentWeek = getCurrentISOWeek()
+        const weekStart = getWeekStartTimestamp(currentWeek)
+        const weekHistories = await database
+          .get<History>('histories')
+          .query(
+            Q.where('deleted_at', null),
+            Q.where('start_time', Q.gte(weekStart)),
+          )
+          .fetch()
+        // +1 pour inclure la seance en cours
+        const weekSessionCount = weekHistories.length
+
+        const streakResult = updateStreak(
+          user.lastWorkoutWeek,
+          user.currentStreak || 0,
+          user.bestStreak || 0,
+          user.streakTarget || 3,
+          weekSessionCount,
+          currentWeek,
+        )
+
+        // Capture before state pour milestones
+        const totalSessionCount = await getTotalSessionCount()
+        const before = {
+          totalSessions: totalSessionCount - 1, // -1 car la seance courante est deja comptee
+          totalTonnage: user.totalTonnage || 0,
+          level: user.level || 1,
+        }
+
+        await database.write(async () => {
+          await user.update(u => {
+            u.totalXp = newTotalXp
+            u.level = newLevel
+            u.totalTonnage = newTotalTonnage
+            u.currentStreak = streakResult.currentStreak
+            u.bestStreak = streakResult.bestStreak
+            u.lastWorkoutWeek = streakResult.lastWorkoutWeek
+          })
+        })
+
+        const after = {
+          totalSessions: before.totalSessions + 1,
+          totalTonnage: newTotalTonnage,
+          level: newLevel,
+        }
+        const detected = detectMilestones(before, after)
+        if (detected.length > 0) {
+          setMilestones(detected)
+        }
+      } catch (e) {
+        if (__DEV__) console.error('[WorkoutScreen] gamification update:', e)
+      }
+    }
+
     setConfirmEndVisible(false)
     setSummaryVisible(true)
     haptics.onMajorSuccess()
+  }
+
+  /** Nombre total de seances (histories non supprimees). */
+  async function getTotalSessionCount(): Promise<number> {
+    const count = await database
+      .get<History>('histories')
+      .query(Q.where('deleted_at', null))
+      .fetchCount()
+    return count
+  }
+
+  /** Timestamp du debut de la semaine ISO. */
+  function getWeekStartTimestamp(isoWeek: string): number {
+    const [yearStr, weekStr] = isoWeek.split('-W')
+    const year = parseInt(yearStr, 10)
+    const week = parseInt(weekStr, 10)
+    // 4 janvier est toujours dans la semaine ISO 1
+    const jan4 = new Date(Date.UTC(year, 0, 4))
+    const dayOfWeek = jan4.getUTCDay() || 7
+    // Lundi de la semaine 1
+    const mondayWeek1 = new Date(jan4.getTime() - (dayOfWeek - 1) * 86400000)
+    // Lundi de la semaine demandee
+    const target = new Date(mondayWeek1.getTime() + (week - 1) * 7 * 86400000)
+    return target.getTime()
   }
 
   const handleConfirmAbandon = async () => {
@@ -268,6 +386,13 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         totalSets={completedSets}
         totalPrs={totalPrs}
         historyId={historyId}
+      />
+
+      {/* Celebration milestone */}
+      <MilestoneCelebration
+        visible={milestoneVisible}
+        milestone={milestones[0] ?? null}
+        onClose={() => setMilestoneVisible(false)}
       />
     </SafeAreaView>
   )

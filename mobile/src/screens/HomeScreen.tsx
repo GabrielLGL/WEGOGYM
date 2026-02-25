@@ -17,8 +17,12 @@ import History from '../model/models/History'
 import WorkoutSet from '../model/models/Set'
 import User from '../model/models/User'
 import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume } from '../model/utils/statsHelpers'
+import { xpToNextLevel, formatTonnage } from '../model/utils/gamificationHelpers'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
+import { LevelBadge } from '../components/LevelBadge'
+import { XPProgressBar } from '../components/XPProgressBar'
+import { StreakIndicator } from '../components/StreakIndicator'
 import type { RootStackParamList } from '../navigation'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
@@ -87,6 +91,10 @@ function HomeScreenBase({ users, histories, sets }: Props) {
 
   const user = users[0] ?? null
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
+  const xpProgress = useMemo(
+    () => xpToNextLevel(user?.totalXp ?? 0, user?.level ?? 1),
+    [user?.totalXp, user?.level],
+  )
   const motivationalPhrase = useMemo(
     () => computeMotivationalPhrase(histories, sets),
     [histories, sets],
@@ -133,8 +141,24 @@ function HomeScreenBase({ users, histories, sets }: Props) {
           <View style={styles.kpiSeparator} />
           <KpiItem label="Volume" value={formatVolume(kpis.totalVolumeKg)} />
           <View style={styles.kpiSeparator} />
+          <KpiItem label="Tonnage" value={formatTonnage(user?.totalTonnage ?? 0)} />
+          <View style={styles.kpiSeparator} />
           <KpiItem label="Records" value={String(kpis.totalPRs)} />
         </View>
+      </View>
+
+      {/* ── Card Gamification ── */}
+      <View style={styles.gamificationCard}>
+        <LevelBadge level={user?.level ?? 1} />
+        <XPProgressBar
+          currentXP={xpProgress.current}
+          requiredXP={xpProgress.required}
+          percentage={xpProgress.percentage}
+        />
+        <StreakIndicator
+          currentStreak={user?.currentStreak ?? 0}
+          streakTarget={user?.streakTarget ?? 3}
+        />
       </View>
 
       {/* ── Sections de tuiles ── */}
@@ -234,6 +258,14 @@ const styles = StyleSheet.create({
     width: 1,
     height: spacing.xl,
     backgroundColor: colors.separator,
+  },
+  // Gamification Card
+  gamificationCard: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
   // Sections
   section: {
