@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NavigationContainer, DarkTheme, NavigationContainerRefWithCurrent } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Platform, BackHandler, ToastAndroid } from 'react-native'
@@ -23,8 +23,12 @@ import StatsRepartitionScreen from '../screens/StatsRepartitionScreen'
 import StatsExercisesScreen from '../screens/StatsExercisesScreen'
 import StatsMeasurementsScreen from '../screens/StatsMeasurementsScreen'
 import { ErrorBoundary } from '../components/ErrorBoundary'
+import OnboardingScreen from '../screens/OnboardingScreen'
+import { database } from '../model'
+import User from '../model/models/User'
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Home: undefined;
   Programs: undefined;
   Exercices: undefined;
@@ -111,6 +115,18 @@ function GlobalBackHandler({ navigationRef }: { navigationRef: NavigationContain
  */
 export default function AppNavigator() {
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | null>(null)
+
+  useEffect(() => {
+    database.get<User>('users').query().fetch().then(users => {
+      const user = users[0]
+      setInitialRoute(!user || !user.onboardingCompleted ? 'Onboarding' : 'Home')
+    })
+  }, [])
+
+  if (initialRoute === null) {
+    return null
+  }
 
   return (
     <ErrorBoundary>
@@ -118,7 +134,7 @@ export default function AppNavigator() {
         <NavigationContainer ref={navigationRef} theme={MyDarkTheme}>
           <GlobalBackHandler navigationRef={navigationRef} />
           <Stack.Navigator
-            initialRouteName="Home"
+            initialRouteName={initialRoute}
             screenOptions={{
               headerStyle: { backgroundColor: colors.background },
               headerTintColor: colors.text,
@@ -128,6 +144,12 @@ export default function AppNavigator() {
               statusBarBackgroundColor: colors.background,
             }}
           >
+            {/* Onboarding */}
+            <Stack.Screen
+              name="Onboarding"
+              component={OnboardingScreen}
+              options={{ headerShown: false }}
+            />
             {/* Dashboard principal */}
             <Stack.Screen
               name="Home"
