@@ -33,6 +33,12 @@ export default class Exercise extends Model {
   // Colonne 'notes' optionnelle — notes persistantes par exercice (grip, tempo, sensation)
   @text('notes') notes?: string
 
+  // Colonne 'animation_key' optionnelle — clé de référence vers un asset d'animation
+  @text('animation_key') animationKey?: string
+
+  // Colonne 'description' optionnelle — description textuelle de l'exécution de l'exercice
+  @text('description') description?: string
+
   // Colonne de date de création, gérée automatiquement et en lecture seule
   @readonly @date('created_at') createdAt!: Date
 

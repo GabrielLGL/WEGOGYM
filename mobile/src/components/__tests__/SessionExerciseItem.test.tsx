@@ -1,4 +1,19 @@
 // Mocks AVANT les imports
+jest.mock('@expo/vector-icons', () => ({
+  Ionicons: 'Ionicons',
+}))
+
+jest.mock('@gorhom/portal', () => ({
+  Portal: ({ children }: { children: React.ReactNode }) => children,
+}))
+
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(),
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
+  notificationAsync: jest.fn(),
+  NotificationFeedbackType: { Error: 'error', Success: 'success' },
+}))
+
 jest.mock('@nozbe/with-observables', () => (
   (_keys: string[], _fn: () => object) =>
     (Component: React.ComponentType<object>) => Component

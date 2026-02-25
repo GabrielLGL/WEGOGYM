@@ -1,4 +1,8 @@
 // Mocks AVANT tous les imports
+jest.mock('@expo/vector-icons', () => ({
+  Ionicons: 'Ionicons',
+}))
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))

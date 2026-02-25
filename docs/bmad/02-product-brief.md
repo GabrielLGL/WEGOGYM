@@ -1,60 +1,71 @@
-# Product Brief — Dashboard Statistiques Globales — 2026-02-21
+# Product Brief — Animations/Demos exercices — 2026-02-25
 
-## Problème
-L'écran Historique actuel affiche une liste brute de séances passées, sans synthèse ni insight. L'utilisateur ne peut pas mesurer sa progression globale, sa régularité ou ses records en un coup d'œil. Il n'existe aucun endroit dans l'app pour voir "où j'en suis" de manière motivante.
+## Probleme
+
+Les debutants en musculation ne savent pas toujours comment executer correctement un exercice. Ils doivent quitter l'app pour chercher sur YouTube/Google, ce qui casse le flow de la seance. Les apps concurrentes (Hevy, Strong) offrent des demos visuelles integrees — c'est un standard attendu.
 
 ## Solution
-Remplacer l'écran Historique par un **Dashboard Statistiques** personnalisé :
-- En-tête avec nom de l'utilisateur + KPIs clés + phrase d'accroche dynamique contextuelle
-- Grille de 7 boutons menant aux vues détaillées :
-  ⏱ Durée · 🏋 Volume · 🗓 Calendrier · 💪 Répartition · 📊 Exercices · 📏 Mesures · 📋 Historique
-- Le bouton Historique donne accès à la liste existante des séances (même style que les autres)
+
+Un systeme de fiches d'exercice accessibles d'un tap pendant la seance, affichees dans un BottomSheet. Chaque fiche contient :
+- Une zone placeholder pour future animation/illustration
+- Les muscles cibles (deja en base)
+- Les notes personnelles de l'utilisateur (deja en base)
+- Des instructions texte courtes (cues d'execution)
+
+Structure prete pour recevoir des vrais assets visuels (Lottie/GIF/SVG) dans une phase ulterieure.
 
 ## Utilisateurs cibles
-- **Primaire** : Intermédiaire (6-24 mois de pratique) — veut voir sa progression et rester motivé
-- **Secondaire** : Avancé — veut les analytics granulaires (répartition, volumes, 1RM)
 
-## Périmètre de la feature
+| Persona | Benefice |
+|---------|----------|
+| Debutant | Apprendre les mouvements sans quitter l'app |
+| Intermediaire | Verifier un mouvement meconnu, lire ses notes |
+| Avance | Consulter ses notes personnelles rapidement |
 
-### Dans le scope (MVP)
-- Dashboard principal : nom, KPIs synthétiques, phrase d'accroche dynamique
-- Ajout champ `name` sur table `users` (migration schéma v17)
-- Nouvelle table `body_measurements` (poids, taille, hanches, bras, poitrine)
-- Vue Durée : durée moyenne/totale des séances, min/max, tendance
-- Vue Volume : volume total (kg), tendance semaine/mois, top exercices par volume
-- Vue Calendrier : grille GitHub-style, 1 carré = 1 jour, intensité = nb séances
-- Vue Répartition : tonnage par groupe musculaire (parsing muscles string)
-- Vue Exercices : top exercices fréquence + PRs centralisés (depuis is_pr sur sets)
-- Vue Mesures corporelles : saisie manuelle + graphique évolution dans le temps
+## Metriques de succes
 
-### Hors scope (v2)
-- Export CSV/PDF
-- Photos de progression
-- Comparaison avec d'autres utilisateurs
-- Objectifs personnalisés avec suivi
-- Rappels automatiques pour les mesures
+| Metrique | Cible |
+|----------|-------|
+| Fiche exercice accessible d'un tap en seance | 100% des exercices |
+| Description textuelle presente pour 20-30 exos de base | 100% coverage |
+| Placeholder visuel pret pour futur remplacement par animation | Structure en place |
+| Aucune regression sur les tests existants | 0 fail |
+| TypeScript clean | 0 erreur |
+| Fonctionne offline | 100% |
 
-## Métriques de succès
-- L'utilisateur comprend sa progression en < 5 secondes sur le dashboard
-- Toutes les stats disponibles offline (0 dépendance réseau)
-- Phrase d'accroche toujours pertinente et contextualisée
-- Temps de calcul des stats < 500ms (requêtes WatermelonDB optimisées)
+## Scope MVP
+
+1. Ajout `animation_key` + `description` sur le modele Exercise (schema migration v21)
+2. Mapping des 20-30 exercices de base avec cles d'animation et descriptions texte (cues d'execution)
+3. Composant `ExerciseInfoSheet` (BottomSheet) : placeholder visuel + muscles + description + notes
+4. Bouton d'acces dans `SessionExerciseItem` (icone info)
+5. Acces aussi depuis la bibliotheque d'exercices
 
 ## Contraintes techniques
-- Migration schéma v16 → v17 (migration WatermelonDB avec addColumns)
-- Offline-first : toutes stats calculées localement depuis SQLite
-- Dark Mode uniquement (#121212 bg, #1C1C1E cards)
-- Composants existants à réutiliser : Button, BottomSheet, ChipSelector
-- Charts : exploiter la fondation WEGO-007 (sets table)
-- Pas de native Modal (Fabric) → Portal pattern
 
-## Architecture de navigation
-- Tab "Historique" (existant) → renommé "Stats" → charge StatsScreen (nouveau)
-- StatsScreen → 7 sous-écrans (push sur le Native Stack) :
-  - StatsDurationScreen
-  - StatsVolumeScreen
-  - StatsCalendarScreen
-  - StatsRepartitionScreen
-  - StatsExercisesScreen
-  - StatsMeasurementsScreen
-  - HistoryScreen (existant, réutilisé)
+- Schema migration v20 → v21 (ajout colonnes animation_key + description sur exercises)
+- BottomSheet via Portal (pas de Modal natif — Fabric crash)
+- Offline-first : tout en local, pas de fetch reseau
+- Mutations dans database.write()
+- Reactivite via withObservables
+- Theme dark mode, couleurs depuis theme/index.ts
+
+## Hors scope (futur)
+
+- Vrais assets visuels (Lottie/GIF/SVG)
+- Telechargement d'animations supplementaires
+- Mode "apprendre" interstitiel avant exercice
+- Contribution communautaire de tips
+- Tap sur placeholder pour importer une image custom
+
+## Risques
+
+| Risque | Mitigation |
+|--------|------------|
+| Placeholder visuel parait "vide" | Icone stylisee + message "Animation a venir" |
+| Description texte insuffisante pour debutant | Cues clairs et actionables, pas de jargon |
+| Migration schema echoue | addColumns non-destructif, testable |
+| Exercices custom sans description | Afficher "Pas de description" avec invite a ajouter des notes |
+
+## Pret pour Phase 3 ?
+OUI

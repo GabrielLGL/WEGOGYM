@@ -1,66 +1,46 @@
-# Brainstorm — Templates intelligents + Notes exercice — 2026-02-24
+# Brainstorm — Animations/Demos exercices — 2026-02-25
 
 ## Idee reformulee
-En tant que pratiquant, quand j'ouvre ma seance, je veux que mes poids/reps de la derniere fois soient deja la ET qu'une suggestion de progression intelligente me guide — et que mes notes personnelles par exercice (grip, douleur, focus) me suivent d'une seance a l'autre sans effort.
+En tant qu'utilisateur (surtout debutant), je veux voir une demonstration visuelle de l'execution correcte d'un exercice d'un simple tap pendant ma seance, pour m'assurer que je fais le mouvement correctement — meme sans internet.
 
 ## Persona cible
-Intermediaire (6-24 mois) — pratiquant regulier qui veut progresser sans paperasse. Debutant et avance en profitent aussi.
+Debutant (prioritaire) — ne connait pas tous les mouvements, a besoin de guidance visuelle. Aussi utile pour les intermediaires decouvrant de nouveaux exercices.
 
 ## Idees explorees
-
-### Templates intelligents (#23)
-1. Pre-remplir poids + reps de la derniere seance identique
-2. Suggestion +2.5kg si les reps cibles ont ete atteintes la derniere fois
-3. Suggestion +1 rep si le poids max est atteint ou progression lineaire stagne
-4. Indicateur visuel discret (petite fleche verte +2.5kg) a cote du champ poids
-5. Possibilite d'accepter la suggestion en 1 tap
-6. Historique multi-seances : si 3 seances consecutives au meme poids -> suggerer changement
-7. Fallback gracieux : si pas d'historique, champs vides comme aujourd'hui
-8. Suggestion basee sur la derniere History de la MEME session
-9. Double progression adaptative : range -> +reps puis +poids / fixe -> +poids uniquement
-10. Badge "Progression acceptee" quand l'utilisateur suit la suggestion et reussit
-
-### Notes par exercice (#22)
-11. Champ notes sur le modele Exercise (global, pas par seance)
-12. Affichage automatique dans SessionExerciseItem quand une note existe
-13. Editable pendant la seance (tap pour ouvrir, sauvegarder au blur)
-14. Exemples d'usage : "Grip pronation", "Douleur epaule droite -> leger", "Focus excentrique"
-15. Icone indicatrice quand une note existe (sans prendre de place)
-16. Notes consultables aussi dans la bibliotheque d'exercices
-17. Pas de limite de caracteres (text field)
-18. Placeholder contextuel : "Ajouter une note (grip, tempo, sensation...)"
-
-### Idees rejetees
-19. Suggestion de progression par IA — over-engineering, l'algo simple suffit
-20. Notes par seance ET par exercice — trop complexe, notes globales suffisent
-21. Historique des notes (versionning) — pas MVP
-22. Auto-detection du type de progression — pas MVP
+1. Animation Lottie bundled (fichiers vectoriels ultra-legers)
+2. GIF anime bundled (simple mais plus lourd)
+3. SVG anime sequentiel (deux poses alternees)
+4. BottomSheet de demonstration (animation + muscles + notes)
+5. Fallback texte enrichi (instructions courtes pour exercices sans animation)
+6. Icone "?" contextuelle a cote du nom de l'exercice
+7. Mode "apprendre" (ecran interstitiel optionnel avant exercice)
+8. Progression download (base bundled + supplementaires telechargeable)
+9. Contribution communautaire (tips texte par utilisateurs avances)
+10. Categorisation par difficulte visuelle (badge "technique complexe")
+11. Integration notes exercice (panneau d'info complet avec animation + notes)
+12. Animation avec angles/cues (overlay de fleches sur l'animation)
 
 ## Top 5 Insights
-1. **Double progression adaptative** — Range (6-8) : +reps puis +poids. Fixe (5) : +poids uniquement. Vide : pas de suggestion. Parse reps_target (string) pour determiner le mode. | Risque : edge cases non couverts (periodisation ondulee, etc.)
-2. **Notes sur Exercise (global)** — Une seule note persistante par exercice, pas par seance. Schema plus simple, meilleure UX. | Risque : utilisateur pourrait vouloir notes differentes selon programme (rare)
-3. **Suggestion discrete, pas imposee** — Petite indication visuelle (+2.5kg), utilisateur choisit. Pas de popup. | Risque : trop discret = pas remarque
-4. **Reutilisation de l'existant** — getLastSetsForExercises() existe deja. Etendre pour reps + ajouter logique suggestion. | Risque : scope "meme session" vs "meme exercice tous programmes" a bien definir
-5. **Migration schema v18** — Ajouter colonne `notes` (text, optional) sur `exercises`. Simple addColumns. | Risque : migration non-triviale mais non-destructive
+1. **SVG statique 2 poses** — Ultra-leger, aucune dependance, mais moins fluide | Risque : rendu "cheap"
+2. **Bundled-first, download-later** — 20-30 exercices de base bundled, le reste en placeholder | Risque : augmente le bundle initial
+3. **BottomSheet info panel** — Reutilise le composant existant, combine animation + muscles + notes | Risque : distraction en pleine seance
+4. **Fallback texte obligatoire** — Chaque exercice a au minimum une description textuelle | Risque : texte seul moins efficace pour debutants
+5. **Champ animation_key sur Exercise** — String optionnelle mappant vers un asset local | Risque : couplage fort code/assets
 
-## Decisions prises
-- Double progression adaptative selon le type de reps_target
-- Range ("6-8") : d'abord +reps jusqu'au haut, puis +poids et reset au bas
-- Fixe ("5") : uniquement +poids, jamais de suggestion de reps
-- Vide/null : pre-remplissage seul, pas de suggestion
-- Notes sur Exercise (global), pas sur SessionExercise
-- Suggestion discrète, jamais imposee (indicateur visuel, pas de modal)
-- App non publique : schema v17 -> v18 direct, reset DB OK
+## Decision
+- **Format : Placeholder (option D)** — Structure complete avec placeholders, prete pour les vrais assets plus tard
+- **Scope MVP : 20-30 exercices de base** mappes avec animation_key
+- **Assets : a sourcer apres** — le code est pret, les animations viendront dans une phase ulterieure
 
 ## Questions ouvertes
-- Scope exact de "derniere seance" : meme session_id ou meme exercice globalement ?
-- Increment de poids configurable ? (2.5kg par defaut, mais certains veulent 1.25kg)
+- Format final des animations (Lottie vs GIF vs SVG) — a decider quand les assets seront prets
+- Source des animations (creation custom, banque libre de droits, generation IA)
 
 ## Contraintes techniques identifiees
-- Schema migration v17 -> v18 (ajout colonne notes sur exercises)
-- reps_target est un string : parsing "6-8" vs "5" vs null
-- getLastSetsForExercises() existe deja dans databaseHelpers.ts
-- Mutations dans database.write(), withObservables pour reactivite
+- Pas de Modal natif (Fabric crash) → BottomSheet via Portal
+- Offline-first : assets bundled, pas de fetch reseau
+- Schema migration necessaire (ajout animation_key sur exercises)
+- Bundle size a surveiller quand les vrais assets arriveront
 
 ## Pret pour Phase 2 ?
 OUI

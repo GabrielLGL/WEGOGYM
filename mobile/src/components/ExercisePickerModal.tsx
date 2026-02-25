@@ -1,10 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { Portal } from '@gorhom/portal'
 import Exercise from '../model/models/Exercise'
 import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 import { ChipSelector } from './ChipSelector'
 import { ExerciseTargetInputs } from './ExerciseTargetInputs'
+import { ExerciseInfoSheet } from './ExerciseInfoSheet'
+import { useHaptics } from '../hooks/useHaptics'
 import { filterExercises } from '../model/utils/databaseHelpers'
 import { validateWorkoutInput } from '../model/utils/validationHelpers'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
@@ -63,6 +66,8 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
   const [targetSets, setTargetSets] = useState(initialSets)
   const [targetReps, setTargetReps] = useState(initialReps)
   const [targetWeight, setTargetWeight] = useState(initialWeight)
+  const [infoExercise, setInfoExercise] = useState<Exercise | null>(null)
+  const haptics = useHaptics()
 
   // Réinitialiser les états quand la modale se ferme
   useEffect(() => {
@@ -73,6 +78,7 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
       setTargetSets(initialSets)
       setTargetReps(initialReps)
       setTargetWeight(initialWeight)
+      setInfoExercise(null)
     }
   }, [visible, initialSets, initialReps, initialWeight])
 
@@ -130,17 +136,37 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
           {/* Liste d'exercices */}
           <ScrollView style={styles.exerciseList}>
             {filteredExercises.map(exo => (
-              <TouchableOpacity
+              <View
                 key={exo.id}
                 style={[styles.exoChip, selectedExerciseId === exo.id && styles.exoChipSelected]}
-                onPress={() => handleExerciseSelect(exo.id)}
               >
-                <Text style={[styles.exoText, selectedExerciseId === exo.id && styles.exoTextSelected]}>
-                  {exo.name}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.exoNameArea}
+                  onPress={() => handleExerciseSelect(exo.id)}
+                >
+                  <Text style={[styles.exoText, selectedExerciseId === exo.id && styles.exoTextSelected]}>
+                    {exo.name}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    haptics.onPress()
+                    setInfoExercise(exo)
+                  }}
+                  style={styles.exoInfoBtn}
+                >
+                  <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
             ))}
           </ScrollView>
+          {infoExercise && (
+            <ExerciseInfoSheet
+              exercise={infoExercise}
+              visible={!!infoExercise}
+              onClose={() => setInfoExercise(null)}
+            />
+          )}
 
           {/* Inputs objectifs */}
           <ExerciseTargetInputs
@@ -207,10 +233,21 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   exoChip: {
-    padding: spacing.ms,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.ms,
+    paddingLeft: spacing.ms,
+    paddingRight: spacing.xs,
     backgroundColor: colors.cardSecondary,
     marginBottom: spacing.xs,
     borderRadius: borderRadius.sm,
+  },
+  exoNameArea: {
+    flex: 1,
+  },
+  exoInfoBtn: {
+    padding: spacing.xs,
+    marginLeft: spacing.xs,
   },
   exoChipSelected: {
     backgroundColor: colors.primary,

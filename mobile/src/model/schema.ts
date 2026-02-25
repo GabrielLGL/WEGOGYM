@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 20, // v20 : ajout user_level/user_goal sur users + equipment/frequency sur programs
+  version: 21, // v21 : ajout animation_key/description sur exercises
   tables: [
     tableSchema({
       name: 'programs',
@@ -46,6 +46,8 @@ export const mySchema = appSchema({
         { name: 'muscles', type: 'string', isOptional: true },
         { name: 'equipment', type: 'string', isOptional: true },
         { name: 'notes', type: 'string', isOptional: true },
+        { name: 'animation_key', type: 'string', isOptional: true },
+        { name: 'description', type: 'string', isOptional: true },
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' }
       ]

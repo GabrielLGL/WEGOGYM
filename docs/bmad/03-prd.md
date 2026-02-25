@@ -1,137 +1,118 @@
-# PRD — Dashboard Statistiques Globales — 2026-02-21
+# PRD — Animations/Demos exercices — 2026-02-25
 
 ## Vue d'ensemble
-Remplacement de l'écran Historique par un Dashboard Stats personnalisé avec 7 accès vers des vues de statistiques détaillées. Migration schéma v16 → v17 (champ `name` sur `users` + table `body_measurements`).
+Systeme de fiches d'exercice avec placeholder visuel, description textuelle et acces rapide pendant la seance. Structure prete pour recevoir des animations reelles dans une phase ulterieure.
+
+Feature : #99 (Videos/animations execution)
 
 ---
 
-## User Stories & Critères d'acceptation
+## User Stories & Criteres d'acceptation
 
-### US-01 — Dashboard principal [MUST]
-**En tant qu'utilisateur**, je veux voir un dashboard qui affiche mon nom, mes KPIs globaux et une phrase d'accroche motivante, **afin de** comprendre ma progression en un coup d'œil.
+### US-01 — Migration schema : animation_key et description sur Exercise [MUST]
+**En tant que** developpeur,
+**je veux** ajouter les colonnes `animation_key` (string, optional) et `description` (string, optional) sur la table `exercises`,
+**afin de** stocker les references d'animation et les descriptions texte pour chaque exercice.
 
-**Critères d'acceptation :**
-- [ ] L'onglet "Historique" est renommé "Stats" dans la bottom tab
-- [ ] L'écran affiche le prénom de l'utilisateur (champ `name` de la table `users`)
-- [ ] Les KPIs affichés : nombre total de séances, volume cumulé (kg), nombre de PRs
-- [ ] Une phrase d'accroche dynamique est affichée selon le contexte (cf US-02)
-- [ ] La grille affiche 7 boutons : Durée, Volume, Calendrier, Répartition, Exercices, Mesures, Historique
-- [ ] Tous les boutons sont visuellement identiques (même style, même taille)
-- [ ] L'écran est entièrement offline (0 requête réseau)
+**Criteres d'acceptation :**
+- [ ] Schema v21 avec `animation_key` et `description` sur `exercises`
+- [ ] Migration `addColumns` non-destructive dans `migrations.ts`
+- [ ] Model Exercise mis a jour avec les decorateurs `@text` correspondants
+- [ ] Sync parfait schema <-> model (Known Pitfall)
+- [ ] `npx tsc --noEmit` → 0 erreur
+- [ ] Tests existants passent
 
-### US-02 — Phrase d'accroche dynamique [MUST]
-**En tant qu'utilisateur**, je veux une phrase d'accroche contextuelle et motivante, **afin de** ressentir que l'app comprend où j'en suis.
+---
 
-**Critères d'acceptation :**
-- [ ] Cas streak ≥ 3 jours → `"🔥 X jours consécutifs — ne lâche rien !"`
-- [ ] Cas PR cette semaine → `"💥 Nouveau record cette semaine — tu progresses !"`
-- [ ] Cas retour après gap > 4 jours → `"😤 De retour après X jours — l'important c'est de revenir."`
-- [ ] Cas premier jour du mois → `"🎯 Nouveau mois, nouvelles perfs. C'est parti !"`
-- [ ] Cas régularité ≥ 4 séances/semaine moyenne → `"⚡ X séances/semaine — niveau sérieux."`
-- [ ] Cas défaut → volume du mois fun format : `"🚀 Ce mois : X kg soulevés."`
-- [ ] Priorité des cas : streak > PR > retour > début mois > régularité > défaut
-- [ ] Calculé depuis WatermelonDB, sans requête réseau
+### US-02 — Descriptions texte et animation_key pour 20-30 exercices de base [MUST]
+**En tant que** debutant,
+**je veux** voir des instructions d'execution courtes pour chaque exercice courant,
+**afin de** savoir comment faire le mouvement correctement.
 
-### US-03 — Champ nom utilisateur [MUST]
-**En tant qu'utilisateur**, je veux pouvoir définir mon prénom dans l'app, **afin de** voir mon nom affiché sur le dashboard.
+**Criteres d'acceptation :**
+- [ ] Fichier `exerciseDescriptions.ts` dans `model/utils/`
+- [ ] Mapping : exerciseName → { animationKey, description }
+- [ ] 20-30 exercices de base couverts
+- [ ] Descriptions en francais, 2-4 phrases, cues actionables sans jargon
+- [ ] Chaque description inclut : position de depart, mouvement, respiration ou cue cle
+- [ ] Script/helper de seed pour mettre a jour les exercices existants en base
+- [ ] `npx tsc --noEmit` → 0 erreur
 
-**Critères d'acceptation :**
-- [ ] Migration schéma v16 → v17 : ajout colonne `name` (string, isOptional) sur `users`
-- [ ] Le champ `name` est saisissable depuis l'écran Réglages (existant)
-- [ ] Si `name` vide → afficher "Toi" par défaut sur le dashboard
-- [ ] La migration ne casse pas les données existantes
+---
 
-### US-04 — Vue Durée [MUST]
-**En tant qu'utilisateur**, je veux voir les statistiques de durée de mes séances, **afin de** comprendre combien de temps je passe à m'entraîner.
+### US-03 — Composant ExerciseInfoSheet [MUST]
+**En tant que** utilisateur,
+**je veux** voir une fiche d'information complete sur un exercice dans un BottomSheet,
+**afin de** consulter la description, les muscles cibles et mes notes rapidement.
 
-**Critères d'acceptation :**
-- [ ] Durée moyenne par séance (en min)
-- [ ] Durée totale cumulée (en heures)
-- [ ] Durée min et max par séance
-- [ ] Graphique d'évolution de la durée par séance (30 dernières séances)
-- [ ] Calculé depuis `histories.start_time` et `histories.end_time`
-- [ ] Séances sans `end_time` exclues du calcul
+**Criteres d'acceptation :**
+- [ ] Nouveau composant `ExerciseInfoSheet.tsx` dans `components/`
+- [ ] Utilise `<BottomSheet>` existant (Portal pattern — pas de Modal natif)
+- [ ] Affiche dans l'ordre :
+  - Zone placeholder visuel (icone stylisee + texte "Animation a venir")
+  - Nom de l'exercice
+  - Chips des muscles cibles
+  - Description textuelle (ou "Pas de description disponible")
+  - Notes personnelles (ou invite a ajouter des notes)
+- [ ] Props : `exercise: Exercise`, `visible: boolean`, `onClose: () => void`
+- [ ] Se ferme proprement (tap dehors ou bouton)
+- [ ] Theme dark mode respecte (couleurs du theme uniquement)
+- [ ] `npx tsc --noEmit` → 0 erreur
+- [ ] Test unitaire du composant
 
-### US-05 — Vue Volume [MUST]
-**En tant qu'utilisateur**, je veux voir l'évolution de mon volume d'entraînement, **afin de** vérifier que je progresse en charge totale.
+---
 
-**Critères d'acceptation :**
-- [ ] Volume total cumulé (somme weight × reps de tous les sets)
-- [ ] Volume par semaine (graphique des 12 dernières semaines)
-- [ ] Comparaison semaine actuelle vs semaine précédente (+ ou - %)
-- [ ] Top 3 exercices par volume total
-- [ ] Sélecteur de période : 1 mois / 3 mois / tout
-- [ ] Calculé depuis la table `sets` (weight × reps)
+### US-04 — Bouton info dans SessionExerciseItem [MUST]
+**En tant que** utilisateur en pleine seance,
+**je veux** un bouton discret a cote du nom de l'exercice,
+**afin d'** ouvrir la fiche info d'un tap sans quitter ma seance.
 
-### US-06 — Vue Calendrier [MUST]
-**En tant qu'utilisateur**, je veux voir un calendrier d'activité style GitHub, **afin de** visualiser ma régularité d'entraînement.
+**Criteres d'acceptation :**
+- [ ] Icone info (Ionicons `information-circle-outline`) a cote du nom
+- [ ] Ouvre ExerciseInfoSheet au tap
+- [ ] Haptics `onPress` au tap (via `useHaptics()`)
+- [ ] Ne gene pas le flow de saisie des series
+- [ ] Fonctionne pendant une seance active
+- [ ] `npx tsc --noEmit` → 0 erreur
 
-**Critères d'acceptation :**
-- [ ] Grille de carrés : 1 carré = 1 jour, organisés par semaine (colonnes) sur 6 mois glissants
-- [ ] Couleur selon intensité : 0 séance = gris (#2C2C2E), 1 = vert clair, 2+ = vert foncé
-- [ ] Au tap sur un carré → afficher la date + nb de séances ce jour
-- [ ] Streak actuel affiché (jours consécutifs avec au moins 1 séance)
-- [ ] Streak record affiché
-- [ ] Calculé depuis la table `histories` (groupé par jour via `start_time`)
+---
 
-### US-07 — Vue Répartition musculaire [MUST]
-**En tant qu'utilisateur**, je veux voir la répartition de mon volume par groupe musculaire, **afin de** détecter les déséquilibres dans mon entraînement.
+### US-05 — Acces depuis la bibliotheque d'exercices [SHOULD]
+**En tant que** utilisateur parcourant la bibliotheque,
+**je veux** pouvoir ouvrir la fiche info d'un exercice,
+**afin de** lire sa description et ses muscles avant de l'ajouter a ma seance.
 
-**Critères d'acceptation :**
-- [ ] Graphique en barres horizontales : top groupes musculaires par volume (weight × reps)
-- [ ] Parsing du champ `exercises.muscles` (format string, ex: "Pectoraux,Triceps")
-- [ ] Sélecteur de période : 1 mois / 3 mois / tout
-- [ ] Maximum 8 groupes musculaires affichés (autres regroupés en "Autres")
-- [ ] Pourcentage de chaque groupe affiché
-
-### US-08 — Vue Exercices & PRs [MUST]
-**En tant qu'utilisateur**, je veux voir mes records personnels centralisés et mes exercices les plus pratiqués, **afin de** voir mes accomplissements.
-
-**Critères d'acceptation :**
-- [ ] Liste des PRs : 1 entrée par exercice avec le poids max, les reps et la date
-- [ ] Construit depuis `sets` où `is_pr = true`, groupé par `exercise_id`
-- [ ] Top 5 exercices par fréquence (nb de fois pratiqué)
-- [ ] 1RM estimé affiché pour chaque exercice avec PR (formule Epley : poids × (1 + reps/30))
-- [ ] Tri par date du PR (plus récent en premier)
-
-### US-09 — Vue Mesures corporelles [MUST]
-**En tant qu'utilisateur**, je veux saisir et suivre mes mesures corporelles, **afin de** tracker mon évolution physique en parallèle de mes performances.
-
-**Critères d'acceptation :**
-- [ ] Migration v17 : nouvelle table `body_measurements` avec colonnes : `date` (number), `weight` (number, isOptional), `waist` (number, isOptional), `hips` (number, isOptional), `chest` (number, isOptional), `arms` (number, isOptional), `created_at`, `updated_at`
-- [ ] Bouton "Ajouter une mesure" → BottomSheet avec formulaire (keyboardType numeric pour tous les champs)
-- [ ] Validation via `validateWorkoutInput()` ou helper dédié
-- [ ] Graphique d'évolution pour chaque mesure (sélecteur : poids / taille / hanches / bras / poitrine)
-- [ ] Dernière mesure affichée en haut de l'écran
-- [ ] Suppression d'une mesure via AlertDialog de confirmation
-- [ ] Toutes mutations dans `database.write()`
+**Criteres d'acceptation :**
+- [ ] Bouton/zone tap sur la carte exercice dans ExercisePickerScreen ou equivalent
+- [ ] Ouvre le meme ExerciseInfoSheet
+- [ ] Coherent visuellement avec le bouton en seance
+- [ ] `npx tsc --noEmit` → 0 erreur
 
 ---
 
 ## MoSCoW
 
-| US | Titre | Priorité |
+| US | Titre | Priorite |
 |----|-------|----------|
-| US-01 | Dashboard principal | MUST |
-| US-02 | Phrase d'accroche dynamique | MUST |
-| US-03 | Champ nom utilisateur | MUST |
-| US-04 | Vue Durée | MUST |
-| US-05 | Vue Volume | MUST |
-| US-06 | Vue Calendrier GitHub-style | MUST |
-| US-07 | Vue Répartition musculaire | MUST |
-| US-08 | Vue Exercices & PRs | MUST |
-| US-09 | Vue Mesures corporelles | MUST |
-| — | Export CSV/PDF | WON'T |
-| — | Photos de progression | WON'T |
-| — | Rappels automatiques mesures | WON'T |
-| — | Objectifs avec suivi | WON'T (v2) |
+| US-01 | Migration schema v21 | MUST |
+| US-02 | Descriptions texte + animation_key | MUST |
+| US-03 | Composant ExerciseInfoSheet | MUST |
+| US-04 | Bouton info en seance | MUST |
+| US-05 | Bouton info en bibliotheque | SHOULD |
+| -- | Vrais assets visuels (Lottie/GIF/SVG) | WON'T (Phase 2) |
+| -- | Telechargement animations supplementaires | WON'T (Phase 2) |
+| -- | Mode "apprendre" interstitiel | WON'T (Phase 2) |
+| -- | Contribution communautaire de tips | WON'T (Phase 2) |
 
 ---
 
 ## Contraintes non-fonctionnelles
-- Calcul de toutes les stats < 500ms
-- Offline-first : 0 requête réseau
-- Dark Mode uniquement
-- Langue : français (fr-FR)
-- Pas de native Modal (Portal pattern obligatoire)
+- **Offline-first** : 0 requete reseau, tout en local
 - Toutes mutations DB dans `database.write()`
+- Reactivite via `withObservables` (pas de refresh manuel)
+- Dark Mode uniquement (`colors.*` du theme)
+- Langue : francais (fr-FR)
+- Pas de native Modal → BottomSheet via Portal
+- Schema migration v20 → v21 (addColumns non-destructif)
+- Haptics : `useHaptics()` pour feedback tactile
+- Ne pas casser : le modele Exercise existant, le flow de seance, la bibliotheque

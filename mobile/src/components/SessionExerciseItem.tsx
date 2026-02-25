@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import SessionExercise from '../model/models/SessionExercise'
 import Exercise from '../model/models/Exercise'
+import { ExerciseInfoSheet } from './ExerciseInfoSheet'
+import { useHaptics } from '../hooks/useHaptics'
 import { of } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
@@ -20,7 +23,15 @@ interface EnhancedProps extends SessionExerciseItemProps {
 }
 
 const SessionExerciseItemComponent: React.FC<EnhancedProps> = ({ item, exercise, onEditTargets, onRemove, drag, dragActive }) => {
+  const [infoVisible, setInfoVisible] = useState(false)
+  const haptics = useHaptics()
+
   if (!exercise) return null
+
+  const handleInfoPress = () => {
+    haptics.onPress()
+    setInfoVisible(true)
+  }
 
   return (
     <View style={[styles.itemContainer, dragActive && styles.itemContainerDragging]}>
@@ -32,7 +43,12 @@ const SessionExerciseItemComponent: React.FC<EnhancedProps> = ({ item, exercise,
         </TouchableOpacity>
       )}
       <View style={styles.itemInfo}>
-        <Text style={styles.itemTitle}>{exercise.name}</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.itemTitle} numberOfLines={2}>{exercise.name}</Text>
+          <TouchableOpacity onPress={handleInfoPress} style={styles.infoBtn} testID="info-button">
+            <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.itemTags}>{exercise.muscles?.join(', ')} • {exercise.equipment}</Text>
         {exercise.notes ? <Text style={styles.noteIndicator}>Notes</Text> : null}
         <TouchableOpacity style={styles.targetRow} onPress={() => onEditTargets(item)}>
@@ -50,6 +66,11 @@ const SessionExerciseItemComponent: React.FC<EnhancedProps> = ({ item, exercise,
       <TouchableOpacity style={styles.deleteBtn} onPress={() => onRemove(item, exercise.name)}>
         <Text style={styles.deleteIcon}>🗑️</Text>
       </TouchableOpacity>
+      <ExerciseInfoSheet
+        exercise={exercise}
+        visible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+      />
     </View>
   )
 }
@@ -84,11 +105,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   itemInfo: { flex: 1 },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
   itemTitle: {
     color: colors.text,
     fontSize: fontSize.lg,
     fontWeight: 'bold',
-    marginBottom: spacing.xs,
+    flex: 1,
+  },
+  infoBtn: {
+    marginLeft: spacing.sm,
+    padding: spacing.xs,
   },
   itemTags: {
     color: colors.textSecondary,

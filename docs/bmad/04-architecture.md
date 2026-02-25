@@ -1,194 +1,197 @@
-# Architecture — Dashboard Statistiques Globales — 2026-02-21
+# Architecture — Animations/Demos exercices — 2026-02-25
 
-## Schéma d'ensemble
+## 1. Migration schema v20 → v21
 
-```
-Tab "Stats" (📈)
-     │
-     └─▶ StatsScreen (nouveau — dashboard principal)
-              │
-              ├─▶ StatsDurationScreen     (Root Stack)
-              ├─▶ StatsVolumeScreen       (Root Stack)
-              ├─▶ StatsCalendarScreen     (Root Stack)
-              ├─▶ StatsRepartitionScreen  (Root Stack)
-              ├─▶ StatsExercisesScreen    (Root Stack) ← ChartsScreen renommé/réutilisé
-              ├─▶ StatsMeasurementsScreen (Root Stack)
-              └─▶ ChartsScreen            (Root Stack) ← anciennement le tab Stats
-```
-
-## 1. Migration schéma v16 → v17
-
-### Modifications `mobile/src/model/schema.ts`
+### Modification `mobile/src/model/schema.ts`
 ```typescript
 // Version bump
-version: 17
+version: 21
 
-// Table users — ajout colonne name
-{ name: 'name', type: 'string', isOptional: true }
-
-// Nouvelle table body_measurements
-tableSchema({
-  name: 'body_measurements',
-  columns: [
-    { name: 'date', type: 'number' },
-    { name: 'weight', type: 'number', isOptional: true },     // poids (kg)
-    { name: 'waist', type: 'number', isOptional: true },      // tour de taille (cm)
-    { name: 'hips', type: 'number', isOptional: true },       // hanches (cm)
-    { name: 'chest', type: 'number', isOptional: true },      // poitrine (cm)
-    { name: 'arms', type: 'number', isOptional: true },       // bras (cm)
-    { name: 'created_at', type: 'number' },
-    { name: 'updated_at', type: 'number' },
-  ]
-})
+// Table exercises — 2 colonnes ajoutees
+{ name: 'animation_key', type: 'string', isOptional: true }
+{ name: 'description', type: 'string', isOptional: true }
 ```
 
-### Nouveau modèle `mobile/src/model/models/BodyMeasurement.ts`
+### Modification `mobile/src/model/models/Exercise.ts`
 ```typescript
-import { Model } from '@nozbe/watermelondb'
-import { field, readonly, date } from '@nozbe/watermelondb/decorators'
+@text('animation_key') animationKey?: string
+@text('description') description?: string
+```
 
-export default class BodyMeasurement extends Model {
-  static table = 'body_measurements'
+### Pas de fichier de migration
+App non publiee → DB reset au changement de version. Pas besoin de `migrations.ts`.
 
-  @field('date') date!: number
-  @field('weight') weight!: number | null
-  @field('waist') waist!: number | null
-  @field('hips') hips!: number | null
-  @field('chest') chest!: number | null
-  @field('arms') arms!: number | null
-  @readonly @date('created_at') createdAt!: Date
-  @readonly @date('updated_at') updatedAt!: Date
+---
+
+## 2. Donnees : exerciseDescriptions.ts
+
+### Fichier : `mobile/src/model/utils/exerciseDescriptions.ts` (NOUVEAU)
+
+```typescript
+interface ExerciseDescriptionData {
+  animationKey: string
+  description: string
+}
+
+// Mapping nom d'exercice → donnees
+export const EXERCISE_DESCRIPTIONS: Record<string, ExerciseDescriptionData> = {
+  'Developpe couche': {
+    animationKey: 'bench_press',
+    description: 'Allonge sur le banc, pieds au sol. Descends la barre vers le milieu de la poitrine en controlant. Pousse vers le haut en expirant. Garde les epaules collees au banc.',
+  },
+  // ... 20-30 exercices
 }
 ```
 
-### Modification `mobile/src/model/models/User.ts`
-Ajouter : `@text('name') name!: string | null`
-
-### Modification `mobile/src/model/index.ts`
-Ajouter `BodyMeasurement` dans le tableau `modelClasses`.
-
-## 2. Navigation — `mobile/src/navigation/index.tsx`
-
-### Ajouts à `RootStackParamList`
+### Helper de seed
 ```typescript
-StatsDuration: undefined
-StatsVolume: undefined
-StatsCalendar: undefined
-StatsRepartition: undefined
-StatsExercises: undefined    // reprend ChartsScreen
-StatsMeasurements: undefined
+export async function seedExerciseDescriptions(database: Database): Promise<number>
 ```
+- Parcourt tous les exercices en base
+- Pour chaque exercice dont le nom matche dans `EXERCISE_DESCRIPTIONS`
+- Met a jour `animation_key` et `description` via `database.write()` + `database.batch()`
+- Retourne le nombre d'exercices mis a jour
+- Appele au lancement de l'app (idempotent — ne re-ecrit pas si deja rempli)
 
-### Modification du Tab "Stats"
-```typescript
-// Avant
-component={ChartsScreen}
+---
 
-// Après
-component={StatsScreen}
-```
+## 3. Composant ExerciseInfoSheet
 
-### Nouveaux écrans dans le Root Stack
-```typescript
-<Stack.Screen name="StatsDuration" component={StatsDurationScreen} />
-<Stack.Screen name="StatsVolume" component={StatsVolumeScreen} />
-<Stack.Screen name="StatsCalendar" component={StatsCalendarScreen} />
-<Stack.Screen name="StatsRepartition" component={StatsRepartitionScreen} />
-<Stack.Screen name="StatsExercises" component={ChartsScreen} />  // réutilisé
-<Stack.Screen name="StatsMeasurements" component={StatsMeasurementsScreen} />
-```
-
-## 3. Nouveaux fichiers
-
-### Écrans (`mobile/src/screens/`)
-```
-StatsScreen.tsx          ← Dashboard principal (remplace ChartsScreen comme tab)
-StatsDurationScreen.tsx  ← Vue durée des séances
-StatsVolumeScreen.tsx    ← Vue volume total
-StatsCalendarScreen.tsx  ← Vue calendrier GitHub-style
-StatsRepartitionScreen.tsx ← Vue répartition musculaire
-StatsMeasurementsScreen.tsx ← Vue mesures corporelles
-```
-
-ChartsScreen.tsx reste inchangé — accessible via `StatsExercises` dans le Root Stack.
-
-### Helpers (`mobile/src/model/utils/statsHelpers.ts`)
-Fonctions de calcul pures (pas de HOC) utilisées par tous les écrans stats :
+### Fichier : `mobile/src/components/ExerciseInfoSheet.tsx` (NOUVEAU)
 
 ```typescript
-// KPIs globaux
-computeGlobalKPIs(histories, sets): { totalSessions, totalVolume, totalPRs }
-
-// Phrase d'accroche dynamique
-computeMotivationalPhrase(histories, sets): string
-
-// Streak
-computeCurrentStreak(histories): number
-computeRecordStreak(histories): number
-
-// Durée
-computeDurationStats(histories): { avg, total, min, max, perSession }
-
-// Volume
-computeVolumeStats(sets, histories, period): { total, perWeek, topExercises }
-
-// Calendrier
-computeCalendarData(histories): Map<string, number>  // date → nb séances
-
-// Répartition musculaire
-computeMuscleRepartition(sets, exercises, period): Array<{ muscle, volume, pct }>
-
-// PRs centralisés
-computePRsByExercise(sets, exercises): Array<{ exercise, weight, reps, date, orm1 }>
+interface ExerciseInfoSheetProps {
+  exercise: Exercise
+  visible: boolean
+  onClose: () => void
+}
 ```
 
-## 4. Flux de données (WatermelonDB → UI)
-
-### StatsScreen
+**Structure du BottomSheet :**
 ```
-database.collections.get('histories').query(
-  Q.where('deleted_at', null)
-).observe()
-  + sets.query().observe()
-  + users.query().observe()
-→ withObservables HOC
-→ computeGlobalKPIs() + computeMotivationalPhrase()
-→ StatsScreen (render)
+┌─────────────────────────────────────┐
+│           ── drag handle ──          │
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │     [icone placeholder]     │   │
+│   │    "Animation a venir"      │   │
+│   └─────────────────────────────┘   │
+│                                     │
+│   NOM DE L'EXERCICE                 │
+│                                     │
+│   [Pecs] [Epaules] [Triceps]       │ ← chips muscles
+│                                     │
+│   ── Description ──                 │
+│   Allonge sur le banc, pieds au     │
+│   sol. Descends la barre vers...    │
+│                                     │
+│   ── Notes ──                       │
+│   Grip pronation, tempo 3-1-1-0     │
+│   (ou "Aucune note" en italic)      │
+│                                     │
+└─────────────────────────────────────┘
 ```
 
-### StatsMeasurementsScreen
+**Composants reutilises :**
+- `<BottomSheet>` existant (Portal pattern)
+- Chips muscles : simple `View` + `Text` avec style chip (pas ChipSelector — affichage seul)
+- Couleurs du theme uniquement
+
+---
+
+## 4. Integration SessionExerciseItem
+
+### Fichier : `mobile/src/components/SessionExerciseItem.tsx` (MODIFIE)
+
+**Ajouts :**
+- Import `ExerciseInfoSheet` + `useModalState` + `useHaptics`
+- State : `const infoSheet = useModalState()`
+- Icone info (Ionicons `information-circle-outline`) a cote du nom
+- Au tap : `haptics.onPress()` + `infoSheet.open()`
+- Rendu : `<ExerciseInfoSheet exercise={exercise} visible={infoSheet.isOpen} onClose={infoSheet.close} />`
+
+**Layout modifie :**
 ```
-database.collections.get('body_measurements').query(
-  Q.sortBy('date', Q.desc)
-).observe()
-→ withObservables HOC
-→ StatsMeasurementsScreen (render)
+[drag] [nom exercice] [icone info (i)]    [poubelle]
+       [muscles • equipment]
+       [Notes]
+       [series x reps]
 ```
 
-## 5. Composants réutilisés (existants)
-- `BottomSheet` → formulaire de saisie des mesures corporelles
-- `AlertDialog` → confirmation suppression d'une mesure
-- `Button` → tous les boutons du dashboard (variant: 'secondary')
-- `ChipSelector` → sélecteur de période (1 mois / 3 mois / tout) dans les vues Volume et Répartition
+---
 
-## 6. Gestion des settings (nom utilisateur)
-- `SettingsScreen.tsx` → nouvelle section "Mon profil" avec input pour le champ `name`
-- Update via `database.write(async () => { await user.update(u => { u.name = newName }) })`
-- Validé via `isValidText()` de `validationHelpers.ts`
+## 5. Integration ExercisePickerModal
 
-## 7. Ordre d'implémentation recommandé
-1. Migration schéma v17 (stories S01)
-2. Modèle BodyMeasurement + update User (S02)
-3. statsHelpers.ts (fonctions de calcul) (S03)
-4. StatsScreen dashboard (S04)
-5. Vue Durée + Volume (S05)
-6. Vue Calendrier (S06)
-7. Vue Répartition (S07)
-8. Vue Exercices (S08) — wrapping ChartsScreen
-9. Vue Mesures (S09)
-10. Champ name dans SettingsScreen (S10)
+### Fichier : `mobile/src/components/ExercisePickerModal.tsx` (MODIFIE)
 
-## 8. Dépendances
-- Bibliothèque graphiques : `victory-native` (déjà utilisé dans ChartsScreen pour les line charts)
-- Calendrier GitHub-style : composant custom (grille de Views, pas de lib externe)
-- Pas de nouvelle dépendance npm nécessaire
+**Ajouts :**
+- Import `ExerciseInfoSheet` + `useModalState`
+- State : `const infoSheet = useModalState()` + `selectedInfoExercise`
+- Icone info (i) a cote de chaque exercice dans la liste
+- Au tap : ouvre l'ExerciseInfoSheet pour l'exercice concerne
+- N'interfere pas avec la selection d'exercice (tap sur la ligne = selection, tap sur icone = info)
+
+---
+
+## 6. Flux de donnees complet
+
+```
+App Launch
+    │
+    ▼
+[seedExerciseDescriptions()] ← idempotent, 1 seule fois
+    │
+    ▼
+Exercices en base ont animation_key + description
+    │
+    ▼
+SessionExerciseItem / ExercisePickerModal
+    │
+    ├── Tap sur icone info (i)
+    │       │
+    │       ▼
+    │   ExerciseInfoSheet (BottomSheet)
+    │       ├── Placeholder animation (icone + texte)
+    │       ├── Nom exercice
+    │       ├── Chips muscles
+    │       ├── Description (depuis exercise.description)
+    │       └── Notes (depuis exercise.notes)
+    │
+    └── Tap normal → selection / edit targets (inchange)
+```
+
+---
+
+## 7. Fichiers impactes (liste complete)
+
+### Nouveaux fichiers
+| Fichier | Role |
+|---------|------|
+| `model/utils/exerciseDescriptions.ts` | Mapping descriptions + helper seed |
+| `components/ExerciseInfoSheet.tsx` | Fiche info exercice (BottomSheet) |
+| `components/__tests__/ExerciseInfoSheet.test.tsx` | Tests du composant |
+
+### Fichiers modifies
+| Fichier | Modification |
+|---------|-------------|
+| `model/schema.ts` | v20 → v21, +2 colonnes exercises |
+| `model/models/Exercise.ts` | +`animationKey`, +`description` |
+| `components/SessionExerciseItem.tsx` | +icone info, +ExerciseInfoSheet |
+| `components/ExercisePickerModal.tsx` | +icone info, +ExerciseInfoSheet |
+
+---
+
+## 8. Ordre d'implementation recommande
+
+1. **US-01** Schema v21 + Model Exercise mis a jour
+2. **US-02** exerciseDescriptions.ts (mapping + helper seed)
+3. **US-03** ExerciseInfoSheet (composant BottomSheet)
+4. **US-04** Integration SessionExerciseItem (bouton info en seance)
+5. **US-05** Integration ExercisePickerModal (bouton info en bibliotheque)
+
+---
+
+## 9. Dependances
+- Aucune nouvelle dependance npm
+- Ionicons deja disponible via `@expo/vector-icons`
+- Composants reutilises : `BottomSheet`, `useModalState`, `useHaptics`, `colors.*`, `spacing.*`

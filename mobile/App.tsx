@@ -3,6 +3,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppNavigator from './src/navigation';
 import { seedExercises } from './src/model/seed';
 import { seedDevData } from './src/model/seedDevData';
+import { seedExerciseDescriptions } from './src/model/utils/exerciseDescriptions';
+import { database } from './src/model/index';
 import { initSentry } from './src/services/sentry';
 import { migrateKeyFromDB } from './src/services/secureKeyStore';
 
@@ -13,6 +15,7 @@ export default function App() {
   useEffect(() => {
     // Charge les exercices de base au démarrage si la DB est vide
     seedExercises().then(() => {
+      seedExerciseDescriptions(database);
       if (__DEV__) seedDevData();
     });
     // Migrate API key from SQLite to secure storage (one-time)
