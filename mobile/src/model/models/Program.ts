@@ -11,6 +11,8 @@ export default class Program extends Model {
 
   @text('name') name!: string
   @field('position') position?: number
+  @text('equipment') equipment!: string | null
+  @field('frequency') frequency!: number | null
   @readonly @date('created_at') createdAt!: Date
   @readonly @date('updated_at') updatedAt!: Date
   @children('sessions') sessions!: Query<Session>
@@ -24,6 +26,8 @@ export default class Program extends Model {
       const newProgram = await db.get<Program>('programs').create(p => {
         p.name = `${this.name} (Copie)`
         p.position = count
+        p.equipment = this.equipment
+        p.frequency = this.frequency
       })
 
       const originalSessions = await this.sessions.fetch()
