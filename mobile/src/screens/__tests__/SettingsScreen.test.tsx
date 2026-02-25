@@ -281,7 +281,7 @@ describe('SettingsContent — section IA', () => {
 describe('SettingsContent — section À propos', () => {
   it('affiche le nom de l\'application', () => {
     const { getByText } = render(<SettingsContent user={null} />)
-    expect(getByText('WEGOGYM')).toBeTruthy()
+    expect(getByText('Kore')).toBeTruthy()
   })
 
   it('affiche la version', () => {

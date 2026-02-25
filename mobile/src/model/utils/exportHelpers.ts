@@ -63,7 +63,7 @@ export async function exportAllData(): Promise<string> {
 
   const jsonString = JSON.stringify(data, null, 2)
   const dateStr = formatExportDate()
-  const fileName = `wegogym-export-${dateStr}.json`
+  const fileName = `kore-export-${dateStr}.json`
   const filePath = `${FileSystem.documentDirectory}${fileName}`
 
   await FileSystem.writeAsStringAsync(filePath, jsonString)

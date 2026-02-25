@@ -1,5 +1,5 @@
 # CLAUDE.md
-> **Guidance for WEGOGYM Project**
+> **Guidance for Kore Project**
 
 ## 0. Règle d'or
 

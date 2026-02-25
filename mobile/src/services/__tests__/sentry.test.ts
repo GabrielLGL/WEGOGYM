@@ -129,7 +129,7 @@ describe('sentry', () => {
 
   describe('captureError', () => {
     it('appelle Sentry.captureException avec l\'erreur fournie', () => {
-      const error = new Error('Test error WEGOGYM')
+      const error = new Error('Test error Kore')
 
       captureError(error)
 

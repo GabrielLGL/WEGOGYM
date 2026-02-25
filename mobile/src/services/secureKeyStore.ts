@@ -1,7 +1,7 @@
 import { database } from '../model'
 import User from '../model/models/User'
 
-const API_KEY_STORE_KEY = 'wegogym_ai_api_key'
+const API_KEY_STORE_KEY = 'kore_ai_api_key'
 
 /**
  * Lazy-loaded SecureStore module.

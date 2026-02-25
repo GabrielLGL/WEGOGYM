@@ -70,7 +70,7 @@ describe('secureKeyStore', () => {
       mockSetItemAsync.mockResolvedValue(undefined)
       const { setApiKey } = require('../secureKeyStore')
       await expect(setApiKey('my-key')).resolves.toBeUndefined()
-      expect(mockSetItemAsync).toHaveBeenCalledWith('wegogym_ai_api_key', 'my-key')
+      expect(mockSetItemAsync).toHaveBeenCalledWith('kore_ai_api_key', 'my-key')
     })
 
     it('does not throw when native call fails', async () => {
@@ -85,7 +85,7 @@ describe('secureKeyStore', () => {
       mockDeleteItemAsync.mockResolvedValue(undefined)
       const { deleteApiKey } = require('../secureKeyStore')
       await expect(deleteApiKey()).resolves.toBeUndefined()
-      expect(mockDeleteItemAsync).toHaveBeenCalledWith('wegogym_ai_api_key')
+      expect(mockDeleteItemAsync).toHaveBeenCalledWith('kore_ai_api_key')
     })
 
     it('does not throw when native call fails', async () => {
@@ -125,7 +125,7 @@ describe('secureKeyStore', () => {
       const { migrateKeyFromDB } = require('../secureKeyStore')
       await migrateKeyFromDB()
 
-      expect(mockSetItemAsync).toHaveBeenCalledWith('wegogym_ai_api_key', 'db-key-123')
+      expect(mockSetItemAsync).toHaveBeenCalledWith('kore_ai_api_key', 'db-key-123')
       expect(database.write).toHaveBeenCalled()
     })
 

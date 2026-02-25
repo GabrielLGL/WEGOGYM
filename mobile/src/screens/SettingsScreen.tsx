@@ -110,7 +110,7 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
       const filePath = await exportAllData()
       await Sharing.shareAsync(filePath, {
         mimeType: 'application/json',
-        dialogTitle: 'Exporter mes donn\u00e9es WEGOGYM',
+        dialogTitle: 'Exporter mes donn\u00e9es Kore',
       })
     } catch (error) {
       if (__DEV__) console.error('Export failed:', error)
@@ -369,7 +369,7 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
 
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Application</Text>
-            <Text style={styles.infoValue}>WEGOGYM</Text>
+            <Text style={styles.infoValue}>Kore</Text>
           </View>
 
           <View style={styles.infoRow}>

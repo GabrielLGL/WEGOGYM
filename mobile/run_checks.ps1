@@ -1,4 +1,4 @@
-Set-Location 'C:\Users\gabri\Desktop\WEGOGYM\mobile'
+Set-Location 'C:\Users\gabri\Desktop\kore-app\mobile'
 
 Write-Host "=== TSC ==="
 $tscOut = & npx tsc --noEmit 2>&1

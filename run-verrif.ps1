@@ -206,7 +206,7 @@ Base-toi sur les rapports dans docs/bmad/verrif/$timestamp/. Ne me pose aucune q
             
             if (-not (Test-Path $scoreFile)) {
                 $header = @"
-# Historique de sante du projet WEGOGYM
+# Historique de sante du projet Kore
 
 | Run | Score | Build | Tests | Bugs | Qualite | Coverage | Mode |
 |-----|-------|-------|-------|------|---------|----------|------|

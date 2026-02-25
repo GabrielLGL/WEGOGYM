@@ -1,6 +1,6 @@
-# WEGOGYM 💪
+# Kore 💪
 
-[![CI Tests](https://github.com/GabrielLGL/WEGOGYM/actions/workflows/ci.yml/badge.svg)](https://github.com/GabrielLGL/WEGOGYM/actions/workflows/ci.yml)
+[![CI Tests](https://github.com/GabrielLGL/kore-app/actions/workflows/ci.yml/badge.svg)](https://github.com/GabrielLGL/kore-app/actions/workflows/ci.yml)
 
 Application mobile de suivi d'entraînement **offline-first** développée avec React Native, Expo et WatermelonDB.
 
@@ -27,8 +27,8 @@ Application mobile de suivi d'entraînement **offline-first** développée avec 
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/GabrielLGL/WEGOGYM.git
-cd WEGOGYM/mobile
+git clone https://github.com/GabrielLGL/kore-app.git
+cd kore-app/mobile
 
 # Installer les dépendances
 npm install
