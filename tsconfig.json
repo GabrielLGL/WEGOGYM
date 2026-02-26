@@ -1,9 +1,0 @@
-{
-  "extends": "./mobile/node_modules/expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "useDefineForClassFields": false
-  }
-}
