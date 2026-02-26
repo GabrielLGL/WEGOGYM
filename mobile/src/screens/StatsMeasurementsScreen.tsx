@@ -8,6 +8,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 import { LineChart } from 'react-native-chart-kit'
@@ -229,8 +230,9 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
                   <TouchableOpacity
                     onPress={() => { haptics.onPress(); setDeleteTarget(m) }}
                     style={styles.deleteBtn}
+                    testID="delete-btn"
                   >
-                    <Text style={styles.deleteIcon}>🗑️</Text>
+                    <Ionicons name="trash-outline" size={20} color={colors.danger} />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -390,9 +392,6 @@ function useStyles(colors: ThemeColors) {
     },
     deleteBtn: {
       padding: spacing.xs,
-    },
-    deleteIcon: {
-      fontSize: fontSize.lg,
     },
     emptyState: {
       backgroundColor: colors.card,

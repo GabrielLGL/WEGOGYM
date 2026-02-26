@@ -199,14 +199,14 @@ describe('StatsMeasurementsScreenBase', () => {
     expect(getAllByText(/80kg/).length).toBeGreaterThanOrEqual(1)
   })
 
-  it('ouvre AlertDialog au clic sur 🗑️ dans historique', () => {
+  it('ouvre AlertDialog au clic sur le bouton delete dans historique', () => {
     const measurements = [
       makeMeasurement('m1', Date.now(), { weight: 80 }),
     ]
-    const { getByText } = render(
+    const { getByText, getByTestId } = render(
       <StatsMeasurementsScreenBase measurements={measurements} />
     )
-    fireEvent.press(getByText('🗑️'))
+    fireEvent.press(getByTestId('delete-btn'))
     expect(getByText('Supprimer cette mesure ?')).toBeTruthy()
   })
 
@@ -214,10 +214,10 @@ describe('StatsMeasurementsScreenBase', () => {
     const measurements = [
       makeMeasurement('m1', Date.now(), { weight: 80 }),
     ]
-    const { getByText } = render(
+    const { getByText, getByTestId } = render(
       <StatsMeasurementsScreenBase measurements={measurements} />
     )
-    fireEvent.press(getByText('🗑️'))
+    fireEvent.press(getByTestId('delete-btn'))
     fireEvent.press(getByText('Supprimer'))
 
     await waitFor(() => {
@@ -229,10 +229,10 @@ describe('StatsMeasurementsScreenBase', () => {
     const measurements = [
       makeMeasurement('m1', Date.now(), { weight: 80 }),
     ]
-    const { getByText } = render(
+    const { getByText, getByTestId } = render(
       <StatsMeasurementsScreenBase measurements={measurements} />
     )
-    fireEvent.press(getByText('🗑️'))
+    fireEvent.press(getByTestId('delete-btn'))
     fireEvent.press(getByText('Annuler'))
     expect(mockDestroyPermanently).not.toHaveBeenCalled()
   })

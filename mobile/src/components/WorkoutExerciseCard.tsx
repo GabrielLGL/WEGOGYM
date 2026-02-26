@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { from, of } from 'rxjs'
 import { switchMap, catchError } from 'rxjs/operators'
@@ -111,8 +112,8 @@ const WorkoutSetRow = React.memo(function WorkoutSetRow({
             <Text style={styles.prBadge}>PR !</Text>
           </View>
         )}
-        <TouchableOpacity onPress={() => onUnvalidate(setOrder)} style={styles.validateBtnActive}>
-          <Text style={styles.validateBtnText}>✓</Text>
+        <TouchableOpacity onPress={() => onUnvalidate(setOrder)} style={styles.validateBtnActive} testID="validate-btn">
+          <Ionicons name="checkmark-outline" size={18} color={colors.text} />
         </TouchableOpacity>
       </View>
     )
@@ -161,8 +162,9 @@ const WorkoutSetRow = React.memo(function WorkoutSetRow({
           onPress={handleValidate}
           disabled={!valid}
           activeOpacity={0.7}
+          testID="validate-btn"
         >
-          <Text style={styles.validateBtnText}>✓</Text>
+          <Ionicons name="checkmark-outline" size={18} color={colors.text} />
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -453,11 +455,6 @@ function useStyles(colors: ThemeColors) {
       justifyContent: 'center',
       alignItems: 'center',
       marginLeft: 'auto',
-    },
-    validateBtnText: {
-      color: colors.text,
-      fontWeight: 'bold',
-      fontSize: fontSize.md,
     },
 
     // Validated state

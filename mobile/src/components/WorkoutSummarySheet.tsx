@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { BottomSheet } from './BottomSheet'
 import { Button } from './Button'
 import { updateHistoryNote } from '../model/utils/databaseHelpers'
@@ -32,15 +33,23 @@ function formatDuration(seconds: number): string {
 interface StatBlockProps {
   label: string
   value: string
-  emoji: string
+  emoji?: string
+  icon?: string
   colors: ThemeColors
 }
 
-const StatBlock: React.FC<StatBlockProps> = ({ label, value, emoji, colors }) => {
+const StatBlock: React.FC<StatBlockProps> = ({ label, value, emoji, icon, colors }) => {
   const styles = useStyles(colors)
   return (
     <View style={styles.statBlock}>
-      <Text style={styles.statValue}>{emoji} {value}</Text>
+      {icon ? (
+        <>
+          <Ionicons name={icon as any} size={20} color={colors.primary} />
+          <Text style={styles.statValue}>{value}</Text>
+        </>
+      ) : (
+        <Text style={styles.statValue}>{emoji} {value}</Text>
+      )}
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   )
@@ -48,12 +57,12 @@ const StatBlock: React.FC<StatBlockProps> = ({ label, value, emoji, colors }) =>
 
 function getMotivationMessage(totalPrs: number, volumeGain: number, colors: ThemeColors): { text: string; color: string } {
   if (totalPrs > 0) {
-    return { text: '🏅 Record battu !', color: colors.primary }
+    return { text: 'Record battu !', color: colors.primary }
   }
   if (volumeGain > 0) {
-    return { text: '🔺 En progression !', color: colors.success }
+    return { text: 'En progression !', color: colors.success }
   }
-  return { text: '💪 Bonne séance !', color: colors.success }
+  return { text: 'Bonne séance !', color: colors.success }
 }
 
 function formatWeight(w: number): string {
@@ -141,9 +150,9 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         {/* Stats grid 2×2 */}
         <View style={styles.statsGrid}>
           <StatBlock label="Durée" value={formatDuration(durationSeconds)} emoji="⏱" colors={colors} />
-          <StatBlock label="Volume" value={`${totalVolume.toFixed(1)} kg`} emoji="🏋️" colors={colors} />
-          <StatBlock label="Séries" value={`${totalSets} validées`} emoji="✅" colors={colors} />
-          <StatBlock label="Records" value={`${totalPrs} PR`} emoji="🏆" colors={colors} />
+          <StatBlock label="Volume" value={`${totalVolume.toFixed(1)} kg`} icon="barbell-outline" colors={colors} />
+          <StatBlock label="Séries" value={`${totalSets} validées`} icon="checkmark-circle-outline" colors={colors} />
+          <StatBlock label="Records" value={`${totalPrs} PR`} icon="trophy-outline" colors={colors} />
         </View>
 
         {/* Section gamification */}
@@ -174,7 +183,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                     <Text style={styles.exoName}>{exo.exerciseName}</Text>
                     {exo.setsTarget > 0 && (
                       isComplete
-                        ? <Text style={styles.completeBadge}>✅</Text>
+                        ? <Ionicons name="checkmark-circle" size={18} color={colors.success} />
                         : <Text style={styles.incompleteBadge}>
                             {exo.setsValidated}/{exo.setsTarget}
                           </Text>
@@ -197,18 +206,24 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 
             {/* Delta volume total */}
             {recapComparison.prevVolume === null ? (
-              <Text style={styles.progressionFirstTime}>🎉 Première séance !</Text>
+              <Text style={styles.progressionFirstTime}>Première séance !</Text>
             ) : (
               <View style={styles.progressionVolRow}>
                 <Text style={styles.progressionLabel}>Volume total</Text>
                 {recapComparison.volumeGain > 0 ? (
-                  <Text style={[styles.progressionDelta, { color: colors.success }]}>
-                    +{recapComparison.volumeGain.toFixed(1)} kg 🔺
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text style={[styles.progressionDelta, { color: colors.success }]}>
+                      +{recapComparison.volumeGain.toFixed(1)} kg
+                    </Text>
+                    <Ionicons name="chevron-up-outline" size={12} color={colors.success} />
+                  </View>
                 ) : recapComparison.volumeGain < 0 ? (
-                  <Text style={[styles.progressionDelta, { color: colors.danger }]}>
-                    {recapComparison.volumeGain.toFixed(1)} kg 🔻
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text style={[styles.progressionDelta, { color: colors.danger }]}>
+                      {recapComparison.volumeGain.toFixed(1)} kg
+                    </Text>
+                    <Ionicons name="chevron-down-outline" size={12} color={colors.danger} />
+                  </View>
                 ) : (
                   <Text style={[styles.progressionDelta, { color: colors.textSecondary }]}>
                     Même volume
@@ -221,13 +236,19 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
             {exercisesWithDelta.map((exo, idx) => (
               <View key={idx} style={styles.progressionExoRow}>
                 <Text style={styles.progressionExoName}>{exo.exerciseName}</Text>
-                <Text style={[
-                  styles.progressionDelta,
-                  { color: exo.currMaxWeight > exo.prevMaxWeight ? colors.success : colors.danger }
-                ]}>
-                  {formatWeight(exo.prevMaxWeight)} → {formatWeight(exo.currMaxWeight)} kg
-                  {exo.currMaxWeight > exo.prevMaxWeight ? ' 🔺' : ' 🔻'}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={[
+                    styles.progressionDelta,
+                    { color: exo.currMaxWeight > exo.prevMaxWeight ? colors.success : colors.danger }
+                  ]}>
+                    {formatWeight(exo.prevMaxWeight)} → {formatWeight(exo.currMaxWeight)} kg
+                  </Text>
+                  <Ionicons
+                    name={exo.currMaxWeight > exo.prevMaxWeight ? 'chevron-up-outline' : 'chevron-down-outline'}
+                    size={12}
+                    color={exo.currMaxWeight > exo.prevMaxWeight ? colors.success : colors.danger}
+                  />
+                </View>
               </View>
             ))}
           </>

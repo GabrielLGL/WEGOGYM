@@ -9,6 +9,7 @@ import {
   Dimensions,
   FlatList,
 } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
 import { Q } from '@nozbe/watermelondb'
@@ -128,8 +129,9 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
           setIsAlertVisible(true)
         }}
         style={styles.deleteBtn}
+        testID="delete-btn"
       >
-        <Text style={styles.deleteIcon}>🗑️</Text>
+        <Ionicons name="trash-outline" size={20} color={colors.danger} />
       </TouchableOpacity>
     </View>
   )
@@ -343,7 +345,6 @@ function useStyles(colors: ThemeColors) {
     logDate: { color: colors.placeholder, fontSize: fontSize.caption, marginTop: 2, marginBottom: 6 },
     setDetailText: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2 },
     deleteBtn: { padding: CHIP_MARGIN_RIGHT },
-    deleteIcon: { fontSize: fontSize.lg },
     emptyState: { marginTop: 50, paddingHorizontal: spacing.xxl },
     emptyText: {
       color: colors.placeholder,

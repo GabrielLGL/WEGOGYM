@@ -230,7 +230,7 @@ describe('ChartsContent', () => {
     expect(getByText(/Série 2 : 75 kg × 12 reps/)).toBeTruthy()
   })
 
-  it('ouvre la modale de suppression au clic sur 🗑️', () => {
+  it('ouvre la modale de suppression au clic sur le bouton delete', () => {
     const mockStats = [
       {
         historyId: 'h1',
@@ -250,14 +250,14 @@ describe('ChartsContent', () => {
     ;(buildExerciseStatsFromData as jest.Mock).mockReturnValue(mockStats)
 
     const exercises = [makeExercise('e1', 'Bench', 'Pecs', 'Barre')]
-    const { getByText, getAllByText } = render(
+    const { getByText, getAllByTestId } = render(
       <ChartsContent exercises={exercises} />
     )
 
     fireEvent.press(getByText('Bench'))
 
     // Press the delete button on first item
-    const deleteBtns = getAllByText('🗑️')
+    const deleteBtns = getAllByTestId('delete-btn')
     fireEvent.press(deleteBtns[0])
 
     expect(getByText('Supprimer cette séance ?')).toBeTruthy()
@@ -288,13 +288,13 @@ describe('ChartsContent', () => {
     ;(buildExerciseStatsFromData as jest.Mock).mockReturnValue(mockStats)
 
     const exercises = [makeExercise('e1', 'Bench', 'Pecs', 'Barre')]
-    const { getByText, getAllByText } = render(
+    const { getByText, getAllByTestId } = render(
       <ChartsContent exercises={exercises} />
     )
 
     fireEvent.press(getByText('Bench'))
 
-    const deleteBtns = getAllByText('🗑️')
+    const deleteBtns = getAllByTestId('delete-btn')
     fireEvent.press(deleteBtns[0])
 
     // Confirm deletion
@@ -325,13 +325,13 @@ describe('ChartsContent', () => {
     ;(buildExerciseStatsFromData as jest.Mock).mockReturnValue(mockStats)
 
     const exercises = [makeExercise('e1', 'Bench', 'Pecs', 'Barre')]
-    const { getByText, getAllByText, queryByText } = render(
+    const { getByText, getAllByTestId, queryByText } = render(
       <ChartsContent exercises={exercises} />
     )
 
     fireEvent.press(getByText('Bench'))
 
-    const deleteBtns = getAllByText('🗑️')
+    const deleteBtns = getAllByTestId('delete-btn')
     fireEvent.press(deleteBtns[0])
 
     fireEvent.press(getByText('Annuler'))

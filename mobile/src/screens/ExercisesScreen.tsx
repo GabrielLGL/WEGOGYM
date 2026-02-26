@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, UIManager, BackHandler, Keyboard } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
 import { Q } from '@nozbe/watermelondb'
@@ -178,7 +179,10 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
                 }}
                 style={styles.searchFakeInput}
               >
-                <Text style={styles.searchFakeText}>🔍 Rechercher un exercice...</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Ionicons name="search-outline" size={16} color={colors.placeholder} />
+                  <Text style={styles.searchFakeText}>Rechercher un exercice...</Text>
+                </View>
               </TouchableOpacity>
             ) : (
               <View style={styles.searchBarContainer}>
@@ -249,10 +253,10 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
 
           <BottomSheet visible={isOptionsVisible} onClose={() => setIsOptionsVisible(false)} title={selectedExercise?.name}>
             <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); if (selectedExercise) loadExerciseForEdit(selectedExercise); setIsEditModalVisible(true); }}>
-              <Text style={styles.sheetIcon}>✏️</Text><Text style={styles.sheetText}>Modifier l'exercice</Text>
+              <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.ms }} /><Text style={styles.sheetText}>Modifier l'exercice</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); setIsAlertVisible(true); }}>
-              <Text style={styles.sheetIcon}>🗑️</Text><Text style={[styles.sheetText, { color: colors.danger }]}>Supprimer l'exercice</Text>
+              <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.ms }} /><Text style={[styles.sheetText, { color: colors.danger }]}>Supprimer l'exercice</Text>
             </TouchableOpacity>
           </BottomSheet>
 
@@ -376,7 +380,6 @@ function useStyles(colors: ThemeColors) {
     confirmBtn: { flex: 0.47, backgroundColor: colors.primary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center' },
     btnText: { color: colors.text, fontWeight: 'bold' },
     sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: LIST_ITEM_PADDING_V },
-    sheetIcon: { fontSize: fontSize.xl, marginRight: spacing.ms },
     sheetText: { color: colors.text, fontSize: fontSize.md },
   })
 }

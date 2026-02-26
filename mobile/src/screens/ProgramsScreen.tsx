@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Animated, ScrollView, BackHandler } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { database } from '../model/index'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
@@ -258,7 +259,10 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
               setIsCreateChoiceVisible(true)
             }}
           >
-            <Text style={styles.btnText}>📂 Créer un Programme</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Ionicons name="add-circle-outline" size={20} color={colors.text} />
+              <Text style={styles.btnText}>Créer un Programme</Text>
+            </View>
           </TouchableOpacity>
         </Animated.View>
 
@@ -280,7 +284,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
               setIsProgramModalVisible(true)
             }}
           >
-            <Text style={styles.sheetOptionIcon}>✏️</Text>
+            <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} />
             <Text style={styles.sheetOptionText}>Soi-même</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -291,7 +295,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
               navigation.navigate('Assistant')
             }}
           >
-            <Text style={styles.sheetOptionIcon}>✨</Text>
+            <Ionicons name="hardware-chip-outline" size={20} color={colors.primary} style={{ marginRight: 20, width: 30 }} />
             <Text style={styles.sheetOptionText}>Automatique</Text>
           </TouchableOpacity>
         </BottomSheet>
@@ -344,13 +348,13 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           title={selectedProgram?.name}
         >
           <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedProgram) prepareRenameProgram(selectedProgram); setIsOptionsVisible(false); if (renameTimerRef.current) clearTimeout(renameTimerRef.current); renameTimerRef.current = setTimeout(() => { setIsProgramModalVisible(true); renameTimerRef.current = null }, 300) }}>
-            <Text style={styles.sheetOptionIcon}>✏️</Text><Text style={styles.sheetOptionText}>Renommer le Programme</Text>
+            <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} /><Text style={styles.sheetOptionText}>Renommer le Programme</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateProgram}>
-            <Text style={styles.sheetOptionIcon}>👯</Text><Text style={styles.sheetOptionText}>Dupliquer le Programme</Text>
+            <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} /><Text style={styles.sheetOptionText}>Dupliquer le Programme</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); setAlertConfig({ title: `Supprimer ${selectedProgram?.name} ?`, message: "Supprimer ce programme et toutes ses séances ?", onConfirm: async () => { await deleteProgram() } }); setIsAlertVisible(true); }}>
-            <Text style={styles.sheetOptionIcon}>🗑️</Text><Text style={[styles.sheetOptionText, { color: colors.danger }]}>Supprimer le Programme</Text>
+            <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: 20, width: 30 }} /><Text style={[styles.sheetOptionText, { color: colors.danger }]}>Supprimer le Programme</Text>
           </TouchableOpacity>
         </BottomSheet>
 
@@ -361,10 +365,10 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           title={selectedSession?.name}
         >
           <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedSession) prepareRenameSession(selectedSession); setIsSessionOptionsVisible(false); if (renameSessionTimerRef.current) clearTimeout(renameSessionTimerRef.current); renameSessionTimerRef.current = setTimeout(() => { setIsSessionModalVisible(true); renameSessionTimerRef.current = null }, 300) }}>
-            <Text style={styles.sheetOptionIcon}>✏️</Text><Text style={styles.sheetOptionText}>Renommer la Séance</Text>
+            <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} /><Text style={styles.sheetOptionText}>Renommer la Séance</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateSession}>
-            <Text style={styles.sheetOptionIcon}>👯</Text><Text style={styles.sheetOptionText}>Dupliquer la Séance</Text>
+            <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} /><Text style={styles.sheetOptionText}>Dupliquer la Séance</Text>
           </TouchableOpacity>
           {programs.length > 1 && (
             <>
@@ -379,7 +383,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
             </>
           )}
           <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsSessionOptionsVisible(false); setAlertConfig({ title: `Supprimer ${selectedSession?.name} ?`, message: "Supprimer cette séance ?", onConfirm: async () => { await deleteSession() } }); setIsAlertVisible(true); }}>
-            <Text style={styles.sheetOptionIcon}>🗑️</Text><Text style={[styles.sheetOptionText, { color: colors.danger }]}>Supprimer la Séance</Text>
+            <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: 20, width: 30 }} /><Text style={[styles.sheetOptionText, { color: colors.danger }]}>Supprimer la Séance</Text>
           </TouchableOpacity>
         </BottomSheet>
 
@@ -493,12 +497,6 @@ function useStyles(colors: ThemeColors) {
       paddingVertical: spacing.md,
       borderBottomWidth: 0.5,
       borderBottomColor: colors.cardSecondary,
-    },
-    sheetOptionIcon: {
-      fontSize: 22,
-      marginRight: 20,
-      width: 30,
-      textAlign: 'center',
     },
     sheetOptionText: { color: colors.text, fontSize: 17, fontWeight: '500' },
     sectionLabel: {

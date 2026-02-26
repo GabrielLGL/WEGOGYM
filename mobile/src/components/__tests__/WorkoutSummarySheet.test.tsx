@@ -73,7 +73,7 @@ describe('WorkoutSummarySheet', () => {
         <WorkoutSummarySheet {...defaultProps} totalVolume={2500.5} />
       )
 
-      expect(getByText('🏋️ 2500.5 kg')).toBeTruthy()
+      expect(getByText('2500.5 kg')).toBeTruthy()
     })
 
     it('affiche le nombre de séries validées', () => {
@@ -81,7 +81,7 @@ describe('WorkoutSummarySheet', () => {
         <WorkoutSummarySheet {...defaultProps} totalSets={12} />
       )
 
-      expect(getByText('✅ 12 validées')).toBeTruthy()
+      expect(getByText('12 validées')).toBeTruthy()
     })
 
     it('affiche le nombre de PR', () => {
@@ -89,7 +89,7 @@ describe('WorkoutSummarySheet', () => {
         <WorkoutSummarySheet {...defaultProps} totalPrs={3} />
       )
 
-      expect(getByText('🏆 3 PR')).toBeTruthy()
+      expect(getByText('3 PR')).toBeTruthy()
     })
 
     it('affiche les labels des stats (Durée, Volume, Séries, Records)', () => {

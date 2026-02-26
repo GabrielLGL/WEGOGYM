@@ -239,12 +239,12 @@ describe('WorkoutExerciseCard', () => {
       expect(queryByText('PR !')).toBeNull()
     })
 
-    it('affiche le bouton de dé-validation (✓) sur une série validée', () => {
+    it('affiche le bouton de dé-validation sur une série validée', () => {
       const validatedSets: Record<string, ValidatedSetData> = {
         'se-1_1': { weight: 80, reps: 10, isPr: false },
       }
 
-      const { getByText } = render(
+      const { getByTestId } = render(
         <WorkoutExerciseCard
           sessionExercise={makeSessionExercise({ setsTarget: 1 })}
           exercise={makeExercise()}
@@ -258,7 +258,7 @@ describe('WorkoutExerciseCard', () => {
         />
       )
 
-      expect(getByText('✓')).toBeTruthy()
+      expect(getByTestId('validate-btn')).toBeTruthy()
     })
   })
 
@@ -357,12 +357,12 @@ describe('WorkoutExerciseCard', () => {
       expect(onUpdateInput).toHaveBeenCalledWith('se-1_1', 'weight', '705')
     })
 
-    it('affiche le bouton de validation ✓', () => {
+    it('affiche le bouton de validation', () => {
       const setInputs: Record<string, SetInputData> = {
         'se-1_1': { weight: '60', reps: '10' },
       }
 
-      const { getByText } = render(
+      const { getByTestId } = render(
         <WorkoutExerciseCard
           sessionExercise={makeSessionExercise({ setsTarget: 1 })}
           exercise={makeExercise()}
@@ -376,7 +376,7 @@ describe('WorkoutExerciseCard', () => {
         />
       )
 
-      expect(getByText('✓')).toBeTruthy()
+      expect(getByTestId('validate-btn')).toBeTruthy()
     })
 
     it('affiche les suffixes "kg" et "reps"', () => {
@@ -411,7 +411,7 @@ describe('WorkoutExerciseCard', () => {
       }
       mockValidateSetInput.mockReturnValue({ valid: true })
 
-      const { getAllByDisplayValue, getByText } = render(
+      const { getAllByDisplayValue, getByTestId } = render(
         <WorkoutExerciseCard
           sessionExercise={makeSessionExercise({ setsTarget: 1 })}
           exercise={makeExercise()}
@@ -429,7 +429,7 @@ describe('WorkoutExerciseCard', () => {
       const weightInput = getAllByDisplayValue('')[0]
       fireEvent.changeText(weightInput, '100')
       // Immédiatement (< 300ms), tape sur le bouton de validation
-      fireEvent.press(getByText('✓'))
+      fireEvent.press(getByTestId('validate-btn'))
 
       // Le debounce doit avoir été flushé : onUpdateInput appelé immédiatement
       expect(onUpdateInput).toHaveBeenCalledWith('se-1_1', 'weight', '100')
@@ -475,7 +475,7 @@ describe('WorkoutExerciseCard', () => {
         'se-1_1': { weight: '60', reps: '' },
       }
 
-      const { getAllByDisplayValue, getByText } = render(
+      const { getAllByDisplayValue, getByTestId } = render(
         <WorkoutExerciseCard
           sessionExercise={makeSessionExercise({ setsTarget: 1 })}
           exercise={makeExercise()}
@@ -491,7 +491,7 @@ describe('WorkoutExerciseCard', () => {
 
       const repsInput = getAllByDisplayValue('')[0]
       fireEvent.changeText(repsInput, '8')
-      fireEvent.press(getByText('✓'))
+      fireEvent.press(getByTestId('validate-btn'))
 
       expect(onUpdateInput).toHaveBeenCalledWith('se-1_1', 'reps', '8')
     })
@@ -530,7 +530,7 @@ describe('WorkoutExerciseCard', () => {
         .mockReturnValueOnce({ valid: true })
         .mockReturnValue({ valid: false })
 
-      const { getByText } = render(
+      const { getByTestId } = render(
         <WorkoutExerciseCard
           sessionExercise={makeSessionExercise({ setsTarget: 1 })}
           exercise={makeExercise()}
@@ -544,7 +544,7 @@ describe('WorkoutExerciseCard', () => {
         />
       )
 
-      fireEvent.press(getByText('✓'))
+      fireEvent.press(getByTestId('validate-btn'))
 
       expect(onValidateSet).not.toHaveBeenCalled()
     })
@@ -560,7 +560,7 @@ describe('WorkoutExerciseCard', () => {
         'se-1_1': { weight: 60, reps: 10, isPr: false },
       }
 
-      const { getByText } = render(
+      const { getByTestId } = render(
         <WorkoutExerciseCard
           sessionExercise={makeSessionExercise({ setsTarget: 1 })}
           exercise={makeExercise()}
@@ -574,7 +574,7 @@ describe('WorkoutExerciseCard', () => {
         />
       )
 
-      fireEvent.press(getByText('✓'))
+      fireEvent.press(getByTestId('validate-btn'))
 
       expect(onUnvalidateSet).toHaveBeenCalledTimes(1)
     })

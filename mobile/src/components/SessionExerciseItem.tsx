@@ -67,8 +67,8 @@ const SessionExerciseItemComponent: React.FC<EnhancedProps> = ({ item, exercise,
           </View>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.deleteBtn} onPress={() => onRemove(item, exercise.name)}>
-        <Text style={styles.deleteIcon}>🗑️</Text>
+      <TouchableOpacity style={styles.deleteBtn} onPress={() => onRemove(item, exercise.name)} testID="delete-btn">
+        <Ionicons name="trash-outline" size={20} color={colors.danger} />
       </TouchableOpacity>
       <ExerciseInfoSheet
         exercise={exercise}
@@ -171,6 +171,5 @@ function useStyles(colors: ThemeColors) {
       fontWeight: '300',
     },
     deleteBtn: { padding: spacing.md },
-    deleteIcon: { fontSize: fontSize.xl, color: colors.placeholder },
   })
 }

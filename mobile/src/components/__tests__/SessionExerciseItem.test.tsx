@@ -245,7 +245,7 @@ describe('SessionExerciseItem', () => {
       const onRemove = jest.fn()
       const se = makeSessionExercise()
 
-      const { getByText } = render(
+      const { getByTestId } = render(
         <SessionExerciseItem
           item={se}
           exercise={makeExercise({ name: 'Curl biceps' })}
@@ -254,7 +254,7 @@ describe('SessionExerciseItem', () => {
         />
       )
 
-      fireEvent.press(getByText('🗑️'))
+      fireEvent.press(getByTestId('delete-btn'))
 
       expect(onRemove).toHaveBeenCalledTimes(1)
       expect(onRemove).toHaveBeenCalledWith(se, 'Curl biceps')
