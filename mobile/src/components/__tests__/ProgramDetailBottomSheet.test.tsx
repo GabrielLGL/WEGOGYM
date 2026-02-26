@@ -35,7 +35,7 @@ jest.mock('expo-haptics', () => ({
 
 import React from 'react'
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
-import { render, fireEvent } from '@testing-library/react-native'
+import { render, fireEvent, act } from '@testing-library/react-native'
 import ProgramDetailBottomSheet from '../ProgramDetailBottomSheet'
 import { BottomSheet } from '../BottomSheet'
 import type Program from '../../model/models/Program'
@@ -174,7 +174,14 @@ const defaultProps = {
 describe('ProgramDetailBottomSheet', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
     ;(globalThis as Record<string, unknown>).__pdbSessions = []
+  })
+
+  afterEach(() => {
+    act(() => { jest.runAllTimers() })
+    jest.clearAllTimers()
+    jest.useRealTimers()
   })
 
   describe('rendu du BottomSheet', () => {

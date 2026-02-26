@@ -7,7 +7,7 @@ jest.mock('@expo/vector-icons', () => ({
 }))
 
 import React from 'react'
-import { render } from '@testing-library/react-native'
+import { render, act } from '@testing-library/react-native'
 import { ExerciseInfoSheet } from '../ExerciseInfoSheet'
 import type Exercise from '../../model/models/Exercise'
 
@@ -25,6 +25,16 @@ const makeExercise = (overrides: Partial<Record<string, unknown>> = {}): Exercis
 } as unknown as Exercise)
 
 describe('ExerciseInfoSheet', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    act(() => { jest.runAllTimers() })
+    jest.clearAllTimers()
+    jest.useRealTimers()
+  })
+
   it('affiche le nom de l\'exercice', () => {
     const { getByText } = render(
       <ExerciseInfoSheet

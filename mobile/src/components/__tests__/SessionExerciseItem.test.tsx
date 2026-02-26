@@ -31,7 +31,7 @@ jest.mock('../../model/index', () => ({
 }))
 
 import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
+import { render, fireEvent, act } from '@testing-library/react-native'
 import { SessionExerciseItem } from '../SessionExerciseItem'
 import type SessionExercise from '../../model/models/SessionExercise'
 import type Exercise from '../../model/models/Exercise'
@@ -62,6 +62,16 @@ const makeExercise = (overrides: Partial<Exercise> = {}): Exercise => ({
 } as unknown as Exercise)
 
 describe('SessionExerciseItem', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    act(() => { jest.runAllTimers() })
+    jest.clearAllTimers()
+    jest.useRealTimers()
+  })
+
   describe('rendu des données', () => {
     it('affiche le nom de l\'exercice', () => {
       const { getByText } = render(

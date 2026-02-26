@@ -39,6 +39,13 @@ const defaultProps = {
 describe('WorkoutSummarySheet', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    act(() => { jest.runAllTimers() })
+    jest.clearAllTimers()
+    jest.useRealTimers()
   })
 
   describe('rendu des statistiques', () => {

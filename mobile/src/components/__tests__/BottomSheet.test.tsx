@@ -9,6 +9,16 @@ jest.mock('@gorhom/portal', () => ({
 }))
 
 describe('BottomSheet', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    act(() => { jest.runAllTimers() })
+    jest.clearAllTimers()
+    jest.useRealTimers()
+  })
+
   describe('visibilité', () => {
     it('ne rend rien quand visible est false (initialement)', () => {
       const { queryByText } = render(
