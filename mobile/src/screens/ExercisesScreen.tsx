@@ -205,7 +205,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
               selectedValue={filterEquipment}
               onChange={setFilterEquipment}
               noneLabel="Tout équipement"
-              style={[styles.filterRow, { marginTop: 10 }]}
+              style={[styles.filterRow, { marginTop: spacing.sm }]}
             />
           </View>
         </View>
@@ -301,22 +301,22 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
 const styles = StyleSheet.create({
   baseContainer: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 15 },
-  headerTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15, height: 45 },
-  searchFakeInput: { flex: 1, backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: 15, height: 45, justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
+  header: { paddingHorizontal: 20, paddingTop: spacing.sm, paddingBottom: spacing.ms },
+  headerTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.ms, height: 45 },
+  searchFakeInput: { flex: 1, backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: spacing.ms, height: 45, justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   searchFakeText: { color: colors.textSecondary, fontSize: fontSize.bodyMd },
-  searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: 15, height: 45, borderWidth: 1, borderColor: colors.primary },
+  searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: spacing.ms, height: 45, borderWidth: 1, borderColor: colors.primary },
   searchInput: { flex: 1, color: colors.text, fontSize: fontSize.md },
-  closeSearchText: { color: colors.primary, marginLeft: 10, fontWeight: '600' },
+  closeSearchText: { color: colors.primary, marginLeft: spacing.sm, fontWeight: '600' },
   searchFilters: { marginBottom: 5 },
   filterRow: { flexDirection: 'row' },
   listWrapper: { flex: 1 },
   list: { flex: 1 },
-  exoItem: { paddingVertical: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  exoItem: { paddingVertical: spacing.ms, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   exoInfo: { flex: 1 },
-  exoTitle: { color: colors.text, fontSize: 17, fontWeight: '600' },
-  exoSubtitle: { color: colors.textSecondary, fontSize: 13, marginTop: 3 },
-  moreBtn: { padding: 10 },
+  exoTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: '600' },
+  exoSubtitle: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 3 },
+  moreBtn: { padding: spacing.sm },
   moreIcon: { color: colors.placeholder, fontSize: fontSize.lg, fontWeight: 'bold' },
   separator: { height: 1, backgroundColor: colors.card },
   emptyList: { color: colors.textSecondary, textAlign: 'center', marginTop: 50, fontStyle: 'italic' },
@@ -324,23 +324,23 @@ const styles = StyleSheet.create({
   addButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 8 },
   addButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.md },
 
-  label: { color: colors.textSecondary, fontSize: 13, marginBottom: 10, fontWeight: '600', textTransform: 'uppercase' },
-  input: { backgroundColor: colors.cardSecondary, color: colors.text, padding: 15, borderRadius: borderRadius.md, fontSize: fontSize.md, marginBottom: 20 },
+  label: { color: colors.textSecondary, fontSize: fontSize.xs, marginBottom: spacing.sm, fontWeight: '600', textTransform: 'uppercase' },
+  input: { backgroundColor: colors.cardSecondary, color: colors.text, padding: spacing.ms, borderRadius: borderRadius.md, fontSize: fontSize.md, marginBottom: 20 },
   chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 },
   chip: { paddingVertical: spacing.sm, paddingHorizontal: spacing.ms, borderRadius: borderRadius.lg, backgroundColor: colors.cardSecondary, marginRight: spacing.sm, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.textSecondary, fontSize: fontSize.xs },
   chipTextActive: { color: colors.text, fontWeight: 'bold' },
   equipRow: { flexDirection: 'row', marginBottom: 30 },
-  equipBtn: { paddingVertical: 10, paddingHorizontal: 15, borderRadius: 10, backgroundColor: colors.cardSecondary, marginRight: 10 },
+  equipBtn: { paddingVertical: spacing.sm, paddingHorizontal: spacing.ms, borderRadius: borderRadius.sm, backgroundColor: colors.cardSecondary, marginRight: spacing.sm },
   equipBtnActive: { backgroundColor: colors.secondaryButton, borderWidth: 1, borderColor: colors.primary },
-  equipText: { color: colors.textSecondary, fontSize: 13 },
+  equipText: { color: colors.textSecondary, fontSize: fontSize.xs },
   equipTextActive: { color: colors.text, fontWeight: 'bold' },
   cancelBtn: { flex: 0.47, backgroundColor: colors.secondaryButton, padding: 14, borderRadius: borderRadius.md, alignItems: 'center' },
   confirmBtn: { flex: 0.47, backgroundColor: colors.primary, padding: 14, borderRadius: borderRadius.md, alignItems: 'center' },
   btnText: { color: colors.text, fontWeight: 'bold' },
-  sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15 },
-  sheetIcon: { fontSize: fontSize.xl, marginRight: 15 },
+  sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.ms },
+  sheetIcon: { fontSize: fontSize.xl, marginRight: spacing.ms },
   sheetText: { color: colors.text, fontSize: fontSize.md },
 })
 

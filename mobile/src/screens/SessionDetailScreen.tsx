@@ -205,10 +205,10 @@ const styles = StyleSheet.create({
   listWrapper: { flex: 1 },
   emptyText: { color: colors.placeholder, textAlign: 'center', marginTop: 50, fontSize: fontSize.md, fontStyle: 'italic' },
 
-  footerContainer: { paddingHorizontal: 20, paddingBottom: 30, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.card },
-  launchButton: { backgroundColor: colors.primary, padding: 18, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: 10 },
+  footerContainer: { paddingHorizontal: 20, paddingBottom: 30, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.card },
+  launchButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: spacing.sm },
   launchButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.sm },
-  addButton: { backgroundColor: colors.cardSecondary, padding: 18, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+  addButton: { backgroundColor: colors.cardSecondary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
   addButtonText: { color: colors.primary, fontWeight: 'bold', fontSize: fontSize.sm },
 
   // Modal Edit Styles
