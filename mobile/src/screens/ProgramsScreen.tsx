@@ -84,32 +84,47 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   const renameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const renameSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Ref pour lire l'état courant dans le BackHandler sans le re-enregistrer
+  const backHandlerVisibilityRef = useRef({
+    isCreateChoiceVisible: false,
+    isDetailVisible: false,
+    isOptionsVisible: false,
+    isSessionOptionsVisible: false,
+  })
+
+  // Sync du ref avec l'état courant
+  useEffect(() => {
+    backHandlerVisibilityRef.current = { isCreateChoiceVisible, isDetailVisible, isOptionsVisible, isSessionOptionsVisible }
+  }, [isCreateChoiceVisible, isDetailVisible, isOptionsVisible, isSessionOptionsVisible])
+
   // --- GESTION BOUTON RETOUR ANDROID ---
+  // Enregistré une seule fois (deps vides) — élimine la race condition
+  // lors du remove/re-add à chaque changement d'état
   useEffect(() => {
     const backAction = () => {
-      // Si un BottomSheet est ouvert, le fermer au lieu de naviguer
-      if (isCreateChoiceVisible) {
+      const v = backHandlerVisibilityRef.current
+      if (v.isCreateChoiceVisible) {
         setIsCreateChoiceVisible(false)
         return true
       }
-      if (isDetailVisible) {
+      if (v.isDetailVisible) {
         setIsDetailVisible(false)
         return true
       }
-      if (isOptionsVisible) {
+      if (v.isOptionsVisible) {
         setIsOptionsVisible(false)
-        return true // Consomme l'événement
+        return true
       }
-      if (isSessionOptionsVisible) {
+      if (v.isSessionOptionsVisible) {
         setIsSessionOptionsVisible(false)
         return true
       }
-      return false // Laisse le comportement par défaut
+      return false
     }
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
     return () => backHandler.remove()
-  }, [isCreateChoiceVisible, isDetailVisible, isOptionsVisible, isSessionOptionsVisible])
+  }, []) // Enregistré une seule fois — lit depuis la ref
 
   // --- CLEANUP TIMERS RENOMMAGE ---
   useEffect(() => {

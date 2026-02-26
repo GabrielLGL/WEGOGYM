@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, memo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, UIManager, BackHandler, Keyboard } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
@@ -21,6 +21,35 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 interface Props { exercises: Exercise[] }
+
+interface ExerciseItemProps {
+  item: Exercise
+  onOptionsPress: (item: Exercise) => void
+}
+
+const ExerciseItem = memo<ExerciseItemProps>(
+  ({ item, onOptionsPress }) => (
+    <View style={styles.exoItem}>
+      <View style={styles.exoInfo}>
+        <Text style={styles.exoTitle}>{item.name}</Text>
+        <Text style={styles.exoSubtitle}>{item.muscles?.join(', ')} • {item.equipment}</Text>
+      </View>
+      <TouchableOpacity
+        style={styles.moreBtn}
+        onPress={() => onOptionsPress(item)}
+      >
+        <Text style={styles.moreIcon}>•••</Text>
+      </TouchableOpacity>
+    </View>
+  ),
+  // Comparateur custom : WatermelonDB mute les instances en place — on vérifie aussi les champs
+  (prev, next) =>
+    prev.item === next.item &&
+    prev.item.name === next.item.name &&
+    prev.item.equipment === next.item.equipment &&
+    JSON.stringify(prev.item.muscles) === JSON.stringify(next.item.muscles) &&
+    prev.onOptionsPress === next.onOptionsPress,
+)
 
 const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   const navigation = useNavigation()
@@ -115,24 +144,15 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
     }
   }
 
+  const handleOptionsPress = useCallback((item: Exercise) => {
+    haptics.onPress()
+    setSelectedExercise(item)
+    setIsOptionsVisible(true)
+  }, [haptics, setSelectedExercise, setIsOptionsVisible])
+
   const renderExerciseItem = useCallback(({ item }: { item: Exercise }) => (
-    <View style={styles.exoItem}>
-      <View style={styles.exoInfo}>
-        <Text style={styles.exoTitle}>{item.name}</Text>
-        <Text style={styles.exoSubtitle}>{item.muscles?.join(', ')} • {item.equipment}</Text>
-      </View>
-      <TouchableOpacity
-        style={styles.moreBtn}
-        onPress={() => {
-          haptics.onPress()
-          setSelectedExercise(item)
-          setIsOptionsVisible(true)
-        }}
-      >
-        <Text style={styles.moreIcon}>•••</Text>
-      </TouchableOpacity>
-    </View>
-  ), [haptics, setSelectedExercise, setIsOptionsVisible])
+    <ExerciseItem item={item} onOptionsPress={handleOptionsPress} />
+  ), [handleOptionsPress])
 
   const renderSeparator = useCallback(() => <View style={styles.separator} />, [])
 

@@ -37,8 +37,8 @@
 |---|----------|----------|--------|--------|
 | 1 | databaseHelpers.ts 863L → split modules | databaseHelpers.ts + databaseHelpers.test.ts (1336L) | 2-3h | A |
 | 2 | statsHelpers.ts 602L → split modules | statsHelpers.ts + statsHelpers.test.ts | 1-2h | B |
-| 3 | FlatList items non memoized | ExercisesScreen.tsx | 30min | C |
-| 4 | BackHandler race condition | ProgramsScreen.tsx | 30min | C |
+| 3 | FlatList items non memoized | ExercisesScreen.tsx | 30min | C | ✅ Résolu — 20260226-1115 |
+| 4 | BackHandler race condition | ProgramsScreen.tsx | 30min | C | ✅ Résolu — 20260226-1115 |
 | 5 | Magic numbers → constantes theme | Divers | 1h | D |
 
 ## Parallélisation
@@ -46,6 +46,9 @@
 - Groupe C et D peuvent être travaillés en parallèle
 
 ---
+
+## Résolution (Groupe C)
+Rapport do : docs/bmad/do/20260226-1115-perf-exercises-backhandler.md
 
 ## Statistiques
 
