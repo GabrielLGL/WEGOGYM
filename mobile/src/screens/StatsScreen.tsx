@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   },
   kpiSeparator: {
     width: 1,
-    height: 32,
+    height: spacing.xl,
     backgroundColor: colors.separator,
   },
   // Grille boutons
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     width: '31%',
   },
   btnIcon: {
-    fontSize: 28,
+    fontSize: fontSize.xxxl,
   },
   btnLabel: {
     fontSize: fontSize.xs,

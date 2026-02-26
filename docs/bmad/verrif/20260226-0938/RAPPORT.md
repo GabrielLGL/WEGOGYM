@@ -39,7 +39,7 @@
 | 2 | statsHelpers.ts 602L → split modules | statsHelpers.ts + statsHelpers.test.ts | 1-2h | B |
 | 3 | FlatList items non memoized | ExercisesScreen.tsx | 30min | C | ✅ Résolu — 20260226-1115 |
 | 4 | BackHandler race condition | ProgramsScreen.tsx | 30min | C | ✅ Résolu — 20260226-1115 |
-| 5 | Magic numbers → constantes theme | Divers | 1h | D |
+| 5 | Magic numbers → constantes theme | Divers | 1h | D | ✅ Résolu — 20260226-1200 |
 
 ## Parallélisation
 - Groupe A et B peuvent être travaillés en parallèle (fichiers différents)
@@ -49,6 +49,9 @@
 
 ## Résolution (Groupe C)
 Rapport do : docs/bmad/do/20260226-1115-perf-exercises-backhandler.md
+
+## Résolution (Groupe D)
+Rapport do : docs/bmad/do/20260226-1200-refactor-magic-numbers.md
 
 ## Statistiques
 

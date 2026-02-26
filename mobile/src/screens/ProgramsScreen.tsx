@@ -23,7 +23,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { useProgramManager } from '../hooks/useProgramManager'
 import { importPresetProgram, markOnboardingCompleted } from '../model/utils/databaseHelpers'
 import type { PresetProgram } from '../model/onboardingPrograms'
-import { colors } from '../theme'
+import { colors, fontSize, spacing, borderRadius } from '../theme'
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
@@ -453,8 +453,8 @@ const styles = StyleSheet.create({
   },
   bigButton: {
     backgroundColor: colors.primary,
-    padding: 16,
-    borderRadius: 12,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     elevation: 8,
     shadowColor: colors.shadow,
@@ -462,15 +462,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 5,
   },
-  btnText: { color: colors.text, fontWeight: 'bold', fontSize: 16 },
+  btnText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.md },
 
   // Modal styles
   input: {
     backgroundColor: colors.cardSecondary,
     color: colors.text,
-    padding: 12,
+    padding: spacing.ms,
     borderRadius: 10,
-    fontSize: 16,
+    fontSize: fontSize.md,
     textAlign: 'center',
   },
   modalButton: {
@@ -479,13 +479,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  buttonText: { color: colors.text, fontWeight: 'bold', fontSize: 15 },
+  buttonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.bodyMd },
 
   // BottomSheet content styles
   sheetOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: spacing.md,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.cardSecondary,
   },
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   sheetOptionText: { color: colors.text, fontSize: 17, fontWeight: '500' },
   sectionLabel: {
     color: colors.textSecondary,
-    fontSize: 12,
+    fontSize: fontSize.xs,
     marginTop: 20,
     marginBottom: 10,
     fontWeight: 'bold',
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  moveChipText: { color: colors.textSecondary, fontSize: 14, fontWeight: '600' },
+  moveChipText: { color: colors.textSecondary, fontSize: fontSize.sm, fontWeight: '600' },
 })
 
 export { ProgramsScreen as ProgramsContent }

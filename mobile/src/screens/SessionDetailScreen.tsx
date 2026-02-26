@@ -19,7 +19,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { useSessionManager } from '../hooks/useSessionManager'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../navigation'
-import { colors } from '../theme'
+import { colors, fontSize, spacing, borderRadius } from '../theme'
 
 interface Props {
   session: Session
@@ -203,17 +203,17 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   listWrapper: { flex: 1 },
-  emptyText: { color: colors.placeholder, textAlign: 'center', marginTop: 50, fontSize: 16, fontStyle: 'italic' },
+  emptyText: { color: colors.placeholder, textAlign: 'center', marginTop: 50, fontSize: fontSize.md, fontStyle: 'italic' },
 
   footerContainer: { paddingHorizontal: 20, paddingBottom: 30, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.card },
-  launchButton: { backgroundColor: colors.primary, padding: 18, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
-  launchButtonText: { color: colors.text, fontWeight: 'bold', fontSize: 14 },
-  addButton: { backgroundColor: colors.cardSecondary, padding: 18, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
-  addButtonText: { color: colors.primary, fontWeight: 'bold', fontSize: 14 },
+  launchButton: { backgroundColor: colors.primary, padding: 18, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: 10 },
+  launchButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.sm },
+  addButton: { backgroundColor: colors.cardSecondary, padding: 18, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+  addButtonText: { color: colors.primary, fontWeight: 'bold', fontSize: fontSize.sm },
 
   // Modal Edit Styles
-  confirmBtn: { flex: 0.48, backgroundColor: colors.primary, padding: 12, borderRadius: 8, alignItems: 'center' },
-  cancelBtn: { flex: 0.48, backgroundColor: colors.secondaryButton, padding: 12, borderRadius: 8, alignItems: 'center' },
+  confirmBtn: { flex: 0.48, backgroundColor: colors.primary, padding: spacing.ms, borderRadius: borderRadius.sm, alignItems: 'center' },
+  cancelBtn: { flex: 0.48, backgroundColor: colors.secondaryButton, padding: spacing.ms, borderRadius: borderRadius.sm, alignItems: 'center' },
   btnText: { color: colors.text, fontWeight: 'bold' },
 })
 
