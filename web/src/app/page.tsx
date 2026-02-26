@@ -368,7 +368,10 @@ export default function Home() {
           </form>
 
           <p className="reveal text-[var(--text-muted)] text-xs mt-8 opacity-80">
-            Pas de spam. Desabonnement en un clic.
+            Pas de spam. Desabonnement en un clic.{" "}
+            <a href="/privacy" className="underline hover:text-[var(--accent)] transition-colors">
+              Politique de confidentialite
+            </a>
           </p>
         </div>
       </section>
@@ -385,6 +388,9 @@ export default function Home() {
             </a>
             <a href="mailto:contact@kore-app.com" className="text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--accent)] transition-colors">
               Contact
+            </a>
+            <a href="/privacy" className="text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--accent)] transition-colors">
+              Confidentialite
             </a>
           </div>
 
