@@ -1,71 +1,43 @@
-# Product Brief — Animations/Demos exercices — 2026-02-25
+# Product Brief — Récap Post-Séance — 2026-02-26
 
-## Probleme
-
-Les debutants en musculation ne savent pas toujours comment executer correctement un exercice. Ils doivent quitter l'app pour chercher sur YouTube/Google, ce qui casse le flow de la seance. Les apps concurrentes (Hevy, Strong) offrent des demos visuelles integrees — c'est un standard attendu.
+## Problème
+Le WorkoutSummarySheet actuel affiche uniquement des totaux globaux (durée, volume, séries, PRs, XP). L'utilisateur ne sait pas ce qu'il a fait exercice par exercice ni s'il a progressé par rapport à la dernière fois. Après l'effort, la récompense est abstraite.
 
 ## Solution
-
-Un systeme de fiches d'exercice accessibles d'un tap pendant la seance, affichees dans un BottomSheet. Chaque fiche contient :
-- Une zone placeholder pour future animation/illustration
-- Les muscles cibles (deja en base)
-- Les notes personnelles de l'utilisateur (deja en base)
-- Des instructions texte courtes (cues d'execution)
-
-Structure prete pour recevoir des vrais assets visuels (Lottie/GIF/SVG) dans une phase ulterieure.
+Enrichir le WorkoutSummarySheet avec 3 nouvelles sections sous les stats existantes :
+1. Message motivant + chips muscles (contextuel, local)
+2. "Ce que tu as fait" — liste exercices + sets validés (reps × poids)
+3. "Progression" — delta volume vs dernière séance identique + delta poids max par exo
 
 ## Utilisateurs cibles
+- Intermédiaire (6-24 mois) — validation concrète de ses efforts
+- Débutant — feedback positif pour créer l'habitude
 
-| Persona | Benefice |
-|---------|----------|
-| Debutant | Apprendre les mouvements sans quitter l'app |
-| Intermediaire | Verifier un mouvement meconnu, lire ses notes |
-| Avance | Consulter ses notes personnelles rapidement |
+## Périmètre v1
 
-## Metriques de succes
+### Must Have
+- Liste exercices + sets validés (reps × poids) dans la récap
+- Chips des muscles travaillés (parsés depuis exercises.muscles)
+- Message motivant contextuel (local) : PR → "Record battu !", volume+ → "En progression 🔺", sinon → "Bonne séance !"
+- Comparaison volume total vs dernière séance identique (+X kg / -X kg)
 
-| Metrique | Cible |
-|----------|-------|
-| Fiche exercice accessible d'un tap en seance | 100% des exercices |
-| Description textuelle presente pour 20-30 exos de base | 100% coverage |
-| Placeholder visuel pret pour futur remplacement par animation | Structure en place |
-| Aucune regression sur les tests existants | 0 fail |
-| TypeScript clean | 0 erreur |
-| Fonctionne offline | 100% |
+### Should Have
+- Delta poids max par exercice ("80 kg → 82.5 kg 🔺")
+- Indicateur complétion (séries validées / séries prévues)
 
-## Scope MVP
+### Could Have (v2)
+- Récaps passées depuis l'historique
+- Score de qualité global
+- Timeline chronologique des sets
 
-1. Ajout `animation_key` + `description` sur le modele Exercise (schema migration v21)
-2. Mapping des 20-30 exercices de base avec cles d'animation et descriptions texte (cues d'execution)
-3. Composant `ExerciseInfoSheet` (BottomSheet) : placeholder visuel + muscles + description + notes
-4. Bouton d'acces dans `SessionExerciseItem` (icone info)
-5. Acces aussi depuis la bibliotheque d'exercices
+### Won't Have (v1)
+- Partage/export (couvert par heatmap-recap-export S07)
+- IA contextuelle
 
-## Contraintes techniques
+## Métriques de succès
+- 100% des séances terminées affichent la récap enrichie
+- 0 régression sur le flow WorkoutScreen → WorkoutSummarySheet → Home
+- npx tsc --noEmit 0 erreur / tests existants verts
 
-- Schema migration v20 → v21 (ajout colonnes animation_key + description sur exercises)
-- BottomSheet via Portal (pas de Modal natif — Fabric crash)
-- Offline-first : tout en local, pas de fetch reseau
-- Mutations dans database.write()
-- Reactivite via withObservables
-- Theme dark mode, couleurs depuis theme/index.ts
-
-## Hors scope (futur)
-
-- Vrais assets visuels (Lottie/GIF/SVG)
-- Telechargement d'animations supplementaires
-- Mode "apprendre" interstitiel avant exercice
-- Contribution communautaire de tips
-- Tap sur placeholder pour importer une image custom
-
-## Risques
-
-| Risque | Mitigation |
-|--------|------------|
-| Placeholder visuel parait "vide" | Icone stylisee + message "Animation a venir" |
-| Description texte insuffisante pour debutant | Cues clairs et actionables, pas de jargon |
-| Migration schema echoue | addColumns non-destructif, testable |
-| Exercices custom sans description | Afficher "Pas de description" avec invite a ajouter des notes |
-
-## Pret pour Phase 3 ?
+## Prêt pour Phase 3 ?
 OUI

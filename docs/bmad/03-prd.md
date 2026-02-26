@@ -1,118 +1,73 @@
-# PRD — Animations/Demos exercices — 2026-02-25
+# PRD — Récap Post-Séance — 2026-02-26
 
 ## Vue d'ensemble
-Systeme de fiches d'exercice avec placeholder visuel, description textuelle et acces rapide pendant la seance. Structure prete pour recevoir des animations reelles dans une phase ulterieure.
-
-Feature : #99 (Videos/animations execution)
+Enrichissement du WorkoutSummarySheet avec un message motivant contextuel, les muscles travaillés, le détail exercice par exercice et la comparaison avec la dernière séance.
 
 ---
 
-## User Stories & Criteres d'acceptation
+## User Stories & Critères d'acceptation
 
-### US-01 — Migration schema : animation_key et description sur Exercise [MUST]
-**En tant que** developpeur,
-**je veux** ajouter les colonnes `animation_key` (string, optional) et `description` (string, optional) sur la table `exercises`,
-**afin de** stocker les references d'animation et les descriptions texte pour chaque exercice.
+### US-1 — Message motivant + muscles travaillés [MUST]
+**En tant qu'** utilisateur, je veux voir un message d'encouragement contextuel et les muscles travaillés dès l'ouverture du récap.
 
-**Criteres d'acceptation :**
-- [ ] Schema v21 avec `animation_key` et `description` sur `exercises`
-- [ ] Migration `addColumns` non-destructive dans `migrations.ts`
-- [ ] Model Exercise mis a jour avec les decorateurs `@text` correspondants
-- [ ] Sync parfait schema <-> model (Known Pitfall)
-- [ ] `npx tsc --noEmit` → 0 erreur
-- [ ] Tests existants passent
+**Critères d'acceptation :**
+- [ ] AC1.1 : Message en haut du sheet (remplace celebrationText). Règles : totalPrs > 0 → "🏅 Record battu !" (colors.primary) ; volumeGain > 0 → "🔺 En progression !" (colors.success) ; sinon → "💪 Bonne séance !" (colors.success)
+- [ ] AC1.2 : Chips muscles travaillés sous le message (parsées depuis exercises.muscles). Si aucun muscle → section masquée.
+- [ ] AC1.3 : Chips non-interactives, sans onPress.
+- [ ] AC1.4 : Remplace le celebrationText existant.
 
 ---
 
-### US-02 — Descriptions texte et animation_key pour 20-30 exercices de base [MUST]
-**En tant que** debutant,
-**je veux** voir des instructions d'execution courtes pour chaque exercice courant,
-**afin de** savoir comment faire le mouvement correctement.
+### US-2 — Détail exercice par exercice [MUST]
+**En tant qu'** utilisateur, je veux voir la liste de tous les exercices avec les séries validées (reps × poids).
 
-**Criteres d'acceptation :**
-- [ ] Fichier `exerciseDescriptions.ts` dans `model/utils/`
-- [ ] Mapping : exerciseName → { animationKey, description }
-- [ ] 20-30 exercices de base couverts
-- [ ] Descriptions en francais, 2-4 phrases, cues actionables sans jargon
-- [ ] Chaque description inclut : position de depart, mouvement, respiration ou cue cle
-- [ ] Script/helper de seed pour mettre a jour les exercices existants en base
-- [ ] `npx tsc --noEmit` → 0 erreur
+**Critères d'acceptation :**
+- [ ] AC2.1 : Section "Ce que tu as fait" après la grille gamification.
+- [ ] AC2.2 : Pour chaque exercice (ordre = position) : nom + sets validés (reps × poids kg). Sets sans validated_at ignorés.
+- [ ] AC2.3 : Exercices sans set validé non affichés.
+- [ ] AC2.4 : Si 0 set validé total → section masquée.
+- [ ] AC2.5 : Données passées en props depuis WorkoutScreen (pas de requête DB dans le composant).
 
 ---
 
-### US-03 — Composant ExerciseInfoSheet [MUST]
-**En tant que** utilisateur,
-**je veux** voir une fiche d'information complete sur un exercice dans un BottomSheet,
-**afin de** consulter la description, les muscles cibles et mes notes rapidement.
+### US-3 — Comparaison avec la dernière séance [MUST + SHOULD]
+**En tant qu'** utilisateur, je veux savoir si j'ai fait plus ou moins que la dernière fois.
 
-**Criteres d'acceptation :**
-- [ ] Nouveau composant `ExerciseInfoSheet.tsx` dans `components/`
-- [ ] Utilise `<BottomSheet>` existant (Portal pattern — pas de Modal natif)
-- [ ] Affiche dans l'ordre :
-  - Zone placeholder visuel (icone stylisee + texte "Animation a venir")
-  - Nom de l'exercice
-  - Chips des muscles cibles
-  - Description textuelle (ou "Pas de description disponible")
-  - Notes personnelles (ou invite a ajouter des notes)
-- [ ] Props : `exercise: Exercise`, `visible: boolean`, `onClose: () => void`
-- [ ] Se ferme proprement (tap dehors ou bouton)
-- [ ] Theme dark mode respecte (couleurs du theme uniquement)
-- [ ] `npx tsc --noEmit` → 0 erreur
-- [ ] Test unitaire du composant
+**Critères d'acceptation :**
+- [ ] AC3.1 : Section "Progression" après la section exercices.
+- [ ] AC3.2 (MUST) : Delta volume total. Format : "+3.2 kg vs dernière fois 🔺" (colors.success) / "-1.5 kg 🔻" (colors.danger) / "Même volume" (neutre).
+- [ ] AC3.3 (MUST) : Pas d'historique précédent → "Première séance ! 🎉".
+- [ ] AC3.4 (SHOULD) : Delta poids max par exercice. Format : "Développé couché : 80 → 82.5 kg 🔺". Si identique → omis.
+- [ ] AC3.5 : Calcul dans WorkoutScreen avant ouverture du sheet (helper dans databaseHelpers.ts).
 
 ---
 
-### US-04 — Bouton info dans SessionExerciseItem [MUST]
-**En tant que** utilisateur en pleine seance,
-**je veux** un bouton discret a cote du nom de l'exercice,
-**afin d'** ouvrir la fiche info d'un tap sans quitter ma seance.
+### US-4 — Indicateur de complétion [SHOULD]
+**En tant qu'** utilisateur, je veux voir combien de séries j'ai validées par rapport aux prévues.
 
-**Criteres d'acceptation :**
-- [ ] Icone info (Ionicons `information-circle-outline`) a cote du nom
-- [ ] Ouvre ExerciseInfoSheet au tap
-- [ ] Haptics `onPress` au tap (via `useHaptics()`)
-- [ ] Ne gene pas le flow de saisie des series
-- [ ] Fonctionne pendant une seance active
-- [ ] `npx tsc --noEmit` → 0 erreur
-
----
-
-### US-05 — Acces depuis la bibliotheque d'exercices [SHOULD]
-**En tant que** utilisateur parcourant la bibliotheque,
-**je veux** pouvoir ouvrir la fiche info d'un exercice,
-**afin de** lire sa description et ses muscles avant de l'ajouter a ma seance.
-
-**Criteres d'acceptation :**
-- [ ] Bouton/zone tap sur la carte exercice dans ExercisePickerScreen ou equivalent
-- [ ] Ouvre le meme ExerciseInfoSheet
-- [ ] Coherent visuellement avec le bouton en seance
-- [ ] `npx tsc --noEmit` → 0 erreur
+**Critères d'acceptation :**
+- [ ] AC4.1 : "(3/4)" si incomplet, ✅ si 100%, affiché à côté du nom exercice.
+- [ ] AC4.2 : Total prévu depuis session_exercise.sets_target.
 
 ---
 
 ## MoSCoW
 
-| US | Titre | Priorite |
-|----|-------|----------|
-| US-01 | Migration schema v21 | MUST |
-| US-02 | Descriptions texte + animation_key | MUST |
-| US-03 | Composant ExerciseInfoSheet | MUST |
-| US-04 | Bouton info en seance | MUST |
-| US-05 | Bouton info en bibliotheque | SHOULD |
-| -- | Vrais assets visuels (Lottie/GIF/SVG) | WON'T (Phase 2) |
-| -- | Telechargement animations supplementaires | WON'T (Phase 2) |
-| -- | Mode "apprendre" interstitiel | WON'T (Phase 2) |
-| -- | Contribution communautaire de tips | WON'T (Phase 2) |
+| Story | Priorité |
+|-------|----------|
+| US-1 Message + muscles | Must |
+| US-2 Détail exo par exo | Must |
+| US-3 Comparaison volume | Must |
+| US-3 Delta poids max par exo | Should |
+| US-4 Indicateur complétion | Should |
+| Récaps depuis historique | Won't (V2) |
+| Score qualité | Won't (V2) |
 
 ---
 
 ## Contraintes non-fonctionnelles
-- **Offline-first** : 0 requete reseau, tout en local
-- Toutes mutations DB dans `database.write()`
-- Reactivite via `withObservables` (pas de refresh manuel)
-- Dark Mode uniquement (`colors.*` du theme)
-- Langue : francais (fr-FR)
-- Pas de native Modal → BottomSheet via Portal
-- Schema migration v20 → v21 (addColumns non-destructif)
-- Haptics : `useHaptics()` pour feedback tactile
-- Ne pas casser : le modele Exercise existant, le flow de seance, la bibliotheque
+- Aucune migration de schéma (v17 suffit)
+- Offline-first : 0 requête réseau
+- Dark Mode uniquement (colors.* du theme)
+- Langue : français (fr-FR)
+- Ne pas casser : WorkoutScreen, WorkoutSummarySheet, flow de navigation existant

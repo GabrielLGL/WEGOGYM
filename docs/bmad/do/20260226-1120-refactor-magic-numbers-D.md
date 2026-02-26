@@ -75,4 +75,4 @@ Les fichiers `ExercisesScreen`, `SessionDetailScreen`, `ProgramsScreen`, `Charts
 ✅ Résolu — 20260226-1145
 
 ## Commit
-[à remplir]
+`62bc142` refactor(theme): magic numbers → fontSize/borderRadius constants — groupe D

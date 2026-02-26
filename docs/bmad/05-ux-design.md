@@ -1,101 +1,92 @@
-# UX Design — Animations/Demos exercices — 2026-02-25
+# UX Design — Volume Tracker Complet — 2026-02-26
 
 > Dark Mode uniquement · fr-FR · tokens `theme/index.ts`
 
 ---
 
-## ExerciseInfoSheet (BottomSheet)
+## StatsVolumeScreen — Enrichissement
 
-**Declenchement :** Tap sur icone (i) — depuis la seance ou la bibliotheque
+Les 3 sections existantes restent inchangées en haut :
+1. ChipSelector période (1 mois / 3 mois / Tout)
+2. Card volume total + % comparaison
+3. Bar chart 12 semaines
+
+Ajout de deux nouvelles sections après le "Top exercices" :
+
+---
+
+## Section 4 — "Sets par muscle cette semaine"
 
 ```
-┌─────────────────────────────────────────┐
-│              ─── handle ───              │  #38383A
-│                                         │
-│  ┌───────────────────────────────────┐  │
-│  │                                   │  │  bg: #2C2C2E
-│  │        ◻ (icone fitness)          │  │  icone 48px, #8E8E93
-│  │    "Animation a venir"            │  │  #8E8E93, italic, 12px
-│  │                                   │  │
-│  └───────────────────────────────────┘  │
-│                                         │
-│  Developpe couche                       │  #FFFFFF, bold, 20px
-│                                         │
-│  ┌──────┐ ┌────────┐ ┌────────┐        │
-│  │ Pecs │ │Epaules │ │Triceps │        │  chips: bg primaryBg, text primary
-│  └──────┘ └────────┘ └────────┘        │
-│                                         │
-│  ─── Description ───────────────────    │  label: #8E8E93, 12px
-│  Allonge sur le banc, pieds au sol.     │  text: #FFFFFF, 14px
-│  Descends la barre vers le milieu       │
-│  de la poitrine en controlant.          │
-│  Pousse vers le haut en expirant.       │
-│                                         │
-│  ─── Notes personnelles ────────────    │  label: #8E8E93, 12px
-│  Grip pronation, tempo 3-1-1-0          │  text: #FFFFFF, 14px, italic
-│                                         │
-│  (ou "Aucune note — ajoutez-en une      │  #8E8E93, italic
-│   depuis la seance")                    │
-│                                         │
-└─────────────────────────────────────────┘
-   bg: colors.card (#1C1C1E)
+┌─────────────────────────────────────────────────────┐
+│  Sets par muscle — semaine actuelle                 │  #FFFFFF, 16px, 600
+│                                                     │
+│  Pectoraux                          8 sets          │
+│  ████████████████████░░░░░░░░░░ 80%  #007AFF        │
+│                                                     │
+│  Dos                               10 sets          │
+│  █████████████████████████ 100%      #007AFF        │
+│                                                     │
+│  Épaules                            4 sets          │
+│  ██████████░░░░░░░░░░░░░░░ 40%       #007AFF        │
+│                                                     │
+│  Triceps                            2 sets          │
+│  █████░░░░░░░░░░░░░░░░░░░░ 20%       #007AFF        │
+│                                                     │
+│  [état vide si aucun set cette semaine]             │
+└─────────────────────────────────────────────────────┘
+   bg: colors.card
+   barre: View width proportionnel au max (100% = muscle le + travaillé)
+   hauteur barre: 6px, borderRadius: 3, bg: colors.primary
+   bg barre vide: colors.separator
+```
+
+**Layout par ligne muscle :**
+```
+┌─────────────────────────────────────────────────┐
+│  Nom muscle                          X sets      │  row, justifyContent: space-between
+│  [barre progress pleine couleur     ░░░░░░░░░]  │  View width %
+└─────────────────────────────────────────────────┘
+```
+
+**État vide :**
+```
+"Aucun set enregistré cette semaine"
+italic, colors.textSecondary, centré
 ```
 
 ---
 
-## Bouton info dans SessionExerciseItem
+## Section 5 — "Évolution par muscle"
 
-**Avant :**
 ```
-[drag] Developpe couche                    [poubelle]
-       Pecs, Epaules • Poids libre
-       [3 series] x [10 reps]
-```
-
-**Apres :**
-```
-[drag] Developpe couche  (i)               [poubelle]
-       Pecs, Epaules • Poids libre
-       [3 series] x [10 reps]
-```
-
-- Icone `information-circle-outline` (Ionicons), 20px, `colors.textSecondary`
-- Espacement `spacing.sm` (8px) entre nom et icone
-- Tap → `haptics.onPress()` + ouvre ExerciseInfoSheet
-
----
-
-## Bouton info dans ExercisePickerModal
-
-**Avant :**
-```
-┌─────────────────────────────────┐
-│ Developpe couche                │
-└─────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  Évolution par muscle                               │  #FFFFFF, 16px, 600
+│                                                     │
+│  [Pectoraux] [Dos] [Épaules] [Biceps] ...          │  ← ChipSelector scrollable
+│                                                     │
+│  ┌─────────────────────────────────────────────┐   │
+│  │   10 ─────────────────────────────────────  │   │
+│  │    8 ──────────────────╮                    │   │
+│  │    6 ─────────╮        │        ╭────────   │   │
+│  │    4 ─────────╯ ╭──────╯        │           │   │
+│  │    2            ╰───────────────╯           │   │
+│  │    0                                        │   │
+│  │    03/02  10/02  17/02  24/02  03/03  ...   │   │
+│  └─────────────────────────────────────────────┘   │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+   LineChart de react-native-chart-kit
+   couleur ligne: colors.primary (#007AFF)
+   bg: colors.card
+   labels: semaines (format: "03/02")
 ```
 
-**Apres :**
+**État vide (muscle sans historique) :**
 ```
-┌─────────────────────────────────┐
-│ Developpe couche            (i) │
-└─────────────────────────────────┘
+"Aucun set enregistré pour ce muscle"
+italic, colors.textSecondary, centré
 ```
-
-- Icone (i) alignee a droite, meme style
-- Tap sur (i) = info sheet (ne selectionne PAS l'exercice)
-- Tap sur le reste = selection exercice (inchange)
-
----
-
-## Cas limites
-
-| Situation | Affichage |
-|-----------|-----------|
-| Exercice sans description | "Pas de description disponible" italic textSecondary |
-| Exercice sans notes | "Aucune note" italic textSecondary |
-| Exercice custom | Sheet identique, probablement sans description |
-| Nom tres long | `numberOfLines={2}` avec ellipsis |
-| 5+ muscles | Chips wrappent sur 2 lignes (flexWrap) |
 
 ---
 
@@ -103,46 +94,38 @@
 
 | Action | Feedback |
 |--------|----------|
-| Tap icone (i) en seance | `haptics.onPress()` + ouvre ExerciseInfoSheet |
-| Tap icone (i) en bibliotheque | `haptics.onPress()` + ouvre ExerciseInfoSheet |
-| Tap overlay / drag down | Ferme le BottomSheet (animation slide-down) |
-| Back hardware Android | Ferme le BottomSheet |
+| Tap chip muscle | Haptics.onSelect() + line chart se met à jour |
+| Scroll vertical | Scroll fluent dans ScrollView existant |
+| Changement période (chip du haut) | Section 4 et 5 se mettent à jour avec les nouvelles données |
 
 ---
 
-## Tokens utilises
+## Tokens utilisés
 
 ```typescript
 // Couleurs
-colors.card           // #1C1C1E — fond BottomSheet
-colors.cardSecondary  // #2C2C2E — fond zone placeholder
-colors.primary        // #007AFF — texte chips muscles
-colors.primaryBg      // rgba(0,122,255,0.15) — fond chips muscles
-colors.text           // #FFFFFF — titre, description
-colors.textSecondary  // #8E8E93 — labels, placeholders, icone info
+colors.card           // fond sections
+colors.primary        // barres progression + ligne chart
+colors.separator      // fond barre vide
+colors.text           // titres sections, noms muscles
+colors.textSecondary  // sets count, états vides
 
 // Spacing
-spacing.sm   // 8 — gap chips, gap nom/icone
-spacing.md   // 16 — padding sections
-spacing.lg   // 24 — gap entre sections
+spacing.sm   // 8  — gap interne lignes
+spacing.md   // 16 — padding sections, gap entre sections
+spacing.lg   // 24 — gap vertical entre Section 4 et 5
 
 // Typography
-fontSize.xl (20px) bold — nom exercice
-fontSize.sm (14px) — description, notes
-fontSize.xs (12px) — labels sections, placeholder animation
-fontSize.xs (12px) italic — "Aucune note", "Animation a venir"
-
-// Icons
-Ionicons 'information-circle-outline' 20px — bouton info
-Ionicons 'barbell-outline' 48px — placeholder animation
+fontSize.md (16px) 600 — titre sections
+fontSize.sm (14px) — noms muscles, count sets
+fontSize.xs (12px) — labels chart, états vides italic
 ```
 
 ---
 
 ## Ce qui ne change PAS
 
-- HomeScreen (aucune modification)
-- WorkoutScreen (aucune modification)
-- Navigation (aucun nouvel ecran — seulement des BottomSheets)
-- Flow de seance (saisie series, validation, resume)
-- Flow d'ajout d'exercice (selection + objectifs dans ExercisePickerModal)
+- Sections 1-3 de StatsVolumeScreen (intact)
+- Navigation (aucun nouvel écran)
+- Tous les autres écrans Stats (Duration, Calendar, Repartition, Exercises)
+- Flow de séance

@@ -43,4 +43,4 @@ aucune (refactor interne, API publique inchangée)
 ✅ Résolu — 20260226-1120
 
 ## Commit
-[sera rempli à l'étape 7]
+8df202d refactor(stats): split statsHelpers.ts into 7 thematic sub-modules

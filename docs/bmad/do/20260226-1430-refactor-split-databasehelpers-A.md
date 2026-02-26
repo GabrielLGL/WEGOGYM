@@ -40,4 +40,4 @@ aucune (refactoring pur, signatures inchangées)
 ✅ Résolu — 20260226-1430
 
 ## Commit
-[sera rempli après commit]
+c921dcf refactor(utils): split databaseHelpers.ts into 7 thematic sub-modules

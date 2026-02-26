@@ -36,4 +36,4 @@ aucune
 ✅ Résolu — 20260226-1200
 
 ## Commit
-[sera rempli à l'étape 8]
+954183a test(api/subscribe): add Vitest tests for POST /api/subscribe route

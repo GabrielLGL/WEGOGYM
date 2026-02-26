@@ -32,4 +32,4 @@ aucune
 ✅ Résolu — 20260226-1100
 
 ## Commit
-7bbf200
+663aa5d

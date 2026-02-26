@@ -51,4 +51,4 @@ Aucune (pas de nouveau composant/hook/pattern)
 ✅ Résolu — 20260226-1045
 
 ## Commit
-[à remplir]
+310db86 feat(WorkoutExerciseCard): add Animated.spring on set validation toggle
