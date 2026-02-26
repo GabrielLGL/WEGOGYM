@@ -20,7 +20,7 @@ export const colors = {
   // Text
   text: '#dfe6e9',
   textSecondary: '#b2bec3',
-  placeholder: '#636e72',
+  placeholder: '#8a9299',
 
   // UI Elements
   overlay: 'rgba(10, 12, 16, 0.9)',
@@ -164,8 +164,8 @@ export const lightColors = {
   border: '#b8c1cc',
   separator: '#b8c1cc',
   text: '#2d3436',
-  textSecondary: '#636e72',
-  placeholder: '#8a9299',
+  textSecondary: '#525c61',
+  placeholder: '#6e7a81',
   overlay: 'rgba(20, 25, 30, 0.85)',
   bottomSheetOverlay: 'rgba(20, 25, 30, 0.45)',
   secondaryButton: '#dde2e6',

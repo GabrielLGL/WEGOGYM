@@ -52,4 +52,7 @@ pour passer WCAG AA (≥ 4.5:1 sur texte normal, ≥ 3:1 sur grand texte).
 Aucune dépendance inter-groupes.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260227-0900
+
+## Résolution
+Rapport do : docs/bmad/do/20260227-0900-style-contrast-textmuted.md
