@@ -40,8 +40,8 @@
 |---|----------|----------|--------|--------|
 | 1 | databaseHelpers.ts 863L → split modules | databaseHelpers.ts + tests | 2-3h | A |
 | 2 | statsHelpers.ts 602L → split modules | statsHelpers.ts + tests | 1-2h | B |
-| 3 | WorkoutExerciseCard.tsx — useCallback + React.memo sur WorkoutSetRow | WorkoutExerciseCard.tsx | 30min | E |
-| 4 | Magic numbers sans correspondance exacte dans le theme | ExercisesScreen, ChartsScreen, SessionDetailScreen | 30min | F |
+| 3 | WorkoutExerciseCard.tsx — useCallback + React.memo sur WorkoutSetRow | WorkoutExerciseCard.tsx | 30min | E | ✅ Résolu 20260226-1900 |
+| 4 | Magic numbers sans correspondance exacte dans le theme | ExercisesScreen, ChartsScreen, SessionDetailScreen | 30min | F | ✅ Résolu 20260226-1900 |
 
 ## Parallélisation
 - Groupe A et B peuvent être travaillés en parallèle (fichiers différents)

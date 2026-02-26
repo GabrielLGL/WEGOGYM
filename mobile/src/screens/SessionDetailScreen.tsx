@@ -121,7 +121,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
             />
           )}
           onDragEnd={({ data }) => reorderExercises(data)}
-          contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 10, paddingBottom: 20 }}
+          contentContainerStyle={{ paddingHorizontal: 0, paddingTop: FOOTER_PADDING_TOP, paddingBottom: LIST_PADDING_BOTTOM }}
           ListEmptyComponent={<Text style={styles.emptyText}>Ajoutez un exercice pour commencer.</Text>}
         />
       </View>
@@ -200,15 +200,22 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   )
 }
 
+const SCREEN_PADDING_H = 20
+const FOOTER_PADDING_BOTTOM = 30
+const FOOTER_PADDING_TOP = 10
+const BTN_PADDING = 18
+const BTN_MARGIN_BOTTOM = 10
+const LIST_PADDING_BOTTOM = 20
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   listWrapper: { flex: 1 },
   emptyText: { color: colors.placeholder, textAlign: 'center', marginTop: 50, fontSize: fontSize.md, fontStyle: 'italic' },
 
-  footerContainer: { paddingHorizontal: 20, paddingBottom: 30, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.card },
-  launchButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: spacing.sm },
+  footerContainer: { paddingHorizontal: SCREEN_PADDING_H, paddingBottom: FOOTER_PADDING_BOTTOM, paddingTop: FOOTER_PADDING_TOP, borderTopWidth: 1, borderTopColor: colors.card },
+  launchButton: { backgroundColor: colors.primary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: BTN_MARGIN_BOTTOM },
   launchButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.sm },
-  addButton: { backgroundColor: colors.cardSecondary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+  addButton: { backgroundColor: colors.cardSecondary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
   addButtonText: { color: colors.primary, fontWeight: 'bold', fontSize: fontSize.sm },
 
   // Modal Edit Styles

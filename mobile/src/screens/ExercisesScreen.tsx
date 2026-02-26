@@ -205,7 +205,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
               selectedValue={filterEquipment}
               onChange={setFilterEquipment}
               noneLabel="Tout équipement"
-              style={[styles.filterRow, { marginTop: spacing.sm }]}
+              style={[styles.filterRow, { marginTop: HEADER_PADDING_V }]}
             />
           </View>
         </View>
@@ -216,7 +216,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
               keyExtractor={item => item.id}
               renderItem={renderExerciseItem}
               style={styles.list}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 150 }}
+              contentContainerStyle={{ paddingHorizontal: SCREEN_PADDING_H, paddingBottom: LIST_PADDING_BOTTOM }}
               ItemSeparatorComponent={renderSeparator}
               ListEmptyComponent={<Text style={styles.emptyList}>Aucun exercice trouvé.</Text>}
             />
@@ -298,48 +298,63 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   )
 }
 
+const SCREEN_PADDING_H = 20
+const HEADER_PADDING_V = 10
+const HEADER_PADDING_BOTTOM = 15
+const SEARCH_HEIGHT = 45
+const SEARCH_PADDING_H = 15
+const LIST_ITEM_PADDING_V = 15
+const FONT_SIZE_EXO_TITLE = 17
+const FONT_SIZE_LABEL = 13
+const ICON_PADDING = 10
+const INPUT_MARGIN_BOTTOM = 20
+const EQUIP_ROW_MARGIN_BOTTOM = 30
+const EQUIP_BORDER_RADIUS = 10
+const BTN_PADDING = 14
+const LIST_PADDING_BOTTOM = 150
+
 const styles = StyleSheet.create({
   baseContainer: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: spacing.sm, paddingBottom: spacing.ms },
-  headerTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.ms, height: 45 },
-  searchFakeInput: { flex: 1, backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: spacing.ms, height: 45, justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
+  header: { paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, paddingBottom: HEADER_PADDING_BOTTOM },
+  headerTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: HEADER_PADDING_BOTTOM, height: SEARCH_HEIGHT },
+  searchFakeInput: { flex: 1, backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: SEARCH_PADDING_H, height: SEARCH_HEIGHT, justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   searchFakeText: { color: colors.textSecondary, fontSize: fontSize.bodyMd },
-  searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: spacing.ms, height: 45, borderWidth: 1, borderColor: colors.primary },
+  searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: SEARCH_PADDING_H, height: SEARCH_HEIGHT, borderWidth: 1, borderColor: colors.primary },
   searchInput: { flex: 1, color: colors.text, fontSize: fontSize.md },
   closeSearchText: { color: colors.primary, marginLeft: spacing.sm, fontWeight: '600' },
   searchFilters: { marginBottom: 5 },
   filterRow: { flexDirection: 'row' },
   listWrapper: { flex: 1 },
   list: { flex: 1 },
-  exoItem: { paddingVertical: spacing.ms, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  exoItem: { paddingVertical: LIST_ITEM_PADDING_V, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   exoInfo: { flex: 1 },
-  exoTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: '600' },
-  exoSubtitle: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 3 },
-  moreBtn: { padding: spacing.sm },
+  exoTitle: { color: colors.text, fontSize: FONT_SIZE_EXO_TITLE, fontWeight: '600' },
+  exoSubtitle: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL, marginTop: 3 },
+  moreBtn: { padding: ICON_PADDING },
   moreIcon: { color: colors.placeholder, fontSize: fontSize.lg, fontWeight: 'bold' },
   separator: { height: 1, backgroundColor: colors.card },
   emptyList: { color: colors.textSecondary, textAlign: 'center', marginTop: 50, fontStyle: 'italic' },
-  footerFloating: { paddingHorizontal: 20, paddingTop: 10, marginBottom: 70, backgroundColor: colors.background},
+  footerFloating: { paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, marginBottom: 70, backgroundColor: colors.background},
   addButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 8 },
   addButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.md },
 
-  label: { color: colors.textSecondary, fontSize: fontSize.xs, marginBottom: spacing.sm, fontWeight: '600', textTransform: 'uppercase' },
-  input: { backgroundColor: colors.cardSecondary, color: colors.text, padding: spacing.ms, borderRadius: borderRadius.md, fontSize: fontSize.md, marginBottom: 20 },
-  chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 },
+  label: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL, marginBottom: spacing.sm, fontWeight: '600', textTransform: 'uppercase' },
+  input: { backgroundColor: colors.cardSecondary, color: colors.text, padding: LIST_ITEM_PADDING_V, borderRadius: borderRadius.md, fontSize: fontSize.md, marginBottom: INPUT_MARGIN_BOTTOM },
+  chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: INPUT_MARGIN_BOTTOM },
   chip: { paddingVertical: spacing.sm, paddingHorizontal: spacing.ms, borderRadius: borderRadius.lg, backgroundColor: colors.cardSecondary, marginRight: spacing.sm, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.textSecondary, fontSize: fontSize.xs },
   chipTextActive: { color: colors.text, fontWeight: 'bold' },
-  equipRow: { flexDirection: 'row', marginBottom: 30 },
-  equipBtn: { paddingVertical: spacing.sm, paddingHorizontal: spacing.ms, borderRadius: borderRadius.sm, backgroundColor: colors.cardSecondary, marginRight: spacing.sm },
+  equipRow: { flexDirection: 'row', marginBottom: EQUIP_ROW_MARGIN_BOTTOM },
+  equipBtn: { paddingVertical: ICON_PADDING, paddingHorizontal: SEARCH_PADDING_H, borderRadius: EQUIP_BORDER_RADIUS, backgroundColor: colors.cardSecondary, marginRight: spacing.sm },
   equipBtnActive: { backgroundColor: colors.secondaryButton, borderWidth: 1, borderColor: colors.primary },
-  equipText: { color: colors.textSecondary, fontSize: fontSize.xs },
+  equipText: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL },
   equipTextActive: { color: colors.text, fontWeight: 'bold' },
-  cancelBtn: { flex: 0.47, backgroundColor: colors.secondaryButton, padding: 14, borderRadius: borderRadius.md, alignItems: 'center' },
-  confirmBtn: { flex: 0.47, backgroundColor: colors.primary, padding: 14, borderRadius: borderRadius.md, alignItems: 'center' },
+  cancelBtn: { flex: 0.47, backgroundColor: colors.secondaryButton, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center' },
+  confirmBtn: { flex: 0.47, backgroundColor: colors.primary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center' },
   btnText: { color: colors.text, fontWeight: 'bold' },
-  sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.ms },
+  sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: LIST_ITEM_PADDING_V },
   sheetIcon: { fontSize: fontSize.xl, marginRight: spacing.ms },
   sheetText: { color: colors.text, fontSize: fontSize.md },
 })

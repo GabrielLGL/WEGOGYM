@@ -229,7 +229,7 @@ export const ChartsContent: React.FC<Props> = ({ exercises }) => {
           selectedValue={filterEquipment}
           onChange={setFilterEquipment}
           noneLabel="Tout équipement"
-          style={[styles.filterRow, { marginTop: 8 }]}
+          style={[styles.filterRow, { marginTop: spacing.sm }]}
         />
       </View>
 
@@ -270,6 +270,18 @@ export const ChartsContent: React.FC<Props> = ({ exercises }) => {
   )
 }
 
+const SCREEN_PADDING_H = 20
+const CHART_BORDER_RADIUS = 16
+const FILTER_PADDING_V = 10
+const SELECTOR_PADDING_V = 15
+const CHIP_MARGIN_RIGHT = 10
+const FONT_SIZE_CHIP = 13
+const LIST_PADDING_BOTTOM = 100
+const CHART_MARGIN_BOTTOM = 20
+const HISTORY_TITLE_MARGIN_TOP = 25
+const HISTORY_TITLE_MARGIN_BOTTOM = 15
+const LOG_ROW_PADDING = 15
+
 const chartConfig = {
   backgroundColor: colors.card,
   backgroundGradientFrom: colors.card,
@@ -277,45 +289,45 @@ const chartConfig = {
   decimalPlaces: 1,
   color: (opacity = 1) => `rgba(${PRIMARY_RGB}, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(${TEXT_RGB}, ${opacity})`,
-  style: { borderRadius: 16 },
+  style: { borderRadius: CHART_BORDER_RADIUS },
   propsForDots: { r: '4', strokeWidth: '2', stroke: colors.primary },
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  filtersWrapper: { paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.card },
-  filterRow: { paddingHorizontal: 20 },
+  filtersWrapper: { paddingVertical: FILTER_PADDING_V, borderBottomWidth: 1, borderBottomColor: colors.card },
+  filterRow: { paddingHorizontal: SCREEN_PADDING_H },
   selectorContainer: {
-    paddingVertical: spacing.ms,
+    paddingVertical: SELECTOR_PADDING_V,
     borderBottomWidth: 1,
     borderBottomColor: colors.card,
     backgroundColor: colors.background,
   },
-  exoScroll: { paddingHorizontal: 20 },
+  exoScroll: { paddingHorizontal: SCREEN_PADDING_H },
   exoChip: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: FILTER_PADDING_V,
     borderRadius: borderRadius.md,
     backgroundColor: colors.cardSecondary,
-    marginRight: spacing.sm,
+    marginRight: CHIP_MARGIN_RIGHT,
   },
   exoChipActive: { backgroundColor: colors.primary },
-  exoChipText: { color: colors.textSecondary, fontSize: fontSize.xs, fontWeight: '600' },
+  exoChipText: { color: colors.textSecondary, fontSize: FONT_SIZE_CHIP, fontWeight: '600' },
   exoChipTextActive: { color: colors.text },
   contentArea: { flex: 1 },
   statsContainer: { flex: 1 },
-  listContent: { padding: 20, paddingBottom: 100 },
-  chartWrapper: { marginBottom: spacing.lg },
-  chart: { borderRadius: 16, marginVertical: spacing.sm },
-  historyTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: 'bold', marginTop: spacing.lg, marginBottom: spacing.ms },
+  listContent: { padding: SCREEN_PADDING_H, paddingBottom: LIST_PADDING_BOTTOM },
+  chartWrapper: { marginBottom: CHART_MARGIN_BOTTOM },
+  chart: { borderRadius: CHART_BORDER_RADIUS, marginVertical: spacing.sm },
+  historyTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: 'bold', marginTop: HISTORY_TITLE_MARGIN_TOP, marginBottom: HISTORY_TITLE_MARGIN_BOTTOM },
   logRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     backgroundColor: colors.card,
-    padding: spacing.ms,
+    padding: LOG_ROW_PADDING,
     borderRadius: borderRadius.md,
-    marginBottom: spacing.sm,
+    marginBottom: CHIP_MARGIN_RIGHT,
     borderLeftWidth: 3,
     borderLeftColor: colors.primary,
   },
@@ -323,7 +335,7 @@ const styles = StyleSheet.create({
   logMainText: { color: colors.text, fontSize: fontSize.bodyMd, fontWeight: 'bold' },
   logDate: { color: colors.placeholder, fontSize: fontSize.caption, marginTop: 2, marginBottom: 6 },
   setDetailText: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2 },
-  deleteBtn: { padding: spacing.sm },
+  deleteBtn: { padding: CHIP_MARGIN_RIGHT },
   deleteIcon: { fontSize: fontSize.lg },
   emptyState: { marginTop: 50, paddingHorizontal: spacing.xxl },
   emptyText: {
