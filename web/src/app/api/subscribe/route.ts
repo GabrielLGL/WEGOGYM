@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     try {
       const resend = getResend();
       await resend.emails.send({
-        from: "Kore <noreply@kore-app.com>",
+        from: "Kore <onboarding@resend.dev>",
         to: email,
         subject: "Bienvenue sur Kore !",
         react: WelcomeEmail({ name: name || undefined }),
