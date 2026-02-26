@@ -3,9 +3,9 @@
  */
 export const colors = {
   // Backgrounds
-  background: '#21242b',
+  background: '#181b21',
   card: '#21242b',
-  cardSecondary: '#252830',
+  cardSecondary: '#282d38',
 
   // Actions
   primary: '#00cec9',
@@ -14,8 +14,8 @@ export const colors = {
   warning: '#FF9500',
 
   // Neutrals
-  border: '#2c3039',
-  separator: '#2c3039',
+  border: '#363d4d',
+  separator: '#363d4d',
 
   // Text
   text: '#dfe6e9',
@@ -49,6 +49,9 @@ export const colors = {
   bgGradientEnd: '#181b21',
   primaryGradientStart: '#00d9d4',
   primaryGradientEnd: '#007a77',
+
+  // Input background
+  input: '#16181e',
 }
 
 /**
@@ -151,15 +154,15 @@ export const neuShadow = {
  * Palette light neumorphique (miroir du dark)
  */
 export const lightColors = {
-  background: '#e8ecef',
-  card: '#e8ecef',
-  cardSecondary: '#d5dce5',
-  primary: '#00cec9',
+  background: '#d8dde6',
+  card: '#eef1f5',
+  cardSecondary: '#e4e9f0',
+  primary: '#006d6b',
   danger: '#ff6b6b',
-  success: '#00cec9',
+  success: '#006d6b',
   warning: '#e17055',
-  border: '#c5cad1',
-  separator: '#c5cad1',
+  border: '#b8c1cc',
+  separator: '#b8c1cc',
   text: '#2d3436',
   textSecondary: '#636e72',
   placeholder: '#8a9299',
@@ -167,8 +170,8 @@ export const lightColors = {
   bottomSheetOverlay: 'rgba(20, 25, 30, 0.45)',
   secondaryButton: '#dde2e6',
   shadow: '#b0b8c1',
-  successBg: 'rgba(0, 206, 201, 0.12)',
-  primaryBg: 'rgba(0, 206, 201, 0.15)',
+  successBg: 'rgba(0, 109, 107, 0.12)',
+  primaryBg: 'rgba(0, 109, 107, 0.12)',
   surfaceOverlay: 'rgba(0, 0, 0, 0.06)',
   neuShadowDark: '#8a9bb0',
   neuShadowLight: '#ffffff',
@@ -181,6 +184,9 @@ export const lightColors = {
   bgGradientEnd: '#dce4ee',
   primaryGradientStart: '#00d9d4',
   primaryGradientEnd: '#007a77',
+
+  // Input background
+  input: '#ffffff',
 }
 
 /**
@@ -198,7 +204,7 @@ export const neuShadowLight = {
       android: { elevation: 14 },
     }),
     borderWidth: 1,
-    borderColor: '#ffffff',
+    borderColor: '#f5f8fc',
   },
   elevatedSm: {
     ...Platform.select({
@@ -211,7 +217,7 @@ export const neuShadowLight = {
       android: { elevation: 7 },
     }),
     borderWidth: 1,
-    borderColor: '#ffffff',
+    borderColor: '#f0f4f8',
   },
   pressed: {
     ...Platform.select({
@@ -224,7 +230,7 @@ export const neuShadowLight = {
       android: { elevation: 2 },
     }),
     borderWidth: 1,
-    borderColor: '#d0d7e0',
+    borderColor: '#c8d0da',
   },
 }
 
