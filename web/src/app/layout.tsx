@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "Kore",
     images: [
       {
-        url: "/og.svg",
+        url: "/og.png",
         width: 1200,
         height: 630,
         alt: "Kore — Ton coach muscu dans ta poche",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     title: "Kore — Ton coach muscu dans ta poche",
     description:
       "App de musculation 100% offline. Suis tes programmes et progresse seance apres seance.",
-    images: ["/og.svg"],
+    images: ["/og.png"],
   },
   other: {
     "theme-color": "#6c5ce7",
