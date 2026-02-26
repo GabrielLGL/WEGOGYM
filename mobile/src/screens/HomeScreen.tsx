@@ -7,6 +7,7 @@ import {
   StyleSheet,
   StatusBar,
 } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 import { useNavigation } from '@react-navigation/native'
@@ -49,7 +50,7 @@ interface Section {
 
 const SECTIONS: Section[] = [
   {
-    title: 'Entra\u00eenement',
+    title: 'Entraînement',
     tiles: [
       { icon: '\uD83D\uDCDA', label: 'Programmes', route: 'Programs' },
       { icon: '\uD83C\uDFCB\uFE0F', label: 'Exercices', route: 'Exercices' },
@@ -58,7 +59,7 @@ const SECTIONS: Section[] = [
   {
     title: 'Statistiques',
     tiles: [
-      { icon: '\u23F1', label: 'Dur\u00e9e', route: 'StatsDuration' },
+      { icon: '\u23F1', label: 'Durée', route: 'StatsDuration' },
       { icon: '\uD83C\uDFD7\uFE0F', label: 'Volume', route: 'StatsVolume' },
       { icon: '\uD83D\uDCC5', label: 'Agenda', route: 'StatsCalendar' },
       { icon: '\uD83D\uDCAA', label: 'Muscles', route: 'StatsRepartition' },
@@ -120,8 +121,14 @@ function HomeScreenBase({ users, histories, sets, userBadges }: Props) {
   }
 
   return (
+    <LinearGradient
+      colors={[colors.bgGradientStart, colors.bgGradientEnd]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.3, y: 1 }}
+      style={{ flex: 1 }}
+    >
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: 'transparent' }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
@@ -147,7 +154,7 @@ function HomeScreenBase({ users, histories, sets, userBadges }: Props) {
         </View>
         <View style={styles.separator} />
         <View style={styles.kpisRow}>
-          <KpiItem label="S\u00e9ances" value={String(kpis.totalSessions)} colors={colors} />
+          <KpiItem label="Séances" value={String(kpis.totalSessions)} colors={colors} />
           <View style={styles.kpiSeparator} />
           <KpiItem label="Volume" value={formatVolume(kpis.totalVolumeKg)} colors={colors} />
           <View style={styles.kpiSeparator} />
@@ -187,7 +194,7 @@ function HomeScreenBase({ users, histories, sets, userBadges }: Props) {
 
       {/* ── Card Heatmap ── */}
       <View style={styles.heatmapCard}>
-        <Text style={styles.sectionTitle}>Activit{'\u00e9'}</Text>
+        <Text style={styles.sectionTitle}>Activité</Text>
         <HeatmapCalendar data={heatmapData} />
       </View>
 
@@ -211,6 +218,7 @@ function HomeScreenBase({ users, histories, sets, userBadges }: Props) {
         </View>
       ))}
     </ScrollView>
+    </LinearGradient>
   )
 }
 
