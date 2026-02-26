@@ -38,9 +38,17 @@ export const colors = {
   surfaceOverlay: 'rgba(255, 255, 255, 0.08)',
 
   // Neumorphism tokens
-  neuShadowDark: '#16181d',
-  neuShadowLight: '#2c3039',
+  neuShadowDark: '#060809',
+  neuShadowLight: '#3c4558',
   secondaryAccent: '#6c5ce7',
+
+  // Gradient tokens (LinearGradient)
+  cardGradientStart: '#262d3a',
+  cardGradientEnd: '#1a1d24',
+  bgGradientStart: '#22262e',
+  bgGradientEnd: '#181b21',
+  primaryGradientStart: '#00d9d4',
+  primaryGradientEnd: '#007a77',
 }
 
 /**
@@ -101,41 +109,41 @@ export const neuShadow = {
   elevated: {
     ...Platform.select({
       ios: {
-        shadowColor: '#0a0c10',
-        shadowOffset: { width: 8, height: 8 },
-        shadowOpacity: 0.9,
-        shadowRadius: 16,
+        shadowColor: '#020304',
+        shadowOffset: { width: 12, height: 12 },
+        shadowOpacity: 1.0,
+        shadowRadius: 24,
       },
-      android: { elevation: 10 },
+      android: { elevation: 14 },
     }),
     borderWidth: 1,
-    borderColor: '#353b47',
+    borderColor: '#4a5570',
   },
   elevatedSm: {
     ...Platform.select({
       ios: {
-        shadowColor: '#0a0c10',
-        shadowOffset: { width: 4, height: 4 },
-        shadowOpacity: 0.8,
-        shadowRadius: 8,
+        shadowColor: '#020304',
+        shadowOffset: { width: 6, height: 6 },
+        shadowOpacity: 0.95,
+        shadowRadius: 12,
       },
-      android: { elevation: 5 },
+      android: { elevation: 7 },
     }),
     borderWidth: 1,
-    borderColor: '#353b47',
+    borderColor: '#404a62',
   },
   pressed: {
     ...Platform.select({
       ios: {
-        shadowColor: '#0a0c10',
-        shadowOffset: { width: 1, height: 1 },
-        shadowOpacity: 0.4,
-        shadowRadius: 3,
+        shadowColor: '#020304',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,
       },
-      android: { elevation: 1 },
+      android: { elevation: 2 },
     }),
     borderWidth: 1,
-    borderColor: '#1a1d22',
+    borderColor: '#1e2330',
   },
 }
 
@@ -162,9 +170,17 @@ export const lightColors = {
   successBg: 'rgba(0, 206, 201, 0.12)',
   primaryBg: 'rgba(0, 206, 201, 0.15)',
   surfaceOverlay: 'rgba(0, 0, 0, 0.06)',
-  neuShadowDark: '#b0b8c1',
+  neuShadowDark: '#8a9bb0',
   neuShadowLight: '#ffffff',
   secondaryAccent: '#6c5ce7',
+
+  // Gradient tokens (LinearGradient)
+  cardGradientStart: '#eaeff5',
+  cardGradientEnd: '#d8dfe8',
+  bgGradientStart: '#e8ecf0',
+  bgGradientEnd: '#d5dae0',
+  primaryGradientStart: '#00d9d4',
+  primaryGradientEnd: '#007a77',
 }
 
 /**
@@ -174,12 +190,12 @@ export const neuShadowLight = {
   elevated: {
     ...Platform.select({
       ios: {
-        shadowColor: '#b0b8c1',
-        shadowOffset: { width: 8, height: 8 },
-        shadowOpacity: 0.9,
-        shadowRadius: 16,
+        shadowColor: '#8a9bb0',
+        shadowOffset: { width: 12, height: 12 },
+        shadowOpacity: 1.0,
+        shadowRadius: 24,
       },
-      android: { elevation: 10 },
+      android: { elevation: 14 },
     }),
     borderWidth: 1,
     borderColor: '#ffffff',
@@ -187,12 +203,12 @@ export const neuShadowLight = {
   elevatedSm: {
     ...Platform.select({
       ios: {
-        shadowColor: '#b0b8c1',
-        shadowOffset: { width: 4, height: 4 },
-        shadowOpacity: 0.8,
-        shadowRadius: 8,
+        shadowColor: '#8a9bb0',
+        shadowOffset: { width: 6, height: 6 },
+        shadowOpacity: 0.95,
+        shadowRadius: 12,
       },
-      android: { elevation: 5 },
+      android: { elevation: 7 },
     }),
     borderWidth: 1,
     borderColor: '#ffffff',
@@ -200,15 +216,15 @@ export const neuShadowLight = {
   pressed: {
     ...Platform.select({
       ios: {
-        shadowColor: '#b0b8c1',
-        shadowOffset: { width: 1, height: 1 },
-        shadowOpacity: 0.4,
-        shadowRadius: 3,
+        shadowColor: '#8a9bb0',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,
       },
-      android: { elevation: 1 },
+      android: { elevation: 2 },
     }),
     borderWidth: 1,
-    borderColor: '#c5cad1',
+    borderColor: '#d0d7e0',
   },
 }
 
