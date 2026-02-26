@@ -151,9 +151,9 @@ export const neuShadow = {
  * Palette light neumorphique (miroir du dark)
  */
 export const lightColors = {
-  background: '#e8ecef',
-  card: '#e8ecef',
-  cardSecondary: '#dde2e6',
+  background: '#dde3ea',
+  card: '#edf1f5',
+  cardSecondary: '#d5dce5',
   primary: '#00cec9',
   danger: '#ff6b6b',
   success: '#00cec9',
@@ -177,8 +177,8 @@ export const lightColors = {
   // Gradient tokens (LinearGradient)
   cardGradientStart: '#eaeff5',
   cardGradientEnd: '#d8dfe8',
-  bgGradientStart: '#e8ecf0',
-  bgGradientEnd: '#d5dae0',
+  bgGradientStart: '#dde3ea',
+  bgGradientEnd: '#cdd5de',
   primaryGradientStart: '#00d9d4',
   primaryGradientEnd: '#007a77',
 }
