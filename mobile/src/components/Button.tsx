@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import { borderRadius, spacing, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
+import { NeuShadow } from './NeuShadow'
 
 type ButtonVariant = 'primary' | 'danger' | 'secondary' | 'ghost'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -59,9 +61,10 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   enableHaptics = true,
 }) => {
-  const { colors, neuShadow } = useTheme()
+  const { colors } = useTheme()
   const styles = useStyles(colors)
   const haptics = useHaptics()
+  const [isPressed, setIsPressed] = useState(false)
 
   const handlePress = async () => {
     if (disabled) return
@@ -87,26 +90,54 @@ export const Button: React.FC<ButtonProps> = ({
     textStyle,
   ].filter(Boolean) as TextStyle[]
 
-  return (
+  const pressable = (
     <Pressable
-      style={({ pressed }) => [
+      style={[
         styles.base,
         styles[`size_${size}` as keyof typeof styles] as ViewStyle,
         styles[`variant_${variant}` as keyof typeof styles] as ViewStyle,
-        variant !== 'ghost' && (pressed ? neuShadow.pressed : neuShadow.elevated),
         fullWidth && styles.fullWidth,
         disabled && styles.disabled,
-        style,
       ].filter(Boolean)}
       onPress={handlePress}
+      onPressIn={() => setIsPressed(true)}
+      onPressOut={() => setIsPressed(false)}
       disabled={disabled}
     >
-      {typeof children === 'string' ? (
-        <Text style={textStyles}>{children}</Text>
-      ) : (
-        children
+      {({ pressed }) => (
+        <>
+          {variant === 'primary' && !pressed && (
+            <LinearGradient
+              colors={[colors.primaryGradientStart, colors.primaryGradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[StyleSheet.absoluteFillObject, { borderRadius: borderRadius.sm }]}
+            />
+          )}
+          {typeof children === 'string' ? (
+            <Text style={textStyles}>{children}</Text>
+          ) : (
+            children
+          )}
+        </>
       )}
     </Pressable>
+  )
+
+  if (variant === 'ghost') {
+    return pressable
+  }
+
+  return (
+    <NeuShadow
+      level={isPressed ? 'pressed' : 'elevated'}
+      radius={borderRadius.sm}
+      stretch={fullWidth}
+      style={style}
+      disabled={disabled}
+    >
+      {pressable}
+    </NeuShadow>
   )
 }
 

@@ -151,8 +151,8 @@ export const neuShadow = {
  * Palette light neumorphique (miroir du dark)
  */
 export const lightColors = {
-  background: '#dde3ea',
-  card: '#edf1f5',
+  background: '#e8ecef',
+  card: '#e8ecef',
   cardSecondary: '#d5dce5',
   primary: '#00cec9',
   danger: '#ff6b6b',
@@ -175,10 +175,10 @@ export const lightColors = {
   secondaryAccent: '#6c5ce7',
 
   // Gradient tokens (LinearGradient)
-  cardGradientStart: '#eaeff5',
-  cardGradientEnd: '#d8dfe8',
-  bgGradientStart: '#dde3ea',
-  bgGradientEnd: '#cdd5de',
+  cardGradientStart: '#edf1f5',
+  cardGradientEnd: '#dde5ee',
+  bgGradientStart: '#eaeff5',
+  bgGradientEnd: '#dce4ee',
   primaryGradientStart: '#00d9d4',
   primaryGradientEnd: '#007a77',
 }
@@ -225,6 +225,23 @@ export const neuShadowLight = {
     }),
     borderWidth: 1,
     borderColor: '#d0d7e0',
+  },
+}
+
+/**
+ * Paramètres numériques pour react-native-shadow-2 (vrai neumorphisme double-ombre)
+ * distance : taille du flou SVG, offset : décalage de l'ombre (bas-droite / haut-gauche)
+ */
+export const neuShadowParams = {
+  dark: {
+    elevated:   { distance: 14, offset: 10, darkColor: '#060809', lightColor: '#3c4558' },
+    elevatedSm: { distance: 8,  offset: 6,  darkColor: '#060809', lightColor: '#3c4558' },
+    pressed:    { distance: 3,  offset: 2,  darkColor: '#060809', lightColor: '#2a3040' },
+  },
+  light: {
+    elevated:   { distance: 14, offset: 10, darkColor: '#8a9bb0', lightColor: '#ffffff' },
+    elevatedSm: { distance: 8,  offset: 6,  darkColor: '#8a9bb0', lightColor: '#ffffff' },
+    pressed:    { distance: 3,  offset: 2,  darkColor: '#a0aabb', lightColor: '#ffffff' },
   },
 }
 
