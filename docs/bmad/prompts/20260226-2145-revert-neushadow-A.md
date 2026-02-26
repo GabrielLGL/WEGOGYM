@@ -138,4 +138,7 @@ cd mobile && npm test -- --passWithNoTests 2>&1 | tail -5
 Aucune dépendance sur Groupe B. Peut tourner en parallèle.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260226-2145
+
+## Résolution
+Rapport do : docs/bmad/do/20260226-2145-style-button-revert-neushadow.md
