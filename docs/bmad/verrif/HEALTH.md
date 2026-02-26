@@ -28,6 +28,7 @@
 | 2026-02-23 | 20 | 20 | 20 | 18 | 15 | **93/100** | → stable (847 tests, cov 65.48%, 2 critiques fixés) |
 | 2026-02-26 | 20 | 20 | 20 | 20 | 15 | **95/100** | ↑ +2 (1186 tests, exit 0, Jest teardown ReferenceError fixés) |
 | 2026-02-26 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1206 tests, handleSkipOnboarding try/catch fixé) |
+| 2026-02-26 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1257 tests, spacing.xxl token ChartsScreen) |
 
 ---
 

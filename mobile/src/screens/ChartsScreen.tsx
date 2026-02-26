@@ -22,7 +22,7 @@ import { AlertDialog } from '../components/AlertDialog'
 import { ChipSelector } from '../components/ChipSelector'
 import { useHaptics } from '../hooks/useHaptics'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
-import { colors, fontSize, borderRadius } from '../theme'
+import { colors, fontSize, borderRadius, spacing } from '../theme'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
 import type { ExerciseSessionStat } from '../model/utils/databaseHelpers'
 
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   setDetailText: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2 },
   deleteBtn: { padding: 10 },
   deleteIcon: { fontSize: fontSize.lg },
-  emptyState: { marginTop: 50, paddingHorizontal: 40 },
+  emptyState: { marginTop: 50, paddingHorizontal: spacing.xxl },
   emptyText: {
     color: colors.placeholder,
     textAlign: 'center',
