@@ -16,9 +16,16 @@ vi.mock('@/emails/welcome', () => ({
   WelcomeEmail: vi.fn(() => null),
 }))
 
+// Mock rate limiter
+vi.mock('@/lib/rateLimit', () => ({
+  checkRateLimit: vi.fn(),
+  getClientIp: vi.fn(),
+}))
+
 import { POST } from '../route'
 import { getSupabase } from '@/lib/supabase'
 import { getResend } from '@/lib/resend'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 function makeRequest(body: Record<string, unknown>) {
   return new NextRequest('http://localhost:3000/api/subscribe', {
@@ -31,6 +38,14 @@ function makeRequest(body: Record<string, unknown>) {
 describe('POST /api/subscribe', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Rate limit allowed by default
+    vi.mocked(getClientIp).mockReturnValue('127.0.0.1')
+    vi.mocked(checkRateLimit).mockReturnValue({
+      allowed: true,
+      remaining: 4,
+      resetAt: Date.now() + 3600000,
+      limit: 5,
+    })
   })
 
   it('retourne 400 si email manquant', async () => {
@@ -99,5 +114,55 @@ describe('POST /api/subscribe', () => {
     expect(res.status).toBe(200)
     const json = await res.json()
     expect(json.success).toBe(true)
+  })
+})
+
+describe('Rate limiting', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getClientIp).mockReturnValue('127.0.0.1')
+    vi.mocked(checkRateLimit).mockReturnValue({
+      allowed: true,
+      remaining: 4,
+      resetAt: Date.now() + 3600000,
+      limit: 5,
+    })
+  })
+
+  it('retourne 429 quand la limite est atteinte', async () => {
+    vi.mocked(checkRateLimit).mockReturnValueOnce({
+      allowed: false,
+      remaining: 0,
+      resetAt: Date.now() + 3600000,
+      limit: 5,
+    })
+
+    const req = makeRequest({ email: 'test@example.com' })
+    const res = await POST(req)
+    expect(res.status).toBe(429)
+
+    const json = await res.json()
+    expect(json.error).toMatch(/Trop de tentatives/i)
+    expect(res.headers.get('Retry-After')).toBeTruthy()
+    expect(res.headers.get('X-RateLimit-Remaining')).toBe('0')
+  })
+
+  it('inclut les headers X-RateLimit-* sur une requête réussie', async () => {
+    vi.mocked(getSupabase).mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        upsert: vi.fn().mockResolvedValue({ error: null }),
+      }),
+    } as unknown as ReturnType<typeof getSupabase>)
+
+    vi.mocked(getResend).mockReturnValue({
+      emails: { send: vi.fn().mockResolvedValue({}) },
+    } as unknown as ReturnType<typeof getResend>)
+
+    const req = makeRequest({ email: 'test@example.com' })
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-RateLimit-Limit')).toBe('5')
+    expect(res.headers.get('X-RateLimit-Remaining')).toBe('4')
+    expect(res.headers.get('X-RateLimit-Reset')).toBeTruthy()
   })
 })
