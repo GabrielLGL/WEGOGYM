@@ -61,7 +61,7 @@ const PRICING = [
   },
   {
     name: "Pro",
-    price: "4,99\u20AC",
+    price: "2,50\u20AC",
     period: "/mois",
     features: [
       "Programmes illimites",
@@ -77,7 +77,7 @@ const PRICING = [
   },
   {
     name: "Pro Annuel",
-    price: "39,99\u20AC",
+    price: "19.99\u20AC",
     period: "/an",
     features: [
       "Tout le plan Pro",
@@ -178,11 +178,8 @@ export default function Home() {
 
         {/* Title */}
         <h1 className="hero-fade text-[clamp(2.5rem,8vw,5rem)] font-black leading-[1.1] tracking-tight mb-5">
-          <span className="shimmer-text">Ton coach muscu</span>
-          <br />
-          <span className="text-[var(--accent)]" style={{ textShadow: "0 0 30px var(--accent-glow)" }}>
-            dans ta poche
-          </span>
+          <span className="shimmer-text">SCULPT YOUR BODY.</span>
+          <span className="text-[var(--accent)] animate-[blink_0.7s_step-end_infinite]">|</span>
         </h1>
 
         {/* Subtitle */}
@@ -219,7 +216,7 @@ export default function Home() {
       </header>
 
       {/* ===== FEATURES ===== */}
-      <section id="features" className="relative z-[2] py-20 sm:py-28 px-6">
+      <section id="features" className="relative z-[2] py-10 sm:py-16 px-6">
         <div className="max-w-[1100px] mx-auto">
           <h2 className="reveal text-center text-3xl sm:text-4xl font-black tracking-tight mb-4">
             Tout ce qu&apos;il te faut
@@ -252,7 +249,7 @@ export default function Home() {
       </section>
 
       {/* ===== PRICING ===== */}
-      <section id="pricing" className="relative z-[2] py-20 sm:py-28 px-6">
+      <section id="pricing" className="relative z-[2] py-10 sm:py-16 px-6">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="reveal text-center text-3xl sm:text-4xl font-black tracking-tight mb-4">
             Tarifs simples et transparents
