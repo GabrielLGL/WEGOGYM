@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { from, of } from 'rxjs'
@@ -21,8 +21,8 @@ interface WorkoutSetRowProps {
   input: SetInputData
   validated: ValidatedSetData | undefined
   onUpdateInput: (key: string, field: 'weight' | 'reps', value: string) => void
-  onValidate: (weight: string, reps: string) => Promise<void>
-  onUnvalidate: () => Promise<void>
+  onValidate: (setOrder: number, weight: string, reps: string) => Promise<void>
+  onUnvalidate: (setOrder: number) => Promise<void>
   repsTarget?: string
 }
 
@@ -39,7 +39,7 @@ interface WorkoutExerciseCardContentProps {
 
 // --- WorkoutSetRow ---
 
-const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
+const WorkoutSetRow = React.memo(function WorkoutSetRow({
   setOrder,
   inputKey,
   input,
@@ -48,7 +48,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
   onValidate,
   onUnvalidate,
   repsTarget,
-}) => {
+}: WorkoutSetRowProps) {
   // Hooks AVANT tout return conditionnel (règle des hooks React)
   const [localWeight, setLocalWeight] = React.useState(input.weight)
   const [localReps, setLocalReps] = React.useState(input.reps)
@@ -63,38 +63,19 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     }
   }, [])
 
-  if (validated) {
-    return (
-      <View style={[styles.setRow, styles.setRowValidated]}>
-        <Text style={styles.setLabel}>Série {setOrder}</Text>
-        <Text style={styles.validatedText}>
-          {validated.weight} kg × {validated.reps} reps
-        </Text>
-        {validated.isPr && (
-          <View style={styles.prChip}>
-            <Text style={styles.prBadge}>PR !</Text>
-          </View>
-        )}
-        <TouchableOpacity onPress={onUnvalidate} style={styles.validateBtnActive}>
-          <Text style={styles.validateBtnText}>✓</Text>
-        </TouchableOpacity>
-      </View>
-    )
-  }
-
-  const handleWeightChange = (v: string) => {
+  const handleWeightChange = useCallback((v: string) => {
     setLocalWeight(v)
     if (weightTimerRef.current) clearTimeout(weightTimerRef.current)
     weightTimerRef.current = setTimeout(() => onUpdateInput(inputKey, 'weight', v), 300)
-  }
+  }, [inputKey, onUpdateInput])
 
-  const handleRepsChange = (v: string) => {
+  const handleRepsChange = useCallback((v: string) => {
     setLocalReps(v)
     if (repsTimerRef.current) clearTimeout(repsTimerRef.current)
     repsTimerRef.current = setTimeout(() => onUpdateInput(inputKey, 'reps', v), 300)
-  }
+  }, [inputKey, onUpdateInput])
 
-  const handleValidate = () => {
+  const handleValidate = useCallback(() => {
     // Flush debounce immédiatement : évite le desync si le user valide < 300ms après avoir tapé
     if (weightTimerRef.current) {
       clearTimeout(weightTimerRef.current)
@@ -111,7 +92,26 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
       Animated.spring(scaleAnim, { toValue: 1.25, useNativeDriver: true, speed: 40, bounciness: 10 }),
       Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 0 }),
     ]).start()
-    onValidate(localWeight, localReps)
+    onValidate(setOrder, localWeight, localReps)
+  }, [inputKey, localWeight, localReps, onUpdateInput, onValidate, scaleAnim, setOrder])
+
+  if (validated) {
+    return (
+      <View style={[styles.setRow, styles.setRowValidated]}>
+        <Text style={styles.setLabel}>Série {setOrder}</Text>
+        <Text style={styles.validatedText}>
+          {validated.weight} kg × {validated.reps} reps
+        </Text>
+        {validated.isPr && (
+          <View style={styles.prChip}>
+            <Text style={styles.prBadge}>PR !</Text>
+          </View>
+        )}
+        <TouchableOpacity onPress={() => onUnvalidate(setOrder)} style={styles.validateBtnActive}>
+          <Text style={styles.validateBtnText}>✓</Text>
+        </TouchableOpacity>
+      </View>
+    )
   }
 
   const weightNum = Number(localWeight)
@@ -163,7 +163,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
       </Animated.View>
     </View>
   )
-}
+})
 
 // --- WorkoutExerciseCard ---
 
@@ -206,6 +206,24 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
       })
     }
   }
+
+  const handleValidate = React.useCallback(
+    async (setOrder: number, weight: string, reps: string) => {
+      const { valid } = validateSetInput(weight, reps)
+      if (!valid) { haptics.onError(); return }
+      haptics.onSuccess()
+      await onValidateSet(sessionExercise, setOrder)
+    },
+    [haptics, onValidateSet, sessionExercise]
+  )
+
+  const handleUnvalidate = React.useCallback(
+    async (setOrder: number) => {
+      haptics.onDelete()
+      await onUnvalidateSet(sessionExercise, setOrder)
+    },
+    [haptics, onUnvalidateSet, sessionExercise]
+  )
 
   return (
     <View
@@ -258,6 +276,8 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
           const input = setInputs[key] ?? { weight: '', reps: '' }
           const validated = validatedSets[key]
 
+          // Note: handleValidate/handleUnvalidate sont des refs stables (useCallback parent).
+          // React.memo protège WorkoutSetRow contre les re-renders non liés (ex: note editing).
           return (
             <WorkoutSetRow
               key={key}
@@ -267,19 +287,8 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
               validated={validated}
               onUpdateInput={onUpdateInput}
               repsTarget={sessionExercise.repsTarget}
-              onValidate={async (weight, reps) => {
-                const { valid } = validateSetInput(weight, reps)
-                if (!valid) {
-                  haptics.onError()
-                  return
-                }
-                haptics.onSuccess()
-                await onValidateSet(sessionExercise, setOrder)
-              }}
-              onUnvalidate={async () => {
-                haptics.onDelete()
-                await onUnvalidateSet(sessionExercise, setOrder)
-              }}
+              onValidate={handleValidate}
+              onUnvalidate={handleUnvalidate}
             />
           )
         })
