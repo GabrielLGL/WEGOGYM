@@ -535,9 +535,9 @@ describe('SessionDetailContent', () => {
       expect(queryByText('RestTimer')).toBeNull()
     })
 
-    it('affiche le RestTimer après ajout si timerEnabled', async () => {
+    it("n'affiche pas le RestTimer après ajout même si timerEnabled", async () => {
       const exercises = [makeExercise('ex-1', 'Squat')]
-      const { getByText } = render(
+      const { getByText, queryByText } = render(
         <SessionDetailContent
           session={makeSession()}
           sessionExercises={[]}
@@ -556,14 +556,14 @@ describe('SessionDetailContent', () => {
       })
 
       await waitFor(() => {
-        expect(getByText('RestTimer')).toBeTruthy()
+        expect(queryByText('RestTimer')).toBeNull()
       })
     })
 
-    it('affiche le RestTimer après update targets si timerEnabled', async () => {
+    it("n'affiche pas le RestTimer après update targets même si timerEnabled", async () => {
       const sessionExos = [makeSessionExercise({ id: 'se-1' })]
 
-      const { getByText } = render(
+      const { getByText, queryByText } = render(
         <SessionDetailContent
           session={makeSession()}
           sessionExercises={sessionExos}
@@ -582,7 +582,7 @@ describe('SessionDetailContent', () => {
       })
 
       await waitFor(() => {
-        expect(getByText('RestTimer')).toBeTruthy()
+        expect(queryByText('RestTimer')).toBeNull()
       })
     })
   })

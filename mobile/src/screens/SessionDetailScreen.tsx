@@ -8,7 +8,6 @@ import Session from '../model/models/Session'
 import SessionExercise from '../model/models/SessionExercise'
 import Exercise from '../model/models/Exercise'
 import User from '../model/models/User'
-import RestTimer from '../components/RestTimer'
 import { SessionExerciseItem } from '../components/SessionExerciseItem'
 import { ExerciseTargetInputs } from '../components/ExerciseTargetInputs'
 import { ExercisePickerModal } from '../components/ExercisePickerModal'
@@ -31,7 +30,7 @@ interface Props {
   navigation: NativeStackNavigationProp<RootStackParamList>
 }
 
-export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercises, exercises, user, navigation }) => {
+export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercises, exercises, navigation }) => {
   // --- HOOKS ---
   const colors = useColors()
   const styles = useStyles(colors)
@@ -66,7 +65,6 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     message: string
     onConfirm: () => void | Promise<void>
   }>({ title: '', message: '', onConfirm: async () => {} })
-  const [showRestTimer, setShowRestTimer] = useState(false)
 
   useLayoutEffect(() => { navigation.setOptions({ title: session.name, headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text }) }, [navigation, session.name, colors])
 
@@ -78,7 +76,6 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     const success = await addExercise(exerciseId, sets, reps, weight, exo)
     if (success) {
       setIsAddModalVisible(false)
-      if (user?.timerEnabled) setShowRestTimer(true)
     }
   }
 
@@ -86,7 +83,6 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     const success = await updateTargets()
     if (success) {
       setIsEditModalVisible(false)
-      if (user?.timerEnabled) setShowRestTimer(true)
     }
   }
 
@@ -114,7 +110,6 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
               dragActive={isActive}
               onEditTargets={(se: SessionExercise) => {
                 haptics.onPress()
-                setShowRestTimer(false)
                 prepareEditTargets(se)
                 setIsEditModalVisible(true)
               }}
@@ -131,7 +126,6 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       </View>
 
       <View style={styles.footerContainer}>
-        {showRestTimer && ( <RestTimer duration={user?.restDuration ?? 90} onClose={() => setShowRestTimer(false)} /> )}
         <TouchableOpacity
           style={[styles.launchButton, sessionExercises.length === 0 && { opacity: 0.4 }]}
           onPress={() => {
@@ -146,7 +140,6 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
           style={styles.addButton}
           onPress={() => {
             haptics.onPress()
-            setShowRestTimer(false)
             setIsAddModalVisible(true)
           }}
         >

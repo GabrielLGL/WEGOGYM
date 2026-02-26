@@ -64,4 +64,7 @@ Aucune dépendance — groupe unique.
 
 ## Statut
 
-⏳ En attente
+✅ Résolu — 20260226-2200
+
+## Résolution
+Rapport do : docs/bmad/do/20260226-2200-fix-session-detail-timer.md
