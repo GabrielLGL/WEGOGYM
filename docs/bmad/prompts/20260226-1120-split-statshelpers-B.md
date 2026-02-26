@@ -156,4 +156,7 @@ export function computeTopExercisesByFrequency(histories, sets, exercises, n?): 
 Aucune dépendance sur Groupe A ou D. Peut être lancé en parallèle.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260226-1120
+
+## Résolution
+Rapport do : docs/bmad/do/20260226-1120-refactor-split-statshelpers.md
