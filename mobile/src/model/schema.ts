@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 23, // v23 : thème dynamique dark/light (theme_mode)
+  version: 24, // v24 : sets_target_max (plage de séries)
   tables: [
     tableSchema({
       name: 'programs',
@@ -32,6 +32,7 @@ export const mySchema = appSchema({
         { name: 'exercise_id', type: 'string', isIndexed: true },
         { name: 'position', type: 'number' },
         { name: 'sets_target', type: 'number', isOptional: true },
+        { name: 'sets_target_max', type: 'number', isOptional: true },
         { name: 'reps_target', type: 'string', isOptional: true },
         { name: 'weight_target', type: 'number', isOptional: true },
         { name: 'created_at', type: 'number' },

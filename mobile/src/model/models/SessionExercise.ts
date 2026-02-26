@@ -12,6 +12,7 @@ export default class SessionExercise extends Model {
 
   @field('position') position!: number
   @field('sets_target') setsTarget?: number
+  @field('sets_target_max') setsTargetMax?: number
   @field('reps_target') repsTarget?: string
   @field('weight_target') weightTarget?: number
 
