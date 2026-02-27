@@ -100,6 +100,7 @@ describe('HomeScreen Dashboard', () => {
         users={[makeUser()]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
@@ -112,6 +113,7 @@ describe('HomeScreen Dashboard', () => {
         users={[]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
@@ -124,6 +126,7 @@ describe('HomeScreen Dashboard', () => {
         users={[makeUser()]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
@@ -138,6 +141,7 @@ describe('HomeScreen Dashboard', () => {
         users={[]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
@@ -152,18 +156,19 @@ describe('HomeScreen Dashboard', () => {
         users={[]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
     expect(getByText('Programmes')).toBeTruthy()
-    expect(getByText('Exercices')).toBeTruthy()
+    expect(getByText("Biblioth\u00e8que d'exercices")).toBeTruthy()
     expect(getByText('Dur\u00e9e')).toBeTruthy()
     expect(getAllByText('Volume').length).toBeGreaterThanOrEqual(2)
     expect(getByText('Agenda')).toBeTruthy()
     expect(queryByText('Muscles')).toBeNull()
-    expect(getByText('Exercices & Records')).toBeTruthy()
+    expect(queryByText('Exercices & Records')).toBeNull()
     expect(getByText('Mesures')).toBeTruthy()
-    expect(getByText('Historique')).toBeTruthy()
+    expect(queryByText('Historique')).toBeNull()
   })
 
   it('navigue vers un écran stack au press', () => {
@@ -172,6 +177,7 @@ describe('HomeScreen Dashboard', () => {
         users={[]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
@@ -185,6 +191,7 @@ describe('HomeScreen Dashboard', () => {
         users={[]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
@@ -198,6 +205,7 @@ describe('HomeScreen Dashboard', () => {
         users={[makeUser()]}
         histories={[] as unknown as History[]}
         sets={[] as unknown as WorkoutSet[]}
+        sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )

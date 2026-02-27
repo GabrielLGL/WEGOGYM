@@ -84,4 +84,7 @@ const SECTIONS: Section[] = [
 Aucune dépendance externe.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260228-0002
+
+## Résolution
+Rapport do : docs/bmad/do/20260228-0002-chore-homescreen-sections.md

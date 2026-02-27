@@ -54,18 +54,16 @@ const SECTIONS: Section[] = [
     title: 'Entraînement',
     tiles: [
       { icon: 'library-outline', label: 'Programmes', route: 'Programs' },
-      { icon: 'barbell-outline', label: 'Exercices', route: 'Exercices' },
+      { icon: 'barbell-outline',  label: "Bibliothèque d'exercices", route: 'Exercices' },
+      { icon: 'calendar-outline', label: 'Agenda',                   route: 'StatsCalendar' },
     ],
   },
   {
     title: 'Statistiques',
     tiles: [
-      { icon: 'time-outline',          label: 'Durée',               route: 'StatsDuration' },
-      { icon: 'barbell-outline',       label: 'Volume',              route: 'StatsVolume' },
-      { icon: 'calendar-outline',      label: 'Agenda',              route: 'StatsCalendar' },
-      { icon: 'trophy-outline',        label: 'Exercices & Records', route: 'StatsExercises' },
-      { icon: 'resize-outline',        label: 'Mesures',             route: 'StatsMeasurements' },
-      { icon: 'list-outline',          label: 'Historique',          route: 'StatsHistory' },
+      { icon: 'time-outline',    label: 'Durée',   route: 'StatsDuration' },
+      { icon: 'barbell-outline', label: 'Volume',  route: 'StatsVolume' },
+      { icon: 'resize-outline',  label: 'Mesures', route: 'StatsMeasurements' },
     ],
   },
 ]
