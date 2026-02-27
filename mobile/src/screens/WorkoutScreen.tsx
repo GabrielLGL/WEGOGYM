@@ -274,10 +274,6 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         }
         const detectedBadges = checkBadges(badgeParams)
 
-        setSessionXPGained(sessionXP)
-        setNewLevelResult(newLevel)
-        setNewStreakResult(streakResult.currentStreak)
-
         await database.write(async () => {
           await user.update(u => {
             u.totalXp = newTotalXp
@@ -295,6 +291,10 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
             })
           }
         })
+
+        setSessionXPGained(sessionXP)
+        setNewLevelResult(newLevel)
+        setNewStreakResult(streakResult.currentStreak)
 
         const after = {
           totalSessions: before.totalSessions + 1,
@@ -369,8 +369,12 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     setOrder: number
   ) => {
     const success = await validateSet(sessionExercise, setOrder)
-    if (success && user?.timerEnabled) {
-      setShowRestTimer(true)
+    if (success) {
+      if (user?.timerEnabled) {
+        setShowRestTimer(true)
+      }
+    } else {
+      haptics.onError()
     }
   }
 

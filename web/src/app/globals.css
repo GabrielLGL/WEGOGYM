@@ -10,6 +10,7 @@
   --accent: #6c5ce7;
   --accent-secondary: #00cec9;
   --accent-glow: rgba(108, 92, 231, 0.4);
+  --accent-secondary-glow: rgba(0, 206, 201, 0.6);
   --shadow-out:
     10px 10px 20px rgba(163, 177, 198, 0.6),
     -10px -10px 20px rgba(255, 255, 255, 0.8);
@@ -35,6 +36,7 @@
   --accent: #00cec9;
   --accent-secondary: #6c5ce7;
   --accent-glow: rgba(0, 206, 201, 0.4);
+  --accent-secondary-glow: rgba(108, 92, 231, 0.6);
   --shadow-out:
     10px 10px 20px #16181d,
     -10px -10px 20px #2c3039;
@@ -125,9 +127,9 @@ body {
 }
 
 @keyframes pulseLogo {
-  0%   { filter: drop-shadow(0 0 5px rgba(108, 92, 231, 0.4)); }
-  50%  { filter: drop-shadow(0 0 15px rgba(0, 206, 201, 0.6)); }
-  100% { filter: drop-shadow(0 0 5px rgba(108, 92, 231, 0.4)); }
+  0%   { filter: drop-shadow(0 0 5px var(--accent-glow)); }
+  50%  { filter: drop-shadow(0 0 15px var(--accent-secondary-glow)); }
+  100% { filter: drop-shadow(0 0 5px var(--accent-glow)); }
 }
 
 @keyframes nodePulse {
@@ -190,7 +192,7 @@ body {
 /* === LIQUID BUTTON === */
 .btn-liquid {
   position: relative;
-  background: linear-gradient(90deg, #6c5ce7, #00cec9, #6c5ce7);
+  background: linear-gradient(90deg, var(--accent), var(--accent-secondary), var(--accent));
   background-size: 200% auto;
   animation: liquidFlow 3s linear infinite;
   box-shadow: 0 10px 20px var(--accent-glow);

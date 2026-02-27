@@ -29,13 +29,13 @@
 | # | Problème | Fichier(s) | Effort | Groupe |
 |---|----------|-----------|--------|--------|
 | 1 | ~~C2 — API key dans SQLite (migration à vérifier)~~ | schema.ts + secureKeyStore.ts | — | ✅ Résolu — 20260227-1400 |
-| 2 | C3 — PerformanceLog sans null check exercice | useSessionManager.ts:96-101 | 15min | B |
-| 3 | B1 — handleSaveNote async sans try/catch | WorkoutExerciseCard.tsx:262 | 20min | C |
-| 4 | B4 — handleConfirmEnd gestion erreurs fragmentée | WorkoutScreen.tsx:202-333 | 45min | C |
-| 5 | B5 — validateSet échec DB invisible user | useWorkoutState.ts:103-154 | 30min | C |
+| 2 | ~~C3 — PerformanceLog sans null check exercice~~ | useSessionManager.ts:96-101 | — | ✅ Résolu — commit 33b2a08 |
+| 3 | ~~B1 — handleSaveNote async sans try/catch~~ | WorkoutExerciseCard.tsx:262 | — | ✅ Résolu — 20260227-1327 |
+| 4 | ~~B4 — handleConfirmEnd gestion erreurs fragmentée~~ | WorkoutScreen.tsx:202-333 | — | ✅ Résolu — 20260227-1340 |
+| 5 | ~~B5 — validateSet échec DB invisible user~~ | useWorkoutState.ts:103-154 | — | ✅ Résolu — 20260227-1340 |
 | 6 | ~~H4 — catchError retourne null silencieux~~ | WorkoutExerciseCard.tsx:337-347 | — | ✅ Résolu — 20260227-1330 |
-| 7 | H5 — ExercisePickerModal useEffect deps larges | ExercisePickerModal.tsx:77-87 | 20min | D |
-| 8 | Q1 — Couleurs hardcodées CSS keyframes | globals.css:128-193 | 20min | E |
+| 7 | ~~H5 — ExercisePickerModal useEffect deps larges~~ | ExercisePickerModal.tsx:77-87 | — | ✅ Résolu — 20260227-1340 |
+| 8 | ~~Q1 — Couleurs hardcodées CSS keyframes~~ | globals.css:128-193 | — | ✅ Résolu — 20260227-1340 |
 
 ## Parallélisation
 - **Groupe A** : ~~`schema.ts` + `secureKeyStore.ts` (vérifier appel migrateKeyFromDB)~~ → ✅ Vérifié : `migrateKeyFromDB()` appelée dans `App.tsx:22`
@@ -60,3 +60,5 @@
 ## Résolution
 Rapport do (H4) : docs/bmad/do/20260227-1330-fix-WorkoutExerciseCard-catchError.md
 Rapport do (C2) : docs/bmad/do/20260227-1400-fix-migrate-key-db.md
+Rapport do (B1/B6/B7) : docs/bmad/do/20260227-1327-fix-try-catch-async-handlers.md
+Rapport do (B4/B5/H5/Q1) : docs/bmad/do/20260227-1340-fix-workout-async-errors-css-vars.md
