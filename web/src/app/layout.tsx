@@ -31,6 +31,10 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    languages: {
+      fr: "https://kore-app.com",
+      "x-default": "https://kore-app.com",
+    },
   },
   openGraph: {
     title: "Kore — Ton coach muscu dans ta poche",
@@ -55,9 +59,10 @@ export const metadata: Metadata = {
       "App de musculation 100% offline. Suis tes programmes et progresse séance après séance.",
     images: ["/og.png"],
   },
-  other: {
-    "theme-color": "#6c5ce7",
-  },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#6c5ce7" },
+    { media: "(prefers-color-scheme: dark)", color: "#00cec9" },
+  ],
 };
 
 export default function RootLayout({
@@ -102,11 +107,22 @@ export default function RootLayout({
               name: "Kore",
               url: "https://kore-app.com",
               image: "https://kore-app.com/og.png",
+              inLanguage: "fr-FR",
               author: { "@type": "Organization", name: "Kore" },
               applicationCategory: "HealthApplication",
               operatingSystem: "Android",
               description:
                 "Application de musculation offline-first. Suis tes programmes, enregistre tes performances et progresse séance après séance.",
+              softwareVersion: "1.0",
+              datePublished: "2026-01-01",
+              featureList: [
+                "Programmes de musculation personnalisés",
+                "Suivi de performances et historique",
+                "100% offline — aucune connexion requise",
+                "Interface rapide et intuitive",
+                "Statistiques et progression",
+                "Objectifs et suivi de mensurations",
+              ],
               offers: {
                 "@type": "Offer",
                 price: "0",
