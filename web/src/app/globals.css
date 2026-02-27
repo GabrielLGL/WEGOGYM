@@ -170,7 +170,13 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 4s linear infinite;
+  will-change: background-position;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shimmer-text {
+    animation: shimmer 6s linear infinite;
+  }
 }
 
 /* === GRADIENT TEXT === */
