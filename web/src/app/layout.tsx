@@ -13,13 +13,17 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://kore-app.com"),
   title: "Kore — Ton coach muscu dans ta poche",
   description:
-    "Suis tes programmes, enregistre tes performances et progresse seance apres seance. Application de musculation 100% offline, rapide et intuitive.",
+    "Suis tes programmes, enregistre tes performances et progresse séance après séance. Application de musculation 100% offline, rapide et intuitive.",
   keywords: [
     "musculation",
     "fitness",
     "programme musculation",
-    "suivi entrainement",
+    "suivi entraînement",
     "gym tracker",
+    "workout tracker",
+    "carnet entraînement",
+    "appli musculation android",
+    "coach muscu",
     "Kore",
   ],
   icons: {
@@ -31,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Kore — Ton coach muscu dans ta poche",
     description:
-      "Suis tes programmes, enregistre tes performances et progresse seance apres seance.",
+      "Suis tes programmes, enregistre tes performances et progresse séance après séance.",
     type: "website",
     locale: "fr_FR",
     siteName: "Kore",
@@ -48,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Kore — Ton coach muscu dans ta poche",
     description:
-      "App de musculation 100% offline. Suis tes programmes et progresse seance apres seance.",
+      "App de musculation 100% offline. Suis tes programmes et progresse séance après séance.",
     images: ["/og.png"],
   },
   other: {
@@ -75,13 +79,20 @@ export default function RootLayout({
                   } else {
                     document.documentElement.setAttribute('data-theme', 'light');
                   }
+                  // Supprime la transition body pendant le premier paint (évite FOUC)
+                  document.documentElement.classList.add('no-transition');
+                  requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                      document.documentElement.classList.remove('no-transition');
+                    });
+                  });
+                  // Active les animations ScrollReveal (contenu visible sans JS par défaut)
+                  document.documentElement.classList.add('js-loaded');
                 } catch(e) {}
               })();
             `,
           }}
         />
-      </head>
-      <body className={`${outfit.className} antialiased`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -89,10 +100,13 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
               name: "Kore",
+              url: "https://kore-app.com",
+              image: "https://kore-app.com/og.png",
+              author: { "@type": "Organization", name: "Kore" },
               applicationCategory: "HealthApplication",
               operatingSystem: "Android",
               description:
-                "Application de musculation offline-first. Suis tes programmes, enregistre tes performances et progresse seance apres seance.",
+                "Application de musculation offline-first. Suis tes programmes, enregistre tes performances et progresse séance après séance.",
               offers: {
                 "@type": "Offer",
                 price: "0",
@@ -102,6 +116,8 @@ export default function RootLayout({
             }),
           }}
         />
+      </head>
+      <body className={`${outfit.className} antialiased`}>
         {children}
       </body>
     </html>

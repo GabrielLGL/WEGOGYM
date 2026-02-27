@@ -81,6 +81,11 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* Supprime la transition body au 1er chargement (évite FOUC thème) */
+html.no-transition body {
+  transition: none !important;
+}
+
 ::selection {
   background-color: var(--accent);
   color: white;
@@ -143,7 +148,8 @@ body {
 }
 
 /* === SCROLL REVEAL === */
-.reveal {
+/* Guard .js-loaded : sans JS, les éléments .reveal restent visibles (pas d'opacity:0) */
+.js-loaded .reveal {
   opacity: 0;
   transform: translateY(40px);
   transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
@@ -217,7 +223,9 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal {
+  /* Couvre les deux cas : sans JS (.reveal) et avec JS (.js-loaded .reveal) */
+  .reveal,
+  .js-loaded .reveal {
     opacity: 1;
     transform: none;
   }

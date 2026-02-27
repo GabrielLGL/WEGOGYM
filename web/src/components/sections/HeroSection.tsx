@@ -4,18 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import KoreLogo from "@/components/KoreLogo";
 import SocialProof from "@/components/SocialProof";
 
+const WORDS = ["CORPS.", "PHYSIQUE.", "NIVEAU.", "POTENTIEL.", "MENTAL.", "OBJECTIF."];
+
 interface HeroSectionProps {
-  email: string;
-  name: string;
-  status: "idle" | "loading" | "success" | "error" | "duplicate";
-  setEmail: (value: string) => void;
-  setName: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  subscriberCount: number | null;
 }
 
-const WORDS = ["BODY.", "LEGACY.", "STRENGTH.", "GAINS.", "POTENTIAL.", "PHYSIQUE."];
-
-export default function HeroSection({ email, name, status, setEmail, setName, onSubmit }: HeroSectionProps) {
+export default function HeroSection({ subscriberCount }: HeroSectionProps) {
   const [navVisible, setNavVisible] = useState(false);
   const [wordIdx, setWordIdx] = useState(0);
   const [phase, setPhase] = useState<"idle" | "out" | "in">("idle");
@@ -67,7 +62,7 @@ export default function HeroSection({ email, name, status, setEmail, setName, on
           </a>
           <div className="flex items-center gap-6">
             <a href="#features" className="hidden sm:inline text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--text-main)] transition-colors">
-              Fonctionnalites
+              Fonctionnalités
             </a>
             <a href="#pricing" className="hidden sm:inline text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--text-main)] transition-colors">
               Tarifs
@@ -84,7 +79,7 @@ export default function HeroSection({ email, name, status, setEmail, setName, on
       </nav>
 
       {/* ===== HERO ===== */}
-      <header id="main-content" className="relative z-[2] min-h-screen flex flex-col items-center justify-center text-center px-6 py-20">
+      <header className="relative z-[2] min-h-screen flex flex-col items-center justify-center text-center px-6 py-20">
         {/* Logo pill */}
         <div className="hero-fade inline-flex items-center gap-4 mb-8 px-6 py-2.5 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] backdrop-blur-[10px] shadow-neu-out hover:scale-105 hover:shadow-neu-in transition-all duration-300 cursor-default">
           <KoreLogo size={50} gradientId="heroGrad" />
@@ -93,7 +88,7 @@ export default function HeroSection({ email, name, status, setEmail, setName, on
 
         {/* Title */}
         <h1 className="hero-fade text-[clamp(2.5rem,8vw,5rem)] font-black leading-[1.1] tracking-tight mb-5">
-          <span className="shimmer-text">SCULPT YOUR </span>
+          <span className="shimmer-text">FORGE TON </span>
           <span
             className="shimmer-text"
             style={{
@@ -120,15 +115,15 @@ export default function HeroSection({ email, name, status, setEmail, setName, on
 
         {/* Subtitle */}
         <p className="hero-fade text-lg sm:text-xl text-[var(--text-muted)] max-w-[600px] mb-8 font-light">
-          Suis tes programmes, enregistre tes performances et progresse
-          seance apres seance. Simple, rapide, offline.
+          Ton tracker de musculation 100% offline. Suis tes programmes, enregistre tes
+          performances et progresse séance après séance.
         </p>
 
         {/* Stats row */}
         <div className="hero-fade grid grid-cols-3 gap-6 sm:gap-10 mb-10 max-w-lg mx-auto w-full">
           {[
             { value: "100%", label: "Offline" },
-            { value: "0\u20AC", label: "Pour commencer" },
+            { value: "0€", label: "Pour commencer" },
             { value: "<1s", label: "Chargement" },
           ].map((stat) => (
             <div key={stat.label} className="bg-[var(--bg)] rounded-[20px] shadow-neu-out py-5 px-3 text-center">
@@ -150,70 +145,7 @@ export default function HeroSection({ email, name, status, setEmail, setName, on
           Rejoindre la beta
         </a>
 
-        <SocialProof />
-
-        {/* Hero inline form */}
-        <form
-          onSubmit={onSubmit}
-          className="hero-fade mt-8 space-y-3 w-full max-w-sm mx-auto"
-          aria-label="Formulaire d'inscription rapide"
-        >
-          <div className="bg-[var(--bg)] rounded-full shadow-neu-out p-2.5">
-            <label htmlFor="hero-name" className="sr-only">Prénom (optionnel)</label>
-            <input
-              id="hero-name"
-              type="text"
-              placeholder="Ton prénom (optionnel)"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-transparent border-none py-2.5 px-5 rounded-full shadow-neu-in
-                text-[var(--text-main)] font-inherit text-sm outline-none
-                placeholder:text-[var(--text-muted)] placeholder:opacity-60"
-            />
-          </div>
-
-          <div className="bg-[var(--bg)] rounded-full shadow-neu-out p-2.5">
-            <label htmlFor="hero-email" className="sr-only">Adresse email</label>
-            <input
-              id="hero-email"
-              type="email"
-              placeholder="Ton email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              aria-required="true"
-              className="w-full bg-transparent border-none py-2.5 px-5 rounded-full shadow-neu-in
-                text-[var(--text-main)] font-inherit text-sm outline-none
-                placeholder:text-[var(--text-muted)] placeholder:opacity-60"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="w-full btn-liquid text-white py-3.5 rounded-full font-extrabold text-sm
-              uppercase tracking-widest border-none cursor-pointer
-              disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {status === "loading" ? "Inscription..." : "S\u2019inscrire \u00E0 la beta"}
-          </button>
-
-          {status === "success" && (
-            <p role="alert" className="text-[var(--success)] text-xs font-semibold text-center">
-              Inscription r\u00E9ussie ! V\u00E9rifie ta boite mail.
-            </p>
-          )}
-          {status === "duplicate" && (
-            <p role="alert" className="text-[var(--accent)] text-xs font-semibold text-center">
-              Cet email est d\u00E9j\u00E0 inscrit. \u00C0 bient\u00F4t !
-            </p>
-          )}
-          {status === "error" && (
-            <p role="alert" className="text-[var(--danger)] text-xs font-semibold text-center">
-              Une erreur est survenue. R\u00E9essaie.
-            </p>
-          )}
-        </form>
+        <SocialProof count={subscriberCount} />
       </header>
     </>
   );

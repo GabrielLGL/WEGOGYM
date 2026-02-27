@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import BackgroundBlobs from "@/components/BackgroundBlobs";
 import ThemeToggle from "@/components/ThemeToggle";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -9,38 +6,25 @@ import FeaturesSection from "@/components/sections/FeaturesSection";
 import PricingSection from "@/components/sections/PricingSection";
 import SubscribeSection from "@/components/sections/SubscribeSection";
 import FooterSection from "@/components/sections/FooterSection";
+import { getSupabase } from "@/lib/supabase";
 
-export default function Home() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "duplicate">("idle");
+// ISR : revalide la page toutes les heures (count inscrits mis à jour sans requête client)
+export const revalidate = 3600;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email) return;
-
-    setStatus("loading");
-
-    try {
-      const res = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name }),
-      });
-
-      if (res.ok) {
-        setStatus("success");
-        setEmail("");
-        setName("");
-      } else if (res.status === 409) {
-        setStatus("duplicate");
-      } else {
-        setStatus("error");
-      }
-    } catch {
-      setStatus("error");
-    }
+async function getSubscriberCount(): Promise<number | null> {
+  try {
+    const supabase = getSupabase();
+    const { count } = await supabase
+      .from("subscribers")
+      .select("*", { count: "exact", head: true });
+    return count;
+  } catch {
+    return null;
   }
+}
+
+export default async function Home() {
+  const subscriberCount = await getSubscriberCount();
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -51,24 +35,12 @@ export default function Home() {
       <ThemeToggle />
       <ScrollReveal />
 
-      <HeroSection
-        email={email}
-        name={name}
-        status={status}
-        setEmail={setEmail}
-        setName={setName}
-        onSubmit={handleSubmit}
-      />
-      <FeaturesSection />
-      <PricingSection />
-      <SubscribeSection
-        email={email}
-        name={name}
-        status={status}
-        setEmail={setEmail}
-        setName={setName}
-        onSubmit={handleSubmit}
-      />
+      <main id="main-content">
+        <HeroSection subscriberCount={subscriberCount} />
+        <FeaturesSection />
+        <PricingSection />
+        <SubscribeSection />
+      </main>
       <FooterSection />
     </div>
   );
