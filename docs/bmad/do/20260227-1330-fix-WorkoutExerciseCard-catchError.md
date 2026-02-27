@@ -35,4 +35,5 @@ Aucun changement de code requis. Vérification + documentation du statut.
 ✅ Résolu — 20260227-1330
 
 ## Commit
-[sera rempli après commit]
+08bd07a fix(useSessionManager): guard exercise null before PerformanceLog creation
+(co-inclus dans le commit parallèle)

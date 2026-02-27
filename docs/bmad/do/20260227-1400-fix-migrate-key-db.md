@@ -59,4 +59,4 @@ La migration respecte les patterns CLAUDE.md :
 ✅ Résolu — 20260227-1400
 
 ## Commit
-[à remplir]
+5c12c61 fix(secureKeyStore): verify migrateKeyFromDB() called at startup — C2 resolved
