@@ -38,4 +38,4 @@ Aucune (composant simple)
 ✅ Résolu — 20260227-1500
 
 ## Commit
-[sera rempli]
+`64f6e28` feat(web): add branded 404 page (not-found.tsx)

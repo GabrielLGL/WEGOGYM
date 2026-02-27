@@ -45,4 +45,4 @@ Aucune
 ✅ Résolu — 20260227-1510
 
 ## Commit
-[sera rempli]
+`5891af4` perf(web): ScrollReveal no-JS guard, FOUC fix, SocialProof SSR with ISR

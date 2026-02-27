@@ -58,4 +58,4 @@ Aucune (CLAUDE.md et patterns existants couvrent le cas)
 ✅ Résolu — 20260227-1130
 
 ## Commit
-[sera rempli après commit]
+0a2694e feat(RestTimer): add soundEnabled/vibrationEnabled props + beep via expo-av

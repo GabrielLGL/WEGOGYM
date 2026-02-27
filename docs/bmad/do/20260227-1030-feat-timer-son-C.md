@@ -49,4 +49,4 @@ aucune
 ✅ Résolu — 20260227-1030
 
 ## Commit
-[à remplir]
+88ebf3a feat(settings): add vibration/sound toggles in rest timer section
