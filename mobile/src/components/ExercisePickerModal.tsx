@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { Portal } from '@gorhom/portal'
@@ -72,20 +72,24 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
   const [targetWeight, setTargetWeight] = useState(initialWeight)
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null)
   const haptics = useHaptics()
-  const prevVisibleRef = useRef(visible)
 
-  // Réinitialiser les états uniquement à la fermeture (visible: true → false)
+  // Réinitialiser l'état de navigation à la fermeture
   useEffect(() => {
-    if (prevVisibleRef.current && !visible) {
+    if (!visible) {
       setFilterMuscle(null)
       setFilterEquipment(null)
       setSelectedExerciseId(null)
+      setInfoExercise(null)
+    }
+  }, [visible])
+
+  // Synchroniser les targets aux valeurs initiales (fermeture ou changement de props)
+  useEffect(() => {
+    if (!visible) {
       setTargetSets(initialSets)
       setTargetReps(initialReps)
       setTargetWeight(initialWeight)
-      setInfoExercise(null)
     }
-    prevVisibleRef.current = visible
   }, [visible, initialSets, initialReps, initialWeight])
 
   const filteredExercises = useMemo(() => {

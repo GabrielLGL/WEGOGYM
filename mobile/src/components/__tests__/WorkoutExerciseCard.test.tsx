@@ -147,10 +147,10 @@ describe('WorkoutExerciseCard', () => {
         />
       )
 
-      expect(getByText('Série 1')).toBeTruthy()
-      expect(getByText('Série 2')).toBeTruthy()
-      expect(getByText('Série 3')).toBeTruthy()
-      expect(getAllByText(/Série \d/).length).toBe(3)
+      expect(getByText('1')).toBeTruthy()
+      expect(getByText('2')).toBeTruthy()
+      expect(getByText('3')).toBeTruthy()
+      expect(getAllByText(/^\d$/).length).toBe(3)
     })
 
     it('se rend sans crasher avec setsTarget undefined', () => {
@@ -513,8 +513,8 @@ describe('WorkoutExerciseCard', () => {
         />
       )
 
-      // La série est quand même affichée
-      expect(getByText('Série 1')).toBeTruthy()
+      // La série est quand même affichée (badge numérique)
+      expect(getByText('1')).toBeTruthy()
     })
   })
 

@@ -16,6 +16,8 @@ jest.mock('expo-haptics', () => ({
 
 jest.mock('../../model/utils/databaseHelpers', () => ({
   filterExercises: jest.fn((exercises: unknown[]) => exercises),
+  parseIntegerInput: jest.fn((value: string) => parseInt(value, 10) || 0),
+  parseNumericInput: jest.fn((value: string) => parseFloat(value) || 0),
 }))
 
 jest.mock('../../model/utils/validationHelpers', () => ({
@@ -43,6 +45,30 @@ jest.mock('../../components/ChipSelector', () => ({
       TouchableOpacity,
       { onPress: () => onChange(null), testID: `chip-${noneLabel}` },
       React.createElement(Text, null, noneLabel)
+    )
+  },
+}))
+
+jest.mock('../../components/ExerciseInfoSheet', () => ({
+  ExerciseInfoSheet: ({
+    visible,
+    onClose,
+  }: {
+    visible: boolean
+    exercise: unknown
+    onClose: () => void
+  }) => {
+    const { View, TouchableOpacity, Text } = require('react-native')
+    const React = require('react')
+    if (!visible) return null
+    return React.createElement(
+      View,
+      { testID: 'exercise-info-sheet' },
+      React.createElement(
+        TouchableOpacity,
+        { onPress: onClose, testID: 'close-info-sheet' },
+        React.createElement(Text, null, 'Fermer info')
+      )
     )
   },
 }))
@@ -390,6 +416,144 @@ describe('ExercisePickerModal', () => {
       })
 
       expect(onAdd).toHaveBeenCalledWith('ex-1', '', '', '')
+    })
+  })
+
+  describe('clamping des valeurs', () => {
+    it('clamp les séries à 10 maximum', async () => {
+      const onAdd = jest.fn().mockResolvedValue(undefined)
+      const { getByText } = render(
+        <ExercisePickerModal
+          {...defaultProps}
+          onAdd={onAdd}
+          initialSets="15"
+          initialReps="10"
+          initialWeight="60"
+        />
+      )
+
+      fireEvent.press(getByText('Squat'))
+      await act(async () => { fireEvent.press(getByText('Ajouter')) })
+
+      expect(onAdd).toHaveBeenCalledWith('ex-1', '10', '10', '60')
+    })
+
+    it('clamp les séries à 1 minimum', async () => {
+      const onAdd = jest.fn().mockResolvedValue(undefined)
+      const { getByText } = render(
+        <ExercisePickerModal
+          {...defaultProps}
+          onAdd={onAdd}
+          initialSets="0"
+          initialReps="10"
+          initialWeight="60"
+        />
+      )
+
+      fireEvent.press(getByText('Squat'))
+      await act(async () => { fireEvent.press(getByText('Ajouter')) })
+
+      expect(onAdd).toHaveBeenCalledWith('ex-1', '1', '10', '60')
+    })
+
+    it('clamp le poids à 999 maximum', async () => {
+      const onAdd = jest.fn().mockResolvedValue(undefined)
+      const { getByText } = render(
+        <ExercisePickerModal
+          {...defaultProps}
+          onAdd={onAdd}
+          initialSets="3"
+          initialReps="10"
+          initialWeight="1500"
+        />
+      )
+
+      fireEvent.press(getByText('Squat'))
+      await act(async () => { fireEvent.press(getByText('Ajouter')) })
+
+      expect(onAdd).toHaveBeenCalledWith('ex-1', '3', '10', '999')
+    })
+  })
+
+  describe('sélection successive', () => {
+    it('utilise le dernier exercice sélectionné quand plusieurs sont pressés successivement', async () => {
+      const onAdd = jest.fn().mockResolvedValue(undefined)
+      const { getByText } = render(
+        <ExercisePickerModal
+          {...defaultProps}
+          onAdd={onAdd}
+          initialSets="3"
+          initialReps="10"
+          initialWeight="60"
+        />
+      )
+
+      fireEvent.press(getByText('Squat'))
+      fireEvent.press(getByText('Tractions'))
+
+      await act(async () => { fireEvent.press(getByText('Ajouter')) })
+
+      expect(onAdd).toHaveBeenCalledTimes(1)
+      expect(onAdd).toHaveBeenCalledWith('ex-3', '3', '10', '60')
+    })
+  })
+
+  describe('validation réactive', () => {
+    it('passe les valeurs courantes des inputs à validateWorkoutInput', () => {
+      const { getByTestId } = render(<ExercisePickerModal {...defaultProps} />)
+
+      fireEvent.changeText(getByTestId('input-sets'), '4')
+      fireEvent.changeText(getByTestId('input-reps'), '12')
+      fireEvent.changeText(getByTestId('input-weight'), '75')
+
+      expect(mockValidateWorkoutInput).toHaveBeenLastCalledWith('4', '12', '75')
+    })
+
+    it('ne bloque pas onAdd si validateWorkoutInput retourne valid: true après correction', async () => {
+      mockValidateWorkoutInput
+        .mockReturnValueOnce({ valid: false })
+        .mockReturnValue({ valid: true })
+
+      const onAdd = jest.fn().mockResolvedValue(undefined)
+      const { getByText, getByTestId } = render(
+        <ExercisePickerModal {...defaultProps} onAdd={onAdd} />
+      )
+
+      fireEvent.press(getByText('Squat'))
+      fireEvent.changeText(getByTestId('input-sets'), '3')
+
+      await act(async () => { fireEvent.press(getByText('Ajouter')) })
+
+      expect(onAdd).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('fiche info exercice', () => {
+    it('affiche ExerciseInfoSheet quand le bouton info est pressé', async () => {
+      const { queryByTestId, UNSAFE_getAllByProps } = render(
+        <ExercisePickerModal {...defaultProps} />
+      )
+
+      expect(queryByTestId('exercise-info-sheet')).toBeNull()
+
+      const ioniconsElements = UNSAFE_getAllByProps({ name: 'information-circle-outline' })
+      await act(async () => { fireEvent.press(ioniconsElements[0]) })
+
+      expect(queryByTestId('exercise-info-sheet')).toBeTruthy()
+    })
+
+    it('ferme ExerciseInfoSheet quand son bouton de fermeture est pressé', async () => {
+      const { getByTestId, queryByTestId, UNSAFE_getAllByProps } = render(
+        <ExercisePickerModal {...defaultProps} />
+      )
+
+      const ioniconsElements = UNSAFE_getAllByProps({ name: 'information-circle-outline' })
+      await act(async () => { fireEvent.press(ioniconsElements[0]) })
+      expect(getByTestId('exercise-info-sheet')).toBeTruthy()
+
+      fireEvent.press(getByTestId('close-info-sheet'))
+
+      expect(queryByTestId('exercise-info-sheet')).toBeNull()
     })
   })
 })
