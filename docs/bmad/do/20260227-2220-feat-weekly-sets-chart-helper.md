@@ -36,4 +36,4 @@ aucune (JSDoc ajouté directement sur la fonction)
 ✅ Résolu — 20260227-2220
 
 ## Commit
-[à remplir]
+5257727 feat(stats): add computeWeeklySetsChart with paginated week window

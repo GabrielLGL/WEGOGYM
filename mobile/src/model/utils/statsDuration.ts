@@ -3,18 +3,21 @@
 import type History from '../models/History'
 import type { DurationStats } from './statsTypes'
 
+export const MIN_VALID_DURATION_MIN = 5
+
 export function computeDurationStats(histories: History[]): DurationStats {
   const withDuration = histories
     .filter(h => h.deletedAt === null && h.endTime != null)
     .map(h => ({
+      id: h.id,
       date: h.startTime.getTime(),
       durationMin: Math.round((h.endTime!.getTime() - h.startTime.getTime()) / 60000),
     }))
-    .filter(e => e.durationMin > 0)
+    .filter(e => e.durationMin >= MIN_VALID_DURATION_MIN)
     .sort((a, b) => a.date - b.date)
 
   if (withDuration.length === 0) {
-    return { avgMin: 0, totalHours: 0, minMin: 0, maxMin: 0, perSession: [] }
+    return { avgMin: 0, totalHours: 0, minMin: 0, maxMin: 0, perSession: [], historyAll: [] }
   }
 
   const durations = withDuration.map(e => e.durationMin)
@@ -26,6 +29,7 @@ export function computeDurationStats(histories: History[]): DurationStats {
     minMin: Math.min(...durations),
     maxMin: Math.max(...durations),
     perSession: withDuration.slice(-30),
+    historyAll: [...withDuration].reverse(),
   }
 }
 

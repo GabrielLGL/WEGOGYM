@@ -6,10 +6,12 @@ import {
   StyleSheet,
   useWindowDimensions,
   Pressable,
+  TouchableOpacity,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 import { LineChart } from 'react-native-chart-kit'
+import { Ionicons } from '@expo/vector-icons'
 
 import { database } from '../model'
 import History from '../model/models/History'
@@ -18,8 +20,11 @@ import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
+import { AlertDialog } from '../components/AlertDialog'
+import { useHaptics } from '../hooks/useHaptics'
 
 const chartConfig = createChartConfig({ showDots: true })
+const PAGE_SIZE = 5
 
 function KpiCard({ label, value, colors }: { label: string; value: string; colors: ThemeColors }) {
   const styles = useStyles(colors)
@@ -47,6 +52,9 @@ export function StatsDurationScreenBase({ histories }: Props) {
   const { width: screenWidth } = useWindowDimensions()
   const stats = useMemo(() => computeDurationStats(histories), [histories])
   const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null)
+  const [page, setPage] = useState(0)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const haptics = useHaptics()
 
   const chartData = useMemo(() => {
     if (stats.perSession.length < 2) return null
@@ -83,6 +91,33 @@ export function StatsDurationScreenBase({ histories }: Props) {
       duration: `${Math.round(session.durationMin)} min`,
     }
   }, [selectedPoint, stats.perSession])
+
+  const totalPages = Math.max(1, Math.ceil(stats.historyAll.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages - 1)
+  const pageEntries = stats.historyAll.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE)
+  const hasPrev = safePage > 0
+  const hasNext = safePage < totalPages - 1
+
+  const handleDeletePress = useCallback(
+    (id: string) => {
+      haptics.onDelete()
+      setPendingDeleteId(id)
+    },
+    [haptics]
+  )
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDeleteId) return
+    const target = histories.find(h => h.id === pendingDeleteId)
+    if (target) {
+      await database.write(async () => {
+        await target.update(h => {
+          h.deletedAt = new Date()
+        })
+      })
+    }
+    setPendingDeleteId(null)
+  }, [pendingDeleteId, histories])
 
   return (
     <ScrollView
@@ -141,6 +176,91 @@ export function StatsDurationScreenBase({ histories }: Props) {
           </Text>
         </View>
       )}
+
+      <Text style={[styles.sectionTitle, styles.historySectionTitle]}>
+        Historique ({stats.historyAll.length} séances)
+      </Text>
+
+      {stats.historyAll.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>Aucune séance valide enregistrée.</Text>
+        </View>
+      ) : (
+        <View style={styles.historyCard}>
+          {pageEntries.map((entry, index) => (
+            <View key={entry.id}>
+              {index > 0 && <View style={styles.separator} />}
+              <View style={styles.historyRowActions}>
+                <Text style={styles.historyDate}>
+                  {new Date(entry.date).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </Text>
+                <Text style={styles.historyDuration}>{formatDuration(entry.durationMin)}</Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeletePress(entry.id)}
+                  accessibilityLabel="Supprimer cette séance"
+                >
+                  <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+
+          {totalPages > 1 && (
+            <View style={styles.paginationBar}>
+              <TouchableOpacity
+                style={[styles.paginationButton, !hasPrev && styles.paginationButtonDisabled]}
+                onPress={() => {
+                  if (hasPrev) {
+                    haptics.onPress()
+                    setPage(safePage - 1)
+                  }
+                }}
+                disabled={!hasPrev}
+                accessibilityLabel="Page précédente"
+              >
+                <Text style={[styles.paginationButtonText, !hasPrev && styles.paginationButtonTextDisabled]}>
+                  ← Précédente
+                </Text>
+              </TouchableOpacity>
+
+              <Text style={styles.paginationLabel}>
+                Page {safePage + 1} / {totalPages}
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.paginationButton, !hasNext && styles.paginationButtonDisabled]}
+                onPress={() => {
+                  if (hasNext) {
+                    haptics.onPress()
+                    setPage(safePage + 1)
+                  }
+                }}
+                disabled={!hasNext}
+                accessibilityLabel="Page suivante"
+              >
+                <Text style={[styles.paginationButtonText, !hasNext && styles.paginationButtonTextDisabled]}>
+                  Suivante →
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      )}
+
+      <AlertDialog
+        visible={pendingDeleteId !== null}
+        title="Supprimer cette séance ?"
+        message="Cette action est irréversible."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setPendingDeleteId(null)}
+        confirmText="Supprimer"
+        cancelText="Annuler"
+      />
     </ScrollView>
   )
 }
@@ -225,6 +345,69 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.md,
       fontWeight: '700',
       color: colors.primary,
+    },
+    historySectionTitle: {
+      marginTop: spacing.lg,
+    },
+    historyCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      overflow: 'hidden',
+    },
+    historyRowActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+    },
+    historyDate: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+      flex: 1,
+    },
+    historyDuration: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.primary,
+      marginRight: spacing.sm,
+    },
+    deleteButton: {
+      padding: spacing.sm,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: colors.separator,
+      marginHorizontal: spacing.md,
+    },
+    paginationBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: colors.separator,
+    },
+    paginationButton: {
+      padding: spacing.sm,
+      borderRadius: borderRadius.sm,
+    },
+    paginationButtonDisabled: {
+      opacity: 0.3,
+    },
+    paginationButtonText: {
+      fontSize: fontSize.sm,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    paginationButtonTextDisabled: {
+      color: colors.textSecondary,
+    },
+    paginationLabel: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      textAlign: 'center',
     },
   })
 }
