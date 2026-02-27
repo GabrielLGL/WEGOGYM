@@ -275,7 +275,7 @@ export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
                 {/* CTA — neumorphic raised button */}
                 <div style={{ textAlign: "center" }}>
                   <a
-                    href="https://kore-app.com"
+                    href="https://kore-app.net"
                     style={{
                       background: `linear-gradient(135deg, ${accent}, ${teal})`,
                       color: "#FFFFFF",
