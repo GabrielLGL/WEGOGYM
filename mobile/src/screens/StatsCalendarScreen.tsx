@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useRef } from 'react'
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  PanResponder,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
@@ -25,82 +26,23 @@ import type { ThemeColors } from '../theme'
 
 // ─── Constantes calendrier ────────────────────────────────────────────────────
 
-const DAY_SIZE = 20
-const DAY_GAP = 3
+const DAY_SIZE = 38
+const DAY_GAP = 6
 const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-
-function getIntensityColor(count: number): string {
-  if (count <= 0) return intensityColors[0]
-  if (count === 1) return intensityColors[1]
-  if (count === 2) return intensityColors[2]
-  return intensityColors[3]
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface DayData {
+interface DayCell {
   dateKey: string
   date: Date
+  dayNumber: number
   count: number
   isFuture: boolean
+  isCurrentMonth: boolean
 }
 
-interface WeekData {
-  days: DayData[]
-  monthLabel: string
-}
-
-// ─── Génération des semaines ──────────────────────────────────────────────────
-
-function generateCalendarWeeks(calendarData: Map<string, number>): WeekData[] {
-  const today = new Date()
-  const sixMonthsAgo = new Date(today)
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-
-  // Reculer au lundi de cette semaine
-  const startDate = new Date(sixMonthsAgo)
-  const dow = startDate.getDay()
-  const toMonday = dow === 0 ? 6 : dow - 1
-  startDate.setDate(startDate.getDate() - toMonday)
-
-  const weeks: WeekData[] = []
-  const current = new Date(startDate)
-  let prevMonth = -1
-
-  while (current <= today) {
-    const monday = new Date(current)
-    const currentMonth = monday.getMonth()
-    const monthLabel =
-      currentMonth !== prevMonth
-        ? monday.toLocaleDateString('fr-FR', { month: 'short' })
-        : ''
-    prevMonth = currentMonth
-
-    const days: DayData[] = []
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(current)
-      day.setDate(current.getDate() + d)
-      const isFuture = day > today
-      const dateKey = toDateKey(day)
-      days.push({
-        dateKey,
-        date: day,
-        count: isFuture ? 0 : (calendarData.get(dateKey) ?? 0),
-        isFuture,
-      })
-    }
-
-    weeks.push({ days, monthLabel })
-    current.setDate(current.getDate() + 7)
-  }
-
-  return weeks
-}
-
-// ─── Composant principal ──────────────────────────────────────────────────────
-
-interface Props {
-  histories: History[]
+interface WeekRow {
+  days: DayCell[]
 }
 
 interface SessionDetail {
@@ -115,20 +57,176 @@ interface TooltipInfo {
   sessions: SessionDetail[]
 }
 
+// ─── Génération de la grille mensuelle ────────────────────────────────────────
+
+function generateMonthGrid(
+  year: number,
+  month: number,
+  calendarData: Map<string, number>
+): WeekRow[] {
+  const today = new Date()
+  today.setHours(23, 59, 59, 999)
+
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+
+  // Reculer au lundi avant ou égal au 1er du mois
+  const startDate = new Date(firstDay)
+  const dow = startDate.getDay()
+  const toMonday = dow === 0 ? 6 : dow - 1
+  startDate.setDate(startDate.getDate() - toMonday)
+
+  // Avancer au dimanche sur ou après le dernier jour du mois
+  const endDate = new Date(lastDay)
+  const endDow = endDate.getDay()
+  const toSunday = endDow === 0 ? 0 : 7 - endDow
+  endDate.setDate(endDate.getDate() + toSunday)
+
+  const weeks: WeekRow[] = []
+  const current = new Date(startDate)
+
+  while (current <= endDate) {
+    const days: DayCell[] = []
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(current)
+      day.setDate(current.getDate() + d)
+      const isCurrentMonth = day.getMonth() === month
+      const isFuture = day > today
+      const dateKey = toDateKey(day)
+      const count = isFuture || !isCurrentMonth ? 0 : (calendarData.get(dateKey) ?? 0)
+      days.push({
+        dateKey,
+        date: new Date(day),
+        dayNumber: day.getDate(),
+        count,
+        isFuture,
+        isCurrentMonth,
+      })
+    }
+    weeks.push({ days })
+    current.setDate(current.getDate() + 7)
+  }
+
+  return weeks
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function capitalizeFirst(str: string): string {
+  if (!str) return str
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+function formatMonthTitle(year: number, month: number): string {
+  const date = new Date(year, month, 1)
+  return capitalizeFirst(
+    date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  )
+}
+
+// ─── Composant principal ──────────────────────────────────────────────────────
+
+interface Props {
+  histories: History[]
+}
+
 export function StatsCalendarScreenBase({ histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+
+  const today = useMemo(() => new Date(), [])
+  const [viewYear, setViewYear] = useState(() => new Date().getFullYear())
+  const [viewMonth, setViewMonth] = useState(() => new Date().getMonth())
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null)
+
+  const isCurrentMonth =
+    viewYear === today.getFullYear() && viewMonth === today.getMonth()
 
   const calendarData = useMemo(() => computeCalendarData(histories), [histories])
   const currentStreak = useMemo(() => computeCurrentStreak(histories), [histories])
   const recordStreak = useMemo(() => computeRecordStreak(histories), [histories])
-  const weeks = useMemo(() => generateCalendarWeeks(calendarData), [calendarData])
+  const weeks = useMemo(
+    () => generateMonthGrid(viewYear, viewMonth, calendarData),
+    [viewYear, viewMonth, calendarData]
+  )
 
-  const handleDayPress = async (day: DayData) => {
-    if (day.isFuture) return
+  // Stats du mois affiché
+  const monthStats = useMemo(() => {
+    const prefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`
+    let sessionCount = 0
+    let totalMin = 0
+    histories.forEach(h => {
+      if (h.deletedAt !== null) return
+      const key = toDateKey(h.startTime)
+      if (!key.startsWith(prefix)) return
+      sessionCount++
+      if (h.endTime) {
+        totalMin += Math.round(
+          (h.endTime.getTime() - h.startTime.getTime()) / 60000
+        )
+      }
+    })
+    return { sessionCount, totalMin }
+  }, [histories, viewYear, viewMonth])
 
-    // Toggle off if same day
+  const monthDurationLabel = useMemo(() => {
+    const { totalMin } = monthStats
+    if (totalMin === 0) return null
+    const h = Math.floor(totalMin / 60)
+    const m = totalMin % 60
+    if (h === 0) return `${m}min`
+    if (m === 0) return `${h}h`
+    return `${h}h ${m}min`
+  }, [monthStats])
+
+  const goToPrevMonth = () => {
+    setTooltip(null)
+    if (viewMonth === 0) {
+      setViewYear(y => y - 1)
+      setViewMonth(11)
+    } else {
+      setViewMonth(m => m - 1)
+    }
+  }
+
+  const goToNextMonth = () => {
+    if (isCurrentMonth) return
+    setTooltip(null)
+    if (viewMonth === 11) {
+      setViewYear(y => y + 1)
+      setViewMonth(0)
+    } else {
+      setViewMonth(m => m + 1)
+    }
+  }
+
+  const goToToday = () => {
+    setTooltip(null)
+    setViewYear(today.getFullYear())
+    setViewMonth(today.getMonth())
+  }
+
+  // Utiliser des refs pour éviter les closures périmées dans PanResponder
+  const navRef = useRef({ goToNextMonth, goToPrevMonth })
+  navRef.current = { goToNextMonth, goToPrevMonth }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gs) =>
+        Math.abs(gs.dx) > 15 && Math.abs(gs.dy) < 40,
+      onPanResponderRelease: (_, gs) => {
+        if (gs.dx < -50) {
+          navRef.current.goToNextMonth()
+        } else if (gs.dx > 50) {
+          navRef.current.goToPrevMonth()
+        }
+      },
+    })
+  ).current
+
+  const handleDayPress = async (day: DayCell) => {
+    if (day.isFuture || !day.isCurrentMonth) return
+
     if (tooltip?.dateKey === day.dateKey) {
       setTooltip(null)
       return
@@ -145,32 +243,32 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       return
     }
 
-    // Filter histories for this day
     const dayHistories = histories.filter(
       h => h.deletedAt === null && toDateKey(h.startTime) === day.dateKey
     )
 
-    // Fetch session details
     const sessions: SessionDetail[] = await Promise.all(
-      dayHistories.map(async (h) => {
+      dayHistories.map(async h => {
         let name = 'Séance'
         try {
           const session = await h.session.fetch()
           if (session?.name) name = session.name
         } catch {
-          // session may have been deleted
+          // la séance a peut-être été supprimée
         }
-
         const durationMin = h.endTime
-          ? Math.round((h.endTime.getTime() - h.startTime.getTime()) / 60000)
+          ? Math.round(
+              (h.endTime.getTime() - h.startTime.getTime()) / 60000
+            )
           : null
-
         return { name, durationMin }
       })
     )
 
     setTooltip({ dateKey: day.dateKey, label, count: day.count, sessions })
   }
+
+  const todayKey = toDateKey(today)
 
   return (
     <ScrollView
@@ -191,6 +289,42 @@ export function StatsCalendarScreenBase({ histories }: Props) {
           <Text style={styles.streakLabel}>record</Text>
         </View>
       </View>
+
+      {/* Sélecteur de mois */}
+      <View style={styles.monthSelector}>
+        <TouchableOpacity
+          onPress={goToPrevMonth}
+          style={styles.arrowBtn}
+          accessibilityLabel="Mois précédent"
+        >
+          <Text style={styles.arrowText}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.monthTitle}>{formatMonthTitle(viewYear, viewMonth)}</Text>
+        <TouchableOpacity
+          onPress={goToNextMonth}
+          style={[styles.arrowBtn, isCurrentMonth && styles.arrowDisabled]}
+          disabled={isCurrentMonth}
+          accessibilityLabel="Mois suivant"
+        >
+          <Text style={[styles.arrowText, isCurrentMonth && styles.arrowTextDisabled]}>
+            →
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Stats du mois */}
+      <Text style={styles.monthStats}>
+        {monthStats.sessionCount}{' '}
+        séance{monthStats.sessionCount !== 1 ? 's' : ''}
+        {monthDurationLabel ? `   ·   ${monthDurationLabel} au total` : ''}
+      </Text>
+
+      {/* Bouton "Aujourd'hui" */}
+      {!isCurrentMonth && (
+        <TouchableOpacity onPress={goToToday} style={styles.todayBtn}>
+          <Text style={styles.todayBtnText}>Aujourd'hui</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Tooltip */}
       {tooltip && (
@@ -216,58 +350,91 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       )}
 
       {/* Grille calendrier */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.calendarScroll}
-      >
-        <View style={styles.calendarContainer}>
-          {/* Labels jours */}
-          <View style={styles.dayLabelsColumn}>
-            <View style={styles.monthLabelPlaceholder} />
-            {DAY_LABELS.map((label, i) => (
-              <Text key={i} style={styles.dayLabel}>{label}</Text>
-            ))}
-          </View>
+      <View {...panResponder.panHandlers} style={styles.calendarContainer}>
+        {/* Header jours */}
+        <View style={styles.dayLabelsRow}>
+          {DAY_LABELS.map((label, i) => (
+            <Text key={i} style={styles.dayLabel}>
+              {label}
+            </Text>
+          ))}
+        </View>
 
-          {/* Colonnes de semaines */}
-          {weeks.map((week, wi) => (
-            <View key={wi} style={styles.weekColumn}>
-              <Text style={styles.monthLabel} numberOfLines={1}>
-                {week.monthLabel}
-              </Text>
-              {week.days.map((day, di) => (
+        {/* Semaines */}
+        {weeks.map((week, wi) => (
+          <View key={wi} style={styles.weekRow}>
+            {week.days.map((day, di) => {
+              const isToday = day.dateKey === todayKey
+              const isActive =
+                day.isCurrentMonth && !day.isFuture && day.count > 0
+              const isSelected = tooltip?.dateKey === day.dateKey
+
+              let bgColor = 'transparent'
+              let textColor: string = colors.border
+
+              if (!day.isCurrentMonth) {
+                bgColor = intensityColors[0]
+                textColor = colors.border
+              } else if (day.isFuture) {
+                bgColor = 'transparent'
+                textColor = colors.border
+              } else if (isActive) {
+                bgColor = colors.primaryBg
+                textColor = colors.primary
+              } else {
+                bgColor = intensityColors[0]
+                textColor = colors.textSecondary
+              }
+
+              const borderStyle = isToday
+                ? { borderWidth: 2, borderColor: colors.primary }
+                : isSelected
+                  ? { borderWidth: 1, borderColor: colors.primary }
+                  : {}
+
+              return (
                 <TouchableOpacity
                   key={di}
+                  testID={`day-cell-${day.dateKey}`}
                   onPress={() => handleDayPress(day)}
-                  activeOpacity={day.isFuture ? 1 : 0.7}
+                  activeOpacity={
+                    day.isFuture || !day.isCurrentMonth ? 1 : 0.7
+                  }
                 >
                   <View
                     style={[
                       styles.dayBox,
-                      {
-                        backgroundColor: day.isFuture
-                          ? 'transparent'
-                          : getIntensityColor(day.count),
-                        opacity: day.isFuture ? 0 : 1,
-                        borderWidth: tooltip?.dateKey === day.dateKey ? 1 : 0,
-                        borderColor: colors.primary,
-                      },
+                      { backgroundColor: bgColor },
+                      borderStyle,
                     ]}
-                  />
+                  >
+                    <Text style={[styles.dayNumber, { color: textColor }]}>
+                      {day.dayNumber}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
-              ))}
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-
-      {/* Légende */}
-      <View style={styles.legend}>
-        <Text style={styles.legendText}>Repos</Text>
-        {intensityColors.map((color, i) => (
-          <View key={i} style={[styles.legendBox, { backgroundColor: color }]} />
+              )
+            })}
+          </View>
         ))}
+      </View>
+
+      {/* Légende simplifiée */}
+      <View style={styles.legend}>
+        <View
+          style={[styles.legendBox, { backgroundColor: intensityColors[0] }]}
+        />
+        <Text style={styles.legendText}>Repos</Text>
+        <View
+          style={[
+            styles.legendBox,
+            {
+              backgroundColor: colors.primaryBg,
+              borderWidth: 1,
+              borderColor: colors.primary,
+            },
+          ]}
+        />
         <Text style={styles.legendText}>Actif</Text>
       </View>
     </ScrollView>
@@ -308,6 +475,49 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
       color: colors.textSecondary,
     },
+    monthSelector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: spacing.xs,
+    },
+    arrowBtn: {
+      padding: spacing.sm,
+    },
+    arrowDisabled: {
+      opacity: 0.3,
+    },
+    arrowText: {
+      fontSize: fontSize.xl,
+      color: colors.text,
+    },
+    arrowTextDisabled: {
+      color: colors.textSecondary,
+    },
+    monthTitle: {
+      fontSize: fontSize.lg,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    monthStats: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: spacing.sm,
+    },
+    todayBtn: {
+      alignSelf: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.xl,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      marginBottom: spacing.sm,
+    },
+    todayBtnText: {
+      fontSize: fontSize.xs,
+      color: colors.primary,
+    },
     tooltip: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.sm,
@@ -342,46 +552,36 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       marginLeft: spacing.sm,
     },
-    calendarScroll: {
+    calendarContainer: {
       marginBottom: spacing.md,
     },
-    calendarContainer: {
+    dayLabelsRow: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
-    },
-    dayLabelsColumn: {
-      marginRight: DAY_GAP,
-      alignItems: 'center',
-    },
-    monthLabelPlaceholder: {
-      height: fontSize.xs + spacing.xs,
+      justifyContent: 'space-between',
       marginBottom: DAY_GAP,
     },
     dayLabel: {
-      fontSize: fontSize.caption,
-      color: colors.textSecondary,
-      height: DAY_SIZE,
-      marginBottom: DAY_GAP,
-      lineHeight: DAY_SIZE,
-      width: 14,
+      width: DAY_SIZE,
       textAlign: 'center',
-    },
-    weekColumn: {
-      marginRight: DAY_GAP,
-      alignItems: 'center',
-    },
-    monthLabel: {
       fontSize: fontSize.xs,
       color: colors.textSecondary,
+      fontWeight: '600',
+    },
+    weekRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
       marginBottom: DAY_GAP,
-      height: fontSize.xs + spacing.xs,
-      textAlign: 'center',
     },
     dayBox: {
       width: DAY_SIZE,
       height: DAY_SIZE,
-      borderRadius: 3,
-      marginBottom: DAY_GAP,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    dayNumber: {
+      fontSize: fontSize.xs,
+      fontWeight: '500',
     },
     legend: {
       flexDirection: 'row',
@@ -390,9 +590,9 @@ function useStyles(colors: ThemeColors) {
       gap: spacing.xs,
     },
     legendBox: {
-      width: DAY_SIZE,
-      height: DAY_SIZE,
-      borderRadius: 3,
+      width: 16,
+      height: 16,
+      borderRadius: 4,
     },
     legendText: {
       fontSize: fontSize.xs,
