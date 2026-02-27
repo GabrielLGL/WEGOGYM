@@ -10,13 +10,14 @@ describe('ThemeToggle', () => {
 
   it('renders le bouton avec aria-label correct', () => {
     render(<ThemeToggle />)
-    expect(screen.getByRole('button', { name: /changer le theme/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /changer le th/i })).toBeInTheDocument()
   })
 
-  it('affiche ☀️ par défaut (thème light)', () => {
+  it('affiche une icône soleil par défaut (thème light)', () => {
     render(<ThemeToggle />)
     const btn = screen.getByRole('button')
-    expect(btn.textContent).toContain('☀️')
+    // Soleil = SVG avec un <circle> (corps du soleil)
+    expect(btn.querySelector('circle')).toBeTruthy()
   })
 
   it('passe en dark mode au clic', () => {
@@ -36,11 +37,14 @@ describe('ThemeToggle', () => {
     expect(localStorage.getItem('kore-theme')).toBe('light')
   })
 
-  it('lit data-theme="dark" existant au montage', async () => {
+  it('affiche une icône lune quand data-theme="dark" au montage', async () => {
     document.documentElement.setAttribute('data-theme', 'dark')
     render(<ThemeToggle />)
     await waitFor(() => {
-      expect(screen.getByRole('button').textContent).toContain('🌙')
+      const btn = screen.getByRole('button')
+      // Lune = SVG avec un <path> (croissant), sans <circle>
+      expect(btn.querySelector('path')).toBeTruthy()
+      expect(btn.querySelector('circle')).toBeFalsy()
     })
   })
 })

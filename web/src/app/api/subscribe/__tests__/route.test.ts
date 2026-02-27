@@ -64,6 +64,50 @@ describe('POST /api/subscribe', () => {
     expect(json.error).toBe('Email invalide')
   })
 
+  it('retourne 400 si email dépasse 254 caractères', async () => {
+    const longEmail = 'a'.repeat(245) + '@example.com' // 257 chars
+    const req = makeRequest({ email: longEmail })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const json = await res.json()
+    expect(json.error).toBe('Email invalide')
+  })
+
+  it('normalise l\'email en lowercase avant l\'insert', async () => {
+    const mockInsert = vi.fn().mockResolvedValue({ error: null })
+    vi.mocked(getSupabase).mockReturnValue({
+      from: vi.fn().mockReturnValue({ insert: mockInsert }),
+    } as unknown as ReturnType<typeof getSupabase>)
+    vi.mocked(getResend).mockReturnValue({
+      emails: { send: vi.fn().mockResolvedValue({}) },
+    } as unknown as ReturnType<typeof getResend>)
+
+    const req = makeRequest({ email: 'Test@Example.COM', name: 'Gabriel' })
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'test@example.com' })
+    )
+  })
+
+  it('tronque le name à 100 caractères', async () => {
+    const mockInsert = vi.fn().mockResolvedValue({ error: null })
+    vi.mocked(getSupabase).mockReturnValue({
+      from: vi.fn().mockReturnValue({ insert: mockInsert }),
+    } as unknown as ReturnType<typeof getSupabase>)
+    vi.mocked(getResend).mockReturnValue({
+      emails: { send: vi.fn().mockResolvedValue({}) },
+    } as unknown as ReturnType<typeof getResend>)
+
+    const longName = 'A'.repeat(150)
+    const req = makeRequest({ email: 'test@example.com', name: longName })
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'A'.repeat(100) })
+    )
+  })
+
   it('retourne 200 et success:true pour email valide', async () => {
     // Mock Supabase insert OK
     const mockInsert = vi.fn().mockResolvedValue({ error: null })
