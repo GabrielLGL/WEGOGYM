@@ -1,9 +1,12 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-let client: SupabaseClient | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var _supabase: SupabaseClient | undefined;
+}
 
 export function getSupabase(): SupabaseClient {
-  if (!client) {
+  if (!globalThis._supabase) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -11,7 +14,7 @@ export function getSupabase(): SupabaseClient {
       throw new Error("Missing Supabase env vars");
     }
 
-    client = createClient(url, key);
+    globalThis._supabase = createClient(url, key);
   }
-  return client;
+  return globalThis._supabase;
 }
