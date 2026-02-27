@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 24, // v24 : sets_target_max (plage de séries)
+  version: 25, // v25 : vibration_enabled + timer_sound_enabled
   tables: [
     tableSchema({
       name: 'programs',
@@ -69,6 +69,8 @@ export const mySchema = appSchema({
             {name: 'email', type: 'string'},
             {name: 'name', type: 'string', isOptional: true},
             {name: 'timer_enabled', type: 'boolean'},
+            {name: 'vibration_enabled', type: 'boolean'},
+            {name: 'timer_sound_enabled', type: 'boolean'},
             {name: 'rest_duration', type: 'number'},
             {name: 'onboarding_completed', type: 'boolean'},
             {name: 'user_level', type: 'string', isOptional: true},

@@ -9,6 +9,10 @@ export default class User extends Model {
   // Indispensable pour la version 13
   @field('timer_enabled') timerEnabled!: boolean
 
+  // Préférences timer son & vibration — version 25
+  @field('vibration_enabled') vibrationEnabled!: boolean
+  @field('timer_sound_enabled') timerSoundEnabled!: boolean
+
   // Ajout de la durée de repos pour la version 14
   @field('rest_duration') restDuration!: number
 
