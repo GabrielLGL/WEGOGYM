@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             className="inline-flex items-center gap-2 text-[var(--text-muted)] text-sm
               font-medium no-underline hover:text-[var(--accent)] transition-colors group"
           >
-            <span className="group-hover:-translate-x-1 transition-transform inline-block">
+            <span className="group-hover:-translate-x-1 transition-transform inline-block" aria-hidden="true">
               ←
             </span>
             Retour à l&apos;accueil
