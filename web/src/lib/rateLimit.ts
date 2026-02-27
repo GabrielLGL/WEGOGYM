@@ -1,20 +1,34 @@
-// In-memory rate limiter — acceptable for landing page scale.
-// For production scale: upgrade to @upstash/ratelimit + Redis.
+// In-memory rate limiter — serverless-safe via globalThis.
+// Les invocations chaudes réutilisent le store ; cold starts repartent de zéro (acceptable pour landing page).
+// Pour production à grande échelle : @upstash/ratelimit + Redis.
 
 interface RateLimitEntry {
   count: number;
   resetAt: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
+type RateLimitStore = Map<string, RateLimitEntry>;
 
-// Cleanup entries older than 2h to avoid memory leaks
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of store.entries()) {
-    if (now > entry.resetAt + 60 * 60 * 1000) store.delete(key);
-  }
-}, 60 * 60 * 1000);
+declare global {
+  // eslint-disable-next-line no-var
+  var _rateLimitStore: RateLimitStore | undefined;
+  // eslint-disable-next-line no-var
+  var _rateLimitCleanup: ReturnType<typeof setInterval> | undefined;
+}
+
+const store: RateLimitStore =
+  globalThis._rateLimitStore ?? new Map<string, RateLimitEntry>();
+globalThis._rateLimitStore = store;
+
+// Un seul cleanup interval par process (évite les duplicates en dev hot-reload)
+if (!globalThis._rateLimitCleanup) {
+  globalThis._rateLimitCleanup = setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of store.entries()) {
+      if (now > entry.resetAt + 60 * 60 * 1000) store.delete(key);
+    }
+  }, 60 * 60 * 1000);
+}
 
 export interface RateLimitResult {
   allowed: boolean;
