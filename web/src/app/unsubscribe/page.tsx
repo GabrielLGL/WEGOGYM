@@ -9,19 +9,11 @@ export default async function UnsubscribePage({
   const isSuccess = params.success === "true";
   const isError = params.error === "true";
 
-  const bg = "#ebf0f7";
-  const textMain = "#2d3436";
-  const textMuted = "#636e72";
-  const accent = "#6c5ce7";
-  const teal = "#00cec9";
-  const shadowOut =
-    "8px 8px 16px rgba(163,177,198,0.5), -8px -8px 16px rgba(255,255,255,0.7)";
-
   return (
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: bg,
+        backgroundColor: "var(--bg)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -34,10 +26,10 @@ export default async function UnsubscribePage({
         style={{
           maxWidth: "420px",
           width: "100%",
-          backgroundColor: bg,
+          backgroundColor: "var(--bg)",
           borderRadius: "24px",
           padding: "40px 32px",
-          boxShadow: shadowOut,
+          boxShadow: "var(--shadow-out)",
           textAlign: "center",
         }}
       >
@@ -49,7 +41,7 @@ export default async function UnsubscribePage({
           style={{
             fontSize: "22px",
             fontWeight: 800,
-            color: textMain,
+            color: "var(--text-main)",
             margin: "0 0 12px 0",
             letterSpacing: "-0.3px",
           }}
@@ -64,7 +56,7 @@ export default async function UnsubscribePage({
         <p
           style={{
             fontSize: "15px",
-            color: textMuted,
+            color: "var(--text-muted)",
             lineHeight: "1.6",
             margin: "0 0 32px 0",
           }}
@@ -79,7 +71,8 @@ export default async function UnsubscribePage({
         <Link
           href="/"
           style={{
-            background: `linear-gradient(135deg, ${accent}, ${teal})`,
+            background:
+              "linear-gradient(135deg, var(--accent), var(--accent-secondary))",
             color: "#FFFFFF",
             padding: "12px 32px",
             borderRadius: "50px",
@@ -87,7 +80,7 @@ export default async function UnsubscribePage({
             fontWeight: 700,
             fontSize: "14px",
             display: "inline-block",
-            boxShadow: "0 4px 15px rgba(108,92,231,0.35)",
+            boxShadow: "0 4px 15px var(--accent-glow)",
           }}
         >
           Retour au site

@@ -10,7 +10,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kore-app.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.net"),
   title: "Kore — Ton coach muscu dans ta poche",
   description:
     "Suis tes programmes, enregistre tes performances et progresse séance après séance. Application de musculation 100% offline, rapide et intuitive.",
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
     languages: {
-      fr: "https://kore-app.com",
-      "x-default": "https://kore-app.com",
+      fr: "https://kore-app.net",
+      "x-default": "https://kore-app.net",
     },
   },
   openGraph: {
@@ -105,8 +105,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
               name: "Kore",
-              url: "https://kore-app.com",
-              image: "https://kore-app.com/og.png",
+              url: "https://kore-app.net",
+              image: "https://kore-app.net/og.png",
               inLanguage: "fr-FR",
               author: { "@type": "Organization", name: "Kore" },
               applicationCategory: "HealthApplication",

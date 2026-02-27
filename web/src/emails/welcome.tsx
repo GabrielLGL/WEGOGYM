@@ -9,7 +9,7 @@ interface WelcomeEmailProps {
 export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
   const greeting = name ? `Salut ${name}` : "Salut";
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.com";
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.net";
   const token = createHmac("sha256", process.env.RESEND_API_KEY ?? "")
     .update(email)
     .digest("hex");
@@ -275,7 +275,7 @@ export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
                 {/* CTA — neumorphic raised button */}
                 <div style={{ textAlign: "center" }}>
                   <a
-                    href="https://kore-app.net"
+                    href={siteUrl}
                     style={{
                       background: `linear-gradient(135deg, ${accent}, ${teal})`,
                       color: "#FFFFFF",
