@@ -20,7 +20,6 @@ import StatsScreen from '../screens/StatsScreen'
 import StatsDurationScreen from '../screens/StatsDurationScreen'
 import StatsVolumeScreen from '../screens/StatsVolumeScreen'
 import StatsCalendarScreen from '../screens/StatsCalendarScreen'
-import StatsRepartitionScreen from '../screens/StatsRepartitionScreen'
 import StatsExercisesScreen from '../screens/StatsExercisesScreen'
 import StatsMeasurementsScreen from '../screens/StatsMeasurementsScreen'
 import { ErrorBoundary } from '../components/ErrorBoundary'
@@ -45,7 +44,6 @@ export type RootStackParamList = {
   StatsDuration: undefined;
   StatsVolume: undefined;
   StatsCalendar: undefined;
-  StatsRepartition: undefined;
   StatsExercises: undefined;
   StatsMeasurements: undefined;
   StatsHistory: undefined;
@@ -172,7 +170,6 @@ function AppContent() {
         <Stack.Screen name="StatsDuration" component={StatsDurationScreen} options={{ title: 'Durée des séances' }} />
         <Stack.Screen name="StatsVolume" component={StatsVolumeScreen} options={{ title: "Volume d'entraînement" }} />
         <Stack.Screen name="StatsCalendar" component={StatsCalendarScreen} options={{ title: "Calendrier d'activité" }} />
-        <Stack.Screen name="StatsRepartition" component={StatsRepartitionScreen} options={{ title: 'Répartition musculaire' }} />
         <Stack.Screen name="StatsExercises" component={StatsExercisesScreen} options={{ title: 'Exercices & Records' }} />
         <Stack.Screen name="StatsMeasurements" component={StatsMeasurementsScreen} options={{ title: 'Mesures corporelles' }} />
         <Stack.Screen name="StatsHistory" component={ChartsScreen} options={{ title: 'Historique' }} />

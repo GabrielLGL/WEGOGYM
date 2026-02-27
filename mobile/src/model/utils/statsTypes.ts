@@ -16,6 +16,7 @@ export interface DurationStats {
   minMin: number
   maxMin: number
   perSession: Array<{ date: number; durationMin: number }>
+  historyAll: Array<{ id: string; date: number; durationMin: number }>
 }
 
 export interface VolumeWeekEntry {
@@ -81,3 +82,26 @@ export interface WeeklySetsChartResult {
   hasPrev: boolean        // peut-on reculer encore ?
   hasNext: boolean        // peut-on avancer ? (false si fenêtre la plus récente)
 }
+
+export interface MonthlySetsChartResult {
+  labels: string[]  // ex: ["Sep", "Oct", "Nov", "Déc", "Jan", "Fév"]
+  data: number[]    // séries par mois
+}
+
+export interface WeekDaySessionRecap {
+  sessionName: string
+  setCount: number
+  volumeKg: number
+  durationMin: number | null
+}
+
+export interface WeekDayActivity {
+  dateKey: string         // 'YYYY-MM-DD'
+  dayLabel: string        // 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'
+  dayNumber: number       // numéro du jour dans le mois (ex: 12)
+  isToday: boolean
+  isPast: boolean         // true si le jour est dans le passé
+  sessions: WeekDaySessionRecap[]
+}
+
+export type WeeklyActivityData = WeekDayActivity[]

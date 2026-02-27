@@ -1,24 +1,25 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
+  TouchableOpacity,
 } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
-import { BarChart, LineChart } from 'react-native-chart-kit'
+import { LineChart } from 'react-native-chart-kit'
+import { Ionicons } from '@expo/vector-icons'
 
 import { database } from '../model'
 import History from '../model/models/History'
 import WorkoutSet from '../model/models/Set'
 import Exercise from '../model/models/Exercise'
 import {
-  computeVolumeStats,
-  computeSetsPerMuscleWeek,
-  computeSetsPerMuscleHistory,
-  formatVolume,
+  computeWeeklySetsChart,
+  computeMonthlySetsChart,
+  getMondayOfCurrentWeek,
   PERIOD_LABELS,
   labelToPeriod,
 } from '../model/utils/statsHelpers'
@@ -28,8 +29,60 @@ import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 
-const chartConfig = createChartConfig()
-const lineChartConfig = createChartConfig({ showDots: true })
+const chartConfig = createChartConfig({ showDots: true })
+
+const BAR_PERIOD_LABELS = ['Semaine', '1 mois', '3 mois', 'Tout'] as const
+type BarPeriodLabel = typeof BAR_PERIOD_LABELS[number]
+
+const MONTH_FR_ABBR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+const MONTH_FR_LONG = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+
+const pad = (n: number) => String(n).padStart(2, '0')
+
+function computeBarWindow(barPeriod: BarPeriodLabel, offset: number): {
+  windowStart: number
+  windowEnd: number
+  windowLabel: string
+  showNav: boolean
+} {
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+  const now = new Date()
+
+  if (barPeriod === 'Tout') {
+    return { windowStart: 0, windowEnd: Date.now() + 1, windowLabel: 'Total global', showNav: false }
+  }
+
+  if (barPeriod === 'Semaine') {
+    const monday = getMondayOfCurrentWeek()
+    const windowStart = monday + offset * WEEK_MS
+    const windowEnd = windowStart + WEEK_MS
+    const s = new Date(windowStart)
+    const e = new Date(windowEnd - 1)
+    const windowLabel = `${pad(s.getDate())}/${pad(s.getMonth() + 1)} – ${pad(e.getDate())}/${pad(e.getMonth() + 1)}`
+    return { windowStart, windowEnd, windowLabel, showNav: true }
+  }
+
+  if (barPeriod === '1 mois') {
+    const target = new Date(now.getFullYear(), now.getMonth() + offset, 1)
+    const windowStart = target.getTime()
+    const windowEnd = new Date(target.getFullYear(), target.getMonth() + 1, 1).getTime()
+    const windowLabel = `${MONTH_FR_LONG[target.getMonth()]} ${target.getFullYear()}`
+    return { windowStart, windowEnd, windowLabel, showNav: true }
+  }
+
+  // '3 mois'
+  const endDate = new Date(now.getFullYear(), now.getMonth() + 1 + offset * 3, 1)
+  const startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 3, 1)
+  const windowStart = startDate.getTime()
+  const windowEnd = endDate.getTime()
+  const lastDay = new Date(windowEnd - 1)
+  const sy = startDate.getFullYear()
+  const ey = lastDay.getFullYear()
+  const windowLabel = sy === ey
+    ? `${MONTH_FR_ABBR[startDate.getMonth()]} – ${MONTH_FR_ABBR[lastDay.getMonth()]} ${ey}`
+    : `${MONTH_FR_ABBR[startDate.getMonth()]} ${sy} – ${MONTH_FR_ABBR[lastDay.getMonth()]} ${ey}`
+  return { windowStart, windowEnd, windowLabel, showNav: true }
+}
 
 interface Props {
   sets: WorkoutSet[]
@@ -41,36 +94,14 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { width: screenWidth } = useWindowDimensions()
+
+  // ── Graphique ────────────────────────────────────────────────────────────
   const [periodLabel, setPeriodLabel] = useState<string>('1 mois')
-  const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
   const period = labelToPeriod(periodLabel)
 
-  const stats = useMemo(
-    () => computeVolumeStats(sets, exercises, histories, period),
-    [sets, exercises, histories, period]
-  )
+  const [muscleLabel, setMuscleLabel] = useState<string>('Total')
 
-  const hasChartData = useMemo(
-    () => stats.perWeek.some(w => w.volume > 0),
-    [stats.perWeek]
-  )
-
-  const chartData = useMemo(() => ({
-    labels: stats.perWeek.map((w, i) => i % 3 === 0 ? w.weekLabel : ''),
-    datasets: [{ data: stats.perWeek.map(w => Math.max(w.volume, 0)) }],
-  }), [stats.perWeek])
-
-  const isPositive = stats.comparedToPrevious >= 0
-
-  // S02 — sets par muscle cette semaine
-  const setsPerMuscle = useMemo(
-    () => computeSetsPerMuscleWeek(sets, exercises, histories),
-    [sets, exercises, histories]
-  )
-  const maxSetsThisWeek = setsPerMuscle[0]?.sets ?? 1
-
-  // S03 — liste muscles entraînés + évolution
-  const muscleList = useMemo(() => {
+  const availableMuscles = useMemo(() => {
     const trainedExerciseIds = new Set(sets.map(s => s.exercise.id))
     const muscleSet = new Set<string>()
     exercises
@@ -79,23 +110,74 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
     return Array.from(muscleSet).sort()
   }, [sets, exercises])
 
-  const effectiveMuscle = selectedMuscle && muscleList.includes(selectedMuscle)
-    ? selectedMuscle
-    : (muscleList[0] ?? null)
+  const muscleItems = useMemo(() => ['Total', ...availableMuscles], [availableMuscles])
+  const muscleFilter = muscleLabel === 'Total' ? null : muscleLabel
 
-  const muscleHistoryData = useMemo(
-    () => effectiveMuscle
-      ? computeSetsPerMuscleHistory(sets, exercises, histories, effectiveMuscle, 8)
-      : [],
-    [sets, exercises, histories, effectiveMuscle]
-  )
+  // ── Progress bars ────────────────────────────────────────────────────────
+  const [barPeriodLabel, setBarPeriodLabel] = useState<BarPeriodLabel>('Semaine')
+  const [timeOffset, setTimeOffset] = useState(0)
 
-  const hasHistoryData = muscleHistoryData.some(e => e.sets > 0)
+  useEffect(() => { setTimeOffset(0) }, [barPeriodLabel])
 
-  const lineChartData = useMemo(() => ({
-    labels: muscleHistoryData.map((e, i) => i % 2 === 0 ? e.weekLabel : ''),
-    datasets: [{ data: muscleHistoryData.map(e => Math.max(e.sets, 0)) }],
-  }), [muscleHistoryData])
+  // ── Données line chart ───────────────────────────────────────────────────
+  const chartResult = useMemo(() => {
+    if (period === 'all') {
+      return computeMonthlySetsChart(sets, exercises, histories, muscleFilter)
+    }
+    const weeksToShow = period === '3m' ? 12 : 4
+    return computeWeeklySetsChart(sets, exercises, histories, {
+      muscleFilter,
+      weekOffset: 0,
+      weeksToShow,
+    })
+  }, [sets, exercises, histories, period, muscleFilter])
+
+  const chartLabels = useMemo(() => {
+    if (period === '3m') {
+      return chartResult.labels.map((label, i) => (i % 3 === 0 ? label : ''))
+    }
+    return chartResult.labels
+  }, [chartResult.labels, period])
+
+  const hasChartData = chartResult.data.some(v => v > 0)
+
+  const chartData = useMemo(() => ({
+    labels: chartLabels.length > 0 ? chartLabels : [''],
+    datasets: [{ data: chartResult.data.length > 0 ? chartResult.data.map(v => Math.max(v, 0)) : [0] }],
+  }), [chartLabels, chartResult.data])
+
+  // ── Données progress bars ────────────────────────────────────────────────
+  const { windowLabel, setsPerMuscle, hasNext, showNav } = useMemo(() => {
+    const { windowStart, windowEnd, windowLabel: label, showNav } = computeBarWindow(barPeriodLabel, timeOffset)
+
+    const activeHistories = histories.filter(h => h.deletedAt === null)
+    const historyDates = new Map(activeHistories.map(h => [h.id, h.startTime.getTime()]))
+    const activeHistoryIds = new Set(activeHistories.map(h => h.id))
+    const exerciseMuscles = new Map<string, string[]>(
+      exercises.map(e => [e.id, e.muscles] as [string, string[]])
+    )
+
+    const muscleSets = new Map<string, number>()
+    sets.forEach(s => {
+      if (!activeHistoryIds.has(s.history.id)) return
+      const d = historyDates.get(s.history.id) ?? 0
+      if (d < windowStart || d >= windowEnd) return
+      const muscles = exerciseMuscles.get(s.exercise.id) ?? []
+      muscles.forEach(m => {
+        const trimmed = m.trim()
+        if (!trimmed) return
+        muscleSets.set(trimmed, (muscleSets.get(trimmed) ?? 0) + 1)
+      })
+    })
+
+    const result = Array.from(muscleSets.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([muscle, count]) => ({ muscle, sets: count }))
+
+    return { windowLabel: label, setsPerMuscle: result, hasNext: timeOffset < 0, showNav }
+  }, [sets, exercises, histories, barPeriodLabel, timeOffset])
+
+  const maxSets = setsPerMuscle[0]?.sets ?? 1
 
   return (
     <ScrollView
@@ -103,6 +185,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
+      {/* ── Graphique ── */}
       <ChipSelector
         items={PERIOD_LABELS}
         selectedValue={periodLabel}
@@ -110,62 +193,71 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
         allowNone={false}
         noneLabel=""
       />
-
-      <View style={styles.totalCard}>
-        <Text style={styles.totalLabel}>Volume total</Text>
-        <Text style={styles.totalValue}>{formatVolume(stats.total)}</Text>
-        {period !== 'all' && stats.comparedToPrevious !== 0 && (
-          <Text style={[styles.comparison, { color: isPositive ? colors.success : colors.danger }]}>
-            {isPositive ? '↑' : '↓'} {Math.abs(stats.comparedToPrevious)}% vs période précédente
-          </Text>
-        )}
-      </View>
-
-      <Text style={styles.sectionTitle}>Volume par semaine (12 dernières)</Text>
+      <ChipSelector
+        items={muscleItems}
+        selectedValue={muscleLabel}
+        onChange={label => { if (label) setMuscleLabel(label) }}
+        allowNone={false}
+        noneLabel=""
+      />
       {hasChartData ? (
         <View style={styles.chartWrapper}>
-          <BarChart
+          <LineChart
             data={chartData}
             width={screenWidth - spacing.md * 2}
-            height={200}
+            height={220}
             chartConfig={chartConfig}
             style={styles.chart}
             fromZero
-            showValuesOnTopOfBars={false}
-            yAxisLabel=""
-            yAxisSuffix="kg"
+            bezier
             withInnerLines={false}
+            yAxisLabel=""
+            yAxisSuffix=""
           />
         </View>
       ) : (
         <View style={styles.emptyChart}>
-          <Text style={styles.emptyText}>Aucun volume enregistré sur cette période.</Text>
+          <Text style={styles.emptyText}>Aucune donnée pour cette période.</Text>
         </View>
       )}
 
-      {stats.topExercises.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Top exercices par volume</Text>
-          <View style={styles.topList}>
-            {stats.topExercises.map((ex, i) => (
-              <View
-                key={ex.exerciseId}
-                style={[styles.topRow, i < stats.topExercises.length - 1 && styles.topRowBorder]}
-              >
-                <Text style={styles.topRank}>{i + 1}</Text>
-                <Text style={styles.topName} numberOfLines={1}>{ex.name}</Text>
-                <Text style={styles.topVolume}>{formatVolume(ex.volume)}</Text>
-              </View>
-            ))}
-          </View>
-        </>
-      )}
+      {/* ── Progress bars ── */}
+      <ChipSelector
+        items={BAR_PERIOD_LABELS}
+        selectedValue={barPeriodLabel}
+        onChange={label => { if (label) setBarPeriodLabel(label as BarPeriodLabel) }}
+        allowNone={false}
+        noneLabel=""
+      />
+      <View style={styles.barSection}>
+        <View style={styles.barHeader}>
+          {showNav && (
+            <TouchableOpacity
+              testID="nav-prev"
+              style={styles.navBtn}
+              onPress={() => setTimeOffset(o => o - 1)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="chevron-back" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.windowLabel}>{windowLabel}</Text>
+          {showNav && (
+            <TouchableOpacity
+              testID="nav-next"
+              style={[styles.navBtn, !hasNext && styles.navBtnDisabled]}
+              onPress={() => { if (hasNext) setTimeOffset(o => o + 1) }}
+              activeOpacity={hasNext ? 0.7 : 1}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={hasNext ? colors.primary : colors.textSecondary}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
 
-      {/* S02 — Sets par muscle cette semaine */}
-      <Text style={[styles.sectionTitle, styles.sectionSpacingTop]}>
-        Sets par muscle — semaine actuelle
-      </Text>
-      <View style={styles.muscleCard}>
         {setsPerMuscle.length > 0 ? (
           setsPerMuscle.map(entry => (
             <View key={entry.muscle} style={styles.muscleRow}>
@@ -177,54 +269,16 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
                 <View
                   style={[
                     styles.barFill,
-                    { width: `${Math.round((entry.sets / maxSetsThisWeek) * 100)}%` },
+                    { width: `${Math.round((entry.sets / maxSets) * 100)}%` },
                   ]}
                 />
               </View>
             </View>
           ))
         ) : (
-          <Text style={styles.emptyText}>Aucun set enregistré cette semaine.</Text>
+          <Text style={styles.emptyText}>Aucun set enregistré sur cette période.</Text>
         )}
       </View>
-
-      {/* S03 — Évolution par muscle */}
-      {muscleList.length > 0 && (
-        <>
-          <Text style={[styles.sectionTitle, styles.sectionSpacingTop]}>
-            Évolution par muscle
-          </Text>
-          <ChipSelector
-            items={muscleList}
-            selectedValue={effectiveMuscle}
-            onChange={m => { if (m) setSelectedMuscle(m) }}
-            allowNone={false}
-            noneLabel=""
-          />
-          {hasHistoryData ? (
-            <View style={[styles.chartWrapper, styles.sectionSpacingTop]}>
-              <LineChart
-                data={lineChartData}
-                width={screenWidth - spacing.md * 2}
-                height={180}
-                chartConfig={lineChartConfig}
-                style={styles.chart}
-                fromZero
-                withInnerLines={false}
-                yAxisSuffix=""
-                yAxisLabel=""
-                bezier
-              />
-            </View>
-          ) : (
-            <View style={[styles.emptyChart, styles.sectionSpacingTop]}>
-              <Text style={styles.emptyText}>
-                Aucun set enregistré pour {effectiveMuscle} sur les 8 dernières semaines.
-              </Text>
-            </View>
-          )}
-        </>
-      )}
     </ScrollView>
   )
 }
@@ -239,94 +293,52 @@ function useStyles(colors: ThemeColors) {
       padding: spacing.md,
       paddingBottom: spacing.xl,
     },
-    totalCard: {
-      backgroundColor: colors.card,
-      borderRadius: borderRadius.md,
-      padding: spacing.md,
-      alignItems: 'center',
-      marginVertical: spacing.md,
-    },
-    totalLabel: {
-      fontSize: fontSize.sm,
-      color: colors.textSecondary,
-    },
-    totalValue: {
-      fontSize: fontSize.hero,
-      fontWeight: '700',
-      color: colors.primary,
-      marginTop: spacing.xs,
-    },
-    comparison: {
-      fontSize: fontSize.sm,
-      fontWeight: '600',
-      marginTop: spacing.xs,
-    },
-    sectionTitle: {
-      fontSize: fontSize.md,
-      fontWeight: '600',
-      color: colors.text,
-      marginBottom: spacing.sm,
-    },
-    sectionSpacingTop: {
-      marginTop: spacing.lg,
-    },
     chartWrapper: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.md,
       overflow: 'hidden',
-      marginBottom: spacing.lg,
+      marginTop: spacing.md,
     },
     chart: {
       borderRadius: borderRadius.md,
-    },
-    topList: {
-      backgroundColor: colors.card,
-      borderRadius: borderRadius.md,
-      overflow: 'hidden',
-    },
-    topRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: spacing.md,
-    },
-    topRowBorder: {
-      borderBottomWidth: 1,
-      borderBottomColor: colors.separator,
-    },
-    topRank: {
-      fontSize: fontSize.lg,
-      fontWeight: '700',
-      color: colors.primary,
-      width: 28,
-    },
-    topName: {
-      flex: 1,
-      fontSize: fontSize.md,
-      color: colors.text,
-      marginHorizontal: spacing.sm,
-    },
-    topVolume: {
-      fontSize: fontSize.sm,
-      color: colors.textSecondary,
     },
     emptyChart: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.md,
       padding: spacing.md,
       alignItems: 'center',
-      marginBottom: spacing.lg,
+      marginTop: spacing.md,
     },
     emptyText: {
       fontSize: fontSize.sm,
       color: colors.textSecondary,
       textAlign: 'center',
     },
-    // S02 — muscle week bars
-    muscleCard: {
+    barSection: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.md,
       padding: spacing.md,
+      marginTop: spacing.sm,
       gap: spacing.sm,
+    },
+    barHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: spacing.xs,
+    },
+    windowLabel: {
+      flex: 1,
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.text,
+      textAlign: 'center',
+    },
+    navBtn: {
+      padding: spacing.xs,
+    },
+    navBtnDisabled: {
+      opacity: 0.3,
     },
     muscleRow: {
       gap: spacing.xs,

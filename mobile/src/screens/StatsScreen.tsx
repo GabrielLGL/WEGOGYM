@@ -41,7 +41,6 @@ const STAT_BUTTONS: StatButton[] = [
   { icon: 'time-outline',          label: 'Durée',      route: 'StatsDuration' },
   { icon: 'barbell-outline',       label: 'Volume',     route: 'StatsVolume' },
   { icon: 'calendar-outline',      label: 'Agenda',     route: 'StatsCalendar' },
-  { icon: 'body-outline',          label: 'Muscles',    route: 'StatsRepartition' },
   { icon: 'stats-chart-outline',   label: 'Exercices',  route: 'StatsExercises' },
   { icon: 'resize-outline',        label: 'Mesures',    route: 'StatsMeasurements' },
   { icon: 'list-outline',          label: 'Historique', route: 'StatsHistory' },

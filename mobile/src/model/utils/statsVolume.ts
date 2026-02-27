@@ -3,8 +3,10 @@
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
 import type Exercise from '../models/Exercise'
-import type { StatsPeriod, VolumeStats, VolumeWeekEntry, HeatmapDay } from './statsTypes'
+import type Session from '../models/Session'
+import type { StatsPeriod, VolumeStats, VolumeWeekEntry, HeatmapDay, WeekDayActivity, WeeklyActivityData } from './statsTypes'
 import { getPeriodStart, toDateKey } from './statsDateUtils'
+import { getMondayOfCurrentWeek } from './statsMuscle'
 
 export function computeVolumeStats(
   sets: WorkoutSet[],
@@ -114,4 +116,50 @@ export function buildHeatmapData(histories: History[]): HeatmapDay[] {
 
 export function formatVolume(kg: number): string {
   return `${Math.round(kg).toLocaleString('fr-FR')} kg`
+}
+
+const DAY_LABELS_FR = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'] as const
+const DAY_MS = 24 * 60 * 60 * 1000
+
+export function buildWeeklyActivity(
+  histories: History[],
+  sets: WorkoutSet[],
+  sessions: Session[],
+): WeeklyActivityData {
+  const mondayTs = getMondayOfCurrentWeek()
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayKey = toDateKey(today)
+
+  const sessionNames = new Map(sessions.map(s => [s.id, s.name]))
+
+  return Array.from({ length: 7 }, (_, i): WeekDayActivity => {
+    const dayDate = new Date(mondayTs + i * DAY_MS)
+    const dateKey = toDateKey(dayDate)
+    const isToday = dateKey === todayKey
+    const isPast = dayDate < today
+
+    const dayHistories = histories.filter(h => toDateKey(h.startTime) === dateKey)
+
+    const daySessions = dayHistories.map(h => {
+      const historySets = sets.filter(s => s.history.id === h.id)
+      const setCount = historySets.length
+      const volumeKg = Math.round(historySets.reduce((acc, s) => acc + s.weight * s.reps, 0) * 10) / 10
+      const durationMin = h.endTime != null
+        ? Math.round((h.endTime.getTime() - h.startTime.getTime()) / 60000)
+        : null
+      const sessionName = sessionNames.get(h.session.id) ?? 'Séance'
+      return { sessionName, setCount, volumeKg, durationMin }
+    })
+
+    return {
+      dateKey,
+      dayLabel: DAY_LABELS_FR[i],
+      dayNumber: dayDate.getDate(),
+      isToday,
+      isPast,
+      sessions: daySessions,
+    }
+  })
 }

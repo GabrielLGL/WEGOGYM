@@ -3,10 +3,10 @@
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
 import type Exercise from '../models/Exercise'
-import type { StatsPeriod, MuscleRepartitionEntry, MuscleWeekEntry, MuscleWeekHistoryEntry, WeeklySetsChartResult } from './statsTypes'
+import type { StatsPeriod, MuscleRepartitionEntry, MuscleWeekEntry, MuscleWeekHistoryEntry, WeeklySetsChartResult, MonthlySetsChartResult } from './statsTypes'
 import { getPeriodStart } from './statsDateUtils'
 
-function getMondayOfCurrentWeek(): number {
+export function getMondayOfCurrentWeek(): number {
   const now = new Date()
   const day = now.getDay() // 0=dim, 1=lun, ..., 6=sam
   const diff = (day === 0 ? -6 : 1 - day) // jours à soustraire pour aller au lundi
@@ -165,6 +165,7 @@ export function computeWeeklySetsChart(
   return { labels, data, weekRangeLabel, hasPrev, hasNext }
 }
 
+/** @deprecated Non utilisé depuis la refonte StatsVolumeScreen — candidat à la suppression */
 export function computeSetsPerMuscleHistory(
   sets: WorkoutSet[],
   exercises: Exercise[],
@@ -203,4 +204,72 @@ export function computeSetsPerMuscleHistory(
   }
 
   return result
+}
+
+const MONTH_LABELS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+
+/**
+ * Calcule les séries par mois sur toute l'historique (vue "Tout").
+ * Retourne au maximum les 12 derniers mois.
+ *
+ * @param muscleFilter - null = tous muscles, string = filtre sur un muscle précis
+ */
+export function computeMonthlySetsChart(
+  sets: WorkoutSet[],
+  exercises: Exercise[],
+  histories: History[],
+  muscleFilter: string | null
+): MonthlySetsChartResult {
+  const activeHistories = histories.filter(h => h.deletedAt === null)
+  const historyDates = new Map(activeHistories.map(h => [h.id, h.startTime.getTime()]))
+  const activeHistoryIds = new Set(activeHistories.map(h => h.id))
+  const exerciseMuscles = new Map<string, string[]>(
+    exercises.map(e => [e.id, e.muscles] as [string, string[]])
+  )
+
+  const activeSets = sets.filter(s => activeHistoryIds.has(s.history.id))
+  if (activeSets.length === 0) return { labels: [], data: [] }
+
+  const allTimestamps = activeSets.map(s => historyDates.get(s.history.id) ?? 0)
+  const oldestTimestamp = Math.min(...allTimestamps)
+  const oldestDate = new Date(oldestTimestamp)
+
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth()
+
+  // Collect all months from oldest to current
+  const allMonths: Array<{ year: number; month: number }> = []
+  let y = oldestDate.getFullYear()
+  let m = oldestDate.getMonth()
+  while (y < currentYear || (y === currentYear && m <= currentMonth)) {
+    allMonths.push({ year: y, month: m })
+    m++
+    if (m > 11) { m = 0; y++ }
+  }
+
+  // Keep at most the last 12 months
+  const months = allMonths.slice(-12)
+
+  const labels: string[] = []
+  const data: number[] = []
+
+  for (const { year, month } of months) {
+    labels.push(MONTH_LABELS_FR[month])
+
+    const monthStart = new Date(year, month, 1).getTime()
+    const monthEnd = new Date(year, month + 1, 1).getTime()
+
+    const count = activeSets.filter(s => {
+      const d = historyDates.get(s.history.id) ?? 0
+      if (d < monthStart || d >= monthEnd) return false
+      if (muscleFilter === null) return true
+      const muscles = exerciseMuscles.get(s.exercise.id) ?? []
+      return muscles.some(mu => mu.trim() === muscleFilter)
+    }).length
+
+    data.push(count)
+  }
+
+  return { labels, data }
 }

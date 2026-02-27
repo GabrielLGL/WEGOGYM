@@ -45,4 +45,4 @@ aucune
 ✅ Résolu — 20260227-2230
 
 ## Commit
-[à remplir]
+0c59cd7 feat(screens): enrich muscles screen with weekly sets chart and pagination

@@ -17,10 +17,11 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { database } from '../model'
 import History from '../model/models/History'
 import WorkoutSet from '../model/models/Set'
+import Session from '../model/models/Session'
 import User from '../model/models/User'
 import UserBadge from '../model/models/UserBadge'
 import { BADGES_LIST } from '../model/utils/badgeConstants'
-import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume, buildHeatmapData } from '../model/utils/statsHelpers'
+import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume, buildWeeklyActivity } from '../model/utils/statsHelpers'
 import { xpToNextLevel, formatTonnage } from '../model/utils/gamificationHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -29,7 +30,6 @@ import { useHaptics } from '../hooks/useHaptics'
 import { LevelBadge } from '../components/LevelBadge'
 import { XPProgressBar } from '../components/XPProgressBar'
 import { StreakIndicator } from '../components/StreakIndicator'
-import { HeatmapCalendar } from '../components/HeatmapCalendar'
 import type { RootStackParamList } from '../navigation'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
@@ -63,7 +63,6 @@ const SECTIONS: Section[] = [
       { icon: 'time-outline',          label: 'Durée',               route: 'StatsDuration' },
       { icon: 'barbell-outline',       label: 'Volume',              route: 'StatsVolume' },
       { icon: 'calendar-outline',      label: 'Agenda',              route: 'StatsCalendar' },
-      { icon: 'body-outline',          label: 'Muscles',             route: 'StatsRepartition' },
       { icon: 'trophy-outline',        label: 'Exercices & Records', route: 'StatsExercises' },
       { icon: 'resize-outline',        label: 'Mesures',             route: 'StatsMeasurements' },
       { icon: 'list-outline',          label: 'Historique',          route: 'StatsHistory' },
@@ -91,10 +90,11 @@ interface Props {
   users: User[]
   histories: History[]
   sets: WorkoutSet[]
+  sessions: Session[]
   userBadges: UserBadge[]
 }
 
-function HomeScreenBase({ users, histories, sets, userBadges }: Props) {
+function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<HomeNavigation>()
@@ -110,7 +110,10 @@ function HomeScreenBase({ users, histories, sets, userBadges }: Props) {
     () => computeMotivationalPhrase(histories, sets),
     [histories, sets],
   )
-  const heatmapData = useMemo(() => buildHeatmapData(histories), [histories])
+  const weeklyActivity = useMemo(
+    () => buildWeeklyActivity(histories, sets, sessions),
+    [histories, sets, sessions],
+  )
 
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
@@ -196,10 +199,54 @@ function HomeScreenBase({ users, histories, sets, userBadges }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* ── Card Heatmap ── */}
-      <View style={styles.heatmapCard}>
-        <Text style={styles.sectionTitle}>Activité</Text>
-        <HeatmapCalendar data={heatmapData} />
+      {/* ── Card Activité Semaine ── */}
+      <View style={styles.weeklyCard}>
+        <View style={styles.weeklyHeader}>
+          <Text style={styles.sectionTitle}>Cette semaine</Text>
+          <Text style={styles.weeklySubtitle}>
+            {(() => {
+              const totalSessions = weeklyActivity.reduce((acc, d) => acc + d.sessions.length, 0)
+              if (totalSessions === 0) return 'Aucune séance'
+              const totalVolume = weeklyActivity.reduce(
+                (acc, d) => acc + d.sessions.reduce((a, s) => a + s.volumeKg, 0), 0
+              )
+              return `${totalSessions} séance${totalSessions > 1 ? 's' : ''} · ${Math.round(totalVolume)} kg`
+            })()}
+          </Text>
+        </View>
+        <View style={styles.weekRow}>
+          {weeklyActivity.map((day) => (
+            <View
+              key={day.dateKey}
+              style={[
+                styles.dayChip,
+                day.isToday && styles.dayChipToday,
+                !day.isToday && day.isPast && day.sessions.length === 0 && styles.dayChipRestPast,
+              ]}
+            >
+              <Text style={[styles.dayLabel, day.isToday && styles.dayLabelToday]}>
+                {day.dayLabel}
+              </Text>
+              <Text style={[styles.dayNumber, day.isToday && styles.dayNumberToday]}>
+                {day.dayNumber}
+              </Text>
+              {day.sessions.length > 0 ? (
+                day.sessions.map((s, idx) => (
+                  <View key={idx} style={styles.sessionTag}>
+                    <Text style={styles.sessionName} numberOfLines={1}>{s.sessionName}</Text>
+                    <Text style={styles.sessionMeta}>
+                      {s.setCount} sér{s.durationMin !== null ? ` · ${s.durationMin}m` : ''}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.emptyDay}>
+                  <Text style={styles.emptyDayText}>{day.isPast ? 'Repos' : '—'}</Text>
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
       </View>
 
       {/* ── Sections de tuiles ── */}
@@ -330,12 +377,87 @@ function useStyles(colors: ThemeColors) {
       fontWeight: '700',
       color: colors.primary,
     },
-    // Heatmap Card
-    heatmapCard: {
+    // Weekly Activity Card
+    weeklyCard: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.lg,
       padding: spacing.md,
       marginBottom: spacing.md,
+    },
+    weeklyHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    weeklySubtitle: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+    },
+    weekRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 4,
+    },
+    dayChip: {
+      flex: 1,
+      backgroundColor: colors.cardSecondary,
+      borderRadius: borderRadius.sm,
+      padding: spacing.xs,
+      alignItems: 'center',
+      minHeight: 84,
+    },
+    dayChipToday: {
+      borderWidth: 1.5,
+      borderColor: colors.primary,
+    },
+    dayChipRestPast: {
+      opacity: 0.45,
+    },
+    dayLabel: {
+      fontSize: 9,
+      fontWeight: '600',
+      color: colors.placeholder,
+      letterSpacing: 0.3,
+    },
+    dayLabelToday: {
+      color: colors.primary,
+    },
+    dayNumber: {
+      fontSize: fontSize.xs,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 4,
+    },
+    dayNumberToday: {
+      color: colors.primary,
+    },
+    sessionTag: {
+      backgroundColor: colors.primaryBg,
+      borderRadius: 4,
+      paddingHorizontal: 3,
+      paddingVertical: 2,
+      marginTop: 2,
+      width: '100%',
+    },
+    sessionName: {
+      fontSize: 8,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    sessionMeta: {
+      fontSize: 7,
+      color: colors.textSecondary,
+      marginTop: 1,
+    },
+    emptyDay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyDayText: {
+      fontSize: 9,
+      color: colors.placeholder,
     },
     // Sections
     section: {
@@ -381,6 +503,7 @@ const enhance = withObservables([], () => ({
   users: database.get<User>('users').query().observe(),
   histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
   sets: database.get<WorkoutSet>('sets').query().observe(),
+  sessions: database.get<Session>('sessions').query().observe(),
   userBadges: database.get<UserBadge>('user_badges').query().observe(),
 }))
 
