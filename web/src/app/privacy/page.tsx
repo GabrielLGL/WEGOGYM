@@ -50,10 +50,17 @@ function BulletList({ items }: { items: string[] }) {
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* Skip link — navigation clavier */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-[var(--accent)] focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold"
+      >
+        Aller au contenu principal
+      </a>
       <BackgroundBlobs />
       <ThemeToggle />
 
-      <main className="relative z-[2] py-20 px-6">
+      <main id="main-content" className="relative z-[2] py-20 px-6">
         <div className="max-w-[800px] mx-auto">
 
           {/* Back link */}
@@ -122,6 +129,7 @@ export default function PrivacyPage() {
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-[var(--text-muted)] border-collapse">
+                  <caption className="sr-only">Données personnelles collectées</caption>
                   <thead>
                     <tr className="border-b border-[var(--glass-border)]">
                       <th className="text-left py-3 pr-6 font-semibold text-[var(--text-main)]">
@@ -221,6 +229,7 @@ export default function PrivacyPage() {
                       href={provider.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`Politique de confidentialité de ${provider.label} (nouvel onglet)`}
                       className="text-[var(--accent)] text-xs hover:underline"
                     >
                       Politique de confidentialité → {provider.label}
@@ -336,7 +345,7 @@ export default function PrivacyPage() {
               className="inline-flex items-center gap-2 text-[var(--text-muted)] text-sm
                 font-medium no-underline hover:text-[var(--accent)] transition-colors group"
             >
-              <span className="group-hover:-translate-x-1 transition-transform inline-block">
+              <span aria-hidden="true" className="group-hover:-translate-x-1 transition-transform inline-block">
                 ←
               </span>
               Retour à l&apos;accueil
