@@ -85,15 +85,31 @@ export default function SubscribeSection() {
           </div>
 
           {/* Consentement RGPD */}
-          <label className="flex items-start gap-3 text-left cursor-pointer">
+          <label className="flex items-start gap-3 text-left cursor-pointer select-none">
+            {/* Checkbox native cachée — accessibilité + validation formulaire */}
             <input
               type="checkbox"
               required
               aria-required="true"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 w-4 h-4 shrink-0 rounded accent-[var(--accent)] cursor-pointer"
+              className="sr-only"
             />
+            {/* Checkbox neumorphique custom */}
+            <span
+              aria-hidden="true"
+              className={`mt-0.5 w-5 h-5 shrink-0 rounded-[6px] bg-[var(--bg)] flex items-center justify-center transition-all duration-200 border ${
+                consent
+                  ? "shadow-neu-in border-[var(--accent)]"
+                  : "shadow-neu-out border-white/10"
+              }`}
+            >
+              {consent && (
+                <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
+                  <path d="M1 4l3 3 6-6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </span>
             <span className="text-[var(--text-muted)] text-xs leading-relaxed">
               J&apos;accepte la{" "}
               <Link href="/privacy" className="text-[var(--accent)] hover:underline">
