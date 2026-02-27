@@ -62,7 +62,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
             <KoreLogo size={30} gradientId="navGrad" />
             <span className="gradient-text font-black text-base tracking-widest">KORE</span>
           </a>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 mr-[58px] sm:mr-0">
             <a href="#features" className="hidden sm:inline text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--text-main)] transition-colors">
               Fonctionnalités
             </a>
@@ -124,7 +124,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
         </p>
 
         {/* Stats row */}
-        <div className="hero-fade grid grid-cols-3 gap-6 sm:gap-10 mb-10 max-w-lg mx-auto w-full">
+        <div className="hero-fade grid grid-cols-3 gap-3 sm:gap-10 mb-10 max-w-lg mx-auto w-full">
           {[
             { value: "100%", label: "Offline" },
             { value: "0€", label: "Plan gratuit" },
@@ -141,13 +141,15 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
           ))}
         </div>
 
-        {/* CTA button */}
-        <a
-          href="#download"
-          className="hero-fade btn-liquid text-white px-10 py-4 rounded-full font-extrabold text-lg uppercase tracking-widest no-underline"
-        >
-          Rejoindre la beta
-        </a>
+        {/* CTA button — wrapper hero-fade évite le conflit d'animation avec btn-liquid */}
+        <div className="hero-fade">
+          <a
+            href="#download"
+            className="btn-liquid text-white px-10 py-4 rounded-full font-extrabold text-lg uppercase tracking-widest no-underline"
+          >
+            Rejoindre la beta
+          </a>
+        </div>
 
         <SocialProof count={subscriberCount} />
       </header>

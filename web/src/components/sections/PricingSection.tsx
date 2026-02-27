@@ -23,7 +23,7 @@ export default function PricingSection() {
             >
               {plan.highlighted && (
                 <div className="text-[var(--accent)] text-xs font-extrabold uppercase tracking-widest mb-3">
-                  Le plus populaire
+                  Recommandé
                 </div>
               )}
               <h3 className="text-xl font-bold mb-1">{plan.name}</h3>

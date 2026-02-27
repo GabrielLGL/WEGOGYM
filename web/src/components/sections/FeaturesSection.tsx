@@ -15,7 +15,7 @@ export default function FeaturesSection() {
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="reveal bg-[var(--bg)] p-10 rounded-[30px] shadow-neu-out border border-transparent
+              className="reveal bg-[var(--bg)] p-6 sm:p-10 rounded-[30px] shadow-neu-out border border-transparent
                 transition-all duration-400 text-left
                 hover:border-[var(--accent-glow)] hover:-translate-y-2 hover:rotate-x-[2deg] hover:rotate-y-[-2deg]"
               style={{ perspective: "1000px" }}

@@ -9,7 +9,7 @@ function computeToken(email: string): string {
 
 export async function GET(request: NextRequest) {
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.com";
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.net";
   const { searchParams } = new URL(request.url);
   const email = searchParams.get("email") ?? "";
   const token = searchParams.get("token") ?? "";

@@ -35,7 +35,7 @@ export const PRICING: PricingPlan[] = [
       "Export de données",
       "Support prioritaire",
     ],
-    cta: "Essai gratuit 7 jours",
+    cta: "Rejoindre la beta",
     highlighted: true,
   },
   {
@@ -48,7 +48,7 @@ export const PRICING: PricingPlan[] = [
       "2 mois offerts",
       "Accès aux nouveautés en avant-première",
     ],
-    cta: "Économiser 33%",
+    cta: "Rejoindre la beta",
     highlighted: false,
   },
 ];

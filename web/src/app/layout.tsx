@@ -9,8 +9,16 @@ const outfit = Outfit({
   weight: ["300", "500", "700", "900"],
 });
 
+// Guard: never use a Vercel preview URL as metadataBase (NEXT_PUBLIC_SITE_URL
+// can be set to the deployment URL in the Vercel dashboard by mistake).
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const SITE_URL =
+  rawSiteUrl && !rawSiteUrl.includes(".vercel.app")
+    ? rawSiteUrl
+    : "https://kore-app.net";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.net"),
+  metadataBase: new URL(SITE_URL),
   title: "Kore — Ton coach muscu dans ta poche",
   description:
     "Suis tes programmes, enregistre tes performances et progresse séance après séance. Application de musculation 100% offline, rapide et intuitive.",
