@@ -104,4 +104,7 @@ export function computeWeeklySetsChart(
 Aucune dépendance sur d'autres groupes.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260227-2220
+
+## Résolution
+Rapport do : docs/bmad/do/20260227-2220-feat-weekly-sets-chart-helper.md

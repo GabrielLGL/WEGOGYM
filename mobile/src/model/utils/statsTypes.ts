@@ -73,3 +73,11 @@ export interface HeatmapDay {
   count: number      // 0 = repos, 1+ = nombre de seances
   dayOfWeek: number  // 0=lundi ... 6=dimanche (ISO)
 }
+
+export interface WeeklySetsChartResult {
+  labels: string[]        // ex: ["03/02", "10/02", "17/02", "24/02"] — lundi de chaque semaine
+  data: number[]          // nombre de séries par semaine
+  weekRangeLabel: string  // ex: "03/02 – 02/03" (plage affichée)
+  hasPrev: boolean        // peut-on reculer encore ?
+  hasNext: boolean        // peut-on avancer ? (false si fenêtre la plus récente)
+}

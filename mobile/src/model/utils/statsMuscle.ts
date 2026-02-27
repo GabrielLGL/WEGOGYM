@@ -3,7 +3,7 @@
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
 import type Exercise from '../models/Exercise'
-import type { StatsPeriod, MuscleRepartitionEntry, MuscleWeekEntry, MuscleWeekHistoryEntry } from './statsTypes'
+import type { StatsPeriod, MuscleRepartitionEntry, MuscleWeekEntry, MuscleWeekHistoryEntry, WeeklySetsChartResult } from './statsTypes'
 import { getPeriodStart } from './statsDateUtils'
 
 function getMondayOfCurrentWeek(): number {
@@ -90,6 +90,79 @@ export function computeSetsPerMuscleWeek(
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
     .map(([muscle, setsCount]) => ({ muscle, sets: setsCount }))
+}
+
+/**
+ * Calcule les séries par semaine sur une fenêtre paginable de `weeksToShow` semaines.
+ *
+ * @param options.muscleFilter - null = toutes muscles (global), string = filtre sur un muscle
+ * @param options.weekOffset   - 0 = 4 dernières semaines, -1 = les 4 semaines d'avant, etc.
+ * @param options.weeksToShow  - taille de la fenêtre (défaut 4)
+ */
+export function computeWeeklySetsChart(
+  sets: WorkoutSet[],
+  exercises: Exercise[],
+  histories: History[],
+  options: {
+    muscleFilter: string | null
+    weekOffset: number
+    weeksToShow?: number
+  }
+): WeeklySetsChartResult {
+  const weeksToShow = options.weeksToShow ?? 4
+  const { muscleFilter, weekOffset } = options
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+  // Lundi de la semaine courante
+  const currentMonday = getMondayOfCurrentWeek()
+
+  // windowStartMonday : premier lundi de la fenêtre affichée
+  // offset=0  → currentMonday - 3*WEEK_MS (4 dernières semaines)
+  // offset=-1 → currentMonday - 7*WEEK_MS (4 semaines d'avant)
+  const windowStartMonday = currentMonday + (weekOffset * weeksToShow - (weeksToShow - 1)) * WEEK_MS
+
+  // Pré-calcul des maps pour la performance
+  const activeHistories = histories.filter(h => h.deletedAt === null)
+  const historyDates = new Map(activeHistories.map(h => [h.id, h.startTime.getTime()]))
+  const activeHistoryIds = new Set(activeHistories.map(h => h.id))
+  const exerciseMuscles = new Map<string, string[]>(
+    exercises.map(e => [e.id, e.muscles] as [string, string[]])
+  )
+
+  const labels: string[] = []
+  const data: number[] = []
+
+  for (let i = 0; i < weeksToShow; i++) {
+    const weekStart = windowStartMonday + i * WEEK_MS
+    const weekEnd = weekStart + WEEK_MS
+    const weekDate = new Date(weekStart)
+    const weekLabel = `${String(weekDate.getDate()).padStart(2, '0')}/${String(weekDate.getMonth() + 1).padStart(2, '0')}`
+    labels.push(weekLabel)
+
+    const count = sets.filter(s => {
+      if (!activeHistoryIds.has(s.history.id)) return false
+      const d = historyDates.get(s.history.id) ?? 0
+      if (d < weekStart || d >= weekEnd) return false
+      if (muscleFilter === null) return true
+      const muscles = exerciseMuscles.get(s.exercise.id) ?? []
+      return muscles.some(m => m.trim() === muscleFilter)
+    }).length
+
+    data.push(count)
+  }
+
+  // Label de plage : "DD/MM – DD/MM" (premier lundi → dernier dimanche)
+  const lastWeekSunday = new Date(windowStartMonday + weeksToShow * WEEK_MS - 1)
+  const firstDate = new Date(windowStartMonday)
+  const weekRangeLabel =
+    `${String(firstDate.getDate()).padStart(2, '0')}/${String(firstDate.getMonth() + 1).padStart(2, '0')}` +
+    ` – ` +
+    `${String(lastWeekSunday.getDate()).padStart(2, '0')}/${String(lastWeekSunday.getMonth() + 1).padStart(2, '0')}`
+
+  const hasNext = weekOffset < 0   // peut avancer si pas sur la fenêtre la plus récente
+  const hasPrev = true             // on laisse toujours reculer (pas de limite connue des données)
+
+  return { labels, data, weekRangeLabel, hasPrev, hasNext }
 }
 
 export function computeSetsPerMuscleHistory(
