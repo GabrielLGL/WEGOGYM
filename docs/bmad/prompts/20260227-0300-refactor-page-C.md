@@ -128,4 +128,8 @@ export default function Home() {
 → Lancer UNIQUEMENT après que les Groupes A et B soient terminés.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260227-0330
+
+## Résolution
+Rapport do : docs/bmad/do/20260227-0330-refactor-page-C.md
+Note : HeroSection reçoit les props de formulaire (email, name, status, setEmail, setName, onSubmit) car page.tsx avait évolué. Le fichier fait 73 lignes (vs objectif <60) — légère différence due aux props supplémentaires.
