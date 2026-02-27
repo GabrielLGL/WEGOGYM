@@ -146,7 +146,7 @@ export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
                   Kore. On te tiendra au courant dès qu&apos;on lance.
                 </p>
 
-                {/* Feature Cards — neumorphic inset */}
+                {/* Feature Timeline */}
                 <table
                   role="presentation"
                   cellPadding="0"
@@ -156,85 +156,106 @@ export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
                   <tbody>
                     {[
                       {
-                        num: "01",
                         color: accent,
                         title: "Programmes sur mesure",
                         desc: "Crée tes propres routines",
                       },
                       {
-                        num: "02",
                         color: teal,
                         title: "Suivi de performance",
                         desc: "Chaque serie, chaque rep",
                       },
                       {
-                        num: "03",
                         color: accent,
                         title: "100% Offline",
                         desc: "Pas besoin de wifi à la salle",
                       },
                       {
-                        num: "04",
                         color: teal,
                         title: "Progression visible",
                         desc: "Graphiques et stats détaillés",
                       },
                     ].map((item, i) => (
                       <tr key={i}>
-                        <td style={{ paddingBottom: "10px" }}>
-                          <div
-                            style={{
-                              backgroundColor: cardBg,
-                              borderRadius: "14px",
-                              padding: "14px 16px",
-                              boxShadow: shadowInset,
-                              display: "flex",
-                              alignItems: "flex-start",
-                              gap: "12px",
-                            }}
+                        <td style={{ padding: "0" }}>
+                          <table
+                            role="presentation"
+                            cellPadding="0"
+                            cellSpacing="0"
+                            style={{ width: "100%" }}
                           >
-                            <span
-                              style={{
-                                display: "inline-block",
-                                minWidth: "36px",
-                                width: "36px",
-                                height: "36px",
-                                backgroundColor: item.color,
-                                borderRadius: "10px",
-                                color: "#FFFFFF",
-                                fontSize: "11px",
-                                fontWeight: 900,
-                                textAlign: "center",
-                                lineHeight: "36px",
-                                letterSpacing: "0.5px",
-                                flexShrink: 0,
-                              }}
-                            >
-                              {item.num}
-                            </span>
-                            <span style={{ paddingTop: "2px" }}>
-                              <span
-                                style={{
-                                  color: textMain,
-                                  fontSize: "14px",
-                                  fontWeight: 700,
-                                  display: "block",
-                                }}
-                              >
-                                {item.title}
-                              </span>
-                              <span
-                                style={{
-                                  color: textMuted,
-                                  fontSize: "13px",
-                                  display: "block",
-                                  marginTop: "3px",
-                                }}
-                              >
-                                {item.desc}
-                              </span>
-                            </span>
-                          </div>
+                            <tbody>
+                              <tr>
+                                {/* Col gauche — dot + ligne verticale */}
+                                <td
+                                  style={{
+                                    width: "32px",
+                                    verticalAlign: "top",
+                                    textAlign: "center",
+                                    paddingTop: "2px",
+                                    paddingBottom: "0",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      width: "12px",
+                                      height: "12px",
+                                      borderRadius: "6px",
+                                      backgroundColor: item.color,
+                                      border: `2px solid ${bg}`,
+                                      boxShadow: `0 0 0 2px ${item.color}`,
+                                      margin: "0 auto",
+                                    }}
+                                  />
+                                  {i < 3 && (
+                                    <div
+                                      style={{
+                                        width: "2px",
+                                        height: "44px",
+                                        backgroundColor: item.color + "40",
+                                        margin: "4px auto 0 auto",
+                                      }}
+                                    />
+                                  )}
+                                </td>
+                                {/* Col droite — contenu */}
+                                <td
+                                  style={{
+                                    paddingLeft: "14px",
+                                    paddingBottom: i < 3 ? "0" : "0",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      height: "1px",
+                                      background: `linear-gradient(90deg, ${item.color}80, transparent)`,
+                                      marginBottom: "8px",
+                                    }}
+                                  />
+                                  <span
+                                    style={{
+                                      color: textMain,
+                                      fontSize: "14px",
+                                      fontWeight: 700,
+                                      display: "block",
+                                    }}
+                                  >
+                                    {item.title}
+                                  </span>
+                                  <span
+                                    style={{
+                                      color: textMuted,
+                                      fontSize: "13px",
+                                      display: "block",
+                                      marginTop: "3px",
+                                    }}
+                                  >
+                                    {item.desc}
+                                  </span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </td>
                       </tr>
                     ))}
