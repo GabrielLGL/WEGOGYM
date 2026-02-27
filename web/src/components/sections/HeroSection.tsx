@@ -49,6 +49,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
     <>
       {/* ===== STICKY NAV ===== */}
       <nav
+        aria-label="Navigation principale"
         className={`fixed top-0 left-0 right-0 z-50 py-3 transition-all duration-300 ${
           navVisible
             ? "translate-y-0 bg-[var(--bg)] shadow-[0_2px_20px_rgba(0,0,0,0.08)]"
@@ -56,7 +57,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
         }`}
       >
         <div className="max-w-[1100px] mx-auto px-6 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 no-underline">
+          <a href="/" className="flex items-center gap-2 no-underline">
             <KoreLogo size={30} gradientId="navGrad" />
             <span className="gradient-text font-black text-base tracking-widest">KORE</span>
           </a>

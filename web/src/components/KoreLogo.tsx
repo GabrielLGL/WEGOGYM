@@ -12,8 +12,7 @@ export default function KoreLogo({ size = 50, className = "", gradientId = "kore
       height={size}
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Logo Kore"
+      aria-hidden="true"
     >
       <defs>
         <linearGradient id={gradientId} x1="0%" y1="100%" x2="100%" y2="0%">
