@@ -31,4 +31,4 @@ aucune
 ✅ Résolu — 20260228-0002
 
 ## Commit
-[sera rempli]
+a13589f chore(homescreen): move Agenda to Entraînement, rename Bibliothèque tile
