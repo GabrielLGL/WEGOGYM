@@ -71,4 +71,7 @@ export default nextConfig;
 Aucune dépendance — peut tourner en parallèle avec Groupes B et C.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260227-1910
+
+## Résolution
+Rapport do : docs/bmad/do/20260227-1910-feat-security-headers.md
