@@ -79,4 +79,7 @@ APRÈS : "Pour te désinscrire, réponds à cet email."
 Aucune dépendance — peut tourner en parallèle avec Groupes A et C.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260227-1920
+
+## Résolution
+Rapport do : docs/bmad/do/20260227-1920-fix-email-accents.md

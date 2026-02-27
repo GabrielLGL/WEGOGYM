@@ -111,7 +111,7 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
                     fontWeight: 500,
                   }}
                 >
-                  Bienvenue dans la communaute Kore
+                  Bienvenue dans la communauté Kore
                 </p>
               </div>
 
@@ -125,8 +125,8 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
                     margin: "0 0 24px 0",
                   }}
                 >
-                  Merci de nous rejoindre ! Tu fais partie des premiers a suivre
-                  Kore. On te tient au courant des qu&apos;on lance.
+                  Merci de nous rejoindre ! Tu fais partie des premiers à suivre
+                  Kore. On te tiendra au courant dès qu&apos;on lance.
                 </p>
 
                 {/* Feature Cards — neumorphic inset */}
@@ -141,7 +141,7 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
                       {
                         emoji: "\u{1F4AA}",
                         title: "Programmes sur mesure",
-                        desc: "Cree tes propres routines",
+                        desc: "Crée tes propres routines",
                       },
                       {
                         emoji: "\u{1F4C8}",
@@ -151,12 +151,12 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
                       {
                         emoji: "\u26A1",
                         title: "100% Offline",
-                        desc: "Pas besoin de wifi a la salle",
+                        desc: "Pas besoin de wifi à la salle",
                       },
                       {
                         emoji: "\u{1F3AF}",
                         title: "Progression visible",
-                        desc: "Graphiques et stats detailles",
+                        desc: "Graphiques et stats détaillés",
                       },
                     ].map((item, i) => (
                       <tr key={i}>
@@ -228,7 +228,7 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
                       letterSpacing: "0.3px",
                     }}
                   >
-                    Decouvrir Kore
+                    Découvrir Kore
                   </a>
                 </div>
               </div>
@@ -247,9 +247,9 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
               }}
             >
               <p style={{ margin: "0 0 4px 0" }}>
-                Tu recois cet email car tu t&apos;es inscrit sur Kore.
+                Tu reçois cet email car tu t&apos;es inscrit sur Kore.
               </p>
-              <span>Pour te desinscrire, reponds a cet email.</span>
+              <span>Pour te désinscrire, réponds à cet email.</span>
             </td>
           </tr>
         </tbody>
