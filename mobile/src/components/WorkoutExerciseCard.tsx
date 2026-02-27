@@ -220,11 +220,15 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
   const handleSaveNote = async () => {
     setIsEditingNote(false)
     if (noteText !== (exercise.notes ?? '')) {
-      await database.write(async () => {
-        await exercise.update(e => {
-          e.notes = noteText
+      try {
+        await database.write(async () => {
+          await exercise.update(e => {
+            e.notes = noteText
+          })
         })
-      })
+      } catch (e) {
+        if (__DEV__) console.error('handleSaveNote error:', e)
+      }
     }
   }
 

@@ -8,7 +8,7 @@ import { ChipSelector } from './ChipSelector'
 import { ExerciseTargetInputs } from './ExerciseTargetInputs'
 import { ExerciseInfoSheet } from './ExerciseInfoSheet'
 import { useHaptics } from '../hooks/useHaptics'
-import { filterExercises } from '../model/utils/databaseHelpers'
+import { filterExercises, parseIntegerInput, parseNumericInput } from '../model/utils/databaseHelpers'
 import { validateWorkoutInput } from '../model/utils/validationHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -100,7 +100,13 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
 
   const handleAdd = async () => {
     if (!isAddValid || !selectedExerciseId) return
-    await onAdd(selectedExerciseId, targetSets, targetReps, targetWeight)
+    const clampedSets = targetSets !== '' ? String(Math.min(Math.max(parseIntegerInput(targetSets), 1), 10)) : ''
+    const clampedWeight = targetWeight !== '' ? String(Math.min(Math.max(parseNumericInput(targetWeight), 0), 999)) : ''
+    try {
+      await onAdd(selectedExerciseId, clampedSets, targetReps, clampedWeight)
+    } catch (e) {
+      if (__DEV__) console.error('handleAdd error:', e)
+    }
   }
 
   const handleExerciseSelect = (exoId: string) => {

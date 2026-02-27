@@ -73,16 +73,24 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     const exo = exercises.find(e => e.id === exerciseId)
     if (!exo) return
 
-    const success = await addExercise(exerciseId, sets, reps, weight, exo)
-    if (success) {
-      setIsAddModalVisible(false)
+    try {
+      const success = await addExercise(exerciseId, sets, reps, weight, exo)
+      if (success) {
+        setIsAddModalVisible(false)
+      }
+    } catch (e) {
+      if (__DEV__) console.error('handleAddExercise error:', e)
     }
   }
 
   const handleUpdateTargets = async () => {
-    const success = await updateTargets()
-    if (success) {
-      setIsEditModalVisible(false)
+    try {
+      const success = await updateTargets()
+      if (success) {
+        setIsEditModalVisible(false)
+      }
+    } catch (e) {
+      if (__DEV__) console.error('handleUpdateTargets error:', e)
     }
   }
 
