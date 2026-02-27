@@ -3,7 +3,7 @@ interface SocialProofProps {
 }
 
 export default function SocialProof({ count }: SocialProofProps) {
-  if (count === null || count === 0) {
+  if (count === null || count < 50) {
     return (
       <div
         className="hero-fade inline-flex items-center gap-2 mt-6 px-5 py-2 rounded-full
