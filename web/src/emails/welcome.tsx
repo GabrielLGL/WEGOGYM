@@ -95,9 +95,18 @@ export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
                   textAlign: "center",
                 }}
               >
-                <div style={{ fontSize: "40px", marginBottom: "14px" }}>
-                  &#127947;
-                </div>
+                <img
+                  src={`${siteUrl}/icon.png`}
+                  alt="Kore"
+                  width={72}
+                  height={72}
+                  style={{
+                    borderRadius: "18px",
+                    marginBottom: "16px",
+                    display: "block",
+                    margin: "0 auto 16px auto",
+                  }}
+                />
                 <h1
                   style={{
                     fontSize: "26px",
@@ -147,22 +156,26 @@ export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
                   <tbody>
                     {[
                       {
-                        emoji: "\u{1F4AA}",
+                        num: "01",
+                        color: accent,
                         title: "Programmes sur mesure",
                         desc: "Crée tes propres routines",
                       },
                       {
-                        emoji: "\u{1F4C8}",
+                        num: "02",
+                        color: teal,
                         title: "Suivi de performance",
                         desc: "Chaque serie, chaque rep",
                       },
                       {
-                        emoji: "\u26A1",
+                        num: "03",
+                        color: accent,
                         title: "100% Offline",
                         desc: "Pas besoin de wifi à la salle",
                       },
                       {
-                        emoji: "\u{1F3AF}",
+                        num: "04",
+                        color: teal,
                         title: "Progression visible",
                         desc: "Graphiques et stats détaillés",
                       },
@@ -175,32 +188,51 @@ export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
                               borderRadius: "14px",
                               padding: "14px 16px",
                               boxShadow: shadowInset,
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: "12px",
                             }}
                           >
                             <span
-                              style={{ fontSize: "16px", marginRight: "10px" }}
-                            >
-                              {item.emoji}
-                            </span>
-                            <span
                               style={{
-                                color: textMain,
-                                fontSize: "14px",
-                                fontWeight: 700,
+                                display: "inline-block",
+                                minWidth: "36px",
+                                width: "36px",
+                                height: "36px",
+                                backgroundColor: item.color,
+                                borderRadius: "10px",
+                                color: "#FFFFFF",
+                                fontSize: "11px",
+                                fontWeight: 900,
+                                textAlign: "center",
+                                lineHeight: "36px",
+                                letterSpacing: "0.5px",
+                                flexShrink: 0,
                               }}
                             >
-                              {item.title}
+                              {item.num}
                             </span>
-                            <span
-                              style={{
-                                color: textMuted,
-                                fontSize: "13px",
-                                display: "block",
-                                marginTop: "3px",
-                                paddingLeft: "26px",
-                              }}
-                            >
-                              {item.desc}
+                            <span style={{ paddingTop: "2px" }}>
+                              <span
+                                style={{
+                                  color: textMain,
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  display: "block",
+                                }}
+                              >
+                                {item.title}
+                              </span>
+                              <span
+                                style={{
+                                  color: textMuted,
+                                  fontSize: "13px",
+                                  display: "block",
+                                  marginTop: "3px",
+                                }}
+                              >
+                                {item.desc}
+                              </span>
                             </span>
                           </div>
                         </td>
