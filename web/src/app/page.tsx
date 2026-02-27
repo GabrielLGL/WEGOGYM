@@ -5,6 +5,7 @@ import KoreLogo from "@/components/KoreLogo";
 import BackgroundBlobs from "@/components/BackgroundBlobs";
 import ThemeToggle from "@/components/ThemeToggle";
 import ScrollReveal from "@/components/ScrollReveal";
+import SocialProof from "@/components/SocialProof";
 
 const FEATURES = [
   {
@@ -213,6 +214,66 @@ export default function Home() {
         >
           Rejoindre la beta
         </a>
+
+        <SocialProof />
+
+        {/* Hero inline form */}
+        <form
+          onSubmit={handleSubmit}
+          className="hero-fade mt-8 space-y-3 w-full max-w-sm mx-auto"
+          aria-label="Formulaire d'inscription rapide"
+        >
+          <div className="bg-[var(--bg)] rounded-full shadow-neu-out p-2.5">
+            <label htmlFor="hero-name" className="sr-only">Prénom (optionnel)</label>
+            <input
+              id="hero-name"
+              type="text"
+              placeholder="Ton prénom (optionnel)"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-transparent border-none py-2.5 px-5 rounded-full shadow-neu-in
+                text-[var(--text-main)] font-inherit text-sm outline-none
+                placeholder:text-[var(--text-muted)] placeholder:opacity-60"
+            />
+          </div>
+
+          <div className="bg-[var(--bg)] rounded-full shadow-neu-out p-2.5">
+            <label htmlFor="hero-email" className="sr-only">Adresse email</label>
+            <input
+              id="hero-email"
+              type="email"
+              placeholder="Ton email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              aria-required="true"
+              className="w-full bg-transparent border-none py-2.5 px-5 rounded-full shadow-neu-in
+                text-[var(--text-main)] font-inherit text-sm outline-none
+                placeholder:text-[var(--text-muted)] placeholder:opacity-60"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            className="w-full btn-liquid text-white py-3.5 rounded-full font-extrabold text-sm
+              uppercase tracking-widest border-none cursor-pointer
+              disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {status === "loading" ? "Inscription..." : "S\u2019inscrire à la beta"}
+          </button>
+
+          {status === "success" && (
+            <p role="alert" className="text-[var(--success)] text-xs font-semibold text-center">
+              Inscription réussie ! Vérifie ta boite mail.
+            </p>
+          )}
+          {status === "error" && (
+            <p role="alert" className="text-[var(--danger)] text-xs font-semibold text-center">
+              Une erreur est survenue. Réessaie.
+            </p>
+          )}
+        </form>
       </header>
 
       {/* ===== FEATURES ===== */}
