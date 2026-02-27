@@ -7,6 +7,12 @@ import SubscribeSection from '@/components/sections/SubscribeSection'
 const mockFetch = vi.fn()
 global.fetch = mockFetch
 
+// Helper : remplit email + coche le consentement
+async function fillFormWithConsent(email = 'test@example.com') {
+  await userEvent.type(screen.getByLabelText(/adresse email/i), email)
+  fireEvent.click(screen.getByRole('checkbox'))
+}
+
 describe('SubscribeSection — formulaire inscription', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -21,6 +27,7 @@ describe('SubscribeSection — formulaire inscription', () => {
     expect(screen.getByLabelText(/adresse email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/pr.nom/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /inscrire/i })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox')).toBeInTheDocument()
   })
 
   it('n\'appelle pas fetch si email vide', async () => {
@@ -30,11 +37,19 @@ describe('SubscribeSection — formulaire inscription', () => {
     expect(mockFetch).not.toHaveBeenCalled()
   })
 
+  it('n\'appelle pas fetch si consentement non coché', async () => {
+    render(<SubscribeSection />)
+    await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+    // Ne coche pas la case
+    fireEvent.submit(screen.getByRole('form', { name: /formulaire d'inscription/i }))
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
   it('affiche "Inscription..." pendant le chargement', async () => {
     mockFetch.mockReturnValue(new Promise(() => {}))
 
     render(<SubscribeSection />)
-    await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+    await fillFormWithConsent()
 
     const form = screen.getByRole('form', { name: /formulaire d'inscription/i })
     fireEvent.submit(form)
@@ -46,7 +61,7 @@ describe('SubscribeSection — formulaire inscription', () => {
     mockFetch.mockResolvedValue({ ok: true })
 
     render(<SubscribeSection />)
-    await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+    await fillFormWithConsent()
 
     const form = screen.getByRole('form', { name: /formulaire d'inscription/i })
     fireEvent.submit(form)
@@ -59,7 +74,7 @@ describe('SubscribeSection — formulaire inscription', () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 })
 
     render(<SubscribeSection />)
-    await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+    await fillFormWithConsent()
 
     const form = screen.getByRole('form', { name: /formulaire d'inscription/i })
     fireEvent.submit(form)
@@ -74,6 +89,7 @@ describe('SubscribeSection — formulaire inscription', () => {
     render(<SubscribeSection />)
     await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
     await userEvent.type(screen.getByLabelText(/pr.nom/i), 'Gabriel')
+    fireEvent.click(screen.getByRole('checkbox'))
 
     const form = screen.getByRole('form', { name: /formulaire d'inscription/i })
     fireEvent.submit(form)
@@ -91,7 +107,7 @@ describe('SubscribeSection — formulaire inscription', () => {
     mockFetch.mockResolvedValue({ ok: false, status: 429 })
 
     render(<SubscribeSection />)
-    await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+    await fillFormWithConsent()
 
     fireEvent.submit(screen.getByRole('form', { name: /formulaire d'inscription/i }))
 
@@ -103,7 +119,7 @@ describe('SubscribeSection — formulaire inscription', () => {
     mockFetch.mockResolvedValue({ ok: false, status: 409 })
 
     render(<SubscribeSection />)
-    await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+    await fillFormWithConsent()
 
     fireEvent.submit(screen.getByRole('form', { name: /formulaire d'inscription/i }))
 

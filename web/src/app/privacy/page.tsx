@@ -112,10 +112,10 @@ export default function PrivacyPage() {
                   <strong className="text-[var(--text-main)]">Kore App</strong>
                   <br />
                   Email : <a
-                    href="mailto:contact@kore-app.com"
+                    href="mailto:contact@kore-app.net"
                     className="text-[var(--accent)] hover:underline"
                   >
-                    contact@kore-app.com
+                    contact@kore-app.net
                   </a>
                 </p>
               </div>
@@ -211,6 +211,13 @@ export default function PrivacyPage() {
                     url: "https://vercel.com/legal/privacy-policy",
                     label: "vercel.com",
                   },
+                  {
+                    name: "Google LLC (Google Fonts)",
+                    role: "Chargement de la police Outfit via next/font/google — une requête est effectuée vers les serveurs de Google lors du build, ce qui peut entraîner le transfert de l'adresse IP vers des serveurs américains",
+                    location: "États-Unis — transfert encadré par les clauses contractuelles types (CCT) de Google",
+                    url: "https://policies.google.com/privacy",
+                    label: "policies.google.com",
+                  },
                 ].map((provider) => (
                   <div
                     key={provider.name}
@@ -259,10 +266,10 @@ export default function PrivacyPage() {
                 <p className="text-[var(--text-muted)] text-sm leading-relaxed">
                   Pour exercer tes droits, contacte-nous à{" "}
                   <a
-                    href="mailto:contact@kore-app.com"
+                    href="mailto:contact@kore-app.net"
                     className="text-[var(--accent)] hover:underline"
                   >
-                    contact@kore-app.com
+                    contact@kore-app.net
                   </a>
                   . Nous répondrons dans un délai de 30 jours.
                   <br /><br />

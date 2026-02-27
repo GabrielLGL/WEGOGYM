@@ -20,7 +20,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="fixed top-5 right-5 z-[100] w-[50px] h-[50px] sm:w-[60px] sm:h-[60px] rounded-full
+      className="fixed top-3 right-3 sm:top-5 sm:right-5 z-[100] w-[50px] h-[50px] sm:w-[60px] sm:h-[60px] rounded-full
         bg-[var(--bg)] border-none cursor-pointer shadow-neu-out
         flex items-center justify-center text-2xl
         transition-all duration-300

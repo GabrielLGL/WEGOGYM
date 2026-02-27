@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function SubscribeSection() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "duplicate" | "ratelimit">("idle");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !consent) return;
 
     setStatus("loading");
 
@@ -24,6 +26,7 @@ export default function SubscribeSection() {
         setStatus("success");
         setEmail("");
         setName("");
+        setConsent(false);
       } else if (res.status === 429) {
         setStatus("ratelimit");
       } else if (res.status === 409) {
@@ -81,10 +84,29 @@ export default function SubscribeSection() {
             />
           </div>
 
+          {/* Consentement RGPD */}
+          <label className="flex items-start gap-3 text-left cursor-pointer">
+            <input
+              type="checkbox"
+              required
+              aria-required="true"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="mt-0.5 w-4 h-4 shrink-0 rounded accent-[var(--accent)] cursor-pointer"
+            />
+            <span className="text-[var(--text-muted)] text-xs leading-relaxed">
+              J&apos;accepte la{" "}
+              <Link href="/privacy" className="text-[var(--accent)] hover:underline">
+                politique de confidentialité
+              </Link>{" "}
+              et souhaite recevoir des nouvelles de Kore.
+            </span>
+          </label>
+
           {/* Submit */}
           <button
             type="submit"
-            aria-disabled={status === "loading"}
+            aria-disabled={status === "loading" || !consent}
             tabIndex={status === "loading" ? -1 : 0}
             className="w-full btn-liquid text-white py-4 rounded-full font-extrabold text-base
               uppercase tracking-widest border-none cursor-pointer

@@ -2,7 +2,7 @@ export default function BackgroundBlobs() {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
       <div
-        className="absolute rounded-full blur-[60px] opacity-25 animate-[floatBlob_10s_infinite_alternate_ease-in-out]"
+        className="absolute rounded-full blur-[40px] opacity-25 animate-[floatBlob_10s_infinite_alternate_ease-in-out]"
         style={{
           width: "50vw",
           height: "50vw",
@@ -13,7 +13,7 @@ export default function BackgroundBlobs() {
         }}
       />
       <div
-        className="absolute rounded-full blur-[60px] opacity-25 animate-[floatBlob_10s_infinite_alternate_ease-in-out]"
+        className="absolute rounded-full blur-[40px] opacity-25 animate-[floatBlob_10s_infinite_alternate_ease-in-out]"
         style={{
           width: "40vw",
           height: "40vw",

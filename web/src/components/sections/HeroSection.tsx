@@ -27,6 +27,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
   }, []);
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = setInterval(() => {
       setPhase("out");
       t1Ref.current = setTimeout(() => {
@@ -70,7 +71,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
             </a>
             <a
               href="#download"
-              className="px-5 py-2 rounded-full bg-[var(--accent)] text-white text-sm font-bold no-underline
+              className="px-6 py-2.5 rounded-full bg-[var(--accent)] text-white text-sm font-bold no-underline
                 hover:-translate-y-0.5 hover:shadow-[0_4px_15px_var(--accent-glow)] transition-all duration-200"
             >
               S&apos;inscrire
@@ -150,6 +151,27 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
 
         <SocialProof count={subscriberCount} />
       </header>
+
+      {/* ===== MOBILE NAV CHIPS ===== */}
+      <nav
+        aria-label="Navigation mobile"
+        className="sm:hidden relative z-[2] flex gap-3 justify-center px-6 pb-6 -mt-4"
+      >
+        {[
+          { href: "#features", label: "Fonctionnalités" },
+          { href: "#pricing", label: "Tarifs" },
+          { href: "#download", label: "S\u2019inscrire" },
+        ].map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            className="px-4 py-2 rounded-full bg-[var(--bg)] shadow-neu-out text-[var(--text-muted)]
+              text-sm font-medium no-underline hover:text-[var(--accent)] transition-colors whitespace-nowrap"
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
     </>
   );
 }
