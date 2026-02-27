@@ -42,8 +42,6 @@ import { useHaptics } from '../hooks/useHaptics'
 import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
 import { WorkoutSummarySheet } from '../components/WorkoutSummarySheet'
-import { MilestoneCelebration } from '../components/MilestoneCelebration'
-import { BadgeCelebration } from '../components/BadgeCelebration'
 import { AlertDialog } from '../components/AlertDialog'
 import RestTimer from '../components/RestTimer'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -85,10 +83,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const [startErrorVisible, setStartErrorVisible] = useState(false)
   const [durationSeconds, setDurationSeconds] = useState(0)
   const [milestones, setMilestones] = useState<MilestoneEvent[]>([])
-  const [milestoneVisible, setMilestoneVisible] = useState(false)
   const [newBadges, setNewBadges] = useState<BadgeDefinition[]>([])
-  const [badgeCelebrationVisible, setBadgeCelebrationVisible] = useState(false)
-  const badgeCelebrationWasOpenRef = useRef(false)
   const [sessionXPGained, setSessionXPGained] = useState(0)
   const [newLevelResult, setNewLevelResult] = useState(1)
   const [newStreakResult, setNewStreakResult] = useState(0)
@@ -105,45 +100,24 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet, unvalidateSet } =
     useWorkoutState(sessionExercises, historyId)
 
-  // Quand le résumé se ferme : milestone → badge → home
+  // Quand le résumé se ferme : naviguer vers Home avec les célébrations en params
   useEffect(() => {
     if (summaryVisible) {
       summaryWasOpenRef.current = true
     } else if (summaryWasOpenRef.current) {
       summaryWasOpenRef.current = false
-      if (milestones.length > 0) {
-        setMilestoneVisible(true)
-        haptics.onSuccess()
-      } else if (newBadges.length > 0) {
-        setBadgeCelebrationVisible(true)
-        haptics.onSuccess()
-      } else {
-        navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
-      }
+      navigation.reset({
+        index: 0,
+        routes: [{
+          name: 'Home',
+          params: { celebrations: milestones.length > 0 || newBadges.length > 0
+            ? { milestones, badges: newBadges }
+            : undefined
+          },
+        }],
+      })
     }
-  }, [summaryVisible, navigation, milestones.length, newBadges.length, haptics])
-
-  // Quand le milestone se ferme : badge → home
-  useEffect(() => {
-    if (!milestoneVisible && milestones.length > 0 && !summaryVisible && summaryWasOpenRef.current === false) {
-      if (newBadges.length > 0) {
-        setBadgeCelebrationVisible(true)
-        haptics.onSuccess()
-      } else {
-        navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
-      }
-    }
-  }, [milestoneVisible, milestones.length, summaryVisible, navigation, newBadges.length, haptics])
-
-  // Quand la célébration badge se ferme : home
-  useEffect(() => {
-    if (badgeCelebrationVisible) {
-      badgeCelebrationWasOpenRef.current = true
-    } else if (badgeCelebrationWasOpenRef.current) {
-      badgeCelebrationWasOpenRef.current = false
-      navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
-    }
-  }, [badgeCelebrationVisible, navigation])
+  }, [summaryVisible, navigation, milestones, newBadges])
 
   const completedSets = Object.keys(validatedSets).length
   const totalSetsTarget = sessionExercises.reduce((sum, se) => sum + (se.setsTarget ?? 0), 0)
@@ -196,7 +170,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const handleClose = () => {
     haptics.onPress()
     setSummaryVisible(false)
-    // La navigation vers Home est gérée par le useEffect ci-dessus
+    // La navigation vers Home (avec célébrations) est gérée par le useEffect ci-dessus
   }
 
   const handleConfirmEnd = async () => {
@@ -492,19 +466,6 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         recapComparison={recapComparison}
       />
 
-      {/* Celebration milestone */}
-      <MilestoneCelebration
-        visible={milestoneVisible}
-        milestone={milestones[0] ?? null}
-        onClose={() => setMilestoneVisible(false)}
-      />
-
-      {/* Celebration badge */}
-      <BadgeCelebration
-        visible={badgeCelebrationVisible}
-        badge={newBadges[newBadges.length - 1] ?? null}
-        onClose={() => setBadgeCelebrationVisible(false)}
-      />
     </SafeAreaView>
   )
 }

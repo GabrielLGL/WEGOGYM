@@ -544,7 +544,7 @@ describe('WorkoutContent', () => {
 
       await waitFor(() => {
         expect(navigation.reset).toHaveBeenCalledWith(
-          expect.objectContaining({ routes: [{ name: 'Home' }] })
+          expect.objectContaining({ routes: [expect.objectContaining({ name: 'Home' })] })
         )
       })
     })

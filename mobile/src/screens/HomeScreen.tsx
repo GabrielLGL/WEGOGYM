@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -11,8 +11,9 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import type { RouteProp } from '@react-navigation/native'
 
 import { database } from '../model'
 import History from '../model/models/History'
@@ -23,6 +24,10 @@ import UserBadge from '../model/models/UserBadge'
 import { BADGES_LIST } from '../model/utils/badgeConstants'
 import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume, buildWeeklyActivity } from '../model/utils/statsHelpers'
 import { xpToNextLevel, formatTonnage } from '../model/utils/gamificationHelpers'
+import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
+import type { BadgeDefinition } from '../model/utils/badgeConstants'
+import { MilestoneCelebration } from '../components/MilestoneCelebration'
+import { BadgeCelebration } from '../components/BadgeCelebration'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
@@ -35,6 +40,13 @@ import type { RootStackParamList } from '../navigation'
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 type HomeNavigation = NativeStackNavigationProp<RootStackParamList, 'Home'>
+type HomeRoute = RouteProp<RootStackParamList, 'Home'>
+
+// ─── Célébrations ─────────────────────────────────────────────────────────────
+
+type CelebrationItem =
+  | { type: 'milestone'; data: MilestoneEvent }
+  | { type: 'badge'; data: BadgeDefinition }
 
 // ─── Sections & Tuiles ───────────────────────────────────────────────────────
 
@@ -96,7 +108,35 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<HomeNavigation>()
+  const route = useRoute<HomeRoute>()
   const haptics = useHaptics()
+
+  const [celebrationQueue, setCelebrationQueue] = useState<CelebrationItem[]>([])
+  const [currentCelebration, setCurrentCelebration] = useState<CelebrationItem | null>(null)
+
+  useEffect(() => {
+    const celebrations = route.params?.celebrations
+    if (!celebrations) return
+    const queue: CelebrationItem[] = [
+      ...celebrations.milestones.map(m => ({ type: 'milestone' as const, data: m })),
+      ...celebrations.badges.map(b => ({ type: 'badge' as const, data: b })),
+    ]
+    if (queue.length === 0) return
+    setCurrentCelebration(queue[0])
+    setCelebrationQueue(queue.slice(1))
+    navigation.setParams({ celebrations: undefined })
+  }, [route.params?.celebrations, navigation])
+
+  const handleCloseCelebration = () => {
+    setCelebrationQueue(prev => {
+      if (prev.length > 0) {
+        setCurrentCelebration(prev[0])
+        return prev.slice(1)
+      }
+      setCurrentCelebration(null)
+      return prev
+    })
+  }
 
   const user = users[0] ?? null
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
@@ -267,6 +307,19 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
         </View>
       ))}
     </ScrollView>
+
+    <MilestoneCelebration
+      visible={currentCelebration?.type === 'milestone'}
+      milestone={currentCelebration?.type === 'milestone' ? currentCelebration.data : null}
+      onClose={handleCloseCelebration}
+    />
+
+    <BadgeCelebration
+      visible={currentCelebration?.type === 'badge'}
+      badge={currentCelebration?.type === 'badge' ? currentCelebration.data : null}
+      onClose={handleCloseCelebration}
+    />
+
     </LinearGradient>
   )
 }

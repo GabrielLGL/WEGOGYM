@@ -29,10 +29,12 @@ import ProgramDetailScreen from '../screens/ProgramDetailScreen'
 import { database } from '../model'
 import User from '../model/models/User'
 import ExerciseHistoryScreen from '../screens/ExerciseHistoryScreen'
+import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
+import type { BadgeDefinition } from '../model/utils/badgeConstants'
 
 export type RootStackParamList = {
   Onboarding: undefined;
-  Home: undefined;
+  Home: { celebrations?: { milestones: MilestoneEvent[]; badges: BadgeDefinition[] } } | undefined;
   Badges: undefined;
   Programs: undefined;
   Exercices: undefined;

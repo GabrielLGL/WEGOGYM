@@ -132,4 +132,7 @@ HomeScreen exporte un composant HOC `withObservables`. Le composant interne qui 
 Aucune dépendance sur Groupe A — peut tourner en parallèle.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260228-0055
+
+## Résolution
+Rapport do : docs/bmad/do/20260228-0055-feat-workout-celebrations-home.md
