@@ -89,30 +89,31 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
 
         {/* Title */}
         <h1 className="hero-fade text-[clamp(2.5rem,8vw,5rem)] font-black leading-[1.1] tracking-tight mb-5">
-          <span className="shimmer-text">FORGE TON </span>
-          <span
-            className="shimmer-text"
-            style={{
-              display: "inline-block",
-              minWidth: "11ch",
-              opacity: phase === "idle" ? 1 : 0,
-              transform:
-                phase === "idle"
-                  ? "translateY(0px)"
-                  : phase === "out"
-                  ? "translateY(10px)"
-                  : "translateY(-10px)",
-              transition:
-                phase === "in"
-                  ? "none"
-                  : phase === "out"
-                  ? "opacity 0.35s cubic-bezier(0.4,0,1,1), transform 0.35s cubic-bezier(0.4,0,1,1)"
-                  : "opacity 0.45s cubic-bezier(0,0,0.2,1), transform 0.45s cubic-bezier(0,0,0.2,1)",
-            }}
-          >
-            {WORDS[wordIdx]}
+          <span className="shimmer-text block">FORGE TON</span>
+          <span className="block">
+            <span
+              className="shimmer-text"
+              style={{
+                display: "inline-block",
+                opacity: phase === "idle" ? 1 : 0,
+                transform:
+                  phase === "idle"
+                    ? "translateY(0px)"
+                    : phase === "out"
+                    ? "translateY(10px)"
+                    : "translateY(-10px)",
+                transition:
+                  phase === "in"
+                    ? "none"
+                    : phase === "out"
+                    ? "opacity 0.35s cubic-bezier(0.4,0,1,1), transform 0.35s cubic-bezier(0.4,0,1,1)"
+                    : "opacity 0.45s cubic-bezier(0,0,0.2,1), transform 0.45s cubic-bezier(0,0,0.2,1)",
+              }}
+            >
+              {WORDS[wordIdx]}
+            </span>
+            <span className="text-[var(--accent)] animate-[blink_0.7s_step-end_infinite]">|</span>
           </span>
-          <span className="text-[var(--accent)] animate-[blink_0.7s_step-end_infinite]">|</span>
         </h1>
 
         {/* Subtitle */}
