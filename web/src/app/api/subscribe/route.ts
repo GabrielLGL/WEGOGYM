@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         from: process.env.RESEND_FROM_EMAIL ?? "Kore <contact@kore-app.com>",
         to: trimmedEmail,
         subject: "Bienvenue sur Kore !",
-        react: WelcomeEmail({ name: trimmedName ?? undefined }),
+        react: WelcomeEmail({ name: trimmedName ?? undefined, email: trimmedEmail }),
       });
     } catch (emailErr) {
       if (process.env.NODE_ENV !== "production") console.error("Resend error:", emailErr);

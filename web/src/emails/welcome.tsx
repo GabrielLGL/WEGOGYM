@@ -1,11 +1,19 @@
 import * as React from "react";
+import { createHmac } from "crypto";
 
 interface WelcomeEmailProps {
   name?: string;
+  email: string;
 }
 
-export function WelcomeEmail({ name }: WelcomeEmailProps) {
+export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
   const greeting = name ? `Salut ${name}` : "Salut";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.com";
+  const token = createHmac("sha256", process.env.RESEND_API_KEY ?? "")
+    .update(email)
+    .digest("hex");
+  const unsubscribeUrl = `${siteUrl}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`;
 
   /* ---- Palette neumorphisme (light, from site/shared.css) ---- */
   const bg = "#ebf0f7";
@@ -249,7 +257,16 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
               <p style={{ margin: "0 0 4px 0" }}>
                 Tu reçois cet email car tu t&apos;es inscrit sur Kore.
               </p>
-              <span>Pour te désinscrire, réponds à cet email.</span>
+              <a
+                href={unsubscribeUrl}
+                style={{
+                  color: textMuted,
+                  textDecoration: "underline",
+                  fontSize: "12px",
+                }}
+              >
+                Se désinscrire
+              </a>
             </td>
           </tr>
         </tbody>
