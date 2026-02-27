@@ -160,3 +160,33 @@
 **95/100** (2026-02-26) — Build 20, Tests 20, Bugs 20, Qualité 20, Coverage 15 (1206 tests)
 
 ### Espace libéré : ~248 Ko
+
+---
+
+## Run 20260227-2130
+
+### Supprimés
+- morning/     : 4 fichiers résolus (de 11 → 7)
+- do/          : 81 fichiers (de 111 → 30)
+- reviews/     : 0 fichiers (8 dans la limite de 10)
+- git-history/ : 1 fichier (de 31 → 30)
+- prompts/     : 105 fichiers (de 125 → 20)
+- ui/          : 0 fichiers (dossier vide)
+- verrif/      : 5 runs (de 10 → 5)
+
+### En attente (non supprimés)
+- morning/     : 2 rapports ⏳ — 20260226-0900-commit-web-pending.md, 20260226-0900-fix-hardcoded-spacing.md
+- do/          : 0 rapports ⏳
+
+### Conservés
+- morning/     : 7 fichiers (5 ✅ + 2 ⏳ en attente)
+- do/          : 30 fichiers
+- reviews/     : 8 fichiers
+- git-history/ : 30 fichiers
+- prompts/     : 20 fichiers
+- verrif/      : 5 runs (20260226-0224, 20260226-0938, 20260226-1242, 20260226-1451, 20260227-1220)
+
+### Score santé
+**93/100** (2026-02-27) — Build 20, Tests 20, Bugs 18, Qualité 20, Coverage 15 (1275 tests)
+
+### Espace libéré : ~1 087 Ko
