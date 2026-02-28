@@ -247,6 +247,9 @@ export const en: typeof fr = {
     namePlaceholder: 'Name...',
     muscles: 'Muscles',
     equipment: 'Equipment',
+    descriptionLabel: 'Description (optional)',
+    descriptionPlaceholder: 'Execution instructions...',
+    createError: 'Unable to create exercise. Please try again.',
   },
 
   stats: {

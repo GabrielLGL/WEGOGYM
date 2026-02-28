@@ -49,12 +49,14 @@ const ExerciseItem = memo<ExerciseItemProps>(
           <Text style={styles.exoTitle}>{item.name}</Text>
           <Text style={styles.exoSubtitle}>{muscleNames.join(', ')} • {equipmentLabel}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.moreBtn}
-          onPress={() => onOptionsPress(item)}
-        >
-          <Text style={styles.moreIcon}>•••</Text>
-        </TouchableOpacity>
+        {item.isCustom && (
+          <TouchableOpacity
+            style={styles.moreBtn}
+            onPress={() => onOptionsPress(item)}
+          >
+            <Text style={styles.moreIcon}>•••</Text>
+          </TouchableOpacity>
+        )}
       </TouchableOpacity>
     )
   },
@@ -81,21 +83,15 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   const {
     selectedExercise,
     setSelectedExercise,
-    newExerciseData,
-    updateNewExerciseName,
-    updateNewExerciseMuscles,
-    updateNewExerciseEquipment,
     editExerciseData,
     updateEditExerciseName,
     updateEditExerciseMuscles,
     updateEditExerciseEquipment,
-    createExercise,
     updateExercise,
     deleteExercise,
     loadExerciseForEdit
   } = useExerciseManager(haptics.onSuccess, haptics.onDelete)
 
-  const [isAddModalVisible, setIsAddModalVisible] = useState(false)
   const [isOptionsVisible, setIsOptionsVisible] = useState(false)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [isAlertVisible, setIsAlertVisible] = useState(false)
@@ -103,7 +99,6 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setIsAddModalVisible(false)
       setIsOptionsVisible(false)
       setIsEditModalVisible(false)
       setIsAlertVisible(false)
@@ -141,13 +136,6 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
       hideListener.remove()
     }
   }, [])
-
-  const handleCreateExercise = async () => {
-    const success = await createExercise()
-    if (success) {
-      setIsAddModalVisible(false)
-    }
-  }
 
   const handleUpdateExercise = async () => {
     const success = await updateExercise()
@@ -259,7 +247,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
                 style={styles.addButton}
                 onPress={() => {
                   haptics.onPress()
-                  setIsAddModalVisible(true)
+                  navigation.navigate('CreateExercise')
                 }}
               >
                 <Text style={styles.addButtonText}>{t.exercises.createExercise}</Text>
@@ -270,9 +258,11 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
           {/* --- SURCOUCHES (PORTALISÉES) --- */}
 
           <BottomSheet visible={isOptionsVisible} onClose={() => setIsOptionsVisible(false)} title={selectedExercise?.name}>
-            <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); if (selectedExercise) loadExerciseForEdit(selectedExercise); setIsEditModalVisible(true); }}>
-              <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.ms }} /><Text style={styles.sheetText}>{t.exercises.editTitle}</Text>
-            </TouchableOpacity>
+            {selectedExercise?.isCustom && (
+              <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); if (selectedExercise) loadExerciseForEdit(selectedExercise); setIsEditModalVisible(true); }}>
+                <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.ms }} /><Text style={styles.sheetText}>{t.exercises.editTitle}</Text>
+              </TouchableOpacity>
+            )}
             {selectedExercise?.isCustom && (
               <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); setIsAlertVisible(true); }}>
                 <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.ms }} /><Text style={[styles.sheetText, { color: colors.danger }]}>{t.exercises.deleteTitle}</Text>
@@ -309,22 +299,6 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
             cancelText={t.common.cancel}
           />
 
-          <CustomModal visible={isAddModalVisible} title={t.exercises.newTitle} onClose={() => setIsAddModalVisible(false)}
-            buttons={
-                <>
-                <TouchableOpacity style={styles.cancelBtn} onPress={() => setIsAddModalVisible(false)}><Text style={styles.btnText}>{t.common.cancel}</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.confirmBtn} onPress={handleCreateExercise}><Text style={styles.btnText}>{t.exercises.create}</Text></TouchableOpacity>
-                </>
-            }
-          >
-             <TextInput style={styles.input} value={newExerciseData.name} onChangeText={updateNewExerciseName} placeholder={t.exercises.namePlaceholder} placeholderTextColor={colors.textSecondary} />
-                <View style={styles.chipsContainer}>
-                  {MUSCLES_LIST.map(m => (<TouchableOpacity key={m} style={[styles.chip, newExerciseData.muscles.includes(m) && styles.chipActive]} onPress={() => updateNewExerciseMuscles(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}><Text style={[styles.chipText, newExerciseData.muscles.includes(m) && styles.chipTextActive]}>{m}</Text></TouchableOpacity>))}
-                </View>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.equipRow}>
-                  {EQUIPMENT_LIST.map(e => (<TouchableOpacity key={e} style={[styles.equipBtn, newExerciseData.equipment === e && styles.equipBtnActive]} onPress={() => updateNewExerciseEquipment(e)}><Text style={[styles.equipText, newExerciseData.equipment === e && styles.equipTextActive]}>{e}</Text></TouchableOpacity>))}
-                </ScrollView>
-          </CustomModal>
 
         </SafeAreaView>
       </View>
@@ -382,7 +356,7 @@ function useStyles(colors: ThemeColors) {
     emptyList: { color: colors.textSecondary, textAlign: 'center', marginTop: 50, fontStyle: 'italic' },
     footerFloating: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, paddingBottom: spacing.md, backgroundColor: colors.background },
     addButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 8 },
-    addButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.md },
+    addButtonText: { color: colors.primaryText, fontWeight: 'bold', fontSize: fontSize.md },
 
     label: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL, marginBottom: spacing.sm, fontWeight: '600', textTransform: 'uppercase' },
     input: { backgroundColor: colors.cardSecondary, color: colors.text, padding: LIST_ITEM_PADDING_V, borderRadius: borderRadius.md, fontSize: fontSize.md, marginBottom: INPUT_MARGIN_BOTTOM },

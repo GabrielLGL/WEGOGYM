@@ -248,6 +248,9 @@ export const fr = {
     namePlaceholder: 'Nom...',
     muscles: 'Muscles',
     equipment: 'Équipement',
+    descriptionLabel: 'Description (optionnelle)',
+    descriptionPlaceholder: "Instructions d'exécution...",
+    createError: "Impossible de créer l'exercice. Veuillez réessayer.",
   },
 
   stats: {

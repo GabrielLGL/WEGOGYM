@@ -35,6 +35,7 @@ import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
 import type { GeneratedPlan } from '../services/ai/types'
 import AssistantPreviewScreen from '../screens/AssistantPreviewScreen'
+import CreateExerciseScreen from '../screens/CreateExerciseScreen'
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -56,6 +57,7 @@ export type RootStackParamList = {
   StatsHistory: undefined;
   ExerciseHistory: { exerciseId: string };
   AssistantPreview: { plan: GeneratedPlan; mode: 'program' | 'session'; targetProgramId?: string };
+  CreateExercise: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -186,6 +188,7 @@ function AppContent() {
         <Stack.Screen name="Badges" component={BadgesScreen} options={{ title: t.navigation.badges }} />
         <Stack.Screen name="ExerciseHistory" component={ExerciseHistoryScreen} options={{ title: '' }} />
         <Stack.Screen name="AssistantPreview" component={AssistantPreviewScreen} options={{ title: t.navigation.assistantPreview }} />
+        <Stack.Screen name="CreateExercise" component={CreateExerciseScreen} options={{ title: t.exercises.newTitle }} />
       </Stack.Navigator>
     </NavigationContainer>
   )
