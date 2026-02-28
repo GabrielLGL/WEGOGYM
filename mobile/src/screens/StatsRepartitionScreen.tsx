@@ -31,8 +31,6 @@ import { useHaptics } from '../hooks/useHaptics'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 
-const chartConfig = createChartConfig()
-
 interface Props {
   sets: WorkoutSet[]
   exercises: Exercise[]
@@ -42,6 +40,7 @@ interface Props {
 export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const chartConfig = createChartConfig({ colors })
   const haptics = useHaptics()
   const { t } = useLanguage()
   const { width: screenWidth } = useWindowDimensions()

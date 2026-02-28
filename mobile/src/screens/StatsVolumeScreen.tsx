@@ -30,8 +30,6 @@ import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 
-const chartConfig = createChartConfig({ showDots: true })
-
 const BAR_PERIOD_LABELS = ['Semaine', '1 mois', '3 mois', 'Tout'] as const
 type BarPeriodLabel = typeof BAR_PERIOD_LABELS[number]
 
@@ -97,6 +95,7 @@ interface Props {
 export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const chartConfig = createChartConfig({ showDots: true, colors })
   const { t } = useLanguage()
   const { width: screenWidth } = useWindowDimensions()
 

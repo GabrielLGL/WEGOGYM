@@ -28,8 +28,6 @@ import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { parseNumericInput } from '../model/utils/databaseHelpers'
 
-const chartConfig = createChartConfig({ decimalPlaces: 1, showDots: true })
-
 // ─── Métrique selector ────────────────────────────────────────────────────────
 
 type MetricKey = 'weight' | 'waist' | 'hips' | 'arms' | 'chest'
@@ -69,6 +67,7 @@ interface Props {
 export function StatsMeasurementsScreenBase({ measurements }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const chartConfig = createChartConfig({ decimalPlaces: 1, showDots: true, colors })
   const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   const haptics = useHaptics()
   const { t, language } = useLanguage()

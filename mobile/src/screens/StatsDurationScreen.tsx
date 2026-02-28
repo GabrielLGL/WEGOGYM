@@ -23,7 +23,6 @@ import { createChartConfig } from '../theme/chartConfig'
 import { useHaptics } from '../hooks/useHaptics'
 import { useLanguage } from '../contexts/LanguageContext'
 
-const chartConfig = createChartConfig({ showDots: true })
 const PAGE_SIZE = 5
 
 function KpiCard({ label, value, colors }: { label: string; value: string; colors: ThemeColors }) {
@@ -56,6 +55,7 @@ interface SessionExDetail {
 export function StatsDurationScreenBase({ histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const chartConfig = createChartConfig({ showDots: true, colors })
   const { t, language } = useLanguage()
   const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US'
   const { width: screenWidth } = useWindowDimensions()

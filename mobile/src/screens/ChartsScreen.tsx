@@ -26,14 +26,11 @@ import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { fontSize, borderRadius, spacing } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
+import { createChartConfig } from '../theme/chartConfig'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
 import type { ExerciseSessionStat } from '../model/utils/databaseHelpers'
 
 const screenWidth = Dimensions.get('window').width
-
-// Constantes RGB pour les fonctions d'opacité du chart (colors.primary / colors.text)
-const PRIMARY_RGB = '0, 122, 255'
-const TEXT_RGB = '255, 255, 255'
 
 // --- Sous-composant : ExerciseStatsContent ---
 
@@ -56,16 +53,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
   const [isAlertVisible, setIsAlertVisible] = useState(false)
   const [selectedStat, setSelectedStat] = useState<ExerciseSessionStat | null>(null)
 
-  const chartConfig = {
-    backgroundColor: colors.card,
-    backgroundGradientFrom: colors.card,
-    backgroundGradientTo: colors.card,
-    decimalPlaces: 1,
-    color: (opacity = 1) => `rgba(${PRIMARY_RGB}, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(${TEXT_RGB}, ${opacity})`,
-    style: { borderRadius: CHART_BORDER_RADIUS },
-    propsForDots: { r: '4', strokeWidth: '2', stroke: colors.primary },
-  }
+  const chartConfig = createChartConfig({ decimalPlaces: 1, showDots: true, colors })
 
   const statsForSelectedExo = useMemo(
     () => buildExerciseStatsFromData(setsForExercise, histories, sessions),

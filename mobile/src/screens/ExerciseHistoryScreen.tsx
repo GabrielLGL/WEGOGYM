@@ -28,8 +28,6 @@ import type { RootStackParamList } from '../navigation'
 
 type ExerciseHistoryRouteProp = RouteProp<RootStackParamList, 'ExerciseHistory'>
 
-const chartConfig = createChartConfig({ showDots: true })
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -44,6 +42,7 @@ interface Props {
 function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const chartConfig = createChartConfig({ showDots: true, colors })
   const { t, language } = useLanguage()
   const { width: screenWidth } = useWindowDimensions()
   const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US'
