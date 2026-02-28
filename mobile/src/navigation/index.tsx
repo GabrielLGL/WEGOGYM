@@ -31,6 +31,8 @@ import User from '../model/models/User'
 import ExerciseHistoryScreen from '../screens/ExerciseHistoryScreen'
 import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
+import type { GeneratedPlan } from '../services/ai/types'
+import AssistantPreviewScreen from '../screens/AssistantPreviewScreen'
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -51,6 +53,7 @@ export type RootStackParamList = {
   StatsMeasurements: undefined;
   StatsHistory: undefined;
   ExerciseHistory: { exerciseId: string };
+  AssistantPreview: { plan: GeneratedPlan; mode: 'program' | 'session'; targetProgramId?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -179,6 +182,7 @@ function AppContent() {
         <Stack.Screen name="StatsHistory" component={ChartsScreen} options={{ title: 'Historique' }} />
         <Stack.Screen name="Badges" component={BadgesScreen} options={{ title: 'Mes Badges' }} />
         <Stack.Screen name="ExerciseHistory" component={ExerciseHistoryScreen} options={{ title: '' }} />
+        <Stack.Screen name="AssistantPreview" component={AssistantPreviewScreen} options={{ title: 'Programme généré' }} />
       </Stack.Navigator>
     </NavigationContainer>
   )

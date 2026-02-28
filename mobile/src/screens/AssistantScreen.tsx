@@ -1,24 +1,21 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet, Animated,
-  ScrollView,
+  ScrollView, ActivityIndicator,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { map } from 'rxjs/operators'
 import { database } from '../model'
 import { generatePlan } from '../services/ai/aiService'
-import { importGeneratedPlan, importGeneratedSession } from '../model/utils/databaseHelpers'
-import { AssistantPreviewSheet } from '../components/AssistantPreviewSheet'
 import { AlertDialog } from '../components/AlertDialog'
-import { useModalState } from '../hooks/useModalState'
 import { useHaptics } from '../hooks/useHaptics'
 import { spacing, fontSize, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import type Program from '../model/models/Program'
 import type User from '../model/models/User'
-import type { AIFormData, AIGoal, AILevel, AIDuration, AISplit, GeneratedPlan } from '../services/ai/types'
+import type { AIFormData, AIGoal, AILevel, AIDuration, AISplit } from '../services/ai/types'
 import { useFocusEffect } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RootStackParamList } from '../navigation/index'
@@ -204,27 +201,25 @@ interface AssistantScreenInnerProps {
 export function AssistantScreenInner({ programs, user, navigation }: AssistantScreenInnerProps) {
   const colors = useColors()
   const styles = useStyles(colors)
-  const haptics      = useHaptics()
-  const previewModal = useModalState()
+  const haptics = useHaptics()
 
   // ── Wizard state ──────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep]     = useState(0)
   const [formData, setFormData]           = useState<Partial<AIFormData>>({ equipment: [], musclesFocus: [], muscleGroups: [], injuries: [] })
   const [isGenerating, setIsGenerating]         = useState(false)
-  const [generatedPlan, setGeneratedPlan]       = useState<GeneratedPlan | null>(null)
   const [isResetAlertVisible, setIsResetAlertVisible] = useState(false)
-  const [fallbackNotice, setFallbackNotice]           = useState<string | null>(null)
   const [errorAlertVisible, setErrorAlertVisible]     = useState(false)
   const [errorAlertMessage, setErrorAlertMessage]     = useState('')
 
-  const progressAnim = useRef(new Animated.Value(0)).current
-  const contentAnim  = useRef(new Animated.Value(1)).current
+  const progressAnim   = useRef(new Animated.Value(0)).current
+  const contentAnim    = useRef(new Animated.Value(1)).current
+  const pendingFadeIn  = useRef(false)
 
   // ── Derived ───────────────────────────────────────────────────────────────
   // Réactif via withObservables — mise à jour depuis les settings uniquement
   const providerLabel = PROVIDER_LABELS[user?.aiProvider ?? 'offline'] ?? 'Offline'
 
-  const steps      = buildSteps(formData)
+  const steps      = useMemo(() => buildSteps(formData), [formData])
   const totalSteps = steps.length
   const step       = steps[currentStep]
 
@@ -249,43 +244,54 @@ export function AssistantScreenInner({ programs, user, navigation }: AssistantSc
   )
 
   // ── Transition fade entre étapes ─────────────────────────────────────────
-  const goToStep = useCallback((nextIndex: number) => {
-    Animated.timing(contentAnim, {
-      toValue: 0,
-      duration: 100,
-      useNativeDriver: true,
-    }).start(() => {
-      setCurrentStep(nextIndex)
-      Animated.timing(contentAnim, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }).start()
-    })
+  // Pas de fade-out animée : setValue(0) est synchrone (JS thread), donc
+  // le nouveau contenu est garanti invisible quand React le rend.
+  // La fade-in se déclenche dans un useEffect, après le commit React.
+  const goToStep = useCallback((nextIndex: number, newData?: Partial<AIFormData>) => {
+    contentAnim.setValue(0)
+    pendingFadeIn.current = true
+    if (newData !== undefined) setFormData(newData)
+    setCurrentStep(nextIndex)
   }, [contentAnim])
+
+  useEffect(() => {
+    if (!pendingFadeIn.current) return
+    pendingFadeIn.current = false
+    Animated.timing(contentAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start()
+  }, [currentStep, contentAnim])
 
   // ─── Génération ───────────────────────────────────────────────────────────
 
   const triggerGenerate = useCallback(async (data: AIFormData) => {
     haptics.onPress()
     setIsGenerating(true)
-    setFallbackNotice(null)
-    previewModal.open()
     try {
       const result = await generatePlan(data, user)
-      setGeneratedPlan(result.plan)
+      let fallbackNotice: string | undefined
       if (result.usedFallback) {
         const providerName = PROVIDER_LABELS[result.fallbackReason ?? ''] ?? result.fallbackReason ?? 'cloud'
-        setFallbackNotice(`Plan généré hors ligne — ${providerName} indisponible`)
+        fallbackNotice = `Plan généré hors ligne — ${providerName} indisponible`
       }
+      setCurrentStep(0)
+      setFormData({ equipment: [], musclesFocus: [], muscleGroups: [], injuries: [] })
+      contentAnim.setValue(1)
+      navigation.navigate('AssistantPreview', {
+        plan: result.plan,
+        mode: (data.mode ?? 'program') as 'program' | 'session',
+        targetProgramId: data.targetProgramId,
+      })
+      void fallbackNotice
     } catch {
-      previewModal.close()
       setErrorAlertMessage('Impossible de générer le plan. Réessaie.')
       setErrorAlertVisible(true)
     } finally {
       setIsGenerating(false)
     }
-  }, [user, haptics, previewModal])
+  }, [user, haptics, navigation, contentAnim])
 
   // ─── Navigation wizard ────────────────────────────────────────────────────
 
@@ -300,14 +306,14 @@ export function AssistantScreenInner({ programs, user, navigation }: AssistantSc
       }
     }
 
-    setFormData(newData)
     haptics.onSelect()
 
     const currentSteps = buildSteps(newData)
     if (currentStep === currentSteps.length - 1) {
+      setFormData(newData)
       triggerGenerate(newData as AIFormData)
     } else {
-      goToStep(currentStep + 1)
+      goToStep(currentStep + 1, newData)  // formData mis à jour dans le callback
     }
   }, [formData, currentStep, haptics, triggerGenerate, goToStep])
 
@@ -399,46 +405,6 @@ export function AssistantScreenInner({ programs, user, navigation }: AssistantSc
       contentAnim.setValue(1)
     }
   }, [currentStep, haptics, contentAnim])
-
-  // ─── Preview actions ──────────────────────────────────────────────────────
-
-  const handleModify = useCallback(() => {
-    previewModal.close()
-    setGeneratedPlan(null)
-    setFallbackNotice(null)
-    setCurrentStep(0)
-    setFormData({ equipment: [], musclesFocus: [], muscleGroups: [], injuries: [] })
-  }, [previewModal])
-
-  const handleValidate = useCallback(async (plan: GeneratedPlan) => {
-    const currentMode            = formData.mode ?? 'program'
-    const currentTargetProgramId = formData.targetProgramId
-    try {
-      if (currentMode === 'program') {
-        await importGeneratedPlan(plan)
-        previewModal.close()
-        setCurrentStep(0)
-        setFormData({ equipment: [], musclesFocus: [], muscleGroups: [], injuries: [] })
-        setGeneratedPlan(null)
-        contentAnim.setValue(1)
-        navigation.navigate('Programs')
-      } else {
-        if (!currentTargetProgramId) return
-        if (!plan.sessions.length) { previewModal.close(); return }
-        await importGeneratedSession(plan.sessions[0], currentTargetProgramId)
-        previewModal.close()
-        setCurrentStep(0)
-        setFormData({ equipment: [], musclesFocus: [], muscleGroups: [], injuries: [] })
-        setGeneratedPlan(null)
-        contentAnim.setValue(1)
-        navigation.navigate('ProgramDetail', { programId: currentTargetProgramId })
-      }
-    } catch {
-      previewModal.close()
-      setErrorAlertMessage("Impossible d'enregistrer le plan. Réessaie.")
-      setErrorAlertVisible(true)
-    }
-  }, [formData.mode, formData.targetProgramId, navigation, previewModal])
 
   // ─── Rendu du step courant (wizard) ──────────────────────────────────────
 
@@ -665,17 +631,24 @@ export function AssistantScreenInner({ programs, user, navigation }: AssistantSc
       </View>
 
       {/* ── Contenu ── */}
-      <Animated.View style={[styles.contentWrapper, { opacity: contentAnim }]}>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Text style={styles.question}>{step?.question}</Text>
-          {renderStepContent()}
-        </ScrollView>
-      </Animated.View>
+      {isGenerating ? (
+        <View style={styles.generatingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.generatingText}>Génération en cours...</Text>
+        </View>
+      ) : (
+        <Animated.View style={[styles.contentWrapper, { opacity: contentAnim }]}>
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={styles.question}>{step?.question}</Text>
+            {renderStepContent()}
+          </ScrollView>
+        </Animated.View>
+      )}
 
       {/* ── Bouton recommencer ── */}
       {currentStep > 0 && (
@@ -683,18 +656,6 @@ export function AssistantScreenInner({ programs, user, navigation }: AssistantSc
           <Text style={styles.resetFooterBtnText}>Recommencer</Text>
         </TouchableOpacity>
       )}
-
-      {/* ── Preview sheet ── */}
-      <AssistantPreviewSheet
-        visible={previewModal.isOpen}
-        plan={generatedPlan}
-        isLoading={isGenerating}
-        mode={formData.mode === 'session' ? 'session' : 'program'}
-        onClose={previewModal.close}
-        onModify={handleModify}
-        onValidate={handleValidate}
-        fallbackNotice={fallbackNotice ?? undefined}
-      />
 
       <AlertDialog
         visible={isResetAlertVisible}
@@ -794,6 +755,19 @@ function useStyles(colors: ThemeColors) {
       color: colors.text,
       fontSize: fontSize.sm,
       fontWeight: '600',
+    },
+
+    // ── Generating spinner ───────────────────────────────────────────────────
+    generatingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    generatingText: {
+      color: colors.textSecondary,
+      fontSize: fontSize.md,
+      fontWeight: '500',
     },
 
     // ── Content wrapper (fade animation) ────────────────────────────────────
