@@ -17,6 +17,30 @@ jest.mock('@gorhom/portal', () => ({
   PortalHost: () => null,
 }))
 
+// Mock BottomSheet to remove animation/useEffect complexity in tests
+jest.mock('../../components/BottomSheet', () => ({
+  BottomSheet: ({
+    visible,
+    children,
+    title,
+  }: {
+    visible: boolean
+    children: React.ReactNode
+    title?: string
+    onClose: () => void
+  }) => {
+    if (!visible) return null
+    const mockReact = require('react')
+    const { View, Text } = require('react-native')
+    return mockReact.createElement(
+      View,
+      null,
+      title ? mockReact.createElement(Text, null, title) : null,
+      children,
+    )
+  },
+}))
+
 jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn().mockReturnValue({
@@ -79,7 +103,7 @@ jest.mock('../../components/ProgramDetailBottomSheet', () => ({
 }))
 
 import React from 'react'
-import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import { render, fireEvent } from '@testing-library/react-native'
 import ProgramDetailScreen from '../ProgramDetailScreen'
 import type Program from '../../model/models/Program'
 import type Session from '../../model/models/Session'
@@ -177,7 +201,7 @@ describe('ProgramDetailScreen', () => {
     expect(mockNavigation.setOptions).toHaveBeenCalledWith({ title: 'Mon Programme' })
   })
 
-  it('pressing "Ajouter une séance" opens the choice bottom sheet', async () => {
+  it('pressing "Ajouter une séance" opens the choice bottom sheet', () => {
     const { getByText } = render(
       <ProgramDetailScreen
         program={makeProgram()}
@@ -188,10 +212,7 @@ describe('ProgramDetailScreen', () => {
       />
     )
     fireEvent.press(getByText('+ Ajouter une séance'))
-    // BottomSheet renders content via setState in useEffect — waitFor lets effects flush
-    await waitFor(() => {
-      expect(getByText('Créer manuellement')).toBeTruthy()
-      expect(getByText("Générer par l'IA")).toBeTruthy()
-    })
+    expect(getByText('Créer manuellement')).toBeTruthy()
+    expect(getByText("Générer par l'IA")).toBeTruthy()
   })
 })
