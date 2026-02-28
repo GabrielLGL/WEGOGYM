@@ -3,11 +3,11 @@
 import type History from '../models/History'
 import type { DurationStats } from './statsTypes'
 
-export const MIN_VALID_DURATION_MIN = 5
+export const MIN_VALID_DURATION_MIN = 1
 
 export function computeDurationStats(histories: History[]): DurationStats {
   const withDuration = histories
-    .filter(h => h.deletedAt === null && h.endTime != null)
+    .filter(h => h.endTime != null)
     .map(h => ({
       id: h.id,
       date: h.startTime.getTime(),

@@ -204,10 +204,10 @@ describe('StatsDurationScreenBase', () => {
     expect(getByText('Plus longue')).toBeTruthy()
   })
 
-  it('exclut les séances < 5 min des stats', () => {
+  it('exclut les séances < 1 min des stats', () => {
     const now = Date.now()
-    // 4 min session — should be excluded
-    const shortHistory = makeHistory('h-short', now - 86400000, now - 86400000 + 240000)
+    // 20 sec session — should be excluded (rounds to 0 min, < 1 min)
+    const shortHistory = makeHistory('h-short', now - 86400000, now - 86400000 + 20000)
     // 60 min session — valid
     const validHistory = makeHistory('h-valid', now - 172800000, now - 172800000 + 3600000)
     const { getByText, getAllByText } = render(
@@ -215,7 +215,7 @@ describe('StatsDurationScreenBase', () => {
     )
     // Only 1 valid session → no chart (< 2 sessions)
     expect(getByText(/Enregistrez au moins 2 séances/)).toBeTruthy()
-    // KPI avg should be 60 min (not averaged with 4 min)
+    // KPI avg should be 60 min (not averaged with 20 sec)
     expect(getAllByText('1h').length).toBeGreaterThanOrEqual(1)
     // History should show only 1 entry
     expect(getByText(/Historique \(1 séances\)/)).toBeTruthy()
