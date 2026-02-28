@@ -155,9 +155,9 @@ export default function SubscribeSection() {
 
         <p className="reveal text-[var(--text-muted)] text-xs mt-8 opacity-80">
           Pas de spam. Désabonnement en un clic.{" "}
-          <a href="/privacy" className="underline hover:text-[var(--accent)] transition-colors">
+          <Link href="/privacy" className="underline hover:text-[var(--accent)] transition-colors">
             Politique de confidentialité
-          </a>
+          </Link>
         </p>
       </div>
     </section>
