@@ -64,42 +64,57 @@ export async function selectExercisesForSession(
 
   for (const ex of exercises) {
     const meta = EXERCISE_METADATA[ex.name]
-    if (!meta) continue
 
-    // Filtre equipment
+    // Filtre equipment (commun aux exercices avec ou sans metadata)
     const exEquipment = ex.equipment ?? ''
     if (exEquipment && !validEquipmentDB.has(exEquipment)) continue
     if (!exEquipment && !profile.equipment.includes('bodyweight')) continue
 
-    // Filtre muscles cibles
+    // Filtre muscles cibles (commun)
     const exMusclesFR: string[] = Array.isArray(ex.muscles) ? ex.muscles : []
     const matchesMuscle = exMusclesFR.some((m) => targetMusclesFR.has(m))
     if (!matchesMuscle) continue
 
-    // Filtre difficulty
-    const metaLevelInt = levelOrder[meta.minLevel] ?? 0
-    if (metaLevelInt > profileLevelInt) continue
+    if (meta) {
+      // Filtre difficulty
+      const metaLevelInt = levelOrder[meta.minLevel] ?? 0
+      if (metaLevelInt > profileLevelInt) continue
 
-    // Filtre injuries
-    const injuryZonesFR = meta.injuryRisk ?? []
-    const hasConflict = injuryZonesFR.some((zone) => {
-      const bodyZone = INJURY_ZONE_TO_BODY_ZONE[zone]
-      return bodyZone && injuryBodyZones.has(bodyZone)
-    })
-    if (hasConflict) continue
+      // Filtre injuries
+      const injuryZonesFR = meta.injuryRisk ?? []
+      const hasConflict = injuryZonesFR.some((zone) => {
+        const bodyZone = INJURY_ZONE_TO_BODY_ZONE[zone]
+        return bodyZone && injuryBodyZones.has(bodyZone)
+      })
+      if (hasConflict) continue
 
-    // Dérive musclesPrimary (EN)
-    const primaryMuscleEn: MuscleGroup | undefined = (Object.entries(MUSCLE_TO_DB) as [MuscleGroup, string][])
-      .find(([, fr]) => fr === meta.primaryMuscle)?.[0]
-    const musclesPrimary: MuscleGroup[] = primaryMuscleEn ? [primaryMuscleEn] : []
+      // Dérive musclesPrimary (EN)
+      const primaryMuscleEn: MuscleGroup | undefined = (Object.entries(MUSCLE_TO_DB) as [MuscleGroup, string][])
+        .find(([, fr]) => fr === meta.primaryMuscle)?.[0]
+      const musclesPrimary: MuscleGroup[] = primaryMuscleEn ? [primaryMuscleEn] : []
 
-    candidates.push({
-      exerciseId: ex.id,
-      exerciseName: ex.name,
-      musclesPrimary,
-      nervousDemand: toNervousDemand(meta.type),
-      movementPattern: toMovementPattern(meta.primaryMuscle),
-    })
+      candidates.push({
+        exerciseId: ex.id,
+        exerciseName: ex.name,
+        musclesPrimary,
+        nervousDemand: toNervousDemand(meta.type),
+        movementPattern: toMovementPattern(meta.primaryMuscle),
+      })
+    } else if (ex.isCustom) {
+      // Exercice custom sans metadata : fallback basé sur les champs DB
+      const primaryMuscleFR = exMusclesFR[0] ?? ''
+      const primaryMuscleEn: MuscleGroup | undefined = (Object.entries(MUSCLE_TO_DB) as [MuscleGroup, string][])
+        .find(([, fr]) => fr === primaryMuscleFR)?.[0]
+      const musclesPrimary: MuscleGroup[] = primaryMuscleEn ? [primaryMuscleEn] : []
+
+      candidates.push({
+        exerciseId: ex.id,
+        exerciseName: ex.name,
+        musclesPrimary,
+        nervousDemand: 2, // compound par défaut
+        movementPattern: toMovementPattern(primaryMuscleFR),
+      })
+    }
   }
 
   // 6. Tri : nervousDemand desc
