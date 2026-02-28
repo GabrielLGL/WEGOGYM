@@ -22,29 +22,35 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children, initialMode = 'dark' }: ThemeProviderProps) {
   const [mode, setMode] = useState<ThemeMode>(initialMode)
 
-  const persistTheme = useCallback(async (newMode: ThemeMode) => {
+  const persistTheme = useCallback(async (newMode: ThemeMode): Promise<boolean> => {
     try {
       const users = await database.get<User>('users').query().fetch()
       const user = users[0]
-      if (!user) return
+      if (!user) return true  // pas encore d'utilisateur — skip persist, toggle OK
       await database.write(async () => {
         await user.update(u => { u.themeMode = newMode })
       })
+      return true
     } catch (error) {
       if (__DEV__) console.error('[ThemeContext] persist error:', error)
+      return false
     }
   }, [])
 
   const toggleTheme = useCallback(async () => {
     const newMode: ThemeMode = mode === 'dark' ? 'light' : 'dark'
-    setMode(newMode)
-    await persistTheme(newMode)
+    const previousMode = mode
+    setMode(newMode)  // optimistic update
+    const success = await persistTheme(newMode)
+    if (!success) setMode(previousMode)  // rollback si DB échoue
   }, [mode, persistTheme])
 
   const setThemeMode = useCallback(async (newMode: ThemeMode) => {
-    setMode(newMode)
-    await persistTheme(newMode)
-  }, [persistTheme])
+    const previousMode = mode
+    setMode(newMode)  // optimistic update
+    const success = await persistTheme(newMode)
+    if (!success) setMode(previousMode)  // rollback si DB échoue
+  }, [mode, persistTheme])
 
   const value: ThemeContextValue = {
     mode,
