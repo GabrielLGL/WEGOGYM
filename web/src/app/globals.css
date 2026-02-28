@@ -102,12 +102,28 @@ html.no-transition body {
 .shadow-neu-in {
   box-shadow: var(--shadow-in);
 }
+.shadow-neu-accent {
+  box-shadow: var(--shadow-out), 0 0 30px var(--accent-glow);
+}
 
 /* === KEYFRAMES === */
 
 @keyframes floatBlob {
   0% { transform: translate(0, 0) scale(1); }
   100% { transform: translate(30px, 50px) scale(1.1); }
+}
+
+.blob-animate {
+  will-change: transform;
+  animation: floatBlob 10s infinite alternate ease-in-out;
+}
+
+/* Disable heavy blob animation on mobile to reduce GPU load */
+@media (max-width: 639px) {
+  .blob-animate {
+    animation: none;
+    will-change: auto;
+  }
 }
 
 @keyframes heroEnter {

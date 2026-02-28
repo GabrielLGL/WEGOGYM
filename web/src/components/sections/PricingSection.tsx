@@ -1,6 +1,66 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { PRICING } from "@/data/pricing";
 
+const AUTO_SCROLL_MS = 4500;
+
 export default function PricingSection() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const userScrolledRef = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const stopAutoScroll = () => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+  };
+
+  const scrollToCard = (index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const card = container.children[index] as HTMLElement;
+    if (card) container.scrollTo({ left: card.offsetLeft, behavior: "smooth" });
+    setActiveIndex(index);
+  };
+
+  const startAutoScroll = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % PRICING.length;
+        const container = scrollRef.current;
+        if (container) {
+          const card = container.children[next] as HTMLElement;
+          if (card) container.scrollTo({ left: card.offsetLeft, behavior: "smooth" });
+        }
+        return next;
+      });
+    }, AUTO_SCROLL_MS);
+  };
+
+  useEffect(() => {
+    startAutoScroll();
+    return () => stopAutoScroll();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleScroll = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const center = container.scrollLeft + container.offsetWidth / 2;
+    let closest = 0;
+    let minDist = Infinity;
+    Array.from(container.children).forEach((child, i) => {
+      const el = child as HTMLElement;
+      const dist = Math.abs(el.offsetLeft + el.offsetWidth / 2 - center);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    setActiveIndex(closest);
+    if (userScrolledRef.current) stopAutoScroll();
+  };
+
+  const handleTouchStart = () => { userScrolledRef.current = true; };
+
   return (
     <section id="pricing" className="relative z-[2] py-10 sm:py-16 px-6">
       <div className="max-w-[1000px] mx-auto">
@@ -11,14 +71,20 @@ export default function PricingSection() {
           Commence gratuitement. Passe Pro quand tu es prêt.
         </p>
 
-        <div className="grid sm:grid-cols-3 gap-8">
+        <div
+          ref={scrollRef}
+          onTouchStart={handleTouchStart}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory gap-6 py-6 sm:grid sm:grid-cols-3 sm:overflow-visible sm:snap-none sm:py-0 sm:gap-8"
+          style={{ scrollbarWidth: "none" }}
+        >
           {PRICING.map((plan) => (
             <article
               key={plan.name}
-              className={`reveal bg-[var(--bg)] rounded-[30px] p-8 shadow-neu-out border transition-all duration-300
+              className={`shrink-0 w-[75vw] snap-start sm:w-auto bg-[var(--bg)] rounded-[30px] p-8 border transition-all duration-300
                 ${plan.highlighted
-                  ? "border-[var(--accent)] shadow-[0_0_30px_var(--accent-glow)] scale-[1.02]"
-                  : "border-transparent"
+                  ? "border-[var(--accent)] shadow-neu-accent sm:scale-[1.02]"
+                  : "border-transparent shadow-neu-out"
                 }`}
             >
               {plan.highlighted && (
@@ -54,6 +120,22 @@ export default function PricingSection() {
                 {plan.cta}
               </a>
             </article>
+          ))}
+        </div>
+
+        {/* Dots — mobile only */}
+        <div className="sm:hidden flex justify-center items-center gap-2.5 mt-5">
+          {PRICING.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { scrollToCard(i); }}
+              aria-label={`Voir tarif ${i + 1}`}
+              className={`rounded-full transition-all duration-300 ${
+                i === activeIndex
+                  ? "w-6 h-2 bg-[var(--accent)]"
+                  : "w-2 h-2 bg-[var(--text-muted)] opacity-40"
+              }`}
+            />
           ))}
         </div>
       </div>

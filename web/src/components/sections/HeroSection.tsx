@@ -131,7 +131,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
             { value: "<1s", label: "Chargement" },
           ].map((stat) => (
             <div key={stat.label} className="bg-[var(--bg)] rounded-[20px] shadow-neu-out py-5 px-3 text-center">
-              <div className="text-2xl sm:text-3xl font-black text-[var(--accent)]" style={{ textShadow: "0 0 20px var(--accent-glow)" }}>
+              <div className="text-xl sm:text-2xl font-black text-[var(--accent)]" style={{ textShadow: "0 0 20px var(--accent-glow)" }}>
                 {stat.value}
               </div>
               <div className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-medium uppercase tracking-wider">
@@ -145,7 +145,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
         <div className="hero-fade">
           <a
             href="#download"
-            className="btn-liquid text-white px-10 py-4 rounded-full font-extrabold text-lg uppercase tracking-widest no-underline"
+            className="btn-liquid text-white px-6 sm:px-10 py-4 rounded-full font-extrabold text-base sm:text-lg uppercase tracking-wide sm:tracking-widest no-underline"
           >
             Rejoindre la beta
           </a>
@@ -157,7 +157,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
       {/* ===== MOBILE NAV CHIPS ===== */}
       <nav
         aria-label="Navigation mobile"
-        className="sm:hidden relative z-[2] flex gap-3 justify-center pl-6 pr-[70px] pb-6 -mt-4"
+        className="sm:hidden relative z-[2] flex gap-3 justify-center px-[70px] pb-6 -mt-4"
       >
         {[
           { href: "#features", label: "Fonctionnalités" },

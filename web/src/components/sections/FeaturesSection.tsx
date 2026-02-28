@@ -11,7 +11,7 @@ export default function FeaturesSection() {
           Et rien de plus.
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
           {FEATURES.map((feature) => (
             <div
               key={feature.title}

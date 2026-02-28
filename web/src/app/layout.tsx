@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 
@@ -36,7 +36,9 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='5 5 90 90'><defs><linearGradient id='g' x1='0' y1='100%25' x2='100%25' y2='0'><stop offset='0%25' stop-color='%236c5ce7'/><stop offset='100%25' stop-color='%2300cec9'/></linearGradient></defs><g stroke='url(%23g)' stroke-width='14' stroke-linecap='round' fill='none'><line x1='30' y1='15' x2='30' y2='85'/><line x1='30' y1='50' x2='75' y2='15'/><line x1='30' y1='50' x2='75' y2='85'/></g><g fill='%231a1a2e' stroke='url(%23g)' stroke-width='5'><circle cx='30' cy='15' r='5'/><circle cx='30' cy='85' r='5'/><circle cx='30' cy='50' r='8'/><circle cx='75' cy='15' r='5'/><circle cx='75' cy='85' r='5'/></g></svg>",
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
     languages: {
@@ -67,6 +69,9 @@ export const metadata: Metadata = {
       "App de musculation 100% offline. Suis tes programmes et progresse séance après séance.",
     images: ["/og.png"],
   },
+};
+
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#6c5ce7" },
     { media: "(prefers-color-scheme: dark)", color: "#00cec9" },
