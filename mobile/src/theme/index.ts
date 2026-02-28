@@ -39,19 +39,12 @@ export const colors = {
 
   // Neumorphism tokens
   neuShadowDark: '#060809',
-  neuShadowLight: '#3c4558',
-  secondaryAccent: '#6c5ce7',
 
   // Gradient tokens (LinearGradient)
-  cardGradientStart: '#262d3a',
-  cardGradientEnd: '#1a1d24',
   bgGradientStart: '#22262e',
   bgGradientEnd: '#181b21',
   primaryGradientStart: '#00d9d4',
   primaryGradientEnd: '#007a77',
-
-  // Input background
-  input: '#16181e',
 
   // Text on primary-colored surfaces (buttons, badges)
   primaryText: '#ffffff',
@@ -94,7 +87,6 @@ export const fontSize = {
   xl: 20,
   xxl: 24,
   xxxl: 28,
-  hero: 32,
   caption: 11,
   bodyMd: 15,
   jumbo: 48,
@@ -180,19 +172,12 @@ export const lightColors = {
   primaryBg: 'rgba(108, 92, 231, 0.12)',
   surfaceOverlay: 'rgba(0, 0, 0, 0.06)',
   neuShadowDark: '#8a9bb0',
-  neuShadowLight: '#ffffff',
-  secondaryAccent: '#a29bfe',
 
   // Gradient tokens (LinearGradient)
-  cardGradientStart: '#edf1f5',
-  cardGradientEnd: '#dde5ee',
   bgGradientStart: '#eaeff5',
   bgGradientEnd: '#dce4ee',
   primaryGradientStart: '#7c6ef0',
   primaryGradientEnd: '#4a3da8',
-
-  // Input background
-  input: '#ffffff',
 
   // Text on primary-colored surfaces (buttons, badges)
   primaryText: '#ffffff',
