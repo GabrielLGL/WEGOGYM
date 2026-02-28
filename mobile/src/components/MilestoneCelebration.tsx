@@ -23,7 +23,7 @@ export function MilestoneCelebration({ visible, milestone, onClose }: MilestoneC
   return (
     <BottomSheet visible={visible} onClose={onClose}>
       <View style={styles.container}>
-        <Ionicons name={milestone.icon as any} size={fontSize.jumbo} color={colors.primary} style={{ marginBottom: spacing.md }} />
+        <Ionicons name={milestone.icon as React.ComponentProps<typeof Ionicons>['name']} size={fontSize.jumbo} color={colors.primary} style={{ marginBottom: spacing.md }} />
         <Text style={styles.title}>{milestone.title}</Text>
         <Text style={styles.message}>{milestone.message}</Text>
         <Button variant="primary" size="md" onPress={onClose} enableHaptics={false}>

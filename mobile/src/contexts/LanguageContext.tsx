@@ -19,23 +19,27 @@ interface LanguageProviderProps {
 export function LanguageProvider({ children, initialLang = 'fr' }: LanguageProviderProps) {
   const [language, setLang] = useState<Language>(initialLang)
 
-  const persistLanguage = useCallback(async (lang: Language) => {
+  const persistLanguage = useCallback(async (lang: Language): Promise<boolean> => {
     try {
       const users = await database.get<User>('users').query().fetch()
       const user = users[0]
-      if (!user) return
+      if (!user) return true  // pas encore d'utilisateur — skip persist, toggle OK
       await database.write(async () => {
         await user.update(u => { u.languageMode = lang })
       })
+      return true
     } catch (error) {
       if (__DEV__) console.error('[LanguageContext] persist error:', error)
+      return false
     }
   }, [])
 
   const setLanguage = useCallback(async (lang: Language) => {
-    setLang(lang)
-    await persistLanguage(lang)
-  }, [persistLanguage])
+    const previousLang = language
+    setLang(lang)                          // optimistic update
+    const success = await persistLanguage(lang)
+    if (!success) setLang(previousLang)   // rollback si DB échoue
+  }, [language, persistLanguage])
 
   const value: LanguageContextValue = {
     language,
