@@ -71,8 +71,8 @@ describe('StatsRepartitionScreenBase', () => {
     const { getAllByText } = render(
       <StatsRepartitionScreenBase sets={sets} exercises={exercises} histories={histories} />
     )
-    // Les muscles apparaissent dans la répartition ET dans le filtre du chart (ChipSelector)
-    expect(getAllByText('Pecs').length).toBeGreaterThanOrEqual(1)
+    // Les muscles apparaissent dans la répartition ET dans le filtre du chart (ChipSelector, traduits)
+    expect(getAllByText('Pectoraux').length).toBeGreaterThanOrEqual(1)
     expect(getAllByText('Dos').length).toBeGreaterThanOrEqual(1)
   })
 

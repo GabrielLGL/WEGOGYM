@@ -40,11 +40,14 @@ interface ExerciseItemProps {
 const ExerciseItem = memo<ExerciseItemProps>(
   ({ item, onOptionsPress, onPress, colors }) => {
     const styles = useExerciseItemStyles(colors)
+    const { t } = useLanguage()
+    const muscleNames = item.muscles?.map(m => t.muscleNames[m as keyof typeof t.muscleNames] ?? m) ?? []
+    const equipmentLabel = t.equipmentNames[item.equipment as keyof typeof t.equipmentNames] ?? item.equipment
     return (
       <TouchableOpacity style={styles.exoItem} onPress={() => onPress(item)} activeOpacity={0.7}>
         <View style={styles.exoInfo}>
           <Text style={styles.exoTitle}>{item.name}</Text>
-          <Text style={styles.exoSubtitle}>{item.muscles?.join(', ')} • {item.equipment}</Text>
+          <Text style={styles.exoSubtitle}>{muscleNames.join(', ')} • {equipmentLabel}</Text>
         </View>
         <TouchableOpacity
           style={styles.moreBtn}
@@ -224,6 +227,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
               selectedValue={filterMuscle}
               onChange={setFilterMuscle}
               noneLabel={t.exercises.allMuscles}
+              labelMap={t.muscleNames}
               style={styles.filterRow}
             />
             <ChipSelector
@@ -231,6 +235,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
               selectedValue={filterEquipment}
               onChange={setFilterEquipment}
               noneLabel={t.exercises.allEquipment}
+              labelMap={t.equipmentNames}
               style={[styles.filterRow, { marginTop: HEADER_PADDING_V }]}
             />
           </View>

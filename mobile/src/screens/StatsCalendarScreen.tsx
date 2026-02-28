@@ -24,13 +24,13 @@ import {
 } from '../model/utils/statsHelpers'
 import { spacing, borderRadius, fontSize, intensityColors } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 // ─── Constantes calendrier ────────────────────────────────────────────────────
 
 const DAY_SIZE = 38
 const DAY_GAP = 6
-const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -134,10 +134,10 @@ function capitalizeFirst(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-function formatMonthTitle(year: number, month: number): string {
+function formatMonthTitle(year: number, month: number, locale: string): string {
   const date = new Date(year, month, 1)
   return capitalizeFirst(
-    date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+    date.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   )
 }
 
@@ -150,6 +150,8 @@ interface Props {
 export function StatsCalendarScreenBase({ histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const { t, language } = useLanguage()
+  const locale = language === 'fr' ? 'fr-FR' : 'en-US'
 
   const today = useMemo(() => new Date(), [])
   const [viewYear, setViewYear] = useState(() => new Date().getFullYear())
@@ -278,7 +280,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       return
     }
 
-    const label = day.date.toLocaleDateString('fr-FR', {
+    const label = day.date.toLocaleDateString(locale, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -391,12 +393,12 @@ export function StatsCalendarScreenBase({ histories }: Props) {
         <View style={styles.streakCard}>
           <Ionicons name="flame-outline" size={24} color={colors.danger} />
           <Text style={styles.streakValue}>{currentStreak}</Text>
-          <Text style={styles.streakLabel}>jours actuels</Text>
+          <Text style={styles.streakLabel}>{t.statsCalendar.streakCurrent}</Text>
         </View>
         <View style={styles.streakCard}>
           <Ionicons name="trophy-outline" size={24} color={colors.warning} />
           <Text style={styles.streakValue}>{recordStreak}</Text>
-          <Text style={styles.streakLabel}>record</Text>
+          <Text style={styles.streakLabel}>{t.statsCalendar.streakRecord}</Text>
         </View>
       </View>
 
@@ -405,16 +407,16 @@ export function StatsCalendarScreenBase({ histories }: Props) {
         <TouchableOpacity
           onPress={goToPrevMonth}
           style={styles.arrowBtn}
-          accessibilityLabel="Mois précédent"
+          accessibilityLabel={t.statsCalendar.prevMonth}
         >
           <Text style={styles.arrowText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.monthTitle}>{formatMonthTitle(viewYear, viewMonth)}</Text>
+        <Text style={styles.monthTitle}>{formatMonthTitle(viewYear, viewMonth, locale)}</Text>
         <TouchableOpacity
           onPress={goToNextMonth}
           style={[styles.arrowBtn, isCurrentMonth && styles.arrowDisabled]}
           disabled={isCurrentMonth}
-          accessibilityLabel="Mois suivant"
+          accessibilityLabel={t.statsCalendar.nextMonth}
         >
           <Text style={[styles.arrowText, isCurrentMonth && styles.arrowTextDisabled]}>
             →
@@ -425,14 +427,14 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       {/* Stats du mois */}
       <Text style={styles.monthStats}>
         {monthStats.sessionCount}{' '}
-        séance{monthStats.sessionCount !== 1 ? 's' : ''}
-        {monthDurationLabel ? `   ·   ${monthDurationLabel} au total` : ''}
+        {monthStats.sessionCount !== 1 ? t.statsCalendar.sessionCountPlural : t.statsCalendar.sessionCount}
+        {monthDurationLabel ? `   ·   ${monthDurationLabel} ${t.statsCalendar.totalDuration}` : ''}
       </Text>
 
       {/* Bouton "Aujourd'hui" */}
       {!isCurrentMonth && (
         <TouchableOpacity onPress={goToToday} style={styles.todayBtn}>
-          <Text style={styles.todayBtnText}>Aujourd'hui</Text>
+          <Text style={styles.todayBtnText}>{t.statsCalendar.today}</Text>
         </TouchableOpacity>
       )}
 
@@ -440,7 +442,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       <View {...panResponder.panHandlers} style={styles.calendarContainer}>
         {/* Header jours */}
         <View style={styles.dayLabelsRow}>
-          {DAY_LABELS.map((label, i) => (
+          {t.statsCalendar.dayLabels.map((label, i) => (
             <Text key={i} style={styles.dayLabel}>
               {label}
             </Text>
@@ -468,7 +470,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
                 textColor = colors.border
               } else if (isToday) {
                 bgColor = colors.primary
-                textColor = '#000'
+                textColor = colors.text
               } else if (isActive) {
                 bgColor = colors.primaryBg
                 textColor = colors.primary
@@ -511,7 +513,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
         <View
           style={[styles.legendBox, { backgroundColor: intensityColors[0] }]}
         />
-        <Text style={styles.legendText}>Repos</Text>
+        <Text style={styles.legendText}>{t.statsCalendar.rest}</Text>
         <View
           style={[
             styles.legendBox,
@@ -522,17 +524,17 @@ export function StatsCalendarScreenBase({ histories }: Props) {
             },
           ]}
         />
-        <Text style={styles.legendText}>Actif</Text>
+        <Text style={styles.legendText}>{t.statsCalendar.active}</Text>
       </View>
 
       <AlertDialog
         visible={pendingDeleteId !== null}
-        title="Supprimer cette séance ?"
-        message="Cette action est irréversible."
+        title={t.statsCalendar.deleteTitle}
+        message={t.statsCalendar.deleteMessage}
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDeleteId(null)}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        confirmText={t.statsCalendar.deleteConfirm}
+        cancelText={t.statsCalendar.deleteCancel}
       />
 
       {/* Carte de détail */}
@@ -541,7 +543,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
           <Text style={styles.detailDate}>{detail.label}</Text>
 
           {detail.count === 0 ? (
-            <Text style={styles.detailRest}>Repos</Text>
+            <Text style={styles.detailRest}>{t.statsCalendar.rest}</Text>
           ) : (
             detail.sessions.map((block, blockIndex) => {
               const isExpanded = expandedBlocks.has(block.historyId)
@@ -556,7 +558,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
                       activeOpacity={0.7}
                     >
                       <Text style={styles.detailProgramName} numberOfLines={1}>
-                        {block.programName || block.sessionName || 'Séance'}
+                        {block.programName || block.sessionName || t.statsCalendar.sessionFallback}
                       </Text>
                       <View style={styles.detailHeaderRight}>
                         {block.durationMin != null && (
@@ -575,7 +577,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
                     <TouchableOpacity
                       style={styles.deleteSessionBtn}
                       onPress={() => { haptics.onDelete(); setPendingDeleteId(block.historyId) }}
-                      accessibilityLabel="Supprimer cette séance"
+                      accessibilityLabel={t.statsCalendar.deleteButton}
                     >
                       <Ionicons name="trash-outline" size={18} color={colors.danger} />
                     </TouchableOpacity>

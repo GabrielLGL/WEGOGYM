@@ -26,6 +26,7 @@ import {
 import { ChipSelector } from '../components/ChipSelector'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { useHaptics } from '../hooks/useHaptics'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
@@ -42,6 +43,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
   const colors = useColors()
   const styles = useStyles(colors)
   const haptics = useHaptics()
+  const { t } = useLanguage()
   const { width: screenWidth } = useWindowDimensions()
 
   const [periodLabel, setPeriodLabel] = useState<string>('1 mois')
@@ -73,6 +75,11 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
     [availableMuscles]
   )
 
+  const muscleLabelMap = useMemo(
+    () => ({ Global: t.statsRepartition.global, ...t.muscleNames }),
+    [t]
+  )
+
   const weeklySetsChart = useMemo(
     () => computeWeeklySetsChart(sets, exercises, histories, {
       muscleFilter: muscleChartFilter,
@@ -97,6 +104,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
 
   function handleMuscleChartChange(label: string | null) {
     setMuscleChartFilter(!label || label === 'Global' ? null : label)
+
     setWeekOffset(0)
   }
 
@@ -119,7 +127,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
       {repartition.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>
-            Aucune donnée pour cette période.
+            {t.statsRepartition.noDataPeriod}
           </Text>
         </View>
       ) : (
@@ -128,7 +136,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
             {repartition.map(item => (
               <View key={item.muscle} style={styles.barRow}>
                 <View style={styles.barLabelRow}>
-                  <Text style={styles.muscleName}>{item.muscle}</Text>
+                  <Text style={styles.muscleName}>{t.muscleNames[item.muscle as keyof typeof t.muscleNames] ?? item.muscle}</Text>
                   <Text style={styles.musclePct}>{item.pct}%</Text>
                 </View>
                 <View style={styles.barTrack}>
@@ -144,13 +152,13 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
           </View>
 
           <Text style={styles.totalText}>
-            Volume analysé : {formatVolume(totalVolume)}
+            {t.statsRepartition.volumeAnalyzed} {formatVolume(totalVolume)}
           </Text>
         </>
       )}
 
       {/* ── Séries par semaine ── */}
-      <Text style={styles.sectionTitle}>Séries par semaine</Text>
+      <Text style={styles.sectionTitle}>{t.statsRepartition.sectionSeriesPerWeek}</Text>
 
       <ChipSelector
         items={muscleChartItems}
@@ -158,6 +166,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
         onChange={handleMuscleChartChange}
         allowNone={false}
         noneLabel=""
+        labelMap={muscleLabelMap}
       />
 
       {hasChartData ? (
@@ -177,7 +186,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
         </View>
       ) : (
         <View style={styles.emptyChart}>
-          <Text style={styles.emptyText}>Aucune série enregistrée sur cette période.</Text>
+          <Text style={styles.emptyText}>{t.statsRepartition.noSeriesThisPeriod}</Text>
         </View>
       )}
 
@@ -189,7 +198,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
             setWeekOffset(prev => prev - 1)
           }}
         >
-          <Text style={styles.weekNavBtnText}>← Précédent</Text>
+          <Text style={styles.weekNavBtnText}>{t.statsRepartition.prev}</Text>
         </TouchableOpacity>
 
         <Text style={styles.weekRangeLabel}>{weeklySetsChart.weekRangeLabel}</Text>
@@ -204,7 +213,7 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
           disabled={!weeklySetsChart.hasNext}
         >
           <Text style={[styles.weekNavBtnText, !weeklySetsChart.hasNext && styles.weekNavBtnTextDisabled]}>
-            Suivant →
+            {t.statsRepartition.next}
           </Text>
         </TouchableOpacity>
       </View>
@@ -212,12 +221,12 @@ export function StatsRepartitionScreenBase({ sets, exercises, histories }: Props
       {/* ── Sets par muscle cette semaine ── */}
       {setsPerMuscle.length > 0 && (
         <>
-          <Text style={styles.sectionTitle}>Sets par muscle cette semaine</Text>
+          <Text style={styles.sectionTitle}>{t.statsRepartition.sectionSetsThisWeek}</Text>
           <View style={styles.setsMuscleCard}>
             {setsPerMuscle.map(item => (
               <View key={item.muscle} style={styles.setsMuscleRow}>
                 <View style={styles.setsMuscleLabel}>
-                  <Text style={styles.setsMuscleText}>{item.muscle}</Text>
+                  <Text style={styles.setsMuscleText}>{t.muscleNames[item.muscle as keyof typeof t.muscleNames] ?? item.muscle}</Text>
                   <Text style={styles.setsMuscleCnt}>{item.sets} sets</Text>
                 </View>
                 <View style={styles.setsTrack}>

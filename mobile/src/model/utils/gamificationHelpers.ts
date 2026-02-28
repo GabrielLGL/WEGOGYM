@@ -3,6 +3,8 @@
  *
  * Calibrage : niveau 100 atteignable en ~500 seances (~3 ans a 3x/semaine).
  */
+import type { Language } from '../../i18n'
+import { translations } from '../../i18n'
 
 // ─── Constantes XP ──────────────────────────────────────────────────────────
 
@@ -116,8 +118,8 @@ export interface StreakResult {
 /**
  * Met a jour le streak hebdomadaire.
  *
- * Appelee en fin de seance. Verifie si la semaine courante est complete
- * (sessions >= target) et met a jour le streak en consequence.
+ * Appelée en fin de séance. Vérifie si la semaine courante est complète
+ * (sessions >= target) et met à jour le streak en conséquence.
  */
 export function updateStreak(
   lastWorkoutWeek: string | null,
@@ -209,12 +211,22 @@ const TONNAGE_MILESTONE_DATA: Record<number, { emoji: string; message: string }>
   1_000_000: { emoji: '\uD83D\uDE80', message: 'Interstellaire.' },
 }
 
+const SESSION_KEY_MAP: Record<number, keyof typeof translations['fr']['milestones']['sessionMessages']> = {
+  10: 's10', 25: 's25', 50: 's50', 100: 's100', 250: 's250', 500: 's500',
+}
+
+const TONNAGE_KEY_MAP: Record<number, keyof typeof translations['fr']['milestones']['tonnageMessages']> = {
+  10_000: 't10000', 50_000: 't50000', 100_000: 't100000', 500_000: 't500000', 1_000_000: 't1000000',
+}
+
 /** Detecte les milestones franchis entre deux etats. */
 export function detectMilestones(
   before: MilestoneState,
   after: MilestoneState,
+  language: Language = 'fr',
 ): MilestoneEvent[] {
   const events: MilestoneEvent[] = []
+  const m = translations[language].milestones
 
   // Level-up
   if (after.level > before.level) {
@@ -222,8 +234,8 @@ export function detectMilestones(
       type: 'levelup',
       value: after.level,
       emoji: '\u2B50',
-      title: `Niveau ${after.level} !`,
-      message: 'Continue comme ca, tu progresses !',
+      title: m.levelUpTitle.replace('{level}', String(after.level)),
+      message: m.levelUpMessage,
     })
   }
 
@@ -231,12 +243,13 @@ export function detectMilestones(
   for (const threshold of SESSION_MILESTONES) {
     if (before.totalSessions < threshold && after.totalSessions >= threshold) {
       const data = SESSION_MILESTONE_DATA[threshold]
+      const msgKey = SESSION_KEY_MAP[threshold]
       events.push({
         type: 'session',
         value: threshold,
         emoji: data.emoji,
-        title: `${threshold} seances !`,
-        message: data.message,
+        title: m.sessionTitle.replace('{n}', String(threshold)),
+        message: m.sessionMessages[msgKey],
       })
     }
   }
@@ -245,13 +258,16 @@ export function detectMilestones(
   for (const threshold of TONNAGE_MILESTONES_KG) {
     if (before.totalTonnage < threshold && after.totalTonnage >= threshold) {
       const data = TONNAGE_MILESTONE_DATA[threshold]
-      const displayTonnage = threshold >= 1000 ? `${threshold / 1000} tonnes` : `${threshold} kg`
+      const msgKey = TONNAGE_KEY_MAP[threshold]
+      const title = threshold >= 1_000
+        ? m.tonnageTitleTons.replace('{n}', String(threshold / 1000))
+        : m.tonnageTitleKg.replace('{n}', String(threshold))
       events.push({
         type: 'tonnage',
         value: threshold,
         emoji: data.emoji,
-        title: `${displayTonnage} soulevees !`,
-        message: data.message,
+        title,
+        message: m.tonnageMessages[msgKey],
       })
     }
   }

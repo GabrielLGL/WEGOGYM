@@ -26,6 +26,7 @@ import {
 import { ChipSelector } from '../components/ChipSelector'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 
@@ -34,12 +35,15 @@ const chartConfig = createChartConfig({ showDots: true })
 const BAR_PERIOD_LABELS = ['Semaine', '1 mois', '3 mois', 'Tout'] as const
 type BarPeriodLabel = typeof BAR_PERIOD_LABELS[number]
 
-const MONTH_FR_ABBR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
-const MONTH_FR_LONG = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
-
 const pad = (n: number) => String(n).padStart(2, '0')
 
-function computeBarWindow(barPeriod: BarPeriodLabel, offset: number): {
+function computeBarWindow(
+  barPeriod: BarPeriodLabel,
+  offset: number,
+  monthAbbr: string[],
+  monthFull: string[],
+  labelAll: string,
+): {
   windowStart: number
   windowEnd: number
   windowLabel: string
@@ -49,7 +53,7 @@ function computeBarWindow(barPeriod: BarPeriodLabel, offset: number): {
   const now = new Date()
 
   if (barPeriod === 'Tout') {
-    return { windowStart: 0, windowEnd: Date.now() + 1, windowLabel: 'Total global', showNav: false }
+    return { windowStart: 0, windowEnd: Date.now() + 1, windowLabel: labelAll, showNav: false }
   }
 
   if (barPeriod === 'Semaine') {
@@ -66,7 +70,7 @@ function computeBarWindow(barPeriod: BarPeriodLabel, offset: number): {
     const target = new Date(now.getFullYear(), now.getMonth() + offset, 1)
     const windowStart = target.getTime()
     const windowEnd = new Date(target.getFullYear(), target.getMonth() + 1, 1).getTime()
-    const windowLabel = `${MONTH_FR_LONG[target.getMonth()]} ${target.getFullYear()}`
+    const windowLabel = `${monthFull[target.getMonth()]} ${target.getFullYear()}`
     return { windowStart, windowEnd, windowLabel, showNav: true }
   }
 
@@ -79,8 +83,8 @@ function computeBarWindow(barPeriod: BarPeriodLabel, offset: number): {
   const sy = startDate.getFullYear()
   const ey = lastDay.getFullYear()
   const windowLabel = sy === ey
-    ? `${MONTH_FR_ABBR[startDate.getMonth()]} – ${MONTH_FR_ABBR[lastDay.getMonth()]} ${ey}`
-    : `${MONTH_FR_ABBR[startDate.getMonth()]} ${sy} – ${MONTH_FR_ABBR[lastDay.getMonth()]} ${ey}`
+    ? `${monthAbbr[startDate.getMonth()]} – ${monthAbbr[lastDay.getMonth()]} ${ey}`
+    : `${monthAbbr[startDate.getMonth()]} ${sy} – ${monthAbbr[lastDay.getMonth()]} ${ey}`
   return { windowStart, windowEnd, windowLabel, showNav: true }
 }
 
@@ -93,6 +97,7 @@ interface Props {
 export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const { t } = useLanguage()
   const { width: screenWidth } = useWindowDimensions()
 
   // ── Graphique ────────────────────────────────────────────────────────────
@@ -110,8 +115,16 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
     return Array.from(muscleSet).sort()
   }, [sets, exercises])
 
-  const muscleItems = useMemo(() => ['Total', ...availableMuscles], [availableMuscles])
-  const muscleFilter = muscleLabel === 'Total' ? null : muscleLabel
+  const muscleItems = useMemo(() => [t.statsVolume.total, ...availableMuscles], [availableMuscles, t.statsVolume.total])
+  const muscleFilter = muscleLabel === t.statsVolume.total ? null : muscleLabel
+  const muscleLabelMap = useMemo(() => ({ [t.statsVolume.total]: t.statsVolume.total, ...t.muscleNames }), [t])
+
+  const barPeriodLabelMap = useMemo<Record<string, string>>(() => ({
+    'Semaine': t.statsVolume.periodWeek,
+    '1 mois': t.statsVolume.periodMonth,
+    '3 mois': t.statsVolume.period3Months,
+    'Tout': t.statsVolume.periodAll,
+  }), [t])
 
   // ── Progress bars ────────────────────────────────────────────────────────
   const [barPeriodLabel, setBarPeriodLabel] = useState<BarPeriodLabel>('Semaine')
@@ -148,7 +161,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
 
   // ── Données progress bars ────────────────────────────────────────────────
   const { windowLabel, setsPerMuscle, hasNext, showNav } = useMemo(() => {
-    const { windowStart, windowEnd, windowLabel: label, showNav } = computeBarWindow(barPeriodLabel, timeOffset)
+    const { windowStart, windowEnd, windowLabel: label, showNav } = computeBarWindow(barPeriodLabel, timeOffset, t.statsVolume.monthAbbr, t.statsVolume.monthFull, t.statsVolume.totalGlobal)
 
     const activeHistories = histories.filter(h => h.deletedAt === null)
     const historyDates = new Map(activeHistories.map(h => [h.id, h.startTime.getTime()]))
@@ -175,7 +188,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
       .map(([muscle, count]) => ({ muscle, sets: count }))
 
     return { windowLabel: label, setsPerMuscle: result, hasNext: timeOffset < 0, showNav }
-  }, [sets, exercises, histories, barPeriodLabel, timeOffset])
+  }, [sets, exercises, histories, barPeriodLabel, timeOffset, t])
 
   const maxSets = setsPerMuscle[0]?.sets ?? 1
 
@@ -199,6 +212,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
         onChange={label => { if (label) setMuscleLabel(label) }}
         allowNone={false}
         noneLabel=""
+        labelMap={muscleLabelMap}
       />
       {hasChartData ? (
         <View style={styles.chartWrapper}>
@@ -217,7 +231,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
         </View>
       ) : (
         <View style={styles.emptyChart}>
-          <Text style={styles.emptyText}>Aucune donnée pour cette période.</Text>
+          <Text style={styles.emptyText}>{t.statsVolume.noDataPeriod}</Text>
         </View>
       )}
 
@@ -228,6 +242,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
         onChange={label => { if (label) setBarPeriodLabel(label as BarPeriodLabel) }}
         allowNone={false}
         noneLabel=""
+        labelMap={barPeriodLabelMap}
       />
       <View style={styles.barSection}>
         <View style={styles.barHeader}>
@@ -262,7 +277,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
           setsPerMuscle.map(entry => (
             <View key={entry.muscle} style={styles.muscleRow}>
               <View style={styles.muscleLabelRow}>
-                <Text style={styles.muscleName} numberOfLines={1}>{entry.muscle}</Text>
+                <Text style={styles.muscleName} numberOfLines={1}>{t.muscleNames[entry.muscle as keyof typeof t.muscleNames] ?? entry.muscle}</Text>
                 <Text style={styles.muscleSets}>{entry.sets} set{entry.sets > 1 ? 's' : ''}</Text>
               </View>
               <View style={styles.barBg}>
@@ -276,7 +291,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
             </View>
           ))
         ) : (
-          <Text style={styles.emptyText}>Aucun set enregistré sur cette période.</Text>
+          <Text style={styles.emptyText}>{t.statsVolume.noSetsThisPeriod}</Text>
         )}
       </View>
     </ScrollView>

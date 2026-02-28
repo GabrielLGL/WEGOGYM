@@ -2,6 +2,7 @@ import React from 'react'
 import { Text, StyleSheet } from 'react-native'
 import { fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 interface StreakIndicatorProps {
@@ -12,14 +13,17 @@ interface StreakIndicatorProps {
 export function StreakIndicator({ currentStreak, streakTarget }: StreakIndicatorProps) {
   const colors = useColors()
   const styles = useStyles(colors)
+  const { t } = useLanguage()
 
   if (currentStreak <= 0) {
-    return <Text style={styles.inactive}>Pas encore de streak</Text>
+    return <Text style={styles.inactive}>{t.streak.noStreak}</Text>
   }
+
+  const weekLabel = currentStreak > 1 ? t.streak.weeksPlural : t.streak.weeks
 
   return (
     <Text style={styles.active}>
-      {'\uD83D\uDD25'} {currentStreak} semaine{currentStreak > 1 ? 's' : ''} (obj: {streakTarget}/sem)
+      {'\uD83D\uDD25'} {currentStreak} {weekLabel} ({t.streak.target} {streakTarget}{t.streak.per})
     </Text>
   )
 }

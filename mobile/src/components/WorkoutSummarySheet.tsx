@@ -6,6 +6,7 @@ import { Button } from './Button'
 import { updateHistoryNote } from '../model/utils/databaseHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import type { RecapExerciseData, RecapComparisonData } from '../types/workout'
 
@@ -55,14 +56,14 @@ const StatBlock: React.FC<StatBlockProps> = ({ label, value, emoji, icon, colors
   )
 }
 
-function getMotivationMessage(totalPrs: number, volumeGain: number, colors: ThemeColors): { text: string; color: string } {
+function getMotivationMessage(totalPrs: number, volumeGain: number, colors: ThemeColors, t: { motivationPR: string; motivationProgress: string; motivationDefault: string }): { text: string; color: string } {
   if (totalPrs > 0) {
-    return { text: 'Record battu !', color: colors.primary }
+    return { text: t.motivationPR, color: colors.primary }
   }
   if (volumeGain > 0) {
-    return { text: 'En progression !', color: colors.success }
+    return { text: t.motivationProgress, color: colors.success }
   }
-  return { text: 'Bonne séance !', color: colors.success }
+  return { text: t.motivationDefault, color: colors.success }
 }
 
 function formatWeight(w: number): string {
@@ -85,6 +86,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 }) => {
   const colors = useColors()
   const styles = useStyles(colors)
+  const { t } = useLanguage()
   const [note, setNote] = useState('')
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -112,7 +114,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     onClose()
   }
 
-  const motivation = getMotivationMessage(totalPrs, recapComparison.volumeGain, colors)
+  const motivation = getMotivationMessage(totalPrs, recapComparison.volumeGain, colors, t.workoutSummary)
 
   // Muscles uniques de tous les exercices
   const allMuscles = Array.from(
@@ -128,7 +130,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     <BottomSheet
       visible={visible}
       onClose={handleClose}
-      title="Séance terminée !"
+      title={t.workoutSummary.title}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Message motivant */}
@@ -149,10 +151,10 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 
         {/* Stats grid 2×2 */}
         <View style={styles.statsGrid}>
-          <StatBlock label="Durée" value={formatDuration(durationSeconds)} emoji="⏱" colors={colors} />
-          <StatBlock label="Volume" value={`${totalVolume.toFixed(1)} kg`} icon="barbell-outline" colors={colors} />
-          <StatBlock label="Séries" value={`${totalSets} validées`} icon="checkmark-circle-outline" colors={colors} />
-          <StatBlock label="Records" value={`${totalPrs} PR`} icon="trophy-outline" colors={colors} />
+          <StatBlock label={t.workoutSummary.duration} value={formatDuration(durationSeconds)} emoji="⏱" colors={colors} />
+          <StatBlock label={t.workoutSummary.volume} value={`${totalVolume.toFixed(1)} kg`} icon="barbell-outline" colors={colors} />
+          <StatBlock label={t.workoutSummary.sets} value={`${totalSets} ${t.workoutSummary.setsValidated}`} icon="checkmark-circle-outline" colors={colors} />
+          <StatBlock label={t.workoutSummary.records} value={`${totalPrs} PR`} icon="trophy-outline" colors={colors} />
         </View>
 
         {/* Section gamification */}
@@ -162,11 +164,11 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
               {'\u2B50'} +{xpGained} XP
             </Text>
             <Text style={styles.gamItem}>
-              {'\uD83C\uDFAF'} Niveau {level}
+              {'\uD83C\uDFAF'} {t.workoutSummary.levelLabel} {level}
             </Text>
           </View>
           <Text style={[styles.gamItem, styles.gamCenter]}>
-            {'\uD83D\uDD25'} Streak {currentStreak}
+            {'\uD83D\uDD25'} {t.workoutSummary.streakLabel} {currentStreak}
           </Text>
         </View>
 
@@ -174,7 +176,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         {recapExercises.length > 0 && (
           <>
             <View style={styles.separator} />
-            <Text style={styles.sectionTitle}>Ce que tu as fait</Text>
+            <Text style={styles.sectionTitle}>{t.workoutSummary.sectionDone}</Text>
             {recapExercises.map((exo, idx) => {
               const isComplete = exo.setsValidated >= exo.setsTarget && exo.setsTarget > 0
               return (
@@ -202,14 +204,14 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         {recapExercises.length > 0 && (
           <>
             <View style={styles.separator} />
-            <Text style={styles.sectionTitle}>Progression</Text>
+            <Text style={styles.sectionTitle}>{t.workoutSummary.sectionProgression}</Text>
 
             {/* Delta volume total */}
             {recapComparison.prevVolume === null ? (
-              <Text style={styles.progressionFirstTime}>Première séance !</Text>
+              <Text style={styles.progressionFirstTime}>{t.workoutSummary.firstSession}</Text>
             ) : (
               <View style={styles.progressionVolRow}>
-                <Text style={styles.progressionLabel}>Volume total</Text>
+                <Text style={styles.progressionLabel}>{t.workoutSummary.totalVolume}</Text>
                 {recapComparison.volumeGain > 0 ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <Text style={[styles.progressionDelta, { color: colors.success }]}>
@@ -226,7 +228,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                   </View>
                 ) : (
                   <Text style={[styles.progressionDelta, { color: colors.textSecondary }]}>
-                    Même volume
+                    {t.workoutSummary.sameVolume}
                   </Text>
                 )}
               </View>
@@ -256,14 +258,14 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 
         <View style={styles.separator} />
 
-        <Text style={styles.noteLabel}>Note de séance</Text>
+        <Text style={styles.noteLabel}>{t.workoutSummary.noteLabel}</Text>
         <TextInput
           style={styles.noteInput}
           multiline
           numberOfLines={3}
           value={note}
           onChangeText={handleNoteChange}
-          placeholder="Ressenti, conditions, progrès..."
+          placeholder={t.workoutSummary.notePlaceholder}
           placeholderTextColor={colors.placeholder}
           textAlignVertical="top"
         />
@@ -275,7 +277,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
           onPress={handleClose}
           enableHaptics={false}
         >
-          Terminer
+          {t.workoutSummary.finish}
         </Button>
       </ScrollView>
     </BottomSheet>

@@ -5,6 +5,7 @@ import { BottomSheet } from './BottomSheet'
 import Exercise from '../model/models/Exercise'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 interface ExerciseInfoSheetProps {
@@ -26,6 +27,7 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
 }) => {
   const colors = useColors()
   const styles = useStyles(colors)
+  const { t } = useLanguage()
   const muscles = exercise.muscles || []
   const description = exercise.description
   const notes = exercise.notes
@@ -35,7 +37,7 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
       {/* Zone placeholder animation */}
       <View style={styles.placeholderContainer}>
         <Ionicons name="barbell-outline" size={48} color={colors.textSecondary} />
-        <Text style={styles.placeholderText}>Animation à venir</Text>
+        <Text style={styles.placeholderText}>{t.exerciseInfoSheet.placeholderText}</Text>
       </View>
 
       {/* Nom de l'exercice */}
@@ -48,7 +50,7 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
         <View style={styles.musclesRow}>
           {muscles.map((muscle) => (
             <View key={muscle} style={styles.muscleChip}>
-              <Text style={styles.muscleChipText}>{muscle}</Text>
+              <Text style={styles.muscleChipText}>{t.muscleNames[muscle as keyof typeof t.muscleNames] ?? muscle}</Text>
             </View>
           ))}
         </View>
@@ -56,21 +58,21 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
 
       {/* Description */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Description</Text>
+        <Text style={styles.sectionLabel}>{t.exerciseInfoSheet.description}</Text>
         {description ? (
           <Text style={styles.descriptionText}>{description}</Text>
         ) : (
-          <Text style={styles.emptyText}>Pas de description disponible</Text>
+          <Text style={styles.emptyText}>{t.exerciseInfoSheet.noDescription}</Text>
         )}
       </View>
 
       {/* Notes personnelles */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Notes personnelles</Text>
+        <Text style={styles.sectionLabel}>{t.exerciseInfoSheet.personalNotes}</Text>
         {notes ? (
           <Text style={styles.notesText}>{notes}</Text>
         ) : (
-          <Text style={styles.emptyText}>Aucune note</Text>
+          <Text style={styles.emptyText}>{t.exerciseInfoSheet.noNotes}</Text>
         )}
       </View>
     </BottomSheet>

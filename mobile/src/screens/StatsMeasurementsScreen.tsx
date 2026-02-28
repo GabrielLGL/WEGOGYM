@@ -23,6 +23,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { parseNumericInput } from '../model/utils/databaseHelpers'
@@ -70,17 +71,28 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
   const styles = useStyles(colors)
   const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   const haptics = useHaptics()
+  const { t, language } = useLanguage()
   const addSheet = useModalState()
   const [deleteTarget, setDeleteTarget] = useState<BodyMeasurement | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
-  const [selectedMetric, setSelectedMetric] = useState<string>('Poids')
+  const [selectedMetric, setSelectedMetric] = useState<string>('weight')
+
+  const locale = language === 'fr' ? 'fr-FR' : 'en-US'
+
+  const metricsLabelMap = useMemo<Record<string, string>>(() => ({
+    weight: t.statsMeasurements.weight,
+    waist: t.statsMeasurements.waist,
+    hips: t.statsMeasurements.hips,
+    arms: t.statsMeasurements.arms,
+    chest: t.statsMeasurements.chest,
+  }), [t])
 
   // Donnée la plus récente
   const latest = measurements[0] ?? null
 
   // Graphique pour la métrique sélectée
-  const metricKey = METRICS.find(m => m.label === selectedMetric)?.key ?? 'weight'
-  const metricUnit = METRICS.find(m => m.label === selectedMetric)?.unit ?? 'kg'
+  const metricKey = selectedMetric as MetricKey
+  const metricUnit = METRICS.find(m => m.key === selectedMetric)?.unit ?? 'kg'
 
   const chartData = useMemo(() => {
     const points = measurements
@@ -91,12 +103,12 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
     return {
       labels: points.map((m, i) =>
         i % 4 === 0
-          ? new Date(m.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+          ? new Date(m.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })
           : ''
       ),
       datasets: [{ data: points.map(m => m[metricKey] as number) }],
     }
-  }, [measurements, metricKey])
+  }, [measurements, metricKey, locale])
 
   // Validation : au moins 1 champ rempli
   const isFormValid = Object.values(form).some(v => v.trim() !== '')
@@ -150,7 +162,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
             size="sm"
             onPress={() => { haptics.onPress(); addSheet.open() }}
           >
-            + Ajouter
+            {t.statsMeasurements.addButton}
           </Button>
         </View>
 
@@ -158,7 +170,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
         {latest && (
           <>
             <Text style={styles.sectionTitle}>
-              Dernière mesure — {new Date(latest.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {t.statsMeasurements.latestTitle} — {new Date(latest.date).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
             </Text>
             <View style={styles.latestGrid}>
               {METRICS.map(m => (
@@ -175,11 +187,12 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
 
         {/* Graphique */}
         <ChipSelector
-          items={METRICS.map(m => m.label)}
+          items={METRICS.map(m => m.key)}
           selectedValue={selectedMetric}
           onChange={v => { if (v) setSelectedMetric(v) }}
           allowNone={false}
           noneLabel=""
+          labelMap={metricsLabelMap}
         />
 
         {chartData ? (
@@ -198,7 +211,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
         ) : (
           <View style={styles.emptyChart}>
             <Text style={styles.emptyText}>
-              Au moins 2 mesures requises pour voir l'évolution.
+              {t.statsMeasurements.chartEmpty}
             </Text>
           </View>
         )}
@@ -206,7 +219,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
         {/* Historique */}
         {measurements.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { marginTop: spacing.lg }]}>Historique</Text>
+            <Text style={[styles.sectionTitle, { marginTop: spacing.lg }]}>{t.statsMeasurements.historyTitle}</Text>
             <View style={styles.card}>
               {measurements.map((m, i) => (
                 <View
@@ -215,7 +228,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
                 >
                   <View style={styles.historyLeft}>
                     <Text style={styles.historyDate}>
-                      {new Date(m.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {new Date(m.date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}
                     </Text>
                     <Text style={styles.historyValues} numberOfLines={1}>
                       {[
@@ -243,7 +256,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
         {measurements.length === 0 && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>
-              Aucune mesure enregistrée. Appuyez sur "+ Ajouter" pour commencer.
+              {t.statsMeasurements.noData}
             </Text>
           </View>
         )}
@@ -253,7 +266,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
       <BottomSheet
         visible={addSheet.isOpen}
         onClose={addSheet.close}
-        title="Nouvelle mesure"
+        title={t.statsMeasurements.addSheetTitle}
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
@@ -263,7 +276,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
           <View style={styles.formContent}>
             {METRICS.map(m => (
               <View key={m.key} style={styles.inputRow}>
-                <Text style={styles.inputLabel}>{m.label} ({m.unit})</Text>
+                <Text style={styles.inputLabel}>{metricsLabelMap[m.key] ?? m.label} ({m.unit})</Text>
                 <TextInput
                   style={styles.input}
                   value={form[m.key]}
@@ -276,10 +289,10 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
             ))}
             <View style={styles.formButtons}>
               <Button variant="secondary" size="md" onPress={addSheet.close}>
-                Annuler
+                {t.common.cancel}
               </Button>
               <Button variant="primary" size="md" onPress={handleSave}>
-                Enregistrer
+                {t.common.save}
               </Button>
             </View>
           </View>
@@ -289,12 +302,12 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
       {/* AlertDialog suppression */}
       <AlertDialog
         visible={deleteTarget !== null}
-        title="Supprimer cette mesure ?"
-        message="Cette action est irréversible."
+        title={t.statsMeasurements.deleteTitle}
+        message={t.statsMeasurements.deleteMessage}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        confirmText={t.statsMeasurements.deleteConfirm}
+        cancelText={t.statsMeasurements.deleteCancel}
         confirmColor={colors.danger}
       />
     </>

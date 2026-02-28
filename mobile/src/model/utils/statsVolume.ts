@@ -125,6 +125,7 @@ export function buildWeeklyActivity(
   histories: History[],
   sets: WorkoutSet[],
   sessions: Session[],
+  dayLabels?: string[],
 ): WeeklyActivityData {
   const mondayTs = getMondayOfCurrentWeek()
 
@@ -155,7 +156,7 @@ export function buildWeeklyActivity(
 
     return {
       dateKey,
-      dayLabel: DAY_LABELS_FR[i],
+      dayLabel: dayLabels?.[i] ?? DAY_LABELS_FR[i],
       dayNumber: dayDate.getDate(),
       isToday,
       isPast,

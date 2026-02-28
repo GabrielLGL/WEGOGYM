@@ -93,8 +93,8 @@ describe('StatsVolumeScreenBase', () => {
     const { getAllByText } = render(
       <StatsVolumeScreenBase sets={sets} exercises={exercises} histories={histories} />
     )
-    // "Pecs" apparaît dans le chip muscle ET dans la barre de progression
-    expect(getAllByText('Pecs').length).toBeGreaterThanOrEqual(1)
+    // "Pectoraux" apparaît dans le chip muscle ET dans la barre de progression (traduit depuis "Pecs")
+    expect(getAllByText('Pectoraux').length).toBeGreaterThanOrEqual(1)
   })
 
   it('affiche les progress bars avec le nom du muscle et le compteur de sets', () => {

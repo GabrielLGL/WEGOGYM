@@ -92,7 +92,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
   const navigation = useNavigation<HomeNavigation>()
   const route = useRoute<HomeRoute>()
   const haptics = useHaptics()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const SECTIONS: Section[] = useMemo(() => [
     {
@@ -147,12 +147,12 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
     [user?.totalXp, user?.level],
   )
   const motivationalPhrase = useMemo(
-    () => computeMotivationalPhrase(histories, sets),
-    [histories, sets],
+    () => computeMotivationalPhrase(histories, sets, language),
+    [histories, sets, language],
   )
   const weeklyActivity = useMemo(
-    () => buildWeeklyActivity(histories, sets, sessions),
-    [histories, sets, sessions],
+    () => buildWeeklyActivity(histories, sets, sessions, t.home.dayLabels),
+    [histories, sets, sessions, t.home.dayLabels],
   )
 
   const handleTilePress = (tile: Tile) => {

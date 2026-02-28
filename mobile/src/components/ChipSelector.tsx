@@ -11,6 +11,7 @@ interface ChipSelectorProps {
   onChange: (value: string | null) => void
   allowNone?: boolean // Permet de désélectionner (défaut: true)
   noneLabel?: string // Label pour l'option "aucun" (défaut: "Tous")
+  labelMap?: Record<string, string> // Map de valeur → label affiché
   style?: StyleProp<ViewStyle>
 }
 
@@ -42,6 +43,7 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
   onChange,
   allowNone = true,
   noneLabel = 'Tous',
+  labelMap,
   style,
 }) => {
   const { colors, neuShadow } = useTheme()
@@ -100,7 +102,7 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
               selectedValue === item && styles.chipTextSelected,
             ]}
           >
-            {item}
+            {labelMap?.[item] ?? item}
           </Text>
         </TouchableOpacity>
       ))}
@@ -132,7 +134,7 @@ function useStyles(colors: ThemeColors) {
       fontWeight: '600',
     },
     chipTextSelected: {
-      color: colors.text,
+      color: colors.primaryText,
       fontWeight: 'bold',
     },
   })

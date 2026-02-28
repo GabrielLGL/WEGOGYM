@@ -89,7 +89,7 @@ function BadgesScreenBase({ userBadges }: Props) {
       {CATEGORY_ORDER.map(category => (
         <View key={category} style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {BADGE_CATEGORY_LABELS[category]}
+            {t.badges.categories[category] ?? BADGE_CATEGORY_LABELS[category]}
           </Text>
           <View style={styles.grid}>
             {badgesByCategory[category].map(badge => (

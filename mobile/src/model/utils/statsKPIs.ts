@@ -5,6 +5,8 @@ import type WorkoutSet from '../models/Set'
 import type { GlobalKPIs } from './statsTypes'
 import { toDateKey } from './statsDateUtils'
 import { formatVolume } from './statsVolume'
+import type { Language } from '../../i18n'
+import { translations } from '../../i18n'
 
 function getActiveDayStrings(histories: History[]): Set<string> {
   const days = new Set<string>()
@@ -80,15 +82,17 @@ export function computeRecordStreak(histories: History[]): number {
 
 export function computeMotivationalPhrase(
   histories: History[],
-  sets: WorkoutSet[]
+  sets: WorkoutSet[],
+  language: Language = 'fr',
 ): string {
+  const m = translations[language].home.motivational
   const activeHistories = histories.filter(h => h.deletedAt === null)
   const activeHistoryIds = new Set(activeHistories.map(h => h.id))
 
   // 1. Streak ≥ 3
   const streak = computeCurrentStreak(activeHistories)
   if (streak >= 3) {
-    return `🔥 ${streak} jours consécutifs — ne lâche rien !`
+    return m.streak.replace('{n}', String(streak))
   }
 
   // 2. PR cette semaine (7 derniers jours)
@@ -97,7 +101,7 @@ export function computeMotivationalPhrase(
     s => s.isPr && activeHistoryIds.has(s.history.id) && s.createdAt.getTime() > oneWeekAgo
   )
   if (hasPRThisWeek) {
-    return '💥 Nouveau record cette semaine — tu progresses !'
+    return m.weeklyRecord
   }
 
   // 3. Retour après gap > 4 jours
@@ -109,13 +113,13 @@ export function computeMotivationalPhrase(
       (Date.now() - lastSession.startTime.getTime()) / (24 * 60 * 60 * 1000)
     )
     if (daysSinceLast > 4) {
-      return `😤 De retour après ${daysSinceLast} jours — l'important c'est de revenir.`
+      return m.returning.replace('{n}', String(daysSinceLast))
     }
   }
 
   // 4. Premier jour du mois
   if (new Date().getDate() === 1) {
-    return "🎯 Nouveau mois, nouvelles perfs. C'est parti !"
+    return m.newMonth
   }
 
   // 5. Régularité ≥ 4 séances/semaine (sur 4 semaines)
@@ -123,7 +127,7 @@ export function computeMotivationalPhrase(
   const recentCount = activeHistories.filter(h => h.startTime.getTime() > fourWeeksAgo).length
   const avgPerWeek = recentCount / 4
   if (avgPerWeek >= 4) {
-    return `⚡ ${Math.round(avgPerWeek)} séances/semaine — niveau sérieux.`
+    return m.consistency.replace('{n}', String(Math.round(avgPerWeek)))
   }
 
   // 6. Défaut : volume du mois courant
@@ -139,5 +143,5 @@ export function computeMotivationalPhrase(
     .filter(s => monthHistoryIds.has(s.history.id))
     .reduce((sum, s) => sum + s.weight * s.reps, 0)
 
-  return `🚀 Ce mois : ${formatVolume(monthVolume)} soulevés.`
+  return m.volume.replace('{volume}', formatVolume(monthVolume))
 }
