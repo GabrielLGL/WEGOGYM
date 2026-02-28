@@ -24,24 +24,6 @@ jest.mock('../../services/ai/aiService', () => ({
   generatePlan: (...args: unknown[]) => mockGeneratePlan(...args),
 }))
 
-jest.mock('../../model/utils/databaseHelpers', () => ({
-  importGeneratedPlan: jest.fn().mockResolvedValue(undefined),
-  importGeneratedSession: jest.fn().mockResolvedValue({ id: 's1' }),
-}))
-
-jest.mock('../../components/AssistantPreviewSheet', () => ({
-  AssistantPreviewSheet: ({ visible, isLoading, onModify }: { visible: boolean; isLoading: boolean; onModify: () => void }) => {
-    if (!visible) return null
-    const { View, Text, TouchableOpacity } = require('react-native')
-    return (
-      <View>
-        <Text>{isLoading ? 'Chargement...' : 'Preview'}</Text>
-        <TouchableOpacity onPress={onModify}><Text>Modifier</Text></TouchableOpacity>
-      </View>
-    )
-  },
-}))
-
 jest.mock('@react-navigation/native', () => ({
   useFocusEffect: jest.fn(),
 }))
@@ -54,12 +36,16 @@ const mockNavigation = {
   setOptions: jest.fn(),
 } as never
 
+const mockRoute = (params?: { sessionMode?: { targetProgramId: string } }) =>
+  ({ params, key: 'Assistant', name: 'Assistant' }) as never
+
 const mockUser = (overrides = {}) =>
   ({
     id: 'u1',
     name: 'Test',
     aiProvider: 'offline',
     aiApiKey: null,
+    userLevel: 'intermediate',
     ...overrides,
   }) as never
 
@@ -88,40 +74,62 @@ describe('AssistantScreenInner', () => {
         programs={[mockProgram('p1', 'PPL')]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
-    expect(getByText(/Que veux-tu générer/)).toBeTruthy()
+    expect(getByText('Quel est ton objectif ?')).toBeTruthy()
   })
 
   it('rend avec user null sans crash', () => {
     expect(() =>
       render(
-        <AssistantScreenInner programs={[]} user={null} navigation={mockNavigation} />
+        <AssistantScreenInner
+          programs={[]}
+          user={null}
+          navigation={mockNavigation}
+          route={mockRoute()}
+        />
       )
     ).not.toThrow()
   })
 
-  it('affiche la première question du wizard', () => {
+  it('affiche la première question du wizard (objectif)', () => {
     const { getByText } = render(
       <AssistantScreenInner
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
-    expect(getByText('Que veux-tu générer ?')).toBeTruthy()
+    expect(getByText('Quel est ton objectif ?')).toBeTruthy()
   })
 
-  it('affiche les options Programme complet et Séance du jour', () => {
+  it('affiche les options objectif', () => {
     const { getByText } = render(
       <AssistantScreenInner
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
-    expect(getByText('Programme complet')).toBeTruthy()
-    expect(getByText('Séance du jour')).toBeTruthy()
+    expect(getByText('Hypertrophie')).toBeTruthy()
+    expect(getByText('Force')).toBeTruthy()
+    expect(getByText('Renforcement musculaire')).toBeTruthy()
+    expect(getByText('Cardio')).toBeTruthy()
+  })
+
+  it('affiche le subtitle de la première étape', () => {
+    const { getByText } = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+    expect(getByText(/Détermine les exercices/)).toBeTruthy()
   })
 
   it('affiche le badge provider Offline', () => {
@@ -130,17 +138,19 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
     expect(getByText(/Offline/)).toBeTruthy()
   })
 
-  it('affiche le compteur d\'étapes', () => {
+  it("affiche le compteur d'étapes", () => {
     const { getByText } = render(
       <AssistantScreenInner
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
     expect(getByText(/1 \//)).toBeTruthy()
@@ -152,96 +162,109 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser({ aiProvider: 'gemini' })}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
     expect(getByText(/Gemini/)).toBeTruthy()
   })
 
-  it('navigue à l\'étape suivante en sélectionnant Programme complet', () => {
+  it('navigue à l\'étape équipement en sélectionnant un objectif', () => {
     const result = render(
       <AssistantScreenInner
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
-
-    expect(result.getByText('Quel est ton objectif ?')).toBeTruthy()
-  })
-
-  it('navigue à l\'étape objectif et affiche les options', () => {
-    const result = render(
-      <AssistantScreenInner
-        programs={[]}
-        user={mockUser()}
-        navigation={mockNavigation}
-      />
-    )
-
-    pressAndFlush(result, 'Programme complet')
-
-    expect(result.getByText('Bodybuilding')).toBeTruthy()
-    expect(result.getByText('Power')).toBeTruthy()
-    expect(result.getByText('Renfo')).toBeTruthy()
-    expect(result.getByText('Cardio')).toBeTruthy()
-  })
-
-  it('passe de objectif à niveau', () => {
-    const result = render(
-      <AssistantScreenInner
-        programs={[]}
-        user={mockUser()}
-        navigation={mockNavigation}
-      />
-    )
-
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-
-    expect(result.getByText('Quel est ton niveau ?')).toBeTruthy()
-    expect(result.getByText('Débutant')).toBeTruthy()
-    expect(result.getByText('Intermédiaire')).toBeTruthy()
-    expect(result.getByText('Avancé')).toBeTruthy()
-  })
-
-  it('passe au step équipement (multi-select) avec bouton Suivant', () => {
-    const result = render(
-      <AssistantScreenInner
-        programs={[]}
-        user={mockUser()}
-        navigation={mockNavigation}
-      />
-    )
-
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
+    pressAndFlush(result, 'Hypertrophie')
 
     expect(result.getByText('Quel équipement as-tu ?')).toBeTruthy()
+  })
+
+  it('affiche le subtitle de l\'étape équipement', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+
+    expect(result.getByText(/Seuls les exercices compatibles/)).toBeTruthy()
+  })
+
+  it('affiche les options équipement avec bouton Suivant', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+
     expect(result.getByText('Haltères')).toBeTruthy()
     expect(result.getByText('Machines')).toBeTruthy()
     expect(result.getByText('Suivant →')).toBeTruthy()
   })
 
-  it('toggle un équipement et avance avec Suivant', () => {
+  it('toggle un équipement et avance vers durée avec Suivant', () => {
     const result = render(
       <AssistantScreenInner
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
-    // Select equipment
+    pressAndFlush(result, 'Hypertrophie')
     fireEvent.press(result.getByText('Haltères'))
     pressAndFlush(result, 'Suivant →')
 
-    expect(result.getByText('Combien de temps par séance ?')).toBeTruthy()
+    expect(result.getByText('Durée souhaitée par séance ?')).toBeTruthy()
+  })
+
+  it('affiche le subtitle de l\'étape durée', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+
+    expect(result.getByText(/Ajuste le nombre d'exercices/)).toBeTruthy()
+  })
+
+  it('les options durée affichent les sous-textes exercices', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+
+    expect(result.getByText('4–5 exercices')).toBeTruthy()
+    expect(result.getByText('5–7 exercices')).toBeTruthy()
   })
 
   it('bouton retour revient à l\'étape précédente', () => {
@@ -250,14 +273,15 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
-    expect(result.getByText('Quel est ton objectif ?')).toBeTruthy()
+    pressAndFlush(result, 'Hypertrophie')
+    expect(result.getByText('Quel équipement as-tu ?')).toBeTruthy()
 
     pressAndFlush(result, '←')
-    expect(result.getByText('Que veux-tu générer ?')).toBeTruthy()
+    expect(result.getByText('Quel est ton objectif ?')).toBeTruthy()
   })
 
   it('pas de bouton retour à l\'étape 1', () => {
@@ -266,6 +290,7 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
@@ -278,10 +303,11 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
+    pressAndFlush(result, 'Hypertrophie')
     expect(result.getByText('Recommencer')).toBeTruthy()
   })
 
@@ -291,6 +317,7 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
@@ -303,12 +330,13 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
+    pressAndFlush(result, 'Hypertrophie')
     fireEvent.press(result.getByText('Recommencer'))
-    expect(result.getByText('Que veux-tu générer ?')).toBeTruthy()
+    expect(result.getByText('Quel est ton objectif ?')).toBeTruthy()
   })
 
   it('Recommencer ouvre AlertDialog si étape > 2', () => {
@@ -317,13 +345,19 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
-    // Now at step 4 (equipment), > 2
+    // Step 1: goal
+    pressAndFlush(result, 'Hypertrophie')
+    // Step 2: equipment
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    // Step 3: duration
+    pressAndFlush(result, '60 min')
+    // Now at step 4 (split), index 3 > 2
+
     fireEvent.press(result.getByText('Recommencer'))
 
     expect(result.getByText('Recommencer ?')).toBeTruthy()
@@ -336,126 +370,140 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '60 min')
     fireEvent.press(result.getByText('Recommencer'))
 
-    // Find the confirm button in AlertDialog
+    // Confirm button in AlertDialog
     const recommencerBtns = result.getAllByText('Recommencer')
     fireEvent.press(recommencerBtns[recommencerBtns.length - 1])
 
-    expect(result.getByText('Que veux-tu générer ?')).toBeTruthy()
+    expect(result.getByText('Quel est ton objectif ?')).toBeTruthy()
   })
 
-  it('mode session : affiche les étapes muscle groups', () => {
-    const result = render(
-      <AssistantScreenInner
-        programs={[mockProgram('p1', 'PPL')]}
-        user={mockUser()}
-        navigation={mockNavigation}
-      />
-    )
-
-    pressAndFlush(result, 'Séance du jour')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
-
-    // Equipment step
-    fireEvent.press(result.getByText('Haltères'))
-    pressAndFlush(result, 'Suivant →')
-
-    // Duration
-    pressAndFlush(result, '60 min')
-
-    // Should show muscle groups
-    expect(result.getByText('Quels groupes musculaires ?')).toBeTruthy()
-    expect(result.getByText('Pecs')).toBeTruthy()
-    expect(result.getByText('Dos')).toBeTruthy()
-  })
-
-  it('mode session : affiche sélection de programme cible', () => {
-    const result = render(
-      <AssistantScreenInner
-        programs={[mockProgram('p1', 'PPL')]}
-        user={mockUser()}
-        navigation={mockNavigation}
-      />
-    )
-
-    pressAndFlush(result, 'Séance du jour')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
-    fireEvent.press(result.getByText('Haltères'))
-    pressAndFlush(result, 'Suivant →')
-    pressAndFlush(result, '60 min')
-    // Muscle groups
-    fireEvent.press(result.getByText('Pecs'))
-    pressAndFlush(result, 'Suivant →')
-
-    expect(result.getByText('Dans quel programme ?')).toBeTruthy()
-    expect(result.getByText('PPL')).toBeTruthy()
-  })
-
-  it('mode session : message quand aucun programme disponible', () => {
+  it('mode programme : passe par split, phase, recovery, injuries, days, focus', () => {
     const result = render(
       <AssistantScreenInner
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Séance du jour')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
-    fireEvent.press(result.getByText('Haltères'))
-    pressAndFlush(result, 'Suivant →')
-    pressAndFlush(result, '60 min')
-    fireEvent.press(result.getByText('Pecs'))
-    pressAndFlush(result, 'Suivant →')
-
-    expect(result.getByText(/Aucun programme disponible/)).toBeTruthy()
-  })
-
-  it('mode programme : passe par split, phase, recovery, injuries, age, days, focus', () => {
-    const result = render(
-      <AssistantScreenInner
-        programs={[]}
-        user={mockUser()}
-        navigation={mockNavigation}
-      />
-    )
-
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
+    // Goal
+    pressAndFlush(result, 'Hypertrophie')
     // Equipment
     fireEvent.press(result.getByText('Haltères'))
     pressAndFlush(result, 'Suivant →')
     // Duration
     pressAndFlush(result, '60 min')
     // Split
-    expect(result.getByText('Quel style de programme ?')).toBeTruthy()
+    expect(result.getByText('Quel type de programme ?')).toBeTruthy()
+    expect(result.getByText(/Détermine comment les muscles/)).toBeTruthy()
     pressAndFlush(result, 'PPL')
     // Phase
     expect(result.getByText('Dans quelle phase es-tu ?')).toBeTruthy()
     pressAndFlush(result, 'Prise de masse')
     // Recovery
-    expect(result.getByText('Comment te récupères-tu ?')).toBeTruthy()
+    expect(result.getByText('Comment est ta récupération ?')).toBeTruthy()
     pressAndFlush(result, 'Normale')
     // Injuries
     expect(result.getByText('As-tu des zones sensibles ?')).toBeTruthy()
     fireEvent.press(result.getByText('Aucune'))
     pressAndFlush(result, 'Suivant →')
-    // Age group
-    expect(result.getByText(/tranche d'âge/)).toBeTruthy()
-    pressAndFlush(result, '26–35 ans')
     // Days per week
-    expect(result.getByText('Combien de jours par semaine ?')).toBeTruthy()
+    expect(result.getByText("Combien de jours d'entraînement par semaine ?")).toBeTruthy()
+    pressAndFlush(result, '3 jours')
+    // Muscles focus
+    expect(result.getByText('Muscles à prioriser ?')).toBeTruthy()
+  })
+
+  it('mode programme : pas d\'étape niveau ni âge', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '60 min')
+    // Should be split step, not level/age
+    expect(result.getByText('Quel type de programme ?')).toBeTruthy()
+  })
+
+  it('mode séance via route params : affiche 4 étapes', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[mockProgram('p1', 'PPL')]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute({ sessionMode: { targetProgramId: 'p1' } })}
+      />
+    )
+
+    // Step 1: goal
+    expect(result.getByText('Quel est ton objectif ?')).toBeTruthy()
+    pressAndFlush(result, 'Hypertrophie')
+    // Step 2: equipment
+    expect(result.getByText('Quel équipement as-tu ?')).toBeTruthy()
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    // Step 3: duration
+    expect(result.getByText('Durée souhaitée par séance ?')).toBeTruthy()
+    pressAndFlush(result, '60 min')
+    // Step 4: muscle groups
+    expect(result.getByText("Quels groupes musculaires aujourd'hui ?")).toBeTruthy()
+    expect(result.getByText('Pectoraux')).toBeTruthy()
+    expect(result.getByText('Dos')).toBeTruthy()
+  })
+
+  it('mode séance : subtitle muscle groups affiché', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[mockProgram('p1', 'PPL')]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute({ sessionMode: { targetProgramId: 'p1' } })}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '60 min')
+
+    expect(result.getByText(/La séance sera construite autour de ces muscles/)).toBeTruthy()
+  })
+
+  it('mode séance : pas d\'étape split ni phase', () => {
+    const result = render(
+      <AssistantScreenInner
+        programs={[mockProgram('p1', 'PPL')]}
+        user={mockUser()}
+        navigation={mockNavigation}
+        route={mockRoute({ sessionMode: { targetProgramId: 'p1' } })}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '60 min')
+
+    // Should be muscle groups, not split
+    expect(result.getByText("Quels groupes musculaires aujourd'hui ?")).toBeTruthy()
   })
 
   it('sélectionner la dernière étape déclenche la génération', async () => {
@@ -469,34 +517,96 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    // Go through program mode with Full Body split
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
+    // Goal → equipment → duration → split (Full Body) → phase → recovery → injuries → days → focus
+    pressAndFlush(result, 'Hypertrophie')
     fireEvent.press(result.getByText('Haltères'))
     pressAndFlush(result, 'Suivant →')
     pressAndFlush(result, '60 min')
-    // Split: Full Body
     pressAndFlush(result, 'Full Body')
-    // Phase
     pressAndFlush(result, 'Prise de masse')
-    // Recovery
     pressAndFlush(result, 'Normale')
-    // Injuries
     fireEvent.press(result.getByText('Aucune'))
     pressAndFlush(result, 'Suivant →')
-    // Age
-    pressAndFlush(result, '26–35 ans')
-    // Days
-    pressAndFlush(result, '3j')
+    pressAndFlush(result, '3 jours')
     // Muscles focus (last step) → Suivant will trigger generate
     pressAndFlush(result, 'Suivant →')
 
     await waitFor(() => {
       expect(mockGeneratePlan).toHaveBeenCalled()
+    })
+  })
+
+  it('génération injecte le niveau depuis user.userLevel', async () => {
+    mockGeneratePlan.mockResolvedValueOnce({
+      plan: { name: 'Gen', sessions: [] },
+      usedFallback: false,
+    })
+
+    const result = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser({ userLevel: 'beginner' })}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '60 min')
+    pressAndFlush(result, 'Full Body')
+    pressAndFlush(result, 'Prise de masse')
+    pressAndFlush(result, 'Normale')
+    fireEvent.press(result.getByText('Aucune'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '3 jours')
+    pressAndFlush(result, 'Suivant →')
+
+    await waitFor(() => {
+      expect(mockGeneratePlan).toHaveBeenCalledWith(
+        expect.objectContaining({ level: 'débutant' }),
+        expect.anything()
+      )
+    })
+  })
+
+  it('génération avec userLevel null utilise intermédiaire par défaut', async () => {
+    mockGeneratePlan.mockResolvedValueOnce({
+      plan: { name: 'Gen', sessions: [] },
+      usedFallback: false,
+    })
+
+    const result = render(
+      <AssistantScreenInner
+        programs={[]}
+        user={mockUser({ userLevel: null })}
+        navigation={mockNavigation}
+        route={mockRoute()}
+      />
+    )
+
+    pressAndFlush(result, 'Hypertrophie')
+    fireEvent.press(result.getByText('Haltères'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '60 min')
+    pressAndFlush(result, 'Full Body')
+    pressAndFlush(result, 'Prise de masse')
+    pressAndFlush(result, 'Normale')
+    fireEvent.press(result.getByText('Aucune'))
+    pressAndFlush(result, 'Suivant →')
+    pressAndFlush(result, '3 jours')
+    pressAndFlush(result, 'Suivant →')
+
+    await waitFor(() => {
+      expect(mockGeneratePlan).toHaveBeenCalledWith(
+        expect.objectContaining({ level: 'intermédiaire' }),
+        expect.anything()
+      )
     })
   })
 
@@ -508,12 +618,11 @@ describe('AssistantScreenInner', () => {
         programs={[]}
         user={mockUser()}
         navigation={mockNavigation}
+        route={mockRoute()}
       />
     )
 
-    pressAndFlush(result, 'Programme complet')
-    pressAndFlush(result, 'Bodybuilding')
-    pressAndFlush(result, 'Intermédiaire')
+    pressAndFlush(result, 'Hypertrophie')
     fireEvent.press(result.getByText('Haltères'))
     pressAndFlush(result, 'Suivant →')
     pressAndFlush(result, '60 min')
@@ -522,8 +631,7 @@ describe('AssistantScreenInner', () => {
     pressAndFlush(result, 'Normale')
     fireEvent.press(result.getByText('Aucune'))
     pressAndFlush(result, 'Suivant →')
-    pressAndFlush(result, '26–35 ans')
-    pressAndFlush(result, '3j')
+    pressAndFlush(result, '3 jours')
     pressAndFlush(result, 'Suivant →')
 
     await waitFor(() => {

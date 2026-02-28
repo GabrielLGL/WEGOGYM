@@ -55,7 +55,7 @@ const makeUser = (overrides = {}) => ({
 
 describe('SettingsContent — state sync', () => {
   it('affiche les valeurs initiales du user', () => {
-    const user = makeUser({ restDuration: 120, timerEnabled: false })
+    const user = makeUser({ restDuration: 120, timerEnabled: true })
     const { getByDisplayValue } = render(<SettingsContent user={user as never} />)
     expect(getByDisplayValue('120')).toBeTruthy()
   })

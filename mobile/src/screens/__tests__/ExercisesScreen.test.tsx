@@ -173,7 +173,7 @@ describe('ExercisesContent', () => {
   it('affiche les muscles et l\'équipement des exercices', () => {
     const exercises = [makeExercise()]
     const { getByText } = render(<ExercisesContent exercises={exercises} />)
-    expect(getByText(/Pecs.*Triceps/)).toBeTruthy()
+    expect(getByText(/Pectoraux.*Triceps/)).toBeTruthy()
   })
 
   it('ouvre la barre de recherche au clic', () => {

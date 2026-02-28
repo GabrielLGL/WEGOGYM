@@ -15,7 +15,7 @@ const makeExercise = (overrides: Partial<Record<string, unknown>> = {}): Exercis
   id: 'ex-1',
   name: 'Développé Couché Barre',
   isCustom: false,
-  muscles: ['Pecs', 'Epaules', 'Triceps'],
+  muscles: ['Pecs', 'Épaules', 'Triceps'],
   equipment: 'Poids libre',
   description: 'Allongé sur le banc, pieds au sol. Descends la barre vers le milieu de la poitrine.',
   notes: 'Grip pronation, tempo 3-1-1-0',
@@ -56,8 +56,8 @@ describe('ExerciseInfoSheet', () => {
       />
     )
 
-    expect(getByText('Pecs')).toBeTruthy()
-    expect(getByText('Epaules')).toBeTruthy()
+    expect(getByText('Pectoraux')).toBeTruthy()
+    expect(getByText('Épaules')).toBeTruthy()
     expect(getByText('Triceps')).toBeTruthy()
   })
 
