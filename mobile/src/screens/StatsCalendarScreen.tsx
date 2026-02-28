@@ -315,12 +315,12 @@ export function StatsCalendarScreenBase({ histories }: Props) {
           try {
             const program = await session.program.fetch()
             if (program?.name) programName = program.name
-          } catch {
-            // programme supprimé
+          } catch (e) {
+            if (__DEV__) console.error('[StatsCalendarScreen] programme supprimé ou inaccessible', e)
           }
         }
-      } catch {
-        // session supprimée
+      } catch (e) {
+        if (__DEV__) console.error('[StatsCalendarScreen] session supprimée ou inaccessible', e)
       }
 
       // Durée
@@ -344,8 +344,8 @@ export function StatsCalendarScreenBase({ histories }: Props) {
             try {
               const ex = await s.exercise.fetch()
               if (ex?.name) exName = ex.name
-            } catch {
-              // exercice supprimé
+            } catch (e) {
+              if (__DEV__) console.error('[StatsCalendarScreen] exercice supprimé ou inaccessible', e)
             }
 
             if (!exerciseMap.has(exName)) {
@@ -364,8 +364,8 @@ export function StatsCalendarScreenBase({ histories }: Props) {
           exDetail.sets.sort((a, b) => a.setOrder - b.setOrder)
           exercises.push(exDetail)
         })
-      } catch {
-        // sets inaccessibles
+      } catch (e) {
+        if (__DEV__) console.error('[StatsCalendarScreen] sets inaccessibles', e)
       }
 
       sessionBlocks.push({ historyId: h.id, programName, sessionName, durationMin, exercises })
@@ -594,7 +594,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
                           <Text style={styles.detailExerciseName}>{ex.exerciseName}</Text>
                           <View style={styles.detailSetsRow}>
                             {ex.sets.map((s, si) => (
-                              <View key={si} style={styles.detailSetChip}>
+                              <View key={si} style={[styles.detailSetChip, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
                                 <Text
                                   style={[
                                     styles.detailSetText,
@@ -602,8 +602,8 @@ export function StatsCalendarScreenBase({ histories }: Props) {
                                   ]}
                                 >
                                   {s.weight > 0 ? `${s.weight} kg` : 'PC'} × {s.reps}
-                                  {s.isPr ? ' 🏅' : ''}
                                 </Text>
+                                {s.isPr && <Ionicons name="ribbon" size={12} color={colors.primary} />}
                               </View>
                             ))}
                           </View>

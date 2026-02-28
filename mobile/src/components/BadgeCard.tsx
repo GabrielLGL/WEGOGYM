@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { type ComponentProps } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { spacing, fontSize, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
@@ -17,7 +18,7 @@ export function BadgeCard({ badge, unlocked }: BadgeCardProps) {
 
   return (
     <View style={[styles.card, !unlocked && styles.locked]}>
-      <Text style={styles.emoji}>{badge.emoji}</Text>
+      <Ionicons name={badge.icon as ComponentProps<typeof Ionicons>['name']} size={fontSize.xxxl} color={colors.primary} style={{ marginBottom: spacing.xs }} />
       <Text
         style={[styles.title, !unlocked && styles.titleLocked]}
         numberOfLines={2}
@@ -41,10 +42,6 @@ function useStyles(colors: ThemeColors) {
     },
     locked: {
       opacity: 0.35,
-    },
-    emoji: {
-      fontSize: fontSize.xxxl,
-      marginBottom: spacing.xs,
     },
     title: {
       fontSize: fontSize.xs,

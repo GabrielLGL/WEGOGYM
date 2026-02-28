@@ -183,7 +183,7 @@ export function formatTonnage(totalKg: number): string {
 export interface MilestoneEvent {
   type: 'session' | 'tonnage' | 'levelup'
   value: number
-  emoji: string
+  icon: string
   title: string
   message: string
 }
@@ -194,21 +194,21 @@ interface MilestoneState {
   level: number
 }
 
-const SESSION_MILESTONE_DATA: Record<number, { emoji: string; message: string }> = {
-  10: { emoji: '\uD83D\uDCAA', message: 'Tu as pris le rythme.' },
-  25: { emoji: '\uD83D\uDD25', message: 'Un quart de centenaire.' },
-  50: { emoji: '\u2B50', message: 'Tu es un habitue.' },
-  100: { emoji: '\uD83C\uDFC6', message: 'Niveau dedicace.' },
-  250: { emoji: '\uD83D\uDC51', message: 'Force et perseverance.' },
-  500: { emoji: '\uD83E\uDDBE', message: 'Legendaire.' },
+const SESSION_MILESTONE_DATA: Record<number, { icon: string; message: string }> = {
+  10: { icon: 'fitness-outline', message: 'Tu as pris le rythme.' },
+  25: { icon: 'flame-outline',   message: 'Un quart de centenaire.' },
+  50: { icon: 'star',            message: 'Tu es un habitue.' },
+  100: { icon: 'trophy-outline', message: 'Niveau dedicace.' },
+  250: { icon: 'ribbon-outline', message: 'Force et perseverance.' },
+  500: { icon: 'person-outline', message: 'Legendaire.' },
 }
 
-const TONNAGE_MILESTONE_DATA: Record<number, { emoji: string; message: string }> = {
-  10_000: { emoji: '\uD83C\uDFD7\uFE0F', message: 'Ca commence a compter.' },
-  50_000: { emoji: '\uD83D\uDE97', message: 'Le poids d\'un camion.' },
-  100_000: { emoji: '\uD83C\uDFE0', message: 'Le poids d\'une maison.' },
-  500_000: { emoji: '\u2708\uFE0F', message: 'Le poids d\'un avion.' },
-  1_000_000: { emoji: '\uD83D\uDE80', message: 'Interstellaire.' },
+const TONNAGE_MILESTONE_DATA: Record<number, { icon: string; message: string }> = {
+  10_000:    { icon: 'construct-outline', message: 'Ca commence a compter.' },
+  50_000:    { icon: 'car-outline',       message: 'Le poids d\'un camion.' },
+  100_000:   { icon: 'home-outline',      message: 'Le poids d\'une maison.' },
+  500_000:   { icon: 'airplane-outline',  message: 'Le poids d\'un avion.' },
+  1_000_000: { icon: 'rocket-outline',    message: 'Interstellaire.' },
 }
 
 const SESSION_KEY_MAP: Record<number, keyof typeof translations['fr']['milestones']['sessionMessages']> = {
@@ -226,14 +226,15 @@ export function detectMilestones(
   language: Language = 'fr',
 ): MilestoneEvent[] {
   const events: MilestoneEvent[] = []
-  const m = translations[language].milestones
+  const lang = translations[language] ? language : 'fr'
+  const m = translations[lang].milestones
 
   // Level-up
   if (after.level > before.level) {
     events.push({
       type: 'levelup',
       value: after.level,
-      emoji: '\u2B50',
+      icon: 'star',
       title: m.levelUpTitle.replace('{level}', String(after.level)),
       message: m.levelUpMessage,
     })
@@ -247,7 +248,7 @@ export function detectMilestones(
       events.push({
         type: 'session',
         value: threshold,
-        emoji: data.emoji,
+        icon: data.icon,
         title: m.sessionTitle.replace('{n}', String(threshold)),
         message: m.sessionMessages[msgKey],
       })
@@ -265,7 +266,7 @@ export function detectMilestones(
       events.push({
         type: 'tonnage',
         value: threshold,
-        emoji: data.emoji,
+        icon: data.icon,
         title,
         message: m.tonnageMessages[msgKey],
       })

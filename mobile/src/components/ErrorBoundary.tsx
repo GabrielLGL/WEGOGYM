@@ -1,5 +1,6 @@
 import React, { Component, ReactNode } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { captureError } from '../services/sentry'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
 
@@ -16,6 +17,11 @@ interface State {
  * ErrorBoundary - Composant pour capturer les erreurs React non gérées
  *
  * Empêche les écrans blancs en production en affichant une page d'erreur élégante.
+ *
+ * NOTE: Class component required — React error boundaries MUST use componentDidCatch
+ * which cannot be implemented with hooks. Static theme colors are unavoidable here
+ * (StyleSheet.create outside render cannot call useColors). This is an intentional
+ * exception to the functional-only and no-hardcoded-colors rules.
  *
  * @usage
  * Envelopper l'app dans AppNavigator:
@@ -52,7 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <View style={styles.card}>
-            <Text style={styles.emoji}>⚠️</Text>
+            <Ionicons name="warning-outline" size={fontSize.jumbo} color={colors.warning} style={{ marginBottom: spacing.md }} />
             <Text style={styles.title}>Une erreur est survenue</Text>
             <Text style={styles.message}>
               L'application a rencontré un problème inattendu.
@@ -92,10 +98,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     maxWidth: 400,
     alignItems: 'center',
-  },
-  emoji: {
-    fontSize: fontSize.jumbo,
-    marginBottom: spacing.md,
   },
   title: {
     color: colors.text,
