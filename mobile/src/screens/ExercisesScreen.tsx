@@ -373,7 +373,7 @@ function useStyles(colors: ThemeColors) {
     moreIcon: { color: colors.placeholder, fontSize: fontSize.lg, fontWeight: 'bold' },
     separator: { height: 1, backgroundColor: colors.card },
     emptyList: { color: colors.textSecondary, textAlign: 'center', marginTop: 50, fontStyle: 'italic' },
-    footerFloating: { paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, marginBottom: 70, backgroundColor: colors.background},
+    footerFloating: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, paddingBottom: spacing.md, backgroundColor: colors.background },
     addButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 8 },
     addButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.md },
 

@@ -337,9 +337,13 @@ function useStyles(colors: ThemeColors) {
     container: { flex: 1, backgroundColor: colors.background },
     listWrapper: { flex: 1 },
     footerFloating: {
-      paddingHorizontal: 20,
-      paddingTop: 10,
-      marginBottom: 85,
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.md,
       backgroundColor: colors.background,
     },
     bigButton: {
