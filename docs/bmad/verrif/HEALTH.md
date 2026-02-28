@@ -31,6 +31,7 @@
 | 2026-02-26 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1257 tests, spacing.xxl token ChartsScreen) |
 | 2026-02-26 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1257 tests, chartConfig couleurs hardcodées fixées) |
 | 2026-02-27 | 20 | 20 | 18 | 20 | 15 | **93/100** | ↓ -2 (1275 tests, RestTimer anim fix, email validation, B1-B7 async sans try/catch restants) |
+| 2026-02-28 | 20 | 20 | 20 | 18 | 15 | **93/100** | → stable (1559 tests, cov 80.71% lines, 3 critiques fixés, 23 hardcoded values restantes) |
 
 ---
 
