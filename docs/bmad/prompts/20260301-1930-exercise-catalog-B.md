@@ -190,4 +190,7 @@ const handleImport = async (ex: CatalogExercise) => {
 **Ce groupe dépend de : Groupe A** (service `exerciseCatalog.ts` doit exister)
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260301-2005
+
+## Résolution
+Rapport do : docs/bmad/do/20260301-2005-feat-exercise-catalog-screen.md
