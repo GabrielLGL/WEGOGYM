@@ -214,4 +214,7 @@ export function mapCatalogToLocal(ex: CatalogExercise): {
 Aucune dépendance sur d'autres groupes — peut être développé en parallèle avec rien.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260301-1935
+
+## Résolution
+Rapport do : docs/bmad/do/20260301-1935-feat-exercise-catalog-service.md
