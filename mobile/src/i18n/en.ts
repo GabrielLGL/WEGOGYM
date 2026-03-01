@@ -673,7 +673,7 @@ export const en: typeof fr = {
   },
 
   exerciseInfoSheet: {
-    placeholderText: 'Animation coming soon',
+    noAnimation: 'No demonstration available',
     description: 'Description',
     noDescription: 'No description available',
     personalNotes: 'Personal notes',

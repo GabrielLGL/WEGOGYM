@@ -6,6 +6,10 @@ jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }))
 
+jest.mock('expo-image', () => ({
+  Image: 'Image',
+}))
+
 import React from 'react'
 import { render, act } from '@testing-library/react-native'
 import { ExerciseInfoSheet } from '../ExerciseInfoSheet'
@@ -109,16 +113,16 @@ describe('ExerciseInfoSheet', () => {
     expect(getByText('Aucune note')).toBeTruthy()
   })
 
-  it('affiche le placeholder animation', () => {
+  it("affiche le fallback quand l'exercice n'a pas d'image dans le mapping", () => {
     const { getByText } = render(
       <ExerciseInfoSheet
-        exercise={makeExercise()}
+        exercise={makeExercise({ animationKey: 'exercice_sans_image' })}
         visible={true}
         onClose={jest.fn()}
       />
     )
 
-    expect(getByText('Animation à venir')).toBeTruthy()
+    expect(getByText('Pas de démonstration disponible')).toBeTruthy()
   })
 
   it('ne rend rien quand visible est false', () => {

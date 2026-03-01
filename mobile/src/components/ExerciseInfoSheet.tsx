@@ -1,8 +1,10 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheet } from './BottomSheet'
 import Exercise from '../model/models/Exercise'
+import { ANIMATION_MAP } from '../model/utils/animationMap'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -31,13 +33,26 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
   const muscles = exercise.muscles || []
   const description = exercise.description
   const notes = exercise.notes
+  const animationUrl = exercise.animationKey ? ANIMATION_MAP[exercise.animationKey] : undefined
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-      {/* Zone placeholder animation */}
-      <View style={styles.placeholderContainer}>
-        <Ionicons name="barbell-outline" size={48} color={colors.textSecondary} />
-        <Text style={styles.placeholderText}>{t.exerciseInfoSheet.placeholderText}</Text>
+      {/* Zone démonstration */}
+      <View style={styles.animationContainer}>
+        {animationUrl ? (
+          <Image
+            source={{ uri: animationUrl }}
+            style={styles.animationImage}
+            contentFit="contain"
+            cachePolicy="memory-disk"
+            transition={300}
+          />
+        ) : (
+          <>
+            <Ionicons name="barbell-outline" size={48} color={colors.textSecondary} />
+            <Text style={styles.placeholderText}>{t.exerciseInfoSheet.noAnimation}</Text>
+          </>
+        )}
       </View>
 
       {/* Nom de l'exercice */}
@@ -81,13 +96,18 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
 
 function useStyles(colors: ThemeColors) {
   return StyleSheet.create({
-    placeholderContainer: {
+    animationContainer: {
       backgroundColor: colors.cardSecondary,
       borderRadius: borderRadius.md,
-      paddingVertical: spacing.lg,
+      height: 200,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: spacing.md,
+      overflow: 'hidden',
+    },
+    animationImage: {
+      width: '100%',
+      height: '100%',
     },
     placeholderText: {
       color: colors.textSecondary,

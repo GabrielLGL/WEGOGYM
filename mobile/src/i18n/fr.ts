@@ -674,7 +674,7 @@ export const fr = {
   },
 
   exerciseInfoSheet: {
-    placeholderText: 'Animation à venir',
+    noAnimation: 'Pas de démonstration disponible',
     description: 'Description',
     noDescription: 'Pas de description disponible',
     personalNotes: 'Notes personnelles',
