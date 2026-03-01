@@ -71,4 +71,7 @@ Aucune dépendance sur d'autres groupes.
 
 ## Statut
 
-⏳ En attente
+✅ Résolu — 20260301-1435
+
+## Résolution
+Rapport do : docs/bmad/do/20260301-1435-chore-env-local-animations.md
