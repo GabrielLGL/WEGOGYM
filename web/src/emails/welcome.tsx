@@ -8,8 +8,11 @@ interface WelcomeEmailProps {
 
 export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
   const greeting = name ? `Salut ${name}` : "Salut";
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://kore-app.net";
+    rawSiteUrl && !rawSiteUrl.includes(".vercel.app")
+      ? rawSiteUrl
+      : "https://kore-app.net";
   const token = createHmac("sha256", process.env.RESEND_API_KEY ?? "")
     .update(email)
     .digest("hex");
