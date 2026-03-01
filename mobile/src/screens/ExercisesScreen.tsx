@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useCallback, memo, useRef } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, UIManager, BackHandler, Keyboard } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
@@ -93,6 +93,22 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
     deleteExercise,
     loadExerciseForEdit
   } = useExerciseManager(haptics.onSuccess, haptics.onDelete)
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => {
+            haptics.onPress()
+            navigation.navigate('ExerciseCatalog')
+          }}
+          style={{ marginRight: spacing.md }}
+        >
+          <Ionicons name="globe-outline" size={24} color={colors.primary} />
+        </TouchableOpacity>
+      ),
+    })
+  }, [navigation, colors.primary, haptics])
 
   const infoSheet = useModalState()
   const [infoSheetExercise, setInfoSheetExercise] = useState<Exercise | null>(null)

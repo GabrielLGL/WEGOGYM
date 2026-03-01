@@ -125,4 +125,7 @@ const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>(
 **Ce groupe dépend de : Groupe B** (`ExerciseCatalogScreen` doit exister)
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260301-2020
+
+## Résolution
+Rapport do : docs/bmad/do/20260301-2020-feat-exercise-catalog-navigation.md

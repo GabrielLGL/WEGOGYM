@@ -36,6 +36,7 @@ import type { BadgeDefinition } from '../model/utils/badgeConstants'
 import type { GeneratedPlan } from '../services/ai/types'
 import AssistantPreviewScreen from '../screens/AssistantPreviewScreen'
 import CreateExerciseScreen from '../screens/CreateExerciseScreen'
+import ExerciseCatalogScreen from '../screens/ExerciseCatalogScreen'
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -58,6 +59,7 @@ export type RootStackParamList = {
   ExerciseHistory: { exerciseId: string };
   AssistantPreview: { plan: GeneratedPlan; mode: 'program' | 'session'; targetProgramId?: string };
   CreateExercise: undefined;
+  ExerciseCatalog: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -189,6 +191,7 @@ function AppContent() {
         <Stack.Screen name="ExerciseHistory" component={ExerciseHistoryScreen} options={{ title: '' }} />
         <Stack.Screen name="AssistantPreview" component={AssistantPreviewScreen} options={{ title: t.navigation.assistantPreview }} />
         <Stack.Screen name="CreateExercise" component={CreateExerciseScreen} options={{ title: t.exercises.newTitle }} />
+        <Stack.Screen name="ExerciseCatalog" component={ExerciseCatalogScreen} options={{ title: 'Catalogue global' }} />
       </Stack.Navigator>
     </NavigationContainer>
   )

@@ -67,6 +67,7 @@ const mockNavigation = {
     return jest.fn(() => { if (id !== null) clearTimeout(id) })
   }),
   navigate: jest.fn(),
+  setOptions: jest.fn(),
 }
 
 jest.mock('@react-navigation/native', () => ({
