@@ -62,4 +62,7 @@ Vérifier et corriger les couleurs dans l'écran de résumé de séance (Workout
 Aucune — indépendant des groupes A et B
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260301-2002
+
+## Résolution
+Rapport do : docs/bmad/do/20260301-2002-style-workout-summary-cleanup.md
