@@ -54,9 +54,9 @@ function getMotivationMessage(totalPrs: number, volumeGain: number, colors: Them
     return { text: t.motivationPR, color: colors.primary }
   }
   if (volumeGain > 0) {
-    return { text: t.motivationProgress, color: colors.success }
+    return { text: t.motivationProgress, color: colors.warning }
   }
-  return { text: t.motivationDefault, color: colors.success }
+  return { text: t.motivationDefault, color: colors.textSecondary }
 }
 
 function formatWeight(w: number): string {

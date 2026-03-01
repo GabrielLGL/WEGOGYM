@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   SafeAreaView,
-  TouchableOpacity,
   BackHandler,
   Animated,
 } from 'react-native'
@@ -44,6 +43,7 @@ import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
 import { WorkoutSummarySheet } from '../components/WorkoutSummarySheet'
 import { AlertDialog } from '../components/AlertDialog'
+import { Button } from '../components/Button'
 import RestTimer from '../components/RestTimer'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../navigation'
@@ -407,16 +407,9 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
       {/* Footer fixe - passe sous le clavier quand il est ouvert */}
       <Animated.View style={[styles.footer, { transform: [{ translateY: footerSlide }] }]}>
-        <TouchableOpacity
-          style={styles.endButton}
-          onPress={() => {
-            haptics.onPress()
-            setConfirmEndVisible(true)
-          }}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.endButtonText}>{t.workout.finishButton}</Text>
-        </TouchableOpacity>
+        <Button variant="primary" onPress={() => setConfirmEndVisible(true)}>
+          {t.workout.finishButton}
+        </Button>
       </Animated.View>
 
       {/* AlertDialog — confirmation fin de seance */}
@@ -502,17 +495,6 @@ function useStyles(colors: ThemeColors) {
       borderTopWidth: 1,
       borderTopColor: colors.card,
       backgroundColor: colors.background,
-    },
-    endButton: {
-      backgroundColor: colors.primary,
-      padding: spacing.md,
-      borderRadius: borderRadius.md,
-      alignItems: 'center',
-    },
-    endButtonText: {
-      color: colors.primaryText,
-      fontWeight: 'bold',
-      fontSize: fontSize.md,
     },
   })
 }

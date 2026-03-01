@@ -124,7 +124,7 @@ const WorkoutSetRow = React.memo(function WorkoutSetRow({
           </View>
         )}
         <TouchableOpacity onPress={() => onUnvalidate(setOrder)} style={styles.validateBtnActive} testID="validate-btn">
-          <Ionicons name="close-outline" size={18} color={colors.text} />
+          <Ionicons name="close-outline" size={18} color={colors.primary} />
         </TouchableOpacity>
       </View>
     )
@@ -177,7 +177,7 @@ const WorkoutSetRow = React.memo(function WorkoutSetRow({
           activeOpacity={0.7}
           testID="validate-btn"
         >
-          <Ionicons name="checkmark-outline" size={18} color={colors.text} />
+          <Ionicons name="checkmark-outline" size={18} color={valid ? colors.primary : colors.border} />
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -378,7 +378,7 @@ function createStyles(colors: ThemeColors) {
       marginBottom: 2,
     },
     suggestionText: {
-      color: colors.success,
+      color: colors.warning,
       fontSize: fontSize.xs,
       fontWeight: '600',
       marginBottom: spacing.sm,
@@ -490,22 +490,27 @@ function createStyles(colors: ThemeColors) {
 
     // Validate button (not validated)
     validateBtn: {
-      width: 38,
-      height: 38,
+      width: 32,
+      height: 32,
       borderRadius: borderRadius.lg,
-      backgroundColor: colors.primary,
+      backgroundColor: 'transparent',
+      borderWidth: 1.5,
+      borderColor: colors.primary,
       justifyContent: 'center',
       alignItems: 'center',
       marginLeft: 'auto',
     },
     validateBtnDisabled: {
-      backgroundColor: colors.cardSecondary,
+      borderColor: colors.border,
+      backgroundColor: 'transparent',
     },
     validateBtnActive: {
-      width: 38,
-      height: 38,
+      width: 32,
+      height: 32,
       borderRadius: borderRadius.lg,
-      backgroundColor: colors.success,
+      backgroundColor: colors.successBg,
+      borderWidth: 1,
+      borderColor: colors.primary + '60',
       justifyContent: 'center',
       alignItems: 'center',
       marginLeft: 'auto',

@@ -68,7 +68,7 @@ function useStyles(colors: ThemeColors) {
       alignItems: 'flex-end',
     },
     volumeValue: {
-      color: colors.text,
+      color: colors.primary,
       fontSize: fontSize.xl,
       fontWeight: '700',
     },
