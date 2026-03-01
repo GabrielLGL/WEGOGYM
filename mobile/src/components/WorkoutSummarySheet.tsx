@@ -378,9 +378,6 @@ function createStyles(colors: ThemeColors) {
       fontWeight: '600',
       flex: 1,
     },
-    completeBadge: {
-      fontSize: fontSize.xs,
-    },
     incompleteBadge: {
       color: colors.textSecondary,
       fontSize: fontSize.xs,
