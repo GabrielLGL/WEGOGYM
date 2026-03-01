@@ -98,4 +98,17 @@ Ce groupe dépend de :
 
 ## Statut
 
-⏳ En attente (bloquer sur Groupe A + actions manuelles)
+⚠️ Bloqué — 20260301-1500
+
+## Blocage
+Clé `SUPABASE_SERVICE_ROLE_KEY` au format `sb_secret_...` (nouveau SDK Supabase v3)
+mais la Storage REST API requiert le JWT format (`eyJhbGci...`).
+
+Le script fonctionne (29/30 matchs, logique correcte). Seule la clé bloque les uploads.
+
+À reprendre avec : /do docs/bmad/prompts/20260301-1435-exercise-animations-setup-B.md
+après avoir remplacé dans .env.local :
+  SUPABASE_SERVICE_ROLE_KEY=eyJhbGci... (JWT format depuis Dashboard → Settings → API)
+
+## Rapport do
+docs/bmad/do/20260301-1500-chore-build-animations-script.md
