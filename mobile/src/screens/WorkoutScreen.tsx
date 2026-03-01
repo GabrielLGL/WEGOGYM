@@ -504,13 +504,13 @@ function useStyles(colors: ThemeColors) {
       backgroundColor: colors.background,
     },
     endButton: {
-      backgroundColor: colors.success,
+      backgroundColor: colors.primary,
       padding: spacing.md,
       borderRadius: borderRadius.md,
       alignItems: 'center',
     },
     endButtonText: {
-      color: colors.text,
+      color: colors.primaryText,
       fontWeight: 'bold',
       fontSize: fontSize.md,
     },

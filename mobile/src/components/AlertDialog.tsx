@@ -125,7 +125,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
               onPress={handleConfirm}
               activeOpacity={0.7}
             >
-              <Text style={styles.buttonText}>{confirmText}</Text>
+              <Text style={styles.confirmButtonText}>{confirmText}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -187,6 +187,11 @@ function useStyles(colors: ThemeColors) {
     },
     buttonText: {
       color: colors.text,
+      fontWeight: 'bold',
+      fontSize: fontSize.md,
+    },
+    confirmButtonText: {
+      color: colors.primaryText,
       fontWeight: 'bold',
       fontSize: fontSize.md,
     },

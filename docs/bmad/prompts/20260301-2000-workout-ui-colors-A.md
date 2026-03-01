@@ -57,4 +57,7 @@ Corriger les couleurs du bouton "Terminer la séance" et du texte dans l'AlertDi
 Aucune — indépendant des groupes B et C
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260301-2000
+
+## Résolution
+Rapport do : docs/bmad/do/20260301-2000-style-workout-end-button.md
