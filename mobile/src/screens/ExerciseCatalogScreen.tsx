@@ -293,6 +293,7 @@ const ExerciseCatalogScreen: React.FC = () => {
   // Modals
   const detailSheet = useModalState()
   const duplicateAlert = useModalState()
+  const importErrorAlert = useModalState()
 
   // ── Chargement initial / recherche ────────────────────────────────────────
 
@@ -381,12 +382,13 @@ const ExerciseCatalogScreen: React.FC = () => {
 
       haptics.onSuccess()
       detailSheet.close()
-    } catch {
-      // Erreur silencieuse — l'utilisateur peut réessayer
+    } catch (e) {
+      if (__DEV__) console.error('handleImport error:', e)
+      importErrorAlert.open()
     } finally {
       setIsImporting(false)
     }
-  }, [isImporting, haptics, detailSheet, duplicateAlert])
+  }, [isImporting, haptics, detailSheet, duplicateAlert, importErrorAlert])
 
   const handleEndReached = useCallback(() => {
     loadMore(query)
@@ -508,6 +510,17 @@ const ExerciseCatalogScreen: React.FC = () => {
         message="Un exercice avec ce nom existe déjà dans votre bibliothèque."
         onConfirm={duplicateAlert.close}
         onCancel={duplicateAlert.close}
+        confirmText="OK"
+        hideCancel
+      />
+
+      {/* AlertDialog — Erreur d'importation */}
+      <AlertDialog
+        visible={importErrorAlert.isOpen}
+        title="Erreur d'importation"
+        message="Impossible d'importer cet exercice. Veuillez réessayer."
+        onConfirm={importErrorAlert.close}
+        onCancel={importErrorAlert.close}
         confirmText="OK"
         hideCancel
       />

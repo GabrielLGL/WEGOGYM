@@ -2,19 +2,20 @@
 /**
  * build-exercise-animations.mjs
  *
- * Pipeline : free-exercise-db (GitHub, no API key) → JPG → Supabase Storage
+ * Pipeline : free-exercise-db (GitHub, no API key) → WebP animé 2 frames → Supabase Storage
  * Output   : updated animationMap.ts content (stdout)
  *
  * Note : ExerciseDB (RapidAPI) a supprimé gifUrl de son API en 2025.
  * Ce script utilise le dataset libre https://github.com/yuhonas/free-exercise-db
- * qui contient 873 exercices avec des images JPG haute qualité.
+ * qui contient 873 exercices avec exactement 2 images par exercice :
+ *   0.jpg = position de départ
+ *   1.jpg = position d'arrivée
  *
- * Pour des animations WebP personnalisées → upload manuel dans Supabase Storage.
- * Voir scripts/README-animations.md pour les instructions.
+ * Le script génère des WebP animés 2 frames (1fps, loop infini) via ffmpeg-static.
  *
  * Usage:
  *   SUPABASE_URL=https://... SUPABASE_SERVICE_ROLE_KEY=xxx \
- *     node scripts/build-exercise-animations.mjs
+ *     node scripts/build-exercise-animations.mjs > mobile/src/model/utils/animationMap.ts 2>scripts/build-log.txt
  *
  * Ou via .env.local à la racine du repo (chargé automatiquement).
  *
@@ -22,12 +23,22 @@
  *   - Node 18+ (fetch built-in)
  *   - Supabase Storage bucket "exercise-animations" créé (public)
  *   - SUPABASE_SERVICE_ROLE_KEY dans .env.local
+ *   - ffmpeg-static installé (npm install à la racine)
  */
 
-import { createReadStream, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+
+const execFileAsync = promisify(execFile)
+const ffmpegBin = (await import('ffmpeg-static')).default
+if (!ffmpegBin) {
+  console.error('[error] ffmpeg-static not found. Run: npm install ffmpeg-static')
+  process.exit(1)
+}
 
 // ── Load .env.local from repo root ─────────────────────────────────────────
 const repoRoot = join(fileURLToPath(import.meta.url), '..', '..')
@@ -121,6 +132,8 @@ const EXERCISE_SEARCH_TERMS = {
   leg_raises: ['hanging', 'leg', 'raise'],
 }
 
+// ── FFmpeg (ffmpeg-static binary) ────────────────────────────────────────────
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
@@ -193,9 +206,29 @@ async function uploadToSupabase(localPath, storagePath, mimeType) {
   return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${storagePath}`
 }
 
+/**
+ * Create an animated 2-frame WebP using ffmpeg-static binary.
+ * Each frame displayed for 1 second, loops infinitely.
+ */
+async function createAnimatedWebP(frame0Path, frame1Path, outputPath) {
+  const args = [
+    '-y',
+    '-loop', '1', '-t', '1', '-i', frame0Path,
+    '-loop', '1', '-t', '1', '-i', frame1Path,
+    '-filter_complex', '[0:v][1:v]concat=n=2:v=1[out]',
+    '-map', '[out]',
+    '-vcodec', 'libwebp_anim',
+    '-loop', '0',
+    '-quality', '75',
+    outputPath,
+  ]
+  await execFileAsync(ffmpegBin, args)
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   mkdirSync(TMP_DIR, { recursive: true })
+  console.error(`[info] Using ffmpeg binary: ${ffmpegBin}`)
 
   // 1. Download exercises dataset
   console.error('[info] Fetching free-exercise-db dataset...')
@@ -223,21 +256,34 @@ async function main() {
         resultMap[animKey] = undefined
         continue
       }
-      console.error(`  ✓ Match: "${exercise.name}"`)
+      console.error(`  ✓ Match: "${exercise.name}" (${exercise.images.length} images)`)
 
-      // 3. Download the first image (always 0.jpg = starting position)
-      const imageRef = exercise.images[0] // e.g. "Barbell_Bench_Press_-_Medium_Grip/0.jpg"
-      const imgUrl = `${FREE_EXERCISE_IMG_BASE}/${imageRef}`
-      const ext = imageRef.endsWith('.gif') ? 'gif' : 'jpg'
-      const localPath = join(TMP_DIR, `${animKey}.${ext}`)
+      // 3. Download 0.jpg and 1.jpg (2 frames of the movement)
+      const images = exercise.images.slice(0, 2)
+      const framePaths = []
 
-      const size = await downloadFile(imgUrl, localPath)
-      console.error(`  ✓ Downloaded image (${(size / 1024).toFixed(0)} KB)`)
+      for (let f = 0; f < images.length; f++) {
+        const url = `${FREE_EXERCISE_IMG_BASE}/${images[f]}`
+        const localPath = join(TMP_DIR, `${animKey}_${f}.jpg`)
+        const size = await downloadFile(url, localPath)
+        console.error(`  ✓ Frame ${f} downloaded (${(size / 1024).toFixed(0)} KB)`)
+        framePaths.push(localPath)
+      }
 
-      // 4. Upload to Supabase
-      const mimeType = ext === 'gif' ? 'image/gif' : 'image/jpeg'
-      const storagePath = `${animKey}.${ext}`
-      const publicUrl = await uploadToSupabase(localPath, storagePath, mimeType)
+      if (framePaths.length < 2) {
+        console.error(`  ⚠ Only 1 image available — creating static WebP (single frame)`)
+        // Fall back to single-frame WebP if dataset only has 1 image
+        framePaths.push(framePaths[0])
+      }
+
+      // 4. Create animated WebP via FFmpeg WASM
+      const webpPath = join(TMP_DIR, `${animKey}.webp`)
+      await createAnimatedWebP(framePaths[0], framePaths[1], webpPath)
+      const webpSize = readFileSync(webpPath).length
+      console.error(`  ✓ Animated WebP created (${(webpSize / 1024).toFixed(0)} KB)`)
+
+      // 5. Upload to Supabase
+      const publicUrl = await uploadToSupabase(webpPath, `${animKey}.webp`, 'image/webp')
       console.error(`  ✓ Uploaded → ${publicUrl}`)
       resultMap[animKey] = publicUrl
 
@@ -279,17 +325,15 @@ async function main() {
   const SUPABASE_BASE = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}`
 
   let tsContent = `/**
- * animationMap — Mapping animationKey → URL image de démonstration (Supabase Storage)
+ * animationMap — Mapping animationKey → URL WebP animé de démonstration (Supabase Storage)
  *
  * Source    : free-exercise-db (https://github.com/yuhonas/free-exercise-db)
- *             Licence CC0 — 873 exercices, images JPG haute qualité
+ *             Licence CC0 — 873 exercices, 2 images JPG par exercice (départ + arrivée)
+ * Format    : WebP animé 2 frames (1fps, loop infini) — généré via ffmpeg-static
  * Hébergement : Supabase Storage (bucket public "exercise-animations")
  *   ${SUPABASE_BASE}/
  *
- * Régénérer : node scripts/build-exercise-animations.mjs > mobile/src/model/utils/animationMap.ts
- *
- * Ajouter des animations WebP : upload manuel dans Supabase Storage
- * (remplace le .jpg par .webp — expo-image détecte automatiquement)
+ * Régénérer : node scripts/build-exercise-animations.mjs > mobile/src/model/utils/animationMap.ts 2>scripts/build-log.txt
  *
  * Fallback  : undefined → ExerciseInfoSheet affiche l'icône barbell
  * Cache     : expo-image cachePolicy="memory-disk" → offline après premier chargement
@@ -319,7 +363,7 @@ export const ANIMATION_MAP: Record<string, string | undefined> = {
   console.error(`[done] ${found}/${total} exercises mapped successfully`)
   console.error('[done] animationMap.ts content written to stdout')
   console.error('[hint] Redirect stdout to update the file:')
-  console.error('       node scripts/build-exercise-animations.mjs > mobile/src/model/utils/animationMap.ts')
+  console.error('       node scripts/build-exercise-animations.mjs > mobile/src/model/utils/animationMap.ts 2>scripts/build-log.txt')
 }
 
 main().catch((err) => {
