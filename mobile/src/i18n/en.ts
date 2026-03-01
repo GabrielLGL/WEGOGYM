@@ -678,5 +678,6 @@ export const en: typeof fr = {
     noDescription: 'No description available',
     personalNotes: 'Personal notes',
     noNotes: 'No notes',
+    viewHistory: 'View history',
   },
 } as const

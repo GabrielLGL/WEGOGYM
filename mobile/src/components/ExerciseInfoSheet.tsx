@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheet } from './BottomSheet'
@@ -14,6 +14,7 @@ interface ExerciseInfoSheetProps {
   exercise: Exercise
   visible: boolean
   onClose: () => void
+  onViewHistory?: () => void
 }
 
 /**
@@ -26,6 +27,7 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
   exercise,
   visible,
   onClose,
+  onViewHistory,
 }) => {
   const colors = useColors()
   const styles = useStyles(colors)
@@ -90,6 +92,14 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
           <Text style={styles.emptyText}>{t.exerciseInfoSheet.noNotes}</Text>
         )}
       </View>
+
+      {/* Bouton historique */}
+      {onViewHistory && (
+        <TouchableOpacity style={styles.historyButton} onPress={onViewHistory}>
+          <Text style={styles.historyButtonText}>{t.exerciseInfoSheet.viewHistory}</Text>
+          <Ionicons name="arrow-forward" size={16} color={colors.primary} />
+        </TouchableOpacity>
+      )}
     </BottomSheet>
   )
 }
@@ -163,6 +173,19 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       fontSize: fontSize.sm,
       fontStyle: 'italic',
+    },
+    historyButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      paddingVertical: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    historyButtonText: {
+      color: colors.primary,
+      fontSize: fontSize.sm,
+      fontWeight: '600',
     },
   })
 }

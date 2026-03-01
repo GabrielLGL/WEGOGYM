@@ -679,5 +679,6 @@ export const fr = {
     noDescription: 'Pas de description disponible',
     personalNotes: 'Notes personnelles',
     noNotes: 'Aucune note',
+    viewHistory: "Voir l'historique",
   },
 }

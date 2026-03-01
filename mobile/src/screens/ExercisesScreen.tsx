@@ -15,8 +15,10 @@ import { CustomModal } from '../components/CustomModal'
 import { BottomSheet } from '../components/BottomSheet'
 import { AlertDialog } from '../components/AlertDialog'
 import { ChipSelector } from '../components/ChipSelector'
+import { ExerciseInfoSheet } from '../components/ExerciseInfoSheet'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { useExerciseManager } from '../hooks/useExerciseManager'
 import { fontSize, spacing, borderRadius } from '../theme'
@@ -92,6 +94,9 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
     loadExerciseForEdit
   } = useExerciseManager(haptics.onSuccess, haptics.onDelete)
 
+  const infoSheet = useModalState()
+  const [infoSheetExercise, setInfoSheetExercise] = useState<Exercise | null>(null)
+
   const [isOptionsVisible, setIsOptionsVisible] = useState(false)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [isAlertVisible, setIsAlertVisible] = useState(false)
@@ -163,8 +168,15 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
 
   const handleRowPress = useCallback((item: Exercise) => {
     haptics.onSelect()
-    navigation.navigate('ExerciseHistory', { exerciseId: item.id })
-  }, [haptics, navigation])
+    setInfoSheetExercise(item)
+    infoSheet.open()
+  }, [haptics, infoSheet])
+
+  const handleViewHistory = useCallback(() => {
+    if (!infoSheetExercise) return
+    infoSheet.close()
+    navigation.navigate('ExerciseHistory', { exerciseId: infoSheetExercise.id })
+  }, [infoSheetExercise, infoSheet, navigation])
 
   const renderExerciseItem = useCallback(({ item }: { item: Exercise }) => (
     <ExerciseItem item={item} onOptionsPress={handleOptionsPress} onPress={handleRowPress} colors={colors} />
@@ -301,6 +313,14 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
             cancelText={t.common.cancel}
           />
 
+          {infoSheetExercise && (
+            <ExerciseInfoSheet
+              exercise={infoSheetExercise}
+              visible={infoSheet.isOpen}
+              onClose={infoSheet.close}
+              onViewHistory={handleViewHistory}
+            />
+          )}
 
         </SafeAreaView>
       </View>
