@@ -92,7 +92,9 @@ export function isoToExpoWeekday(isoDay: number): number {
 export async function scheduleWeeklyReminders(
   days: number[],
   hour: number,
-  minute: number
+  minute: number,
+  title = 'C\'est l\'heure de s\'entraîner !',
+  body = 'Ton programme t\'attend sur Kore'
 ): Promise<string[]> {
   const Notifications = getNotifications()
   if (!Notifications) return []
@@ -102,8 +104,8 @@ export async function scheduleWeeklyReminders(
     try {
       const id = await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'C\'est l\'heure de s\'entraîner !',
-          body: 'Ton programme t\'attend sur Kore',
+          title,
+          body,
           sound: 'default',
         },
         trigger: {
@@ -125,8 +127,7 @@ export async function scheduleWeeklyReminders(
 export async function cancelAllReminders(): Promise<void> {
   const Notifications = getNotifications()
   if (!Notifications) return
-  // Cancel all scheduled notifications (both rest timer and reminders)
-  // then re-check if we need to be more selective
+  // Cancel only reminder-channel notifications (preserves rest timer)
   const all = await Notifications.getAllScheduledNotificationsAsync()
   for (const notif of all) {
     const trigger = notif.trigger as Record<string, unknown> | null
@@ -140,9 +141,11 @@ export async function updateReminders(
   enabled: boolean,
   days: number[],
   hour: number,
-  minute: number
+  minute: number,
+  title?: string,
+  body?: string
 ): Promise<string[]> {
   await cancelAllReminders()
   if (!enabled || days.length === 0) return []
-  return scheduleWeeklyReminders(days, hour, minute)
+  return scheduleWeeklyReminders(days, hour, minute, title, body)
 }

@@ -18,6 +18,7 @@ import {
   requestNotificationPermission,
   setupReminderChannel,
   updateReminders,
+  cancelAllReminders,
 } from '../services/notificationService'
 import { useHaptics } from '../hooks/useHaptics'
 import { useTheme } from '../contexts/ThemeContext'
@@ -37,6 +38,10 @@ import {
 
 interface Props {
   user: User | null
+}
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true)
 }
 
 const SettingsContent: React.FC<Props> = ({ user }) => {
@@ -270,10 +275,15 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
             u.userLevel = null
             u.userGoal = null
             u.lastWorkoutWeek = null
+            u.remindersEnabled = false
+            u.reminderDays = null
+            u.reminderHour = 18
+            u.reminderMinute = 0
           })] : []),
         )
       })
 
+      await cancelAllReminders()
       await deleteApiKey()
 
       // Delete export files from documentDirectory
@@ -352,11 +362,11 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
           u.reminderMinute = minute
         })
       })
-      await updateReminders(enabled, days, hour, minute)
+      await updateReminders(enabled, days, hour, minute, t.settings.reminders.notifTitle, t.settings.reminders.notifBody)
     } catch (error) {
       if (__DEV__) console.error('Failed to save reminders:', error)
     }
-  }, [user])
+  }, [user, t])
 
   const handleToggleReminders = async (enabled: boolean) => {
     if (enabled) {
