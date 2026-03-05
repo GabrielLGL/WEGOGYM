@@ -58,7 +58,7 @@ describe('exportHelpers — exportAllData', () => {
     expect(data.metadata).toBeDefined()
     expect(data.metadata.exportDate).toBeDefined()
     expect(data.metadata.appVersion).toBe('1.0.0')
-    expect(data.metadata.schemaVersion).toBe(20)
+    expect(data.metadata.schemaVersion).toBe(31)
   })
 
   it('inclut le compte par table dans metadata.tables', async () => {
