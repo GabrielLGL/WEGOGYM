@@ -110,7 +110,7 @@ function GlobalBackHandler({ navigationRef, exitMessage }: { navigationRef: Navi
       backHandler.remove();
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     };
-  }, [navigationRef]);
+  }, [navigationRef, haptics, exitMessage]);
 
   return null;
 }
@@ -142,6 +142,9 @@ function AppContent() {
     database.get<User>('users').query().fetch().then(users => {
       const user = users[0]
       setInitialRoute(!user || !user.onboardingCompleted ? 'Onboarding' : 'Home')
+    }).catch(error => {
+      if (__DEV__) console.error('[Navigation] DB fetch failed:', error)
+      setInitialRoute('Onboarding')
     })
   }, [])
 
@@ -221,6 +224,9 @@ export default function AppNavigator() {
       if (savedLang === 'fr' || savedLang === 'en') {
         setInitialLang(savedLang)
       }
+      setReady(true)
+    }).catch(error => {
+      if (__DEV__) console.error('[Navigation] DB preferences fetch failed:', error)
       setReady(true)
     })
   }, [])
