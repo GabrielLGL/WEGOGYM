@@ -173,6 +173,29 @@ export function useSessionManager(
   }
 
   /**
+   * Met à jour les notes d'un exercice de session
+   * @param sessionExercise - SessionExercise à modifier
+   * @param notes - Nouveau texte de notes
+   * @returns true si succès, false sinon
+   */
+  const updateExerciseNotes = async (
+    sessionExercise: SessionExercise,
+    notes: string
+  ): Promise<boolean> => {
+    try {
+      await database.write(async () => {
+        await sessionExercise.update((se) => {
+          se.notes = notes
+        })
+      })
+      return true
+    } catch (error) {
+      if (__DEV__) console.error('[useSessionManager] updateExerciseNotes failed:', error)
+      return false
+    }
+  }
+
+  /**
    * Prépare le formulaire pour éditer les targets d'un exercice
    * @param sessionExercise - SessionExercise à éditer
    */
@@ -326,6 +349,7 @@ export function useSessionManager(
     addExercise,
     updateTargets,
     removeExercise,
+    updateExerciseNotes,
     prepareEditTargets,
     resetTargets,
     reorderExercises,

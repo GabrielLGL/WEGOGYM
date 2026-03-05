@@ -17,7 +17,7 @@
 ## 2. Architecture & Data Flow
 - **Pattern:** Offline-first, Reactive.
 - **Data Access:** MUST use `withObservables` HOC from `@nozbe/with-observables`.
-- **Schema:** v17 (`mobile/src/model/schema.ts`).
+- **Schema:** v29 (`mobile/src/model/schema.ts`).
 - **Models:**
   - `Program` (1:N) `Session` (1:N) `SessionExercise`
   - `History` (Soft-delete `deleted_at`) -> `Set`

@@ -45,4 +45,7 @@ Ajouter un champ `notes` au modèle `SessionExercise` pour permettre des notes p
 Aucune dépendance — ce groupe est la base.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260305-2245
+
+## Résolution
+Rapport do : docs/bmad/do/20260305-2245-feat-exercise-notes-data.md

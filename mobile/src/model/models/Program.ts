@@ -66,6 +66,8 @@ export default class Program extends Model {
               newSE.supersetId = newSupersetId
               newSE.supersetType = se.supersetType ?? null
               newSE.supersetPosition = se.supersetPosition ?? null
+              newSE.notes = se.notes
+              newSE.restTime = se.restTime ?? null
             })
           }
         }

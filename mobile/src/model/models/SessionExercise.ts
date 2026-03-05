@@ -1,5 +1,5 @@
 import { Model, Relation } from '@nozbe/watermelondb'
-import { field, date, readonly, relation } from '@nozbe/watermelondb/decorators'
+import { field, text, date, readonly, relation } from '@nozbe/watermelondb/decorators'
 import type Session from './Session'
 import type Exercise from './Exercise'
 
@@ -18,6 +18,8 @@ export default class SessionExercise extends Model {
   @field('superset_id') supersetId?: string | null
   @field('superset_type') supersetType?: string | null
   @field('superset_position') supersetPosition?: number | null
+  @text('notes') notes?: string
+  @field('rest_time') restTime?: number | null
 
   @relation('sessions', 'session_id') session!: Relation<Session>
   @relation('exercises', 'exercise_id') exercise!: Relation<Exercise>

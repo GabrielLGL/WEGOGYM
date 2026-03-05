@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 28, // v28 : tutorial_completed
+  version: 31, // v31 : training reminders
   tables: [
     tableSchema({
       name: 'programs',
@@ -38,6 +38,8 @@ export const mySchema = appSchema({
         { name: 'superset_id', type: 'string', isOptional: true },
         { name: 'superset_type', type: 'string', isOptional: true },
         { name: 'superset_position', type: 'number', isOptional: true },
+        { name: 'notes', type: 'string', isOptional: true },
+        { name: 'rest_time', type: 'number', isOptional: true },
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' },
       ]
@@ -91,6 +93,10 @@ export const mySchema = appSchema({
             {name: 'theme_mode', type: 'string', isOptional: true},
             {name: 'language_mode', type: 'string', isOptional: true},
             {name: 'tutorial_completed', type: 'boolean'},
+            {name: 'reminders_enabled', type: 'boolean'},
+            {name: 'reminder_days', type: 'string', isOptional: true},
+            {name: 'reminder_hour', type: 'number'},
+            {name: 'reminder_minute', type: 'number'},
             {name: 'created_at', type: 'number'},
             {name: 'updated_at', type: 'number'}
         ]

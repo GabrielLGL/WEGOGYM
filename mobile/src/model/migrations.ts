@@ -26,5 +26,41 @@ export const migrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 29,
+      steps: [
+        addColumns({
+          table: 'session_exercises',
+          columns: [
+            { name: 'notes', type: 'string', isOptional: true },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 30,
+      steps: [
+        addColumns({
+          table: 'session_exercises',
+          columns: [
+            { name: 'rest_time', type: 'number', isOptional: true },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 31,
+      steps: [
+        addColumns({
+          table: 'users',
+          columns: [
+            { name: 'reminders_enabled', type: 'boolean' },
+            { name: 'reminder_days', type: 'string', isOptional: true },
+            { name: 'reminder_hour', type: 'number' },
+            { name: 'reminder_minute', type: 'number' },
+          ],
+        }),
+      ],
+    },
   ],
 })
