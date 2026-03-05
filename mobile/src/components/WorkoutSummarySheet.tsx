@@ -34,7 +34,7 @@ function formatDuration(seconds: number): string {
 interface StatBlockProps {
   label: string
   value: string
-  icon: string
+  icon: React.ComponentProps<typeof Ionicons>['name']
   colors: ThemeColors
 }
 
@@ -42,7 +42,7 @@ const StatBlock: React.FC<StatBlockProps> = ({ label, value, icon, colors }) => 
   const styles = useMemo(() => createStyles(colors), [colors])
   return (
     <View style={styles.statBlock}>
-      <Ionicons name={icon as any} size={20} color={colors.primary} />
+      <Ionicons name={icon} size={20} color={colors.primary} />
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
