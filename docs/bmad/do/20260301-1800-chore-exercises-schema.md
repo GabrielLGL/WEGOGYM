@@ -46,4 +46,4 @@ Aucune
 ✅ Résolu — 20260301-1800
 
 ## Commit
-[à remplir]
+976465a chore(exercises): add SQL migration schema for exercises table + bucket instructions

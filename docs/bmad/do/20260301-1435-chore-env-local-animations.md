@@ -29,4 +29,4 @@ Aucune
 ✅ Résolu — 20260301-1435
 
 ## Commit
-[à remplir]
+862d014 chore(env): add exercise animations variables to .env.local

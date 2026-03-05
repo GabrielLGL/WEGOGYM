@@ -53,4 +53,53 @@ Aucune
 ✅ Résolu — 20260301-1805
 
 ## Commit
-[à remplir]
+d7887d4 chore(exercises): add seed-exercises.mjs script + supabase-js/dotenv deps
+
+---
+
+## Vérification npm install — 20260301-1850
+
+### Résultat
+```
+up to date, audited 1194 packages in 8s
+```
+✅ Les 3 dépendances (`@supabase/supabase-js`, `dotenv`, `node-fetch`) sont installées.
+
+### Warnings ERESOLVE — inoffensifs
+- Conflit peer dep `react-dom@19.0.0-rc` ↔ `react@18.3.1` issu de `jest-expo` (dev only)
+- `seed-exercises.mjs` n'utilise pas React → aucun impact
+
+### 16 vulnerabilities
+- Issues dans dépendances transitives, hors scope du seeder. Peut être adressé avec `npm audit fix` séparément.
+
+### Actions manuelles Supabase requises (bloquantes)
+1. **SQL Editor** → exécuter `scripts/migrations/001-exercises-schema.sql`
+2. **Storage** → créer bucket `exercise-gifs` (public, limite 5MB par fichier)
+3. **`.env.local`** → vérifier `SUPABASE_SERVICE_ROLE_KEY=eyJ...` (format JWT valide)
+
+### Lancer le seed
+```bash
+node seed-exercises.mjs
+```
+~5–15 min · ~1300 exercices · idempotent (safe à relancer)
+
+---
+
+## Résultat final — 20260301-1900
+
+### Pipeline complet ✅
+
+| Étape | Résultat |
+|---|---|
+| Source | `free-exercise-db` GitHub (873 exercices, JPEG, sans API key) |
+| Storage | 873 fichiers `.jpg` dans bucket `exercise-gifs` |
+| Table `exercises` | 873 lignes upsertées |
+| Erreurs | 0 (fix NOT NULL : fallback `'body only'` / `'other'`) |
+
+### Correctifs appliqués pendant l'exécution
+1. **Source API** : pivot `exercisedb.dev` (400) → `free-exercise-db` GitHub
+2. **NOT NULL constraint** : `equipment ?? 'body only'`, `category ?? 'other'`, `primaryMuscles[0] ?? 'other'`
+3. **Idempotence** : 2e run → 873 ⏭ skippés proprement, metadata mis à jour
+
+### Statut final
+✅ **DONE** — Infrastructure exercices opérationnelle

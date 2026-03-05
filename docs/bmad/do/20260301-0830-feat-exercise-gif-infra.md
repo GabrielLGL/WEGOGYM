@@ -40,4 +40,4 @@ Aucune (pattern standard, pas de nouveau pitfall)
 ✅ Résolu — 20260301-0830
 
 ## Commit
-[sera rempli après commit]
+3664400 feat(exercise): affichage image démonstration dans ExerciseInfoSheet

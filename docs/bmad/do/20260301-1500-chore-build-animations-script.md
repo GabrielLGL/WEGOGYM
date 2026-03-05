@@ -74,4 +74,4 @@ Fichiers modifiés :
 Script correct et prêt. Relancer après avoir corrigé SUPABASE_SERVICE_ROLE_KEY.
 
 ## Commit
-[à remplir]
+8849730 chore(scripts): pivot exercise animations to free-exercise-db + fix matching

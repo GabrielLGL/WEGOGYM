@@ -58,4 +58,4 @@ Aucune (JSDoc complet dans le fichier)
 ✅ Résolu — 20260301-1935
 
 ## Commit
-À remplir
+7031ddd feat(exercises): add Supabase REST catalog service + anon key config

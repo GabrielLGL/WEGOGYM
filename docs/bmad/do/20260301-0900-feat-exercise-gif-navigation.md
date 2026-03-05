@@ -40,4 +40,4 @@ Aucune
 ✅ Résolu — 20260301-0900
 
 ## Commit
-[sera rempli après commit]
+25f2b81 feat(exercise): clic exercice → fiche image + bouton historique

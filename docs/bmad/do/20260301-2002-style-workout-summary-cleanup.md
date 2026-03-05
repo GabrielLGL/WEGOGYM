@@ -28,4 +28,4 @@ aucune
 ✅ Résolu — 20260301-2002
 
 ## Commit
-[sera rempli]
+6ccbb08 style(workout-summary): remove unused completeBadge style
