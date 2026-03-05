@@ -29,4 +29,4 @@ aucune
 ✅ Resolu — 20260305-1410
 
 ## Commit
-[sera rempli apres commit]
+03e051f feat(splash): add animated splash screen with Reanimated
