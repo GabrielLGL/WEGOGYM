@@ -6,7 +6,6 @@ import {
   computeMuscleRepartition,
   computeSetsPerMuscleWeek,
   computeWeeklySetsChart,
-  computeSetsPerMuscleHistory,
   computeMonthlySetsChart,
 } from '../statsMuscle'
 import type History from '../../models/History'
@@ -229,40 +228,6 @@ describe('computeWeeklySetsChart', () => {
   it('weekRangeLabel is a formatted date range string', () => {
     const result = computeWeeklySetsChart([], [], [], { muscleFilter: null, weekOffset: 0 })
     expect(result.weekRangeLabel).toMatch(/\d{2}\/\d{2} – \d{2}\/\d{2}/)
-  })
-})
-
-// ─── computeSetsPerMuscleHistory (deprecated) ─────────────────────────────────
-
-describe('computeSetsPerMuscleHistory', () => {
-  it('returns an array of the correct length', () => {
-    const result = computeSetsPerMuscleHistory([], [], [], 'Pecs', 4)
-    expect(result).toHaveLength(4)
-  })
-
-  it('returns default 8 weeks when weeks param not provided', () => {
-    const result = computeSetsPerMuscleHistory([], [], [], 'Pecs')
-    expect(result).toHaveLength(8)
-  })
-
-  it('each entry has weekLabel, weekStart, sets fields', () => {
-    const result = computeSetsPerMuscleHistory([], [], [], 'Pecs', 2)
-    for (const entry of result) {
-      expect(entry).toHaveProperty('weekLabel')
-      expect(entry).toHaveProperty('weekStart')
-      expect(entry).toHaveProperty('sets')
-    }
-  })
-
-  it('counts sets for matching muscle in correct week bucket', () => {
-    const exercise = ex('e1', 'Bench', ['Pecs'])
-    // Utiliser une heure passée pour éviter l'égalité exacte avec Date.now() dans la fonction
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-    const history = h('h1', oneHourAgo) // dans la semaine courante, mais clairement avant now
-    const set = s('s1', 'h1', 'e1')
-    const result = computeSetsPerMuscleHistory([set], [exercise], [history], 'Pecs', 2)
-    // Le dernier bucket (index 1) correspond à la semaine la plus récente
-    expect(result[result.length - 1].sets).toBe(1)
   })
 })
 

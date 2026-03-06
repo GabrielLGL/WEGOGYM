@@ -2,7 +2,7 @@
 
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
-import type { GlobalKPIs } from './statsTypes'
+import type { GlobalKPIs, StatsContext } from './statsTypes'
 import { toDateKey } from './statsDateUtils'
 import { formatVolume } from './statsVolume'
 import type { Language } from '../../i18n'
@@ -18,10 +18,11 @@ function getActiveDayStrings(histories: History[]): Set<string> {
 
 export function computeGlobalKPIs(
   histories: History[],
-  sets: WorkoutSet[]
+  sets: WorkoutSet[],
+  ctx?: Pick<StatsContext, 'historyIds'>
 ): GlobalKPIs {
-  const activeHistories = histories.filter(h => h.deletedAt === null)
-  const activeHistoryIds = new Set(activeHistories.map(h => h.id))
+  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null).map(h => h.id))
+  const activeHistories = histories.filter(h => activeHistoryIds.has(h.id))
   const activeSets = sets.filter(s => activeHistoryIds.has(s.history.id))
 
   return {
@@ -143,5 +144,6 @@ export function computeMotivationalPhrase(
     .filter(s => monthHistoryIds.has(s.history.id))
     .reduce((sum, s) => sum + s.weight * s.reps, 0)
 
-  return m.volume.replace('{volume}', formatVolume(monthVolume))
+  const locale = language === 'fr' ? 'fr-FR' : 'en-US'
+  return m.volume.replace('{volume}', formatVolume(monthVolume, locale))
 }

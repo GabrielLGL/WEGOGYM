@@ -187,8 +187,8 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
     [histories, sets, language],
   )
   const weeklyActivity = useMemo(
-    () => buildWeeklyActivity(histories, sets, sessions, t.home.dayLabels),
-    [histories, sets, sessions, t.home.dayLabels],
+    () => buildWeeklyActivity(histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback),
+    [histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback],
   )
 
   const handleTilePress = (tile: Tile) => {
@@ -237,7 +237,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
         <View style={styles.kpisRow}>
           <KpiItem label={t.home.tiles.sessions} value={String(kpis.totalSessions)} colors={colors} />
           <View style={styles.kpiSeparator} />
-          <KpiItem label={t.home.tiles.volume} value={formatVolume(kpis.totalVolumeKg)} colors={colors} />
+          <KpiItem label={t.home.tiles.volume} value={formatVolume(kpis.totalVolumeKg, language === 'fr' ? 'fr-FR' : 'en-US')} colors={colors} />
           <View style={styles.kpiSeparator} />
           <KpiItem label={t.home.tiles.tonnage} value={formatTonnage(user?.totalTonnage ?? 0)} colors={colors} />
           <View style={styles.kpiSeparator} />

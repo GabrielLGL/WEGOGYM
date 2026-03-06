@@ -3,15 +3,16 @@
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
 import type Exercise from '../models/Exercise'
-import type { ExercisePR, ExerciseFrequency } from './statsTypes'
+import type { ExercisePR, ExerciseFrequency, StatsContext } from './statsTypes'
 
 export function computePRsByExercise(
   sets: WorkoutSet[],
   exercises: Exercise[],
-  histories: History[]
+  histories: History[],
+  ctx?: Pick<StatsContext, 'historyIds'>
 ): ExercisePR[] {
   const exerciseNames = new Map(exercises.map(e => [e.id, e.name]))
-  const activeHistoryIds = new Set(
+  const activeHistoryIds = ctx?.historyIds ?? new Set(
     histories.filter(h => h.deletedAt === null).map(h => h.id)
   )
 
@@ -46,10 +47,11 @@ export function computeTopExercisesByFrequency(
   sets: WorkoutSet[],
   exercises: Exercise[],
   histories: History[],
-  limit: number = 5
+  limit: number = 5,
+  ctx?: Pick<StatsContext, 'historyIds'>
 ): ExerciseFrequency[] {
   const exerciseNames = new Map(exercises.map(e => [e.id, e.name]))
-  const activeHistoryIds = new Set(
+  const activeHistoryIds = ctx?.historyIds ?? new Set(
     histories.filter(h => h.deletedAt === null).map(h => h.id)
   )
 

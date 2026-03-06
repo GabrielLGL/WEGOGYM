@@ -232,10 +232,10 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
                     <Text style={styles.historyValues} numberOfLines={1}>
                       {[
                         m.weight ? `${m.weight}kg` : null,
-                        m.waist ? `T:${m.waist}cm` : null,
-                        m.hips ? `H:${m.hips}cm` : null,
-                        m.arms ? `B:${m.arms}cm` : null,
-                        m.chest ? `P:${m.chest}cm` : null,
+                        m.waist ? `${t.statsMeasurements.waistAbbr}:${m.waist}cm` : null,
+                        m.hips ? `${t.statsMeasurements.hipsAbbr}:${m.hips}cm` : null,
+                        m.arms ? `${t.statsMeasurements.armsAbbr}:${m.arms}cm` : null,
+                        m.chest ? `${t.statsMeasurements.chestAbbr}:${m.chest}cm` : null,
                       ].filter(Boolean).join(' · ')}
                     </Text>
                   </View>

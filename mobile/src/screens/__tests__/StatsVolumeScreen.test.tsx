@@ -108,7 +108,7 @@ describe('StatsVolumeScreenBase', () => {
     )
     // 'Quadriceps' apparaît dans le chip muscle ET dans la barre de progression
     expect(getAllByText('Quadriceps').length).toBeGreaterThanOrEqual(1)
-    expect(getByText('1 set')).toBeTruthy()
+    expect(getByText('1 série')).toBeTruthy()
   })
 
   it('affiche "Aucun set enregistré" dans les bars quand aucune donnée', () => {

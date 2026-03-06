@@ -212,10 +212,10 @@ describe('buildWeeklyActivity', () => {
     expect(result).toHaveLength(7)
   })
 
-  it('entries have correct dayLabel in order (Lun→Dim)', () => {
+  it('entries have correct dayLabel in order (Mon→Sun default)', () => {
     const result = buildWeeklyActivity([], [], [])
     const labels = result.map(d => d.dayLabel)
-    expect(labels).toEqual(['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'])
+    expect(labels).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
   })
 
   it('each entry has dateKey as YYYY-MM-DD', () => {

@@ -147,7 +147,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   // ── Données line chart ───────────────────────────────────────────────────
   const chartResult = useMemo(() => {
     if (period === 'all') {
-      return computeMonthlySetsChart(sets, exercises, histories, muscleFilter, ctx)
+      return computeMonthlySetsChart(sets, exercises, histories, muscleFilter, ctx, t.statsVolume.monthAbbr)
     }
     const weeksToShow = period === '3m' ? 12 : 4
     return computeWeeklySetsChart(sets, exercises, histories, {
@@ -156,7 +156,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
       weeksToShow,
       ctx,
     })
-  }, [sets, exercises, histories, period, muscleFilter, ctx])
+  }, [sets, exercises, histories, period, muscleFilter, ctx, t.statsVolume.monthAbbr])
 
   const chartLabels = useMemo(() => {
     if (period === '3m') {
@@ -290,7 +290,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
             <View key={entry.muscle} style={styles.muscleRow}>
               <View style={styles.muscleLabelRow}>
                 <Text style={styles.muscleName} numberOfLines={1}>{t.muscleNames[entry.muscle as keyof typeof t.muscleNames] ?? entry.muscle}</Text>
-                <Text style={styles.muscleSets}>{entry.sets} set{entry.sets > 1 ? 's' : ''}</Text>
+                <Text style={styles.muscleSets}>{entry.sets} {entry.sets > 1 ? t.statsVolume.setsPlural : t.statsVolume.sets}</Text>
               </View>
               <View style={styles.barBg}>
                 <View

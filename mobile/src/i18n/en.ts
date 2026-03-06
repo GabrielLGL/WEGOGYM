@@ -653,6 +653,9 @@ export const en: typeof fr = {
     noDataPeriod: 'No data for this period.',
     noSetsThisPeriod: 'No sets logged for this period.',
     total: 'Total',
+    sets: 'set',
+    setsPlural: 'sets',
+    sessionFallback: 'Session',
   },
 
   statsMeasurements: {
@@ -671,6 +674,10 @@ export const en: typeof fr = {
     deleteMessage: 'This action is irreversible.',
     deleteConfirm: 'Delete',
     deleteCancel: 'Cancel',
+    waistAbbr: 'W',
+    hipsAbbr: 'H',
+    armsAbbr: 'A',
+    chestAbbr: 'C',
   },
 
   statsRepartition: {
@@ -682,6 +689,7 @@ export const en: typeof fr = {
     next: 'Next →',
     sectionSetsThisWeek: 'Sets per muscle this week',
     global: 'Global',
+    others: 'Others',
   },
 
   muscleNames: {

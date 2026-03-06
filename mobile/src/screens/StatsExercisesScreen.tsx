@@ -16,6 +16,7 @@ import Exercise from '../model/models/Exercise'
 import {
   computePRsByExercise,
   computeTopExercisesByFrequency,
+  prepareStatsContext,
 } from '../model/utils/statsHelpers'
 import { formatRelativeDate } from '../model/utils/databaseHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -46,14 +47,19 @@ export function StatsExercisesScreenBase({ sets, exercises, histories }: Props) 
     filteredExercises,
   } = useExerciseFilters(exercises)
 
+  const ctx = useMemo(
+    () => prepareStatsContext(histories, exercises),
+    [histories, exercises]
+  )
+
   const prs = useMemo(
-    () => computePRsByExercise(sets, exercises, histories),
-    [sets, exercises, histories]
+    () => computePRsByExercise(sets, exercises, histories, ctx),
+    [sets, exercises, histories, ctx]
   )
 
   const topFrequency = useMemo(
-    () => computeTopExercisesByFrequency(sets, exercises, histories, 5),
-    [sets, exercises, histories]
+    () => computeTopExercisesByFrequency(sets, exercises, histories, 5, ctx),
+    [sets, exercises, histories, ctx]
   )
 
   const hasActiveFilter = searchQuery !== '' || filterMuscle !== null || filterEquipment !== null
