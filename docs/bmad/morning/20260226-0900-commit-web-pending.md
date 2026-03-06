@@ -32,4 +32,7 @@
 - Pas de fichiers temp (jest_result.txt, tsc_result.txt) committés par erreur
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260306-2330
+
+## Résolution
+Tous les fichiers listés ont déjà été committés entre le 2026-02-26 et le 2026-02-28 dans des commits séparés (feat/fix/chore web). Aucune action nécessaire.
