@@ -64,7 +64,7 @@ export function StatsScreenBase({ users, histories, sets }: Props) {
   const styles = useStyles(colors)
   const navigation = useNavigation<StatsNavigation>()
   const haptics = useHaptics()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const STAT_BUTTONS: StatButton[] = useMemo(() => [
     { icon: 'time-outline',        label: t.stats.duration,  route: 'StatsDuration' },
@@ -77,7 +77,7 @@ export function StatsScreenBase({ users, histories, sets }: Props) {
 
   const user = users[0] ?? null
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
-  const motivationalPhrase = useMemo(() => computeMotivationalPhrase(histories, sets), [histories, sets])
+  const motivationalPhrase = useMemo(() => computeMotivationalPhrase(histories, sets, language), [histories, sets, language])
 
   const handleNavigate = (route: StatRoute) => {
     haptics.onPress()
@@ -98,7 +98,7 @@ export function StatsScreenBase({ users, histories, sets }: Props) {
         <View style={styles.kpisRow}>
           <KpiItem label={t.stats.sessions} value={String(kpis.totalSessions)} colors={colors} />
           <View style={styles.kpiSeparator} />
-          <KpiItem label={t.stats.volume} value={formatVolume(kpis.totalVolumeKg)} colors={colors} />
+          <KpiItem label={t.stats.volume} value={formatVolume(kpis.totalVolumeKg, language === 'fr' ? 'fr-FR' : 'en-US')} colors={colors} />
           <View style={styles.kpiSeparator} />
           <KpiItem label={t.stats.records} value={String(kpis.totalPRs)} colors={colors} />
         </View>
