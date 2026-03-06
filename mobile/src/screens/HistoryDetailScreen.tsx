@@ -39,9 +39,8 @@ type HistoryDetailNavProp = NativeStackNavigationProp<RootStackParamList, 'Histo
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type RawSet = { history_id: string; exercise_id: string }
-const getSetRaw = (s: WorkoutSet): RawSet =>
-  (s as unknown as { _raw: RawSet })._raw
+/** Get the exercise FK from a Set model without fetching the relation. */
+const getExerciseId = (s: WorkoutSet): string => s.exercise.id
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -99,7 +98,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
 
   // Fetch Exercise objects for display
   useEffect(() => {
-    const exerciseIds = [...new Set(sets.map(s => getSetRaw(s).exercise_id))]
+    const exerciseIds = [...new Set(sets.map(s => getExerciseId(s)))]
 
     if (exerciseIds.length === 0) return
 
@@ -119,7 +118,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
   const grouped = useMemo<GroupedSets[]>(() => {
     const map = new Map<string, WorkoutSet[]>()
     for (const s of sets) {
-      const exId = getSetRaw(s).exercise_id
+      const exId = getExerciseId(s)
       if (!map.has(exId)) map.set(exId, [])
       map.get(exId)!.push(s)
     }
@@ -187,7 +186,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
                 rec.reps = newReps
               })
             )
-            affectedExerciseIds.add(getSetRaw(s).exercise_id)
+            affectedExerciseIds.add(getExerciseId(s))
           }
         }
 
@@ -238,7 +237,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
 
   const handleDeleteSet = useCallback(async () => {
     if (!deleteSetTarget) return
-    const exerciseId = getSetRaw(deleteSetTarget).exercise_id
+    const exerciseId = getExerciseId(deleteSetTarget)
 
     try {
       await database.write(async () => {
@@ -553,10 +552,12 @@ export default function HistoryDetailScreen() {
   const route = useRoute<HistoryDetailRouteProp>()
   const { historyId } = route.params
   const colors = useColors()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <EnhancedWrapper historyId={historyId} />
+      {mounted && <EnhancedWrapper historyId={historyId} />}
     </View>
   )
 }

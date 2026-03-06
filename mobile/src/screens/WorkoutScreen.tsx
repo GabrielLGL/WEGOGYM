@@ -206,7 +206,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     // La navigation vers Home (avec célébrations) est gérée par le useEffect ci-dessus
   }, [haptics])
 
-  const handleConfirmEnd = async () => {
+  const handleConfirmEnd = useCallback(async () => {
     const now = Date.now()
     setDurationSeconds(Math.floor((now - startTimestampRef.current) / 1000))
     const activeHistoryId = historyRef.current?.id || historyId
@@ -260,8 +260,10 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         const newTotalPrs = (user.totalPrs || 0) + totalPrs
         const newBestStreak = Math.max(streakResult.bestStreak, streakResult.currentStreak)
 
-        const allSetsRaw = await database.get<SetModel>('sets').query().unsafeFetchRaw()
-        const distinctExerciseCount = new Set(allSetsRaw.map(s => (s as Record<string, unknown>).exercise_id as string)).size
+        const distinctResult = await database.get<SetModel>('sets')
+          .query(Q.unsafeSqlQuery('SELECT COUNT(DISTINCT exercise_id) as count FROM sets'))
+          .unsafeFetchRaw()
+        const distinctExerciseCount = (distinctResult[0] as Record<string, number>)?.count ?? 0
 
         const existingBadgeRecords = await database.get<UserBadge>('user_badges').query().fetch()
         const existingBadgeIds = existingBadgeRecords.map(b => b.badgeId)
@@ -336,7 +338,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     setConfirmEndVisible(false)
     setSummaryVisible(true)
     haptics.onMajorSuccess()
-  }
+  }, [historyId, completeWorkoutHistory, user, completedSets, totalSetsTarget, totalPrs, validatedSets, sessionExercises, session.id, totalVolume, haptics])
 
   /** Nombre total de seances (histories non supprimees). */
   async function getTotalSessionCount(): Promise<number> {

@@ -28,6 +28,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { fontSize, borderRadius, spacing } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
@@ -52,6 +53,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
   sessions,
 }) => {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
@@ -111,7 +113,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         <Text style={styles.logDate}>{item.startTime.toLocaleDateString()}</Text>
         {item.sets.map((s, idx) => (
           <Text key={idx} style={styles.setDetailText}>
-            Série {s.setOrder} : {s.weight} kg × {s.reps} reps
+            {t.charts.setDetail.replace('{order}', String(s.setOrder)).replace('{weight}', String(s.weight)).replace('{reps}', String(s.reps))}
           </Text>
         ))}
       </View>
@@ -164,12 +166,12 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
                   fromZero={true}
                   formatXLabel={val => (chartData.labels.length > 6 ? '' : val)}
                 />
-                <Text style={styles.historyTitle}>Historique complet</Text>
+                <Text style={styles.historyTitle}>{t.exerciseHistory.fullHistory}</Text>
               </>
             ) : (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyText}>
-                  Enregistrez au moins une autre session pour voir votre progression.
+                  {t.charts.emptyProgression}
                 </Text>
               </View>
             )}
@@ -179,7 +181,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
       />
       <AlertDialog
         visible={isAlertVisible}
-        title="Supprimer cette séance ?"
+        title={t.charts.deleteSessionTitle}
         message={
           selectedStat
             ? `${selectedStat.sessionName} — ${selectedStat.startTime.toLocaleDateString()}`
@@ -190,8 +192,8 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
           setIsAlertVisible(false)
           setSelectedStat(null)
         }}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        confirmText={t.common.delete}
+        cancelText={t.common.cancel}
         confirmColor={colors.danger}
       />
     </View>
@@ -235,6 +237,7 @@ interface Props {
 
 export const ChartsContent: React.FC<Props> = ({ exercises }) => {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const { filterMuscle, setFilterMuscle, filterEquipment, setFilterEquipment, filteredExercises } =
@@ -249,14 +252,14 @@ export const ChartsContent: React.FC<Props> = ({ exercises }) => {
           items={MUSCLES_LIST}
           selectedValue={filterMuscle}
           onChange={setFilterMuscle}
-          noneLabel="Tous muscles"
+          noneLabel={t.exercises.allMuscles}
           style={styles.filterRow}
         />
         <ChipSelector
           items={EQUIPMENT_LIST}
           selectedValue={filterEquipment}
           onChange={setFilterEquipment}
-          noneLabel="Tout équipement"
+          noneLabel={t.exercises.allEquipment}
           style={[styles.filterRow, { marginTop: spacing.sm }]}
         />
       </View>
@@ -290,7 +293,7 @@ export const ChartsContent: React.FC<Props> = ({ exercises }) => {
           <ObservableExerciseStats exerciseId={selectedExoId} />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>Sélectionnez un exercice pour commencer.</Text>
+            <Text style={styles.emptyText}>{t.charts.emptySelectExercise}</Text>
           </View>
         )}
       </View>
