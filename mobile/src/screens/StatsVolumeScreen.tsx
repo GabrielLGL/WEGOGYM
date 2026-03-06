@@ -118,6 +118,12 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   const muscleFilter = muscleLabel === t.statsVolume.total ? null : muscleLabel
   const muscleLabelMap = useMemo(() => ({ [t.statsVolume.total]: t.statsVolume.total, ...t.muscleNames }), [t])
 
+  const periodLabelMap = useMemo<Record<string, string>>(() => ({
+    '1 mois': t.statsVolume.periodMonth,
+    '3 mois': t.statsVolume.period3Months,
+    'Tout': t.statsVolume.periodAll,
+  }), [t])
+
   const barPeriodLabelMap = useMemo<Record<string, string>>(() => ({
     'Semaine': t.statsVolume.periodWeek,
     '1 mois': t.statsVolume.periodMonth,
@@ -204,6 +210,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
         onChange={label => { if (label) setPeriodLabel(label) }}
         allowNone={false}
         noneLabel=""
+        labelMap={periodLabelMap}
       />
       <ChipSelector
         items={muscleItems}

@@ -32,12 +32,12 @@ import { parseNumericInput } from '../model/utils/databaseHelpers'
 
 type MetricKey = 'weight' | 'waist' | 'hips' | 'arms' | 'chest'
 
-const METRICS: Array<{ key: MetricKey; label: string; unit: string }> = [
-  { key: 'weight', label: 'Poids', unit: 'kg' },
-  { key: 'waist', label: 'Tour de taille', unit: 'cm' },
-  { key: 'hips', label: 'Hanches', unit: 'cm' },
-  { key: 'arms', label: 'Bras', unit: 'cm' },
-  { key: 'chest', label: 'Poitrine', unit: 'cm' },
+const METRICS: Array<{ key: MetricKey; unit: string }> = [
+  { key: 'weight', unit: 'kg' },
+  { key: 'waist', unit: 'cm' },
+  { key: 'hips', unit: 'cm' },
+  { key: 'arms', unit: 'cm' },
+  { key: 'chest', unit: 'cm' },
 ]
 
 // ─── Formulaire ───────────────────────────────────────────────────────────────
@@ -176,7 +176,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
                 latest[m.key] != null ? (
                   <View key={m.key} style={styles.latestCard}>
                     <Text style={styles.latestValue}>{latest[m.key]}{m.unit}</Text>
-                    <Text style={styles.latestLabel}>{m.label}</Text>
+                    <Text style={styles.latestLabel}>{metricsLabelMap[m.key]}</Text>
                   </View>
                 ) : null
               ))}
@@ -275,7 +275,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
           <View style={styles.formContent}>
             {METRICS.map(m => (
               <View key={m.key} style={styles.inputRow}>
-                <Text style={styles.inputLabel}>{metricsLabelMap[m.key] ?? m.label} ({m.unit})</Text>
+                <Text style={styles.inputLabel}>{metricsLabelMap[m.key]} ({m.unit})</Text>
                 <TextInput
                   style={styles.input}
                   value={form[m.key]}
