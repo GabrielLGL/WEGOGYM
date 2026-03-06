@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react'
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import {
   View,
   Text,
@@ -175,13 +175,17 @@ export function StatsCalendarScreenBase({ histories }: Props) {
 
   const handleConfirmDelete = useCallback(async () => {
     if (!pendingDeleteId) return
-    const target = histories.find(h => h.id === pendingDeleteId)
-    if (target) {
-      await database.write(async () => {
-        await target.update(h => {
-          h.deletedAt = new Date()
+    try {
+      const target = histories.find(h => h.id === pendingDeleteId)
+      if (target) {
+        await database.write(async () => {
+          await target.update(h => {
+            h.deletedAt = new Date()
+          })
         })
-      })
+      }
+    } catch (e) {
+      if (__DEV__) console.error('[StatsCalendarScreen] handleConfirmDelete error', e)
     }
     setPendingDeleteId(null)
     setDetail(null)
@@ -297,6 +301,7 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       return
     }
 
+    try {
     const dayHistories = histories.filter(
       h => h.deletedAt === null && toDateKey(h.startTime) === day.dateKey
     )
@@ -378,6 +383,9 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       count: day.count,
       sessions: sessionBlocks,
     })
+    } catch (e) {
+      if (__DEV__) console.error('[StatsCalendarScreen] handleDayPress error', e)
+    }
   }
 
   const todayKey = toDateKey(today)
@@ -846,4 +854,17 @@ const enhance = withObservables([], () => ({
     .observe(),
 }))
 
-export default enhance(StatsCalendarScreenBase)
+const ObservableStatsCalendarContent = enhance(StatsCalendarScreenBase)
+
+const StatsCalendarScreen = () => {
+  const colors = useColors()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {mounted && <ObservableStatsCalendarContent />}
+    </View>
+  )
+}
+
+export default StatsCalendarScreen

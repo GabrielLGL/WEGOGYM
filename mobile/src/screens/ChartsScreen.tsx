@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   FlatList,
+  Platform,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
@@ -95,15 +96,15 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         await database.batch(setsToDelete.map(s => s.prepareDestroyPermanently()))
       })
       haptics.onDelete()
-    } catch {
-      // Erreur DB : on ne bloque pas l'UI
+    } catch (e) {
+      if (__DEV__) console.error('[ChartsScreen] handleDeleteStat error', e)
     } finally {
       setIsAlertVisible(false)
       setSelectedStat(null)
     }
   }
 
-  const renderSessionItem = ({ item }: { item: ExerciseSessionStat }) => (
+  const renderSessionItem = useCallback(({ item }: { item: ExerciseSessionStat }) => (
     <View style={styles.logRow}>
       <View style={styles.logInfo}>
         <Text style={styles.logMainText}>{item.sessionName}</Text>
@@ -138,7 +139,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         </TouchableOpacity>
       </View>
     </View>
-  )
+  ), [styles, colors, haptics, navigation])
 
   return (
     <View style={styles.statsContainer}>
@@ -146,6 +147,10 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         data={reversedStats}
         keyExtractor={item => item.historyId}
         renderItem={renderSessionItem}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS === 'android'}
         ListHeaderComponent={
           <View style={styles.chartWrapper}>
             {chartData ? (
@@ -373,9 +378,11 @@ const ObservableContent = withObservables([], () => ({
 
 const ChartsScreen = () => {
   const colors = useColors()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ObservableContent />
+      {mounted && <ObservableContent />}
     </View>
   )
 }
