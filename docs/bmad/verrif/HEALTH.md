@@ -37,6 +37,7 @@
 | 2026-03-06 | 20 | 20 | 20 | 20 | 15 | **95/100** | ↑ +2 (1571 tests, 8 critiques fixés: race condition, cleanup, _raw, useCallback, useWindowDimensions) |
 | 2026-03-06 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1558 tests, C1 motivationalPhrase language fixé, @text decorators) |
 | 2026-03-07 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1558 tests, 2 CRIT + 5 WARN fixés: i18n WorkoutExerciseCard, soft-delete filter, double observe, dialog stuck, formatWeight) |
+| 2026-03-07 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1687 tests, cov 79.3%, TSC isPr fix + OnboardingSheet i18n) |
 
 ---
 
@@ -86,3 +87,4 @@
 | 20260221-0223 | 83 | 20 | 20 | 13 | 15 | 15 | full |
 | 20260307-0242 | 93 | 20 | 20 | 20 | 17 | 16 | full |
 | 20260307-0242 | 95 | 20 | 20 | 20 | 20 | 15 | full |
+| 20260307-2224 | 95 | 20 | 20 | 20 | 20 | 15 | full |
