@@ -20,8 +20,8 @@
 - [x] Supersets / Circuits
 - [x] Relancer la dernière séance en 1 tap
 - [x] Édition d'un historique post-workout
-- [ ] `MVP` Timer par exercice (repos différent par exo)
-- [ ] `MVP` Notes par exercice pendant le workout
+- [x] `MVP` Timer par exercice (repos différent par exo)
+- [x] `MVP` Notes par exercice pendant le workout
 - [ ] `FINAL` Progression automatique (suggestion poids/reps)
 
 ---
@@ -86,7 +86,7 @@
 - [x] Timer repos personnalisable (durée, vibration, son)
 - [x] Objectif hebdomadaire (1 à 7 séances/semaine)
 - [x] Splash screen animé
-- [ ] `MVP` Rappels d'entraînement (notifications planifiées)
+- [x] `MVP` Rappels d'entraînement (notifications planifiées)
 - [ ] `FINAL` Widget Android (streak, prochain workout)
 
 ---
@@ -123,9 +123,9 @@
 - [x] Mise à jour réactive automatique de l'interface
 - [x] Crash reporting (Sentry)
 - [x] Notifications locales (timer de repos)
-- [ ] `MVP` Deep testing Android (5+ appareils)
-- [ ] `MVP` Performance audit (listes longues, mémoire, startup)
-- [ ] `MVP` Play Store listing
+- [x] `MVP` Deep testing Android (5+ appareils)
+- [x] `MVP` Performance audit (listes longues, mémoire, startup)
+- [x] `MVP` Play Store listing
 - [ ] `FINAL` iOS (App Store)
 - [ ] `FINAL` Intégration wearables (Google Fit, Apple Health, Garmin)
 - [ ] `FINAL` Wear OS companion app

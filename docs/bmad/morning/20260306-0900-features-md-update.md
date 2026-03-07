@@ -1,6 +1,6 @@
 # Mettre a jour FEATURES.md — cocher items MVP termines
 
-## Statut : 🟡 Partiellement résolu — 20260307
+## Statut : ✅ Résolu — 20260307-1200
 
 ## Contexte
 Le fichier `FEATURES.md` liste toutes les features prevues. Les items MVP sont termines mais pas encore coches dans le fichier.
@@ -30,3 +30,6 @@ Le fichier `FEATURES.md` liste toutes les features prevues. Les items MVP sont t
 
 ## Priorite : NICE-TO-HAVE
 Bonne pratique de documentation, pas bloquant.
+
+## Résolution
+Rapport do : docs/bmad/do/20260307-1200-chore-features.md
