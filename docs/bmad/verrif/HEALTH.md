@@ -36,6 +36,7 @@
 | 2026-03-06 | 20 | 20 | 18 | 20 | 15 | **93/100** | ↓ -2 (1571 tests, duplicate() setsTargetMax fixé, StatsCalendar try/catch, 30 i18n strings + WorkoutScreen perf restants) |
 | 2026-03-06 | 20 | 20 | 20 | 20 | 15 | **95/100** | ↑ +2 (1571 tests, 8 critiques fixés: race condition, cleanup, _raw, useCallback, useWindowDimensions) |
 | 2026-03-06 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1558 tests, C1 motivationalPhrase language fixé, @text decorators) |
+| 2026-03-07 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1558 tests, 2 CRIT + 5 WARN fixés: i18n WorkoutExerciseCard, soft-delete filter, double observe, dialog stuck, formatWeight) |
 
 ---
 
