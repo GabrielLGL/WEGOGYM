@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { View, Text, StyleSheet, SafeAreaView, StatusBar, ToastAndroid, Platform } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -212,7 +212,7 @@ export default function OnboardingScreen() {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -266,5 +266,5 @@ function useStyles(colors: ThemeColors) {
     confirmButton: {
       flex: 2,
     },
-  })
+  }), [colors])
 }

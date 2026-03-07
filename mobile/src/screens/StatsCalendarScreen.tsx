@@ -15,6 +15,10 @@ import { database } from '../model'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
 import History from '../model/models/History'
+import type Session from '../model/models/Session'
+import type Program from '../model/models/Program'
+import type SetModel from '../model/models/Set'
+import type Exercise from '../model/models/Exercise'
 import {
   computeCalendarData,
   computeCurrentStreak,
@@ -302,87 +306,128 @@ export function StatsCalendarScreenBase({ histories }: Props) {
     }
 
     try {
-    const dayHistories = histories.filter(
-      h => h.deletedAt === null && toDateKey(h.startTime) === day.dateKey
-    )
+      // 1. Filter histories for this day (already in memory)
+      const dayHistories = histories.filter(
+        h => h.deletedAt === null && toDateKey(h.startTime) === day.dateKey
+      )
 
-    const sessionBlocks: SessionBlock[] = []
+      const historyIds = dayHistories.map(h => h.id)
 
-    for (const h of dayHistories) {
-      let programName = ''
-      let sessionName = ''
+      // 2. Batch fetch sessions (1 query)
+      const sessionIds = dayHistories
+        .map(h => (h._raw as Record<string, unknown>).session_id as string)
+        .filter(Boolean)
+      const uniqueSessionIds = [...new Set(sessionIds)]
 
-      // Session + Programme
-      try {
-        const session = await h.session.fetch()
+      const sessionsCollection = database.get<Session>('sessions')
+      const allSessions = uniqueSessionIds.length > 0
+        ? await sessionsCollection.query(Q.where('id', Q.oneOf(uniqueSessionIds))).fetch()
+        : []
+      const sessionMap = new Map(allSessions.map(s => [s.id, s]))
+
+      // 3. Batch fetch programs (1 query)
+      const programIds = allSessions
+        .map(s => (s._raw as Record<string, unknown>).program_id as string)
+        .filter(Boolean)
+      const uniqueProgramIds = [...new Set(programIds)]
+
+      const programsCollection = database.get<Program>('programs')
+      const allPrograms = uniqueProgramIds.length > 0
+        ? await programsCollection.query(Q.where('id', Q.oneOf(uniqueProgramIds))).fetch()
+        : []
+      const programMap = new Map(allPrograms.map(p => [p.id, p]))
+
+      // 4. Batch fetch sets (1 query)
+      const setsCollection = database.get<SetModel>('sets')
+      const allSets = historyIds.length > 0
+        ? await setsCollection.query(Q.where('history_id', Q.oneOf(historyIds))).fetch()
+        : []
+
+      // Group sets by history_id
+      const setsByHistory = new Map<string, SetModel[]>()
+      for (const s of allSets) {
+        const hId = (s._raw as Record<string, unknown>).history_id as string
+        const arr = setsByHistory.get(hId)
+        if (arr) {
+          arr.push(s)
+        } else {
+          setsByHistory.set(hId, [s])
+        }
+      }
+
+      // 5. Batch fetch exercises (1 query)
+      const exerciseIds = allSets
+        .map(s => (s._raw as Record<string, unknown>).exercise_id as string)
+        .filter(Boolean)
+      const uniqueExerciseIds = [...new Set(exerciseIds)]
+
+      const exercisesCollection = database.get<Exercise>('exercises')
+      const allExercises = uniqueExerciseIds.length > 0
+        ? await exercisesCollection.query(Q.where('id', Q.oneOf(uniqueExerciseIds))).fetch()
+        : []
+      const exerciseMap = new Map(allExercises.map(e => [e.id, e]))
+
+      // 6. Build results using Map lookups
+      const sessionBlocks: SessionBlock[] = dayHistories.map(h => {
+        let programName = ''
+        let sessionName = ''
+
+        const sId = (h._raw as Record<string, unknown>).session_id as string
+        const session = sId ? sessionMap.get(sId) : undefined
         if (session) {
           if (session.name) sessionName = session.name
-          try {
-            const program = await session.program.fetch()
-            if (program?.name) programName = program.name
-          } catch (e) {
-            if (__DEV__) console.error('[StatsCalendarScreen] programme supprimé ou inaccessible', e)
-          }
+          const pId = (session._raw as Record<string, unknown>).program_id as string
+          const program = pId ? programMap.get(pId) : undefined
+          if (program?.name) programName = program.name
         }
-      } catch (e) {
-        if (__DEV__) console.error('[StatsCalendarScreen] session supprimée ou inaccessible', e)
-      }
 
-      // Durée
-      let durationMin: number | null = null
-      if (h.endTime) {
-        const mins = Math.round(
-          (h.endTime.getTime() - h.startTime.getTime()) / 60000
-        )
-        if (mins > 0) durationMin = mins
-      }
+        // Duration
+        let durationMin: number | null = null
+        if (h.endTime) {
+          const mins = Math.round(
+            (h.endTime.getTime() - h.startTime.getTime()) / 60000
+          )
+          if (mins > 0) durationMin = mins
+        }
 
-      // Sets → regrouper par exercice
-      const exercises: ExerciseDetail[] = []
-      try {
-        const sets = await h.sets.fetch()
-        const exerciseMap = new Map<string, ExerciseDetail>()
+        // Group sets by exercise
+        const historySets = setsByHistory.get(h.id) ?? []
+        const exDetailMap = new Map<string, ExerciseDetail>()
 
-        await Promise.all(
-          sets.map(async s => {
-            let exName = 'Exercice inconnu'
-            try {
-              const ex = await s.exercise.fetch()
-              if (ex?.name) exName = ex.name
-            } catch (e) {
-              if (__DEV__) console.error('[StatsCalendarScreen] exercice supprimé ou inaccessible', e)
-            }
+        for (const s of historySets) {
+          const eId = (s._raw as Record<string, unknown>).exercise_id as string
+          const ex = eId ? exerciseMap.get(eId) : undefined
+          const exName = ex?.name ?? 'Exercice inconnu'
 
-            if (!exerciseMap.has(exName)) {
-              exerciseMap.set(exName, { exerciseName: exName, sets: [] })
-            }
-            exerciseMap.get(exName)!.sets.push({
-              setOrder: s.setOrder,
-              weight: s.weight,
-              reps: s.reps,
-              isPr: s.isPr,
-            })
+          let exDetail = exDetailMap.get(exName)
+          if (!exDetail) {
+            exDetail = { exerciseName: exName, sets: [] }
+            exDetailMap.set(exName, exDetail)
+          }
+          exDetail.sets.push({
+            setOrder: s.setOrder,
+            weight: s.weight,
+            reps: s.reps,
+            isPr: s.isPr,
           })
-        )
+        }
 
-        exerciseMap.forEach(exDetail => {
+        const exercises: ExerciseDetail[] = []
+        exDetailMap.forEach(exDetail => {
           exDetail.sets.sort((a, b) => a.setOrder - b.setOrder)
           exercises.push(exDetail)
         })
-      } catch (e) {
-        if (__DEV__) console.error('[StatsCalendarScreen] sets inaccessibles', e)
-      }
 
-      sessionBlocks.push({ historyId: h.id, programName, sessionName, durationMin, exercises })
-    }
+        return { historyId: h.id, programName, sessionName, durationMin, exercises }
+      })
 
-    setExpandedBlocks(new Set())
-    setDetail({
-      dateKey: day.dateKey,
-      label,
-      count: day.count,
-      sessions: sessionBlocks,
-    })
+      setExpandedBlocks(new Set())
+      setDetail({
+        dateKey: day.dateKey,
+        label,
+        count: day.count,
+        sessions: sessionBlocks,
+      })
     } catch (e) {
       if (__DEV__) console.error('[StatsCalendarScreen] handleDayPress error', e)
     }

@@ -7,9 +7,8 @@ import { switchMap, catchError } from 'rxjs/operators'
 import SessionExercise from '../model/models/SessionExercise'
 import Exercise from '../model/models/Exercise'
 import { validateSetInput } from '../model/utils/validationHelpers'
-import { getLastPerformanceForExercise } from '../model/utils/databaseHelpers'
+import { getLastPerformanceForExercise, updateSessionExerciseNotes } from '../model/utils/databaseHelpers'
 import { suggestProgression } from '../model/utils/progressionHelpers'
-import { database } from '../model/index'
 import { useHaptics } from '../hooks/useHaptics'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
@@ -228,11 +227,7 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
     setIsEditingSessionNote(false)
     if (sessionNoteRef.current !== (sessionExercise.notes ?? '')) {
       try {
-        await database.write(async () => {
-          await sessionExercise.update(se => {
-            se.notes = sessionNoteRef.current
-          })
-        })
+        await updateSessionExerciseNotes(sessionExercise, sessionNoteRef.current)
       } catch (e) {
         if (__DEV__) console.error('handleSaveSessionNote error:', e)
       }

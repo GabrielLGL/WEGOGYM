@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet, Animated,
   ScrollView, ActivityIndicator,
@@ -169,7 +169,7 @@ export default AssistantScreen
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -292,5 +292,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       fontWeight: '500',
     },
-  })
+  }), [colors])
 }

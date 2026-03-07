@@ -61,6 +61,12 @@ const PROVIDER_LABELS: Record<string, string> = {
   claude:  'Claude',
 }
 
+const LEVEL_MAP: Record<string, AILevel> = {
+  beginner:     'débutant',
+  intermediate: 'intermédiaire',
+  advanced:     'avancé',
+}
+
 // ─── Hook result ─────────────────────────────────────────────────────────────
 
 export interface UseAssistantWizardResult {
@@ -364,19 +370,13 @@ export function useAssistantWizard({
 
   // ── Generation ────────────────────────────────────────────────────────────
 
-  const levelMap: Record<string, AILevel> = {
-    beginner:     'débutant',
-    intermediate: 'intermédiaire',
-    advanced:     'avancé',
-  }
-
   const triggerGenerate = useCallback(async (data: AIFormData) => {
     haptics.onPress()
     setIsGenerating(true)
     try {
       const formWithLevel: AIFormData = {
         ...data,
-        level: levelMap[user?.userLevel ?? ''] ?? 'intermédiaire',
+        level: LEVEL_MAP[user?.userLevel ?? ''] ?? 'intermédiaire',
       }
       const result = await generatePlan(formWithLevel, user)
       if (!isMountedRef.current) return

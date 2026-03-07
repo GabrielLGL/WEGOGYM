@@ -7,6 +7,7 @@ import { Q } from '@nozbe/watermelondb'
 import { database } from '../index'
 import History from '../models/History'
 import Session from '../models/Session'
+import SessionExercise from '../models/SessionExercise'
 import WorkoutSet from '../models/Set'
 
 /**
@@ -57,6 +58,20 @@ export async function completeWorkoutHistory(
  * @param historyId - ID de la History
  * @param note - Texte de la note
  */
+/**
+ * Met à jour les notes d'un SessionExercise
+ */
+export async function updateSessionExerciseNotes(
+  sessionExercise: SessionExercise,
+  notes: string
+): Promise<void> {
+  await database.write(async () => {
+    await sessionExercise.update(se => {
+      se.notes = notes
+    })
+  })
+}
+
 export async function updateHistoryNote(
   historyId: string,
   note: string

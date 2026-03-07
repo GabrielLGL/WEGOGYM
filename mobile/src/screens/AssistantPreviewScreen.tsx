@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator,
@@ -124,7 +124,7 @@ export default function AssistantPreviewScreen({ navigation, route }: Props) {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -236,5 +236,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.md,
       fontWeight: '600',
     },
-  })
+  }), [colors])
 }

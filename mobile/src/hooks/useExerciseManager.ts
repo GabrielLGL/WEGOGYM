@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { database } from '../model/index'
 import Exercise from '../model/models/Exercise'
 import { validateExerciseInput } from '../model/utils/validationHelpers'
@@ -53,7 +53,7 @@ export function useExerciseManager(
    * Crée un nouvel exercice
    * @returns true si créé avec succès, false sinon
    */
-  const createExercise = async (): Promise<boolean> => {
+  const createExercise = useCallback(async (): Promise<boolean> => {
     const validation = validateExerciseInput(
       newExerciseName,
       newExerciseMuscles,
@@ -73,19 +73,17 @@ export function useExerciseManager(
       })
 
       if (onSuccess) onSuccess()
-      resetNewExercise()
+      setNewExerciseName('')
+      setNewExerciseMuscles([])
+      setNewExerciseEquipment('Poids libre')
       return true
     } catch (error) {
       if (__DEV__) console.error('[useExerciseManager] createExercise failed:', error)
       return false
     }
-  }
+  }, [newExerciseName, newExerciseMuscles, newExerciseEquipment, onSuccess])
 
-  /**
-   * Met à jour un exercice existant
-   * @returns true si mis à jour avec succès, false sinon
-   */
-  const updateExercise = async (): Promise<boolean> => {
+  const updateExercise = useCallback(async (): Promise<boolean> => {
     if (!selectedExercise) return false
 
     const validation = validateExerciseInput(
@@ -112,13 +110,9 @@ export function useExerciseManager(
       if (__DEV__) console.error('[useExerciseManager] updateExercise failed:', error)
       return false
     }
-  }
+  }, [selectedExercise, editExerciseName, editExerciseMuscles, editExerciseEquipment, onSuccess])
 
-  /**
-   * Supprime un exercice et toutes ses données associées
-   * @returns true si supprimé avec succès, false sinon
-   */
-  const deleteExercise = async (): Promise<boolean> => {
+  const deleteExercise = useCallback(async (): Promise<boolean> => {
     if (!selectedExercise) return false
 
     try {
@@ -130,27 +124,20 @@ export function useExerciseManager(
       if (__DEV__) console.error('[useExerciseManager] deleteExercise failed:', error)
       return false
     }
-  }
+  }, [selectedExercise, onDelete])
 
-  /**
-   * Réinitialise les données du nouvel exercice
-   */
-  const resetNewExercise = () => {
+  const resetNewExercise = useCallback(() => {
     setNewExerciseName('')
     setNewExerciseMuscles([])
     setNewExerciseEquipment('Poids libre')
-  }
+  }, [])
 
-  /**
-   * Charge un exercice pour l'édition
-   * @param exercise - Exercice à éditer
-   */
-  const loadExerciseForEdit = (exercise: Exercise) => {
+  const loadExerciseForEdit = useCallback((exercise: Exercise) => {
     setSelectedExercise(exercise)
     setEditExerciseName(exercise.name)
     setEditExerciseMuscles(exercise.muscles)
     setEditExerciseEquipment(exercise.equipment ?? 'Poids libre')
-  }
+  }, [])
 
   return {
     // États

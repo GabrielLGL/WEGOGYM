@@ -128,6 +128,41 @@ describe('validationHelpers', () => {
       expect(result.valid).toBe(false)
       expect(result.errors.length).toBe(3)
     })
+
+    // setsMax validation (lines 105-113)
+    it('should accept valid setsMax when >= sets', () => {
+      const result = validateWorkoutInput('3', '10', '50', '5')
+      expect(result.valid).toBe(true)
+    })
+
+    it('should reject setsMax when less than sets', () => {
+      const result = validateWorkoutInput('5', '10', '50', '3')
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain('Le max de séries doit être ≥ au min')
+    })
+
+    it('should reject non-numeric setsMax', () => {
+      const result = validateWorkoutInput('3', '10', '50', 'abc')
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain('Le max de séries doit être un nombre valide')
+    })
+
+    it('should accept empty setsMax', () => {
+      const result = validateWorkoutInput('3', '10', '50', '')
+      expect(result.valid).toBe(true)
+    })
+
+    it('should accept setsMax equal to sets', () => {
+      const result = validateWorkoutInput('3', '10', '50', '3')
+      expect(result.valid).toBe(true)
+    })
+
+    it('should skip setsMax validation when sets is invalid', () => {
+      const result = validateWorkoutInput('abc', '10', '50', '3')
+      expect(result.valid).toBe(false)
+      // setsMax error should not appear since sets is NaN
+      expect(result.errors).not.toContain('Le max de séries doit être ≥ au min')
+    })
   })
 
   describe('validateMuscles', () => {

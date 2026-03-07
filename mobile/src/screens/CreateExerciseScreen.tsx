@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { database } from '../model/index'
@@ -23,7 +23,7 @@ const SEARCH_PADDING_H = 15
 const BTN_PADDING = 16
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     scrollContent: { padding: SCREEN_PADDING_H, paddingBottom: spacing.xxl },
     label: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL, marginBottom: spacing.sm, fontWeight: '600', textTransform: 'uppercase' },
@@ -43,7 +43,7 @@ function useStyles(colors: ThemeColors) {
     createBtn: { backgroundColor: colors.primary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center' },
     createBtnDisabled: { opacity: 0.4 },
     createBtnText: { color: colors.primaryText, fontWeight: 'bold', fontSize: fontSize.md },
-  })
+  }), [colors])
 }
 
 export default function CreateExerciseScreen() {

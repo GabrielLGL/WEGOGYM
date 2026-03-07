@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, FlatList, ScrollView, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
@@ -270,7 +270,7 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     listContent: { padding: spacing.md, paddingBottom: 100 },
     emptyText: {
@@ -340,7 +340,7 @@ function useStyles(colors: ThemeColors) {
     },
     buttonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.bodyMd },
     buttonTextPrimary: { color: colors.primaryText, fontWeight: 'bold', fontSize: fontSize.bodyMd },
-  })
+  }), [colors])
 }
 
 export { ProgramDetailScreenInner }

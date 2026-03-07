@@ -20,26 +20,14 @@ import History from '../model/models/History'
 import {
   createWorkoutHistory,
   completeWorkoutHistory,
-  buildRecapExercises,
-  getLastSessionVolume,
 } from '../model/utils/databaseHelpers'
-import {
-  calculateSessionXP,
-  calculateSessionTonnage,
-  calculateLevel,
-  updateStreak,
-  getCurrentISOWeek,
-  detectMilestones,
-  type MilestoneEvent,
-} from '../model/utils/gamificationHelpers'
-import { checkBadges, type CheckBadgesParams } from '../model/utils/badgeHelpers'
+import { type MilestoneEvent } from '../model/utils/gamificationHelpers'
 import { type BadgeDefinition } from '../model/utils/badgeConstants'
-import UserBadge from '../model/models/UserBadge'
-import SetModel from '../model/models/Set'
 import { useWorkoutTimer } from '../hooks/useWorkoutTimer'
 import { useWorkoutState } from '../hooks/useWorkoutState'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
+import { useWorkoutCompletion } from '../hooks/useWorkoutCompletion'
 import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
 import { WorkoutSummarySheet } from '../components/WorkoutSummarySheet'
@@ -134,6 +122,25 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet, unvalidateSet } =
     useWorkoutState(sessionExercises, historyId)
 
+  const completedSets = useMemo(() => Object.keys(validatedSets).length, [validatedSets])
+  const totalSetsTarget = useMemo(() => sessionExercises.reduce((sum, se) => sum + (se.setsTarget ?? 0), 0), [sessionExercises])
+  const totalPrs = useMemo(() => Object.values(validatedSets).filter(s => s.isPr).length, [validatedSets])
+
+  const { completeWorkout } = useWorkoutCompletion({
+    historyId,
+    historyRef,
+    startTimestamp: startTimestampRef.current,
+    user,
+    completedSets,
+    totalSetsTarget,
+    totalPrs,
+    validatedSets,
+    sessionExercises,
+    sessionId: session.id,
+    totalVolume,
+    isMountedRef,
+  })
+
   const workoutList = useMemo(() => buildWorkoutList(sessionExercises), [sessionExercises])
 
   // Quand le résumé se ferme : naviguer vers Home avec les célébrations en params
@@ -154,10 +161,6 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       })
     }
   }, [summaryVisible, navigation, milestones, newBadges])
-
-  const completedSets = useMemo(() => Object.keys(validatedSets).length, [validatedSets])
-  const totalSetsTarget = useMemo(() => sessionExercises.reduce((sum, se) => sum + (se.setsTarget ?? 0), 0), [sessionExercises])
-  const totalPrs = useMemo(() => Object.values(validatedSets).filter(s => s.isPr).length, [validatedSets])
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -214,166 +217,22 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   }, [summaryVisible, handleClose])
 
   const handleConfirmEnd = useCallback(async () => {
-    const now = Date.now()
-    setDurationSeconds(Math.floor((now - startTimestampRef.current) / 1000))
-    const activeHistoryId = historyRef.current?.id || historyId
-    if (activeHistoryId) {
-      await completeWorkoutHistory(activeHistoryId, now).catch(e => { if (__DEV__) console.error('[WorkoutScreen] completeWorkoutHistory (end):', e) })
-    }
+    const result = await completeWorkout()
+    if (!result) return
 
-    // ── Gamification ──
-    if (user && completedSets > 0) {
-      try {
-        const setsArray = Object.values(validatedSets).map(s => ({
-          weight: s.weight,
-          reps: s.reps,
-        }))
-        const sessionTonnage = calculateSessionTonnage(setsArray)
-        const isComplete = completedSets >= totalSetsTarget
-        const sessionXP = calculateSessionXP(totalPrs, isComplete)
-        const newTotalXp = (user.totalXp || 0) + sessionXP
-        const newLevel = calculateLevel(newTotalXp)
-        const newTotalTonnage = (user.totalTonnage || 0) + sessionTonnage
-
-        // Streak : compter les seances de la semaine courante
-        const currentWeek = getCurrentISOWeek()
-        const weekStart = getWeekStartTimestamp(currentWeek)
-        const weekSessionCount = await database
-          .get<History>('histories')
-          .query(
-            Q.where('deleted_at', null),
-            Q.where('start_time', Q.gte(weekStart)),
-          )
-          .fetchCount()
-        if (!isMountedRef.current) return
-
-        const streakResult = updateStreak(
-          user.lastWorkoutWeek,
-          user.currentStreak || 0,
-          user.bestStreak || 0,
-          user.streakTarget || 3,
-          weekSessionCount,
-          currentWeek,
-        )
-
-        // Capture before state pour milestones
-        const totalSessionCount = await getTotalSessionCount()
-        const before = {
-          totalSessions: totalSessionCount - 1, // -1 car la seance courante est deja comptee
-          totalTonnage: user.totalTonnage || 0,
-          level: user.level || 1,
-        }
-
-        // Badges — données complémentaires
-        const newTotalPrs = (user.totalPrs || 0) + totalPrs
-        const newBestStreak = Math.max(streakResult.bestStreak, streakResult.currentStreak)
-
-        const distinctResult = await database.get<SetModel>('sets')
-          .query(Q.unsafeSqlQuery('SELECT COUNT(DISTINCT exercise_id) as count FROM sets'))
-          .unsafeFetchRaw()
-        const distinctExerciseCount = (distinctResult[0] as Record<string, number>)?.count ?? 0
-
-        const existingBadgeRecords = await database.get<UserBadge>('user_badges').query().fetch()
-        if (!isMountedRef.current) return
-        const existingBadgeIds = existingBadgeRecords.map(b => b.badgeId)
-
-        const badgeParams: CheckBadgesParams = {
-          user: {
-            totalTonnage: newTotalTonnage,
-            bestStreak: newBestStreak,
-            level: newLevel,
-            totalPrs: newTotalPrs,
-          },
-          existingBadgeIds,
-          sessionCount: totalSessionCount,
-          sessionVolume: sessionTonnage,
-          distinctExerciseCount,
-        }
-        const detectedBadges = checkBadges(badgeParams)
-
-        await database.write(async () => {
-          await user.update(u => {
-            u.totalXp = newTotalXp
-            u.level = newLevel
-            u.totalTonnage = newTotalTonnage
-            u.currentStreak = streakResult.currentStreak
-            u.bestStreak = streakResult.bestStreak
-            u.lastWorkoutWeek = streakResult.lastWorkoutWeek
-            u.totalPrs = newTotalPrs
-          })
-          for (const badge of detectedBadges) {
-            await database.get<UserBadge>('user_badges').create(record => {
-              record.badgeId = badge.id
-              record.unlockedAt = new Date()
-            })
-          }
-        })
-        if (!isMountedRef.current) return
-
-        setSessionXPGained(sessionXP)
-        setNewLevelResult(newLevel)
-        setNewStreakResult(streakResult.currentStreak)
-
-        const after = {
-          totalSessions: before.totalSessions + 1,
-          totalTonnage: newTotalTonnage,
-          level: newLevel,
-        }
-        const detected = detectMilestones(before, after)
-        if (detected.length > 0) {
-          setMilestones(detected)
-        }
-        if (detectedBadges.length > 0) {
-          setNewBadges(detectedBadges)
-        }
-      } catch (e) {
-        if (__DEV__) console.error('[WorkoutScreen] gamification update:', e)
-      }
-    }
-
-    // ── Récap enrichi ──
-    try {
-      const recap = await buildRecapExercises(sessionExercises, validatedSets, historyId)
-      const prevVol = await getLastSessionVolume(session.id, historyId)
-      if (!isMountedRef.current) return
-      setRecapExercises(recap)
-      setRecapComparison({
-        prevVolume: prevVol,
-        currVolume: totalVolume,
-        volumeGain: prevVol !== null ? totalVolume - prevVol : 0,
-      })
-    } catch (e) {
-      if (__DEV__) console.error('[WorkoutScreen] buildRecapExercises:', e)
-    }
+    setDurationSeconds(result.durationSeconds)
+    setSessionXPGained(result.sessionXPGained)
+    setNewLevelResult(result.newLevel)
+    setNewStreakResult(result.newStreak)
+    setRecapExercises(result.recapExercises)
+    setRecapComparison(result.recapComparison)
+    if (result.milestones.length > 0) setMilestones(result.milestones)
+    if (result.newBadges.length > 0) setNewBadges(result.newBadges)
 
     setConfirmEndVisible(false)
     setSummaryVisible(true)
     haptics.onMajorSuccess()
-  }, [historyId, user, completedSets, totalSetsTarget, totalPrs, validatedSets, sessionExercises, session.id, totalVolume, haptics])
-
-  /** Nombre total de seances (histories non supprimees). */
-  async function getTotalSessionCount(): Promise<number> {
-    const count = await database
-      .get<History>('histories')
-      .query(Q.where('deleted_at', null))
-      .fetchCount()
-    return count
-  }
-
-  /** Timestamp du debut de la semaine ISO. */
-  function getWeekStartTimestamp(isoWeek: string): number {
-    const [yearStr, weekStr] = isoWeek.split('-W')
-    const year = parseInt(yearStr, 10)
-    const week = parseInt(weekStr, 10)
-    // 4 janvier est toujours dans la semaine ISO 1
-    const jan4 = new Date(Date.UTC(year, 0, 4))
-    const dayOfWeek = jan4.getUTCDay() || 7
-    // Lundi de la semaine 1
-    const mondayWeek1 = new Date(jan4.getTime() - (dayOfWeek - 1) * 86400000)
-    // Lundi de la semaine demandee
-    const target = new Date(mondayWeek1.getTime() + (week - 1) * 7 * 86400000)
-    return target.getTime()
-  }
+  }, [completeWorkout, haptics])
 
   const handleConfirmAbandon = useCallback(async () => {
     const activeHistoryId = historyRef.current?.id || historyId
@@ -556,7 +415,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     listContent: {
       paddingHorizontal: spacing.md,
@@ -599,7 +458,7 @@ function useStyles(colors: ThemeColors) {
       letterSpacing: 1,
       textTransform: 'uppercase',
     },
-  })
+  }), [colors])
 }
 
 const ObservableWorkoutContent = withObservables(['route'], ({ route }: { route: RouteProp<RootStackParamList, 'Workout'> }) => ({

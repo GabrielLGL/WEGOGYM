@@ -153,16 +153,16 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         {/* Section gamification */}
         <View style={styles.gamificationSection}>
           <View style={styles.gamRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <View style={styles.row}>
               <Ionicons name="star-outline" size={14} color={colors.primary} />
               <Text style={styles.gamItem}>+{xpGained} XP</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <View style={styles.row}>
               <Ionicons name="navigate-outline" size={14} color={colors.primary} />
               <Text style={styles.gamItem}>{t.workoutSummary.levelLabel} {level}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs }}>
+          <View style={[styles.row, { justifyContent: 'center' }]}>
             <Ionicons name="flame-outline" size={14} color={colors.primary} />
             <Text style={[styles.gamItem, styles.gamCenter]}>{t.workoutSummary.streakLabel} {currentStreak}</Text>
           </View>
@@ -209,14 +209,14 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
               <View style={styles.progressionVolRow}>
                 <Text style={styles.progressionLabel}>{t.workoutSummary.totalVolume}</Text>
                 {recapComparison.volumeGain > 0 ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                  <View style={styles.row}>
                     <Text style={[styles.progressionDelta, { color: colors.success }]}>
                       +{recapComparison.volumeGain.toFixed(1)} kg
                     </Text>
                     <Ionicons name="chevron-up-outline" size={12} color={colors.success} />
                   </View>
                 ) : recapComparison.volumeGain < 0 ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                  <View style={styles.row}>
                     <Text style={[styles.progressionDelta, { color: colors.danger }]}>
                       {recapComparison.volumeGain.toFixed(1)} kg
                     </Text>
@@ -234,7 +234,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
             {exercisesWithDelta.map((exo, idx) => (
               <View key={idx} style={styles.progressionExoRow}>
                 <Text style={styles.progressionExoName}>{exo.exerciseName}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                <View style={styles.row}>
                   <Text style={[
                     styles.progressionDelta,
                     { color: exo.currMaxWeight > exo.prevMaxWeight ? colors.success : colors.danger }
@@ -282,6 +282,11 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    row: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing.xs,
+    },
     motivationText: {
       fontSize: fontSize.md,
       fontWeight: '700',

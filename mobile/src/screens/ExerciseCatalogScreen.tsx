@@ -8,7 +8,7 @@
  * Accès : REST API Supabase via plain fetch (service exerciseCatalog.ts)
  */
 
-import React, { useState, useEffect, useCallback, useRef, memo } from 'react'
+import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react'
 import {
   View,
   Text,
@@ -544,7 +544,7 @@ const ExerciseCatalogScreen: React.FC = () => {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -620,7 +620,7 @@ function useStyles(colors: ThemeColors) {
       fontWeight: '700',
       fontSize: fontSize.sm,
     },
-  })
+  }), [colors])
 }
 
 export default ExerciseCatalogScreen

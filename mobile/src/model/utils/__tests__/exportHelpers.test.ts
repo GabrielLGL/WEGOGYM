@@ -2,20 +2,44 @@
 jest.mock('expo-file-system', () => ({
   documentDirectory: 'file:///test-dir/',
   writeAsStringAsync: jest.fn().mockResolvedValue(undefined),
+  readAsStringAsync: jest.fn(),
 }))
 
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
+    write: jest.fn(),
+    batch: jest.fn(),
+  },
+}))
+
+jest.mock('../../schema', () => ({
+  mySchema: {
+    version: 32,
+    tables: {
+      programs: { columnArray: [{ name: 'name' }, { name: 'position' }] },
+      sessions: { columnArray: [{ name: 'name' }, { name: 'program_id' }] },
+      session_exercises: { columnArray: [{ name: 'session_id' }, { name: 'exercise_id' }] },
+      exercises: { columnArray: [{ name: 'name' }, { name: 'muscles' }] },
+      performance_logs: { columnArray: [{ name: 'exercise_id' }] },
+      histories: { columnArray: [{ name: 'session_id' }, { name: 'start_time' }] },
+      sets: { columnArray: [{ name: 'history_id' }, { name: 'exercise_id' }, { name: 'weight' }, { name: 'reps' }] },
+      body_measurements: { columnArray: [{ name: 'weight' }] },
+      users: { columnArray: [{ name: 'name' }] },
+      user_badges: { columnArray: [{ name: 'badge_id' }] },
+    },
   },
 }))
 
 import * as FileSystem from 'expo-file-system'
-import { exportAllData } from '../exportHelpers'
+import { exportAllData, importAllData } from '../exportHelpers'
 import { database } from '../../index'
 
 const mockWriteAsStringAsync = FileSystem.writeAsStringAsync as jest.Mock
+const mockReadAsStringAsync = (FileSystem as unknown as { readAsStringAsync: jest.Mock }).readAsStringAsync
 const mockDbGet = database.get as jest.Mock
+const mockDbWrite = (database as unknown as { write: jest.Mock }).write
+const mockDbBatch = (database as unknown as { batch: jest.Mock }).batch
 
 function makeRecord(tableName: string, id: string, extra: Record<string, unknown> = {}) {
   return {
@@ -120,5 +144,72 @@ describe('exportHelpers — exportAllData', () => {
     const filePath = await exportAllData()
     expect(typeof filePath).toBe('string')
     expect(filePath.startsWith('file:///test-dir/')).toBe(true)
+  })
+})
+
+// ─── importAllData ───────────────────────────────────────────────────────────
+
+describe('exportHelpers — importAllData', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockDbWrite.mockImplementation((cb: () => Promise<unknown>) => cb())
+    mockDbBatch.mockResolvedValue(undefined)
+  })
+
+  it('reads JSON file and destroys existing records before creating new ones', async () => {
+    const importData = {
+      metadata: {
+        exportDate: '2026-01-01',
+        appVersion: '1.0.0',
+        schemaVersion: 32,
+        tables: { programs: 1 },
+      },
+      programs: [{ id: 'p1', name: 'PPL' }],
+    }
+
+    mockReadAsStringAsync.mockResolvedValue(JSON.stringify(importData))
+
+    const mockPrepareDestroy = jest.fn().mockReturnValue({ _raw: { id: 'old' } })
+    const mockPrepareCreate = jest.fn().mockReturnValue({ _raw: {} })
+
+    mockDbGet.mockImplementation(() => ({
+      query: () => ({
+        fetch: () => Promise.resolve([{ prepareDestroyPermanently: mockPrepareDestroy }]),
+      }),
+      prepareCreate: mockPrepareCreate,
+    }))
+
+    await importAllData('file:///import.json')
+
+    expect(mockReadAsStringAsync).toHaveBeenCalledWith('file:///import.json')
+    expect(mockDbWrite).toHaveBeenCalled()
+    expect(mockDbBatch).toHaveBeenCalled()
+  })
+
+  it('throws on invalid format (no metadata.tables)', async () => {
+    mockReadAsStringAsync.mockResolvedValue(JSON.stringify({ bad: 'data' }))
+
+    await expect(importAllData('file:///bad.json')).rejects.toThrow('métadonnées manquantes')
+  })
+
+  it('throws on invalid JSON', async () => {
+    mockReadAsStringAsync.mockResolvedValue('not valid json{{{')
+
+    await expect(importAllData('file:///bad.json')).rejects.toThrow('JSON valide')
+  })
+
+  it('throws when no known table has data', async () => {
+    const importData = {
+      metadata: {
+        exportDate: '2026-01-01',
+        appVersion: '1.0.0',
+        schemaVersion: 32,
+        tables: {},
+      },
+    }
+
+    mockReadAsStringAsync.mockResolvedValue(JSON.stringify(importData))
+
+    await expect(importAllData('file:///empty.json')).rejects.toThrow('Aucune donnée reconnue')
   })
 })

@@ -21,6 +21,7 @@ jest.mock('../../contexts/ThemeContext', () => {
       setThemeMode: jest.fn().mockResolvedValue(undefined),
       neuShadow: {},
     }),
+    useColors: () => require('../../theme').colors,
   }
 })
 

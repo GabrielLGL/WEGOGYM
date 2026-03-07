@@ -13,6 +13,7 @@ import {
   completeWorkoutHistory,
   updateHistoryNote,
   getLastSessionVolume,
+  softDeleteHistory,
 } from '../workoutSessionUtils'
 import { database } from '../../index'
 
@@ -135,7 +136,6 @@ describe('getLastSessionVolume', () => {
       { weight: 50, reps: 5 },   // 250
     ]
 
-    let callCount = 0
     mockGet.mockImplementation((collection: string) => {
       if (collection === 'histories') {
         return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([history]) }) }
@@ -148,5 +148,66 @@ describe('getLastSessionVolume', () => {
 
     const result = await getLastSessionVolume('sess1', 'h-other')
     expect(result).toBe(1250)
+  })
+
+  it('picks the most recent completed history when multiple exist', async () => {
+    const histories = [
+      { id: 'h1', startTime: new Date(2026, 0, 1), endTime: new Date(2026, 0, 1, 1) },
+      { id: 'h2', startTime: new Date(2026, 0, 5), endTime: new Date(2026, 0, 5, 1) },
+    ]
+    const sets = [{ weight: 80, reps: 8 }] // 640
+
+    mockGet.mockImplementation((collection: string) => {
+      if (collection === 'histories') {
+        return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(histories) }) }
+      }
+      if (collection === 'sets') {
+        return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(sets) }) }
+      }
+      return {}
+    })
+
+    const result = await getLastSessionVolume('sess1', 'h-other')
+    expect(result).toBe(640)
+  })
+
+  it('returns 0 when most recent completed session has no sets', async () => {
+    const history = {
+      id: 'h1',
+      startTime: new Date(2026, 0, 1),
+      endTime: new Date(2026, 0, 1, 1),
+    }
+
+    mockGet.mockImplementation((collection: string) => {
+      if (collection === 'histories') {
+        return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([history]) }) }
+      }
+      if (collection === 'sets') {
+        return { query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) }
+      }
+      return {}
+    })
+
+    const result = await getLastSessionVolume('sess1', 'h-other')
+    expect(result).toBe(0)
+  })
+})
+
+// ─── softDeleteHistory ───────────────────────────────────────────────────────
+
+describe('softDeleteHistory', () => {
+  it('sets deletedAt to a Date via database.write', async () => {
+    const capturedUpdate: Record<string, unknown> = {}
+    const mockUpdate = jest.fn().mockImplementation((cb: (h: Record<string, unknown>) => void) => {
+      const record: Record<string, unknown> = { deletedAt: null }
+      cb(record)
+      Object.assign(capturedUpdate, record)
+    })
+    mockGet.mockReturnValue({ find: jest.fn().mockResolvedValue({ update: mockUpdate }) })
+
+    await softDeleteHistory('h1')
+
+    expect(mockWrite).toHaveBeenCalled()
+    expect(capturedUpdate.deletedAt).toBeInstanceOf(Date)
   })
 })

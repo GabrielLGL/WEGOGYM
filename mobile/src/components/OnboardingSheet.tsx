@@ -2,7 +2,9 @@ import React, { useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { BottomSheet } from './BottomSheet'
 import { useHaptics } from '../hooks/useHaptics'
-import { colors, spacing, borderRadius, fontSize } from '../theme'
+import { useTheme } from '../contexts/ThemeContext'
+import { spacing, borderRadius, fontSize } from '../theme'
+import type { ThemeColors } from '../theme'
 import { PRESET_PROGRAMS } from '../model/onboardingPrograms'
 import type { PresetProgram } from '../model/onboardingPrograms'
 
@@ -20,6 +22,8 @@ export const OnboardingSheet: React.FC<Props> = ({
   onSkip,
 }) => {
   const haptics = useHaptics()
+  const { colors } = useTheme()
+  const styles = useStyles(colors)
   const [isImporting, setIsImporting] = useState(false)
 
   const handleSelectProgram = async (preset: PresetProgram) => {
@@ -75,58 +79,60 @@ export const OnboardingSheet: React.FC<Props> = ({
   )
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.cardSecondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  cardDisabled: {
-    opacity: 0.5,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
-  },
-  cardName: {
-    color: colors.text,
-    fontSize: fontSize.md,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  badge: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    marginLeft: spacing.sm,
-  },
-  badgeText: {
-    color: colors.text,
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-  },
-  cardDescription: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
-  },
-  importingText: {
-    color: colors.primary,
-    fontSize: fontSize.xs,
-    marginTop: spacing.xs,
-    fontStyle: 'italic',
-  },
-  skipButton: {
-    marginTop: spacing.md,
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  skipText: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-  },
-})
+function useStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.cardSecondary,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    cardDisabled: {
+      opacity: 0.5,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: spacing.xs,
+    },
+    cardName: {
+      color: colors.text,
+      fontSize: fontSize.md,
+      fontWeight: 'bold',
+      flex: 1,
+    },
+    badge: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      marginLeft: spacing.sm,
+    },
+    badgeText: {
+      color: colors.text,
+      fontSize: fontSize.xs,
+      fontWeight: '600',
+    },
+    cardDescription: {
+      color: colors.textSecondary,
+      fontSize: fontSize.sm,
+    },
+    importingText: {
+      color: colors.primary,
+      fontSize: fontSize.xs,
+      marginTop: spacing.xs,
+      fontStyle: 'italic',
+    },
+    skipButton: {
+      marginTop: spacing.md,
+      padding: spacing.md,
+      alignItems: 'center',
+    },
+    skipText: {
+      color: colors.textSecondary,
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+    },
+  })
+}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Animated, BackHandler, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { database } from '../model/index'
@@ -338,7 +338,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     listWrapper: { flex: 1 },
     footerFloating: {
@@ -411,7 +411,7 @@ function useStyles(colors: ThemeColors) {
       borderColor: colors.border,
     },
     moveChipText: { color: colors.textSecondary, fontSize: fontSize.sm, fontWeight: '600' },
-  })
+  }), [colors])
 }
 
 export { ProgramsScreen as ProgramsContent }

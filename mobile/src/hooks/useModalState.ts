@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 /**
  * Hook pour gerer l'etat d'un modal.
@@ -18,9 +18,9 @@ import { useState } from 'react'
 export function useModalState(initialState = false) {
   const [isOpen, setIsOpen] = useState(initialState)
 
-  const open = () => setIsOpen(true)
-  const close = () => setIsOpen(false)
-  const toggle = () => setIsOpen(prev => !prev)
+  const open = useCallback(() => setIsOpen(true), [])
+  const close = useCallback(() => setIsOpen(false), [])
+  const toggle = useCallback(() => setIsOpen(prev => !prev), [])
 
   return {
     isOpen,

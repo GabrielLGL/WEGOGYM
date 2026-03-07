@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, memo, useRef } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useCallback, memo, useRef, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, UIManager, BackHandler, Keyboard } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
@@ -358,7 +358,7 @@ function useExerciseItemStyles(colors: ThemeColors) {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     baseContainer: { flex: 1, backgroundColor: colors.background },
     container: { flex: 1 },
     header: { paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, paddingBottom: HEADER_PADDING_BOTTOM },
@@ -401,7 +401,7 @@ function useStyles(colors: ThemeColors) {
     btnText: { color: colors.text, fontWeight: 'bold' },
     sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: LIST_ITEM_PADDING_V },
     sheetText: { color: colors.text, fontSize: fontSize.md },
-  })
+  }), [colors])
 }
 
 const ObservableContent = withObservables([], () => ({

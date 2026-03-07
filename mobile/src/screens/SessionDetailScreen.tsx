@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo } from 'react'
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native'
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import withObservables from '@nozbe/with-observables'
@@ -364,7 +364,7 @@ const BTN_MARGIN_BOTTOM = 10
 const LIST_PADDING_BOTTOM = 20
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     listWrapper: { flex: 1 },
     emptyText: { color: colors.placeholder, textAlign: 'center', marginTop: 50, fontSize: fontSize.md, fontStyle: 'italic' },
@@ -434,7 +434,7 @@ function useStyles(colors: ThemeColors) {
     confirmBtn: { flex: 0.48, backgroundColor: colors.primary, padding: spacing.ms, borderRadius: borderRadius.sm, alignItems: 'center' },
     cancelBtn: { flex: 0.48, backgroundColor: colors.secondaryButton, padding: spacing.ms, borderRadius: borderRadius.sm, alignItems: 'center' },
     btnText: { color: colors.text, fontWeight: 'bold' },
-  })
+  }), [colors])
 }
 
 const ObservableSessionDetailContent = withObservables(['route'], ({ route }: { route: RouteProp<RootStackParamList, 'SessionDetail'> }) => ({

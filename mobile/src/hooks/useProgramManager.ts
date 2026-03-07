@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { database } from '../model/index'
 import { Q } from '@nozbe/watermelondb'
 import Program from '../model/models/Program'
@@ -9,40 +9,6 @@ import { getNextPosition } from '../model/utils/databaseHelpers'
 
 /**
  * useProgramManager - Hook pour gérer les opérations CRUD sur les programmes et sessions
- *
- * Encapsule la logique de création, modification et suppression de programmes/sessions.
- * Utilisé dans: HomeScreen
- *
- * @param onSuccess - Callback optionnel pour feedback haptique de succès
- * @returns États et fonctions pour gérer les programmes et sessions
- *
- * @example
- * const {
- *   // Program states
- *   programNameInput,
- *   setProgramNameInput,
- *   isRenamingProgram,
- *   setIsRenamingProgram,
- *   selectedProgram,
- *   setSelectedProgram,
- *   // Session states
- *   sessionNameInput,
- *   setSessionNameInput,
- *   isRenamingSession,
- *   setIsRenamingSession,
- *   selectedSession,
- *   setSelectedSession,
- *   targetProgram,
- *   setTargetProgram,
- *   // Operations
- *   saveProgram,
- *   duplicateProgram,
- *   deleteProgram,
- *   saveSession,
- *   duplicateSession,
- *   deleteSession,
- *   moveSession,
- * } = useProgramManager(haptics.onSuccess)
  */
 export function useProgramManager(onSuccess?: () => void) {
   // --- PROGRAM STATES ---
@@ -56,11 +22,7 @@ export function useProgramManager(onSuccess?: () => void) {
   const [targetProgram, setTargetProgram] = useState<Program | null>(null)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
 
-  /**
-   * Crée ou renomme un programme
-   * @returns true si succès, false sinon
-   */
-  const saveProgram = async (): Promise<boolean> => {
+  const saveProgram = useCallback(async (): Promise<boolean> => {
     if (!isValidText(programNameInput)) return false
 
     try {
@@ -79,19 +41,17 @@ export function useProgramManager(onSuccess?: () => void) {
       })
 
       if (onSuccess) onSuccess()
-      resetProgramForm()
+      setProgramNameInput('')
+      setIsRenamingProgram(false)
+      setSelectedProgram(null)
       return true
     } catch (error) {
       if (__DEV__) console.error('[useProgramManager] saveProgram failed:', error)
       return false
     }
-  }
+  }, [programNameInput, isRenamingProgram, selectedProgram, onSuccess])
 
-  /**
-   * Duplique un programme
-   * @returns true si succès, false sinon
-   */
-  const duplicateProgram = async (): Promise<boolean> => {
+  const duplicateProgram = useCallback(async (): Promise<boolean> => {
     if (!selectedProgram) return false
 
     try {
@@ -104,13 +64,9 @@ export function useProgramManager(onSuccess?: () => void) {
       if (__DEV__) console.error('[useProgramManager] duplicateProgram failed:', error)
       return false
     }
-  }
+  }, [selectedProgram, onSuccess])
 
-  /**
-   * Supprime un programme et toutes ses sessions
-   * @returns true si succès, false sinon
-   */
-  const deleteProgram = async (): Promise<boolean> => {
+  const deleteProgram = useCallback(async (): Promise<boolean> => {
     if (!selectedProgram) return false
 
     try {
@@ -134,13 +90,9 @@ export function useProgramManager(onSuccess?: () => void) {
       if (__DEV__) console.error('[useProgramManager] deleteProgram failed:', error)
       return false
     }
-  }
+  }, [selectedProgram])
 
-  /**
-   * Crée ou renomme une session
-   * @returns true si succès, false sinon
-   */
-  const saveSession = async (): Promise<boolean> => {
+  const saveSession = useCallback(async (): Promise<boolean> => {
     if (!isValidText(sessionNameInput)) return false
 
     try {
@@ -162,19 +114,18 @@ export function useProgramManager(onSuccess?: () => void) {
       })
 
       if (onSuccess) onSuccess()
-      resetSessionForm()
+      setSessionNameInput('')
+      setIsRenamingSession(false)
+      setTargetProgram(null)
+      setSelectedSession(null)
       return true
     } catch (error) {
       if (__DEV__) console.error('[useProgramManager] saveSession failed:', error)
       return false
     }
-  }
+  }, [sessionNameInput, isRenamingSession, selectedSession, targetProgram, onSuccess])
 
-  /**
-   * Duplique une session avec tous ses exercices
-   * @returns true si succès, false sinon
-   */
-  const duplicateSession = async (): Promise<boolean> => {
+  const duplicateSession = useCallback(async (): Promise<boolean> => {
     if (!selectedSession) return false
 
     try {
@@ -219,13 +170,9 @@ export function useProgramManager(onSuccess?: () => void) {
       if (__DEV__) console.error('[useProgramManager] duplicateSession failed:', error)
       return false
     }
-  }
+  }, [selectedSession, onSuccess])
 
-  /**
-   * Supprime une session
-   * @returns true si succès, false sinon
-   */
-  const deleteSession = async (): Promise<boolean> => {
+  const deleteSession = useCallback(async (): Promise<boolean> => {
     if (!selectedSession) return false
 
     try {
@@ -242,14 +189,9 @@ export function useProgramManager(onSuccess?: () => void) {
       if (__DEV__) console.error('[useProgramManager] deleteSession failed:', error)
       return false
     }
-  }
+  }, [selectedSession])
 
-  /**
-   * Déplace une session vers un autre programme
-   * @param targetProg - Programme de destination
-   * @returns true si succès, false sinon
-   */
-  const moveSession = async (targetProg: Program): Promise<boolean> => {
+  const moveSession = useCallback(async (targetProg: Program): Promise<boolean> => {
     if (!selectedSession) return false
 
     try {
@@ -268,44 +210,32 @@ export function useProgramManager(onSuccess?: () => void) {
       if (__DEV__) console.error('[useProgramManager] moveSession failed:', error)
       return false
     }
-  }
+  }, [selectedSession, onSuccess])
 
-  /**
-   * Réinitialise le formulaire de programme
-   */
-  const resetProgramForm = () => {
+  const resetProgramForm = useCallback(() => {
     setProgramNameInput('')
     setIsRenamingProgram(false)
     setSelectedProgram(null)
-  }
+  }, [])
 
-  /**
-   * Réinitialise le formulaire de session
-   */
-  const resetSessionForm = () => {
+  const resetSessionForm = useCallback(() => {
     setSessionNameInput('')
     setIsRenamingSession(false)
     setTargetProgram(null)
     setSelectedSession(null)
-  }
+  }, [])
 
-  /**
-   * Prépare le formulaire pour renommer un programme
-   */
-  const prepareRenameProgram = (program: Program) => {
+  const prepareRenameProgram = useCallback((program: Program) => {
     setSelectedProgram(program)
     setProgramNameInput(program.name)
     setIsRenamingProgram(true)
-  }
+  }, [])
 
-  /**
-   * Prépare le formulaire pour renommer une session
-   */
-  const prepareRenameSession = (session: Session) => {
+  const prepareRenameSession = useCallback((session: Session) => {
     setSelectedSession(session)
     setSessionNameInput(session.name)
     setIsRenamingSession(true)
-  }
+  }, [])
 
   return {
     // Program states

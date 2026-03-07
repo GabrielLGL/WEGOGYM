@@ -8,9 +8,36 @@ jest.mock('expo-haptics', () => ({
   NotificationFeedbackType: { Success: 'Success', Error: 'Error' },
 }))
 
-jest.mock('../../model/index', () => ({
-  database: { write: jest.fn(), get: jest.fn() },
-}))
+jest.mock('../../model/index', () => {
+  const mockSessionObj = {
+    id: 'session-1',
+    name: 'Push Day',
+    _raw: { program_id: 'program-1' },
+  }
+  const mockProgramObj = {
+    id: 'program-1',
+    name: 'PPL Push',
+    _raw: {},
+  }
+
+  const mockCollections: Record<string, unknown[]> = {
+    sessions: [mockSessionObj],
+    programs: [mockProgramObj],
+    sets: [],
+    exercises: [],
+  }
+
+  return {
+    database: {
+      write: jest.fn(),
+      get: jest.fn().mockImplementation((collection: string) => ({
+        query: jest.fn().mockReturnValue({
+          fetch: jest.fn().mockResolvedValue(mockCollections[collection] ?? []),
+        }),
+      })),
+    },
+  }
+})
 
 import { StatsCalendarScreenBase } from '../StatsCalendarScreen'
 
@@ -20,6 +47,7 @@ const makeHistory = (id: string, date: number, overrides = {}) =>
     startTime: new Date(date),
     endTime: new Date(date + 3600000),
     deletedAt: null,
+    _raw: { session_id: 'session-1' },
     session: {
       fetch: jest.fn().mockResolvedValue({
         name: 'Push Day',

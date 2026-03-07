@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { Platform, ToastAndroid } from 'react-native'
 import { Q } from '@nozbe/watermelondb'
 import { database } from '../model/index'
@@ -72,7 +72,7 @@ export function useSessionManager(
    * @param exercise - Instance Exercise (pour éviter refetch)
    * @returns true si succès, false sinon
    */
-  const addExercise = async (
+  const addExercise = useCallback(async (
     exerciseId: string,
     sets: string,
     reps: string,
@@ -112,13 +112,9 @@ export function useSessionManager(
       if (__DEV__) console.error('[useSessionManager] addExercise failed:', error)
       return false
     }
-  }
+  }, [session.id, onSuccess])
 
-  /**
-   * Met à jour les targets d'un exercice de session
-   * @returns true si succès, false sinon
-   */
-  const updateTargets = async (): Promise<boolean> => {
+  const updateTargets = useCallback(async (): Promise<boolean> => {
     if (!selectedSessionExercise || !isFormValid) return false
 
     try {
@@ -151,21 +147,19 @@ export function useSessionManager(
       })
 
       if (onSuccess) onSuccess()
-      resetTargets()
+      setTargetSets('')
+      setTargetReps('')
+      setTargetWeight('')
+      setTargetRestTime('')
       setSelectedSessionExercise(null)
       return true
     } catch (error) {
       if (__DEV__) console.error('[useSessionManager] updateTargets failed:', error)
       return false
     }
-  }
+  }, [selectedSessionExercise, isFormValid, targetSets, targetReps, targetWeight, targetRestTime, onSuccess])
 
-  /**
-   * Supprime un exercice de la session
-   * @param sessionExercise - SessionExercise à supprimer
-   * @returns true si succès, false sinon
-   */
-  const removeExercise = async (sessionExercise: SessionExercise): Promise<boolean> => {
+  const removeExercise = useCallback(async (sessionExercise: SessionExercise): Promise<boolean> => {
     try {
       await database.write(async () => {
         await sessionExercise.destroyPermanently()
@@ -180,36 +174,24 @@ export function useSessionManager(
       if (__DEV__) console.error('[useSessionManager] removeExercise failed:', error)
       return false
     }
-  }
+  }, [t.common.removed])
 
-  /**
-   * Prépare le formulaire pour éditer les targets d'un exercice
-   * @param sessionExercise - SessionExercise à éditer
-   */
-  const prepareEditTargets = (sessionExercise: SessionExercise) => {
+  const prepareEditTargets = useCallback((sessionExercise: SessionExercise) => {
     setSelectedSessionExercise(sessionExercise)
     setTargetSets(sessionExercise.setsTarget?.toString() || '')
     setTargetReps(sessionExercise.repsTarget || '')
     setTargetWeight(sessionExercise.weightTarget?.toString() || '')
     setTargetRestTime(sessionExercise.restTime?.toString() || '')
-  }
+  }, [])
 
-  /**
-   * Réinitialise les inputs de target
-   */
-  const resetTargets = () => {
+  const resetTargets = useCallback(() => {
     setTargetSets('')
     setTargetReps('')
     setTargetWeight('')
     setTargetRestTime('')
-  }
+  }, [])
 
-  /**
-   * Réordonne les exercices d'une session selon l'ordre du tableau reçu
-   * @param items - Tableau de SessionExercise dans le nouvel ordre
-   * @returns true si succès, false sinon
-   */
-  const reorderExercises = async (items: SessionExercise[]): Promise<boolean> => {
+  const reorderExercises = useCallback(async (items: SessionExercise[]): Promise<boolean> => {
     try {
       await database.write(async () => {
         await database.batch(
@@ -225,15 +207,9 @@ export function useSessionManager(
       if (__DEV__) console.error('[useSessionManager] reorderExercises failed:', error)
       return false
     }
-  }
+  }, [])
 
-  /**
-   * Groupe des exercices en superset ou circuit
-   * @param items - SessionExercises à grouper (minimum 2)
-   * @param type - 'superset' ou 'circuit'
-   * @returns true si succès
-   */
-  const groupExercises = async (
+  const groupExercises = useCallback(async (
     items: SessionExercise[],
     type: 'superset' | 'circuit'
   ): Promise<boolean> => {
@@ -260,16 +236,9 @@ export function useSessionManager(
       if (__DEV__) console.error('[useSessionManager] groupExercises failed:', error)
       return false
     }
-  }
+  }, [onSuccess])
 
-  /**
-   * Dissocie un exercice de son superset/circuit
-   * Si le groupe restant n'a plus qu'1 exercice, dissocie tout le groupe
-   * @param sessionExercise - L'exercice à dissocier
-   * @param allSessionExercises - Tous les exercices de la session (pour trouver les voisins)
-   * @returns true si succès
-   */
-  const ungroupExercise = async (
+  const ungroupExercise = useCallback(async (
     sessionExercise: SessionExercise,
     allSessionExercises: SessionExercise[]
   ): Promise<boolean> => {
@@ -318,7 +287,7 @@ export function useSessionManager(
       if (__DEV__) console.error('[useSessionManager] ungroupExercise failed:', error)
       return false
     }
-  }
+  }, [onSuccess])
 
   return {
     // Target inputs states
