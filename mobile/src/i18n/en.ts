@@ -548,7 +548,11 @@ export const en: typeof fr = {
   },
 
   assistantPreview: {
+    titleProgram: 'Generated program',
+    titleSession: 'Generated session',
+    nameLabel: 'Name',
     programNamePlaceholder: 'Program name',
+    namePlaceholder: 'Program or session name',
     session: 'session',
     sessions: 'sessions',
     exercise: 'exercise',
@@ -558,6 +562,18 @@ export const en: typeof fr = {
     rest: 'rest',
     modify: 'Modify',
     validate: 'Validate',
+  },
+
+  exerciseTargetInputs: {
+    sets: 'Sets',
+    weight: 'Weight (kg)',
+    reps: 'Reps',
+    modeFixed: 'Fixed',
+    modeRange: 'Range',
+  },
+
+  exercisePickerModal: {
+    title: 'Library',
   },
 
   statsDuration: {

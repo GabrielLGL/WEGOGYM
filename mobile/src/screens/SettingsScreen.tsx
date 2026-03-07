@@ -165,7 +165,7 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
       const filePath = await exportAllData()
       await Sharing.shareAsync(filePath, {
         mimeType: 'application/json',
-        dialogTitle: 'Exporter mes données Kore',
+        dialogTitle: t.settings.data.exportSheetTitle,
       })
     } catch (error) {
       if (__DEV__) console.error('Export share failed:', error)
@@ -591,7 +591,7 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
                 activeOpacity={0.7}
               >
                 <Text style={[styles.languageBtnText, language === lang && styles.languageBtnTextActive]}>
-                  {lang === 'fr' ? 'Français' : 'English'}
+                  {lang === 'fr' ? t.onboarding.language.fr : t.onboarding.language.en}
                 </Text>
               </TouchableOpacity>
             ))}

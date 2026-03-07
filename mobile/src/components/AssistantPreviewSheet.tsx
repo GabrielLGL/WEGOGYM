@@ -4,13 +4,14 @@ import { BottomSheet } from './BottomSheet'
 import { useHaptics } from '../hooks/useHaptics'
 import { spacing, fontSize, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import type { GeneratedPlan, GeneratedExercise } from '../services/ai/types'
 
-function formatExerciseSets(ex: GeneratedExercise): string {
+function formatExerciseSets(ex: GeneratedExercise, setsLabel: string): string {
   if (ex.setsTarget > 0 && ex.repsTarget) {
     const weight = ex.weightTarget > 0 ? ` · ~${ex.weightTarget} kg` : ''
-    return `${ex.setsTarget} séries × ${ex.repsTarget}${weight}`
+    return `${ex.setsTarget} ${setsLabel} × ${ex.repsTarget}${weight}`
   }
   if (ex.repsTarget) {
     return `× ${ex.repsTarget}`
@@ -40,6 +41,7 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
   fallbackNotice,
 }) => {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const [editableName, setEditableName] = useState('')
@@ -65,13 +67,13 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
     onModify()
   }
 
-  const title = mode === 'program' ? 'Programme généré' : 'Séance générée'
+  const title = mode === 'program' ? t.assistantPreview.titleProgram : t.assistantPreview.titleSession
 
   const totalExercises = plan
     ? plan.sessions.reduce((acc, s) => acc + s.exercises.length, 0)
     : 0
   const summary = plan
-    ? `${plan.sessions.length} séance${plan.sessions.length > 1 ? 's' : ''} · ${totalExercises} exercice${totalExercises > 1 ? 's' : ''}`
+    ? `${plan.sessions.length} ${plan.sessions.length > 1 ? t.assistantPreview.sessions : t.assistantPreview.session} · ${totalExercises} ${totalExercises > 1 ? t.assistantPreview.exercises : t.assistantPreview.exercise}`
     : ''
 
   return (
@@ -79,16 +81,16 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Génération en cours...</Text>
+          <Text style={styles.loadingText}>{t.assistant.generating}</Text>
         </View>
       ) : plan ? (
         <>
-          <Text style={styles.label}>Nom</Text>
+          <Text style={styles.label}>{t.assistantPreview.nameLabel}</Text>
           <TextInput
             style={styles.nameInput}
             value={editableName}
             onChangeText={setEditableName}
-            placeholder="Nom du programme ou de la séance"
+            placeholder={t.assistantPreview.namePlaceholder}
             placeholderTextColor={colors.textSecondary}
           />
           <Text style={styles.summary}>{summary}</Text>
@@ -98,7 +100,7 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
               <View key={`${si}-${session.name}`} style={styles.sessionCard}>
                 <Text style={styles.sessionName}>{session.name}</Text>
                 {session.exercises.map((ex, ei) => {
-                  const setsInfo = formatExerciseSets(ex)
+                  const setsInfo = formatExerciseSets(ex, t.assistantPreview.setsPlural)
                   return (
                     <View key={`${ei}-${ex.exerciseName}`} style={styles.exerciseRow}>
                       <Text style={styles.exerciseName} numberOfLines={1}>
@@ -118,7 +120,7 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
 
           <View style={styles.buttonsRow}>
             <TouchableOpacity style={styles.modifyButton} onPress={handleModify}>
-              <Text style={styles.modifyButtonText}>Modifier</Text>
+              <Text style={styles.modifyButtonText}>{t.assistantPreview.modify}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.validateButton, isSaving && styles.disabledButton]}
@@ -128,7 +130,7 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
               {isSaving ? (
                 <ActivityIndicator size="small" color={colors.text} />
               ) : (
-                <Text style={styles.validateButtonText}>Valider</Text>
+                <Text style={styles.validateButtonText}>{t.assistantPreview.validate}</Text>
               )}
             </TouchableOpacity>
           </View>

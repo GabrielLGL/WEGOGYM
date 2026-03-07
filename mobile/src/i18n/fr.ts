@@ -549,7 +549,11 @@ export const fr = {
   },
 
   assistantPreview: {
+    titleProgram: 'Programme généré',
+    titleSession: 'Séance générée',
+    nameLabel: 'Nom',
     programNamePlaceholder: 'Nom du programme',
+    namePlaceholder: 'Nom du programme ou de la séance',
     session: 'séance',
     sessions: 'séances',
     exercise: 'exercice',
@@ -559,6 +563,18 @@ export const fr = {
     rest: 'repos',
     modify: 'Modifier',
     validate: 'Valider',
+  },
+
+  exerciseTargetInputs: {
+    sets: 'Séries',
+    weight: 'Poids (kg)',
+    reps: 'Reps',
+    modeFixed: 'Fixe',
+    modeRange: 'Plage',
+  },
+
+  exercisePickerModal: {
+    title: 'Bibliothèque',
   },
 
   statsDuration: {

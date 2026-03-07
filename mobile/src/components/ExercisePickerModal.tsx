@@ -12,6 +12,7 @@ import { filterExercises, parseIntegerInput, parseNumericInput } from '../model/
 import { validateWorkoutInput } from '../model/utils/validationHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 interface ExercisePickerModalProps {
@@ -63,6 +64,7 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
   initialWeight = '',
 }) => {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const [filterMuscle, setFilterMuscle] = useState<string | null>(null)
   const [filterEquipment, setFilterEquipment] = useState<string | null>(null)
@@ -129,7 +131,7 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
           <View style={styles.absoluteOverlay} />
         </TouchableWithoutFeedback>
         <View style={styles.customModalContent}>
-          <Text style={styles.modalTitle}>Bibliothèque</Text>
+          <Text style={styles.modalTitle}>{t.exercisePickerModal.title}</Text>
 
           {/* Filtres */}
           <View style={styles.filterSection}>
@@ -137,14 +139,14 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
               items={MUSCLES_LIST}
               selectedValue={filterMuscle}
               onChange={setFilterMuscle}
-              noneLabel="Tous muscles"
+              noneLabel={t.exercises.allMuscles}
               style={styles.filterRow}
             />
             <ChipSelector
               items={EQUIPMENT_LIST}
               selectedValue={filterEquipment}
               onChange={setFilterEquipment}
-              noneLabel="Tout équipement"
+              noneLabel={t.exercises.allEquipment}
               style={[styles.filterRow, { marginTop: spacing.sm }]}
             />
           </View>
@@ -197,14 +199,14 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
           {/* Boutons */}
           <View style={styles.modalButtons}>
             <TouchableOpacity onPress={onClose} style={styles.cancelBtn}>
-              <Text style={styles.btnText}>Annuler</Text>
+              <Text style={styles.btnText}>{t.common.cancel}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleAdd}
               style={[styles.confirmBtn, !isAddValid && { opacity: 0.3 }]}
               disabled={!isAddValid}
             >
-              <Text style={styles.btnText}>Ajouter</Text>
+              <Text style={styles.btnText}>{t.common.add}</Text>
             </TouchableOpacity>
           </View>
         </View>

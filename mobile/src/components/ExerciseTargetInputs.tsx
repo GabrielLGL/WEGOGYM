@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 interface ExerciseTargetInputsProps {
@@ -60,6 +61,7 @@ export const ExerciseTargetInputs: React.FC<ExerciseTargetInputsProps> = ({
   autoFocus = false,
 }) => {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
 
   // --- Reps toggle state (local) ---
@@ -124,7 +126,7 @@ export const ExerciseTargetInputs: React.FC<ExerciseTargetInputsProps> = ({
       {/* Ligne 1 : Séries + Poids */}
       <View style={styles.row}>
         <View style={styles.inputWrapper}>
-          {showLabels && <Text style={styles.label}>Séries</Text>}
+          {showLabels && <Text style={styles.label}>{t.exerciseTargetInputs.sets}</Text>}
           <TextInput
             ref={setsInputRef}
             testID="input-sets"
@@ -137,7 +139,7 @@ export const ExerciseTargetInputs: React.FC<ExerciseTargetInputsProps> = ({
           />
         </View>
         <View style={styles.inputWrapperLast}>
-          {showLabels && <Text style={styles.label}>Poids (kg)</Text>}
+          {showLabels && <Text style={styles.label}>{t.exerciseTargetInputs.weight}</Text>}
           <TextInput
             ref={weightInputRef}
             testID="input-weight"
@@ -154,19 +156,19 @@ export const ExerciseTargetInputs: React.FC<ExerciseTargetInputsProps> = ({
       <View>
         {showLabels && (
           <View style={styles.repsHeader}>
-            <Text style={styles.label}>Reps</Text>
+            <Text style={styles.label}>{t.exerciseTargetInputs.reps}</Text>
             <View style={styles.repsToggle}>
               <TouchableOpacity
                 style={[styles.modeBtn, repsMode === 'fixed' && styles.modeBtnActive]}
                 onPress={switchToFixed}
               >
-                <Text style={[styles.modeBtnText, repsMode === 'fixed' && styles.modeBtnTextActive]}>Fixe</Text>
+                <Text style={[styles.modeBtnText, repsMode === 'fixed' && styles.modeBtnTextActive]}>{t.exerciseTargetInputs.modeFixed}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modeBtn, repsMode === 'range' && styles.modeBtnActive]}
                 onPress={switchToRange}
               >
-                <Text style={[styles.modeBtnText, repsMode === 'range' && styles.modeBtnTextActive]}>Plage</Text>
+                <Text style={[styles.modeBtnText, repsMode === 'range' && styles.modeBtnTextActive]}>{t.exerciseTargetInputs.modeRange}</Text>
               </TouchableOpacity>
             </View>
           </View>
