@@ -1,6 +1,6 @@
 # Tests manquants — 3 screens sans couverture
 
-## Statut : En attente
+## Statut : ✅ Résolu — 20260307-1700
 
 ## Contexte
 La couverture est a ~80.71% (1 572 tests, 93 suites). Trois screens n'ont pas de tests :
@@ -32,3 +32,6 @@ La couverture est a ~80.71% (1 572 tests, 93 suites). Trois screens n'ont pas de
 
 ## Priorite : IMPORTANT
 Augmente la confiance avant la soumission Play Store.
+
+## Résolution
+Rapport do : docs/bmad/do/20260307-1700-test-coverage-screens.md
