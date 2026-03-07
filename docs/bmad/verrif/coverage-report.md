@@ -1,42 +1,47 @@
-# Coverage Report — 2026-02-19
-
-## Avant / Après (P1+P2 → P3+P4)
-
-| Métrique   | Avant (P1+P2) | Après (P3+P4) | Delta  |
-|------------|---------------|---------------|--------|
-| Statements | 30.07%        | 39.63%        | +9.6%  |
-| Branches   | 27.20%        | 33.80%        | +6.6%  |
-| Functions  | 26.80%        | 35.55%        | +8.8%  |
-| Lines      | 30.43%        | 40.27%        | +9.8%  |
-
-## Depuis l'état initial (avant P1)
-
-| Métrique   | Avant tout | Après P3+P4 | Delta total |
-|------------|------------|-------------|-------------|
-| Statements | 11.64%     | 39.63%      | +28.0%      |
-| Branches   | 14.03%     | 33.80%      | +19.8%      |
-| Functions  | 12.73%     | 35.55%      | +22.8%      |
-| Lines      | 11.97%     | 40.27%      | +28.3%      |
 
 ---
 
-## Par priorité
+## Run P8 — 2026-03-07 (session test-coverage #2)
 
-### P1 — Hooks critiques (commit c0eb43c)
+| Métrique   | Avant (P7) | Après (P8) | Delta  |
+|------------|------------|------------|--------|
+| Statements | 75.69%     | 77.00%     | **+1.31%** |
+| Branches   | 65.93%     | 67.80%     | **+1.87%** |
+| Functions  | 70.61%     | 72.00%     | **+1.39%** |
+| Lines      | 77.74%     | 79.01%     | **+1.27%** |
 
-| Fichier               | Avant | Après | Tests ajoutés |
-|-----------------------|-------|-------|---------------|
-| `useProgramManager.ts` | 0%   | 100%  | 34            |
-| `useSessionManager.ts` | 0%   | 100%  | 23            |
-| `useWorkoutState.ts`   | 0%   | 100%  | 23            |
+**1654 → 1687 tests (+33), 102 → 106 suites (+4)** — tous passent.
 
-**80 nouveaux tests** — 3 fichiers créés dans `mobile/src/hooks/__tests__/`
+### Fichiers ajoutés
 
-### P2 — Utils & helpers (commit c386d11)
+| Fichier | Tests ajoutés |
+|---------|---------------|
+| `model/utils/__tests__/buildRecapExercises.test.ts` | 6 |
+| `hooks/__tests__/useSessionManager-superset.test.ts` | 10 |
+| `hooks/__tests__/useCoachMarks.test.ts` | 7 |
+| `components/__tests__/SessionExerciseItem-extended.test.tsx` | 13 |
 
-| Fichier               | Avant | Après | Tests ajoutés |
-|-----------------------|-------|-------|---------------|
-| `validationHelpers.ts` | ~75% | 97%   | 12            |
+### Couverture par fichier — avant/après
+
+| Fichier | Avant | Après |
+|---------|-------|-------|
+| exerciseStatsUtils.ts | 79.83% stmts | **97.47%** |
+| useSessionManager.ts | 68.96% stmts | **100%** |
+| useCoachMarks.ts | 37.50% stmts | **100%** |
+| SessionExerciseItem.tsx | 57.14% stmts | **85.71%** |
+ corrigés**
+
+### Couverture par fichier clé — état final P7
+
+| Fichier | Avant | Après |
+|---------|-------|-------|
+| `workoutSetUtils.ts` | 34.48% | **100%** |
+| `validationHelpers.ts` | 89.09% | **100%** |
+| `exportHelpers.ts` | 60% | **96.77%** |
+| `workoutSessionUtils.ts` | 81.48% | **100%** |
+| `exerciseCatalog.ts` | 0% | **100%** |
+| `timerBeep.ts` | 0% | **100%** |
+7%   | 12            |
 | `databaseHelpers.ts`   | ~40% | 63%   | 22            |
 
 **34 nouveaux tests** — 2 fichiers dans `mobile/src/model/utils/__tests__/`
