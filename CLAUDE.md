@@ -11,13 +11,13 @@
 - **Core:** React Native (Expo 52) + TypeScript + Fabric (New Arch).
 - **State:** WatermelonDB (SQLite/JSI). **NO Redux/Context for data.**
 - **Nav:** React Navigation 7 (Native Stack only — no Bottom Tabs). HomeScreen dashboard is the navigation hub.
-- **Target:** Android Priority. Dark Mode Only (`#121212` bg, `#1C1C1E` cards).
+- **Target:** Android Priority. Dark + Light mode (toggle dans Settings).
 - **Lang:** App language is French (fr-FR).
 
 ## 2. Architecture & Data Flow
 - **Pattern:** Offline-first, Reactive.
 - **Data Access:** MUST use `withObservables` HOC from `@nozbe/with-observables`.
-- **Schema:** v29 (`mobile/src/model/schema.ts`).
+- **Schema:** v32 (`mobile/src/model/schema.ts`).
 - **Models:**
   - `Program` (1:N) `Session` (1:N) `SessionExercise`
   - `History` (Soft-delete `deleted_at`) -> `Set`
@@ -44,7 +44,7 @@ mobile/src/
 │   ├── utils/            # Database & validation utilities
 │   │   ├── databaseHelpers.ts    # getNextPosition, filterExercises, etc.
 │   │   └── validationHelpers.ts  # validateWorkoutInput, isValidText, etc.
-│   ├── schema.ts         # Database schema v17
+│   ├── schema.ts         # Database schema v32
 │   ├── index.ts          # Database initialization
 │   └── constants.ts      # MUSCLES_LIST, EQUIPMENT_LIST
 ├── navigation/           # React Navigation setup
@@ -186,7 +186,16 @@ Types: feat | fix | refactor | test | docs | chore | style | perf
 - Ne jamais mélanger feat et fix dans le même commit
 - Message en anglais, description concise
 
-### 5.2 Git Safety — Travail parallèle
+### 5.2 Git Safety
+
+#### Branching Strategy
+- **`main`** = branche stable, releases uniquement
+- **`develop`** = branche de travail par défaut
+- Features sur `feature/*` depuis `develop`
+- **Ne JAMAIS pusher directement sur `main`**
+- Releases : merge `develop` → `main` + tag (ex: `v0.1.0-mvp`)
+
+#### Travail parallèle
 **Plusieurs Claude Code peuvent travailler en même temps. Règles STRICTES :**
 - **JAMAIS** `git add .` ou `git add -A` ou `git add --all`
 - `git add` UNIQUEMENT les fichiers que TU as modifiés + ton rapport

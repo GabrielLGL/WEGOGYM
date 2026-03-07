@@ -56,8 +56,8 @@ Tu valides chaque phase avant de passer à la suivante. Les stories sont sauvega
 ### `/backup [nom]`
 Crée une branche de sauvegarde locale avant un gros changement. Ne push pas, ne change pas de branche.
 ```
-/backup                    → backup/main-20260219-1430
-/backup avant-refactor-ia  → backup/main-avant-refactor-ia-20260219
+/backup                    → backup/develop-20260219-1430
+/backup avant-refactor-ia  → backup/develop-avant-refactor-ia-20260219
 ```
 
 ### `/status`
