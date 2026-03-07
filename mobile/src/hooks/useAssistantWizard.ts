@@ -117,6 +117,8 @@ export function useAssistantWizard({
 }: UseAssistantWizardOptions): UseAssistantWizardResult {
   const haptics = useHaptics()
   const { t } = useLanguage()
+  const isMountedRef = useRef(true)
+  useEffect(() => () => { isMountedRef.current = false }, [])
 
   const makeEmptyForm = useCallback((): Partial<AIFormData> => ({
     equipment: [],
@@ -377,6 +379,7 @@ export function useAssistantWizard({
         level: levelMap[user?.userLevel ?? ''] ?? 'intermédiaire',
       }
       const result = await generatePlan(formWithLevel, user)
+      if (!isMountedRef.current) return
       let fallbackNotice: string | undefined
       if (result.usedFallback) {
         const providerName = PROVIDER_LABELS[result.fallbackReason ?? ''] ?? result.fallbackReason ?? 'cloud'
@@ -392,10 +395,12 @@ export function useAssistantWizard({
       })
       void fallbackNotice
     } catch {
-      setErrorAlertMessage(t.assistant.errorMessage)
-      setErrorAlertVisible(true)
+      if (isMountedRef.current) {
+        setErrorAlertMessage(t.assistant.errorMessage)
+        setErrorAlertVisible(true)
+      }
     } finally {
-      setIsGenerating(false)
+      if (isMountedRef.current) setIsGenerating(false)
     }
   }, [user, haptics, navigation, contentAnim, makeEmptyForm, t])
 

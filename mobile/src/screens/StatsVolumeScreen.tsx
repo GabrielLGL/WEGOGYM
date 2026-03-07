@@ -104,7 +104,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   const [periodKey, setPeriodKey] = useState<PeriodKey>(PERIOD_KEYS[0])
   const period: StatsPeriod = periodKey
 
-  const [muscleLabel, setMuscleLabel] = useState<string>('Total')
+  const [muscleLabel, setMuscleLabel] = useState<string>(t.statsVolume.total)
 
   const availableMuscles = useMemo(() => {
     const trainedExerciseIds = new Set(sets.map(s => s.exercise.id))

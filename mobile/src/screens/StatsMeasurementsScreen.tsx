@@ -128,8 +128,8 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
       haptics.onSuccess()
       setForm(EMPTY_FORM)
       addSheet.close()
-    } catch {
-      // Erreur DB silencieuse
+    } catch (e) {
+      if (__DEV__) console.error('[StatsMeasurementsScreen] handleSave:', e)
     }
   }
 
@@ -140,8 +140,8 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
         await deleteTarget.destroyPermanently()
       })
       haptics.onDelete()
-    } catch {
-      // Erreur DB silencieuse
+    } catch (e) {
+      if (__DEV__) console.error('[StatsMeasurementsScreen] handleDelete:', e)
     } finally {
       setDeleteTarget(null)
     }

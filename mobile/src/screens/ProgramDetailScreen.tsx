@@ -181,11 +181,11 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
             }, 300)
           }}
         >
-          <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} />
+          <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} />
           <Text style={styles.sheetOptionText}>{t.programDetail.renameSession}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateSession}>
-          <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} />
+          <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} />
           <Text style={styles.sheetOptionText}>{t.programDetail.duplicateSession}</Text>
         </TouchableOpacity>
         {programs.length > 1 && (
@@ -212,7 +212,7 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
             setIsAlertVisible(true)
           }}
         >
-          <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: 20, width: 30 }} />
+          <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.lg, width: 30 }} />
           <Text style={[styles.sheetOptionText, { color: colors.danger }]}>{t.programDetail.deleteSession}</Text>
         </TouchableOpacity>
       </BottomSheet>
@@ -307,19 +307,19 @@ function useStyles(colors: ThemeColors) {
     sectionLabel: {
       color: colors.textSecondary,
       fontSize: fontSize.xs,
-      marginTop: 20,
-      marginBottom: 10,
+      marginTop: spacing.lg,
+      marginBottom: spacing.sm,
       fontWeight: 'bold',
       textTransform: 'uppercase',
-      marginLeft: 5,
+      marginLeft: spacing.xs,
     },
-    moveRow: { flexDirection: 'row', marginBottom: 10 },
+    moveRow: { flexDirection: 'row', marginBottom: spacing.sm },
     moveChip: {
       backgroundColor: colors.cardSecondary,
-      paddingHorizontal: 15,
-      paddingVertical: 10,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
       borderRadius: borderRadius.sm,
-      marginRight: 10,
+      marginRight: spacing.sm,
       borderWidth: 1,
       borderColor: colors.border,
     },

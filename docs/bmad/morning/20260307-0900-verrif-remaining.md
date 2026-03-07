@@ -35,4 +35,7 @@ Le dernier run verrif (20260307-0051) a laisse 7 problemes non corriges (1 warni
 - Prochain /verrif montre 0 problemes restants
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260307-1000
+
+## Résolution
+Rapport do : docs/bmad/do/20260307-1000-fix-verrif-remaining.md

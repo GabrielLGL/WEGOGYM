@@ -125,6 +125,9 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     volumeGain: 0,
   })
 
+  const isMountedRef = useRef(true)
+  useEffect(() => () => { isMountedRef.current = false }, [])
+
   const haptics = useHaptics()
   const footerSlide = useKeyboardAnimation(120)
   const { formattedTime } = useWorkoutTimer(startTimestampRef.current)
@@ -242,6 +245,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
             Q.where('start_time', Q.gte(weekStart)),
           )
           .fetchCount()
+        if (!isMountedRef.current) return
 
         const streakResult = updateStreak(
           user.lastWorkoutWeek,
@@ -270,6 +274,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         const distinctExerciseCount = (distinctResult[0] as Record<string, number>)?.count ?? 0
 
         const existingBadgeRecords = await database.get<UserBadge>('user_badges').query().fetch()
+        if (!isMountedRef.current) return
         const existingBadgeIds = existingBadgeRecords.map(b => b.badgeId)
 
         const badgeParams: CheckBadgesParams = {
@@ -303,6 +308,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
             })
           }
         })
+        if (!isMountedRef.current) return
 
         setSessionXPGained(sessionXP)
         setNewLevelResult(newLevel)
@@ -329,6 +335,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     try {
       const recap = await buildRecapExercises(sessionExercises, validatedSets, historyId)
       const prevVol = await getLastSessionVolume(session.id, historyId)
+      if (!isMountedRef.current) return
       setRecapExercises(recap)
       setRecapComparison({
         prevVolume: prevVol,

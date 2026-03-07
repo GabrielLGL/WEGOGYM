@@ -30,3 +30,4 @@ aucune
 ✅ Résolu — 20260307-1800
 
 ## Commit
+8fd4286 chore(eas): configure submit.production.android for Play Store

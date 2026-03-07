@@ -111,7 +111,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
         for (const e of exos) map[e.id] = e
         setExercises(map)
       })
-      .catch(() => { /* DB error — exercises will show as '—' */ })
+      .catch((e) => { if (__DEV__) console.error('[HistoryDetailScreen] fetchExercises:', e) })
   }, [sets])
 
   // Group sets by exercise
@@ -210,8 +210,8 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
       }
 
       haptics.onSuccess()
-    } catch {
-      // DB error — don't crash UI
+    } catch (e) {
+      if (__DEV__) console.error('[HistoryDetailScreen] handleSave:', e)
     }
   }, [sets, edits, noteText, history, haptics])
 
@@ -230,8 +230,8 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
         setOrder: nextOrder,
       })
       haptics.onPress()
-    } catch {
-      // DB error
+    } catch (e) {
+      if (__DEV__) console.error('[HistoryDetailScreen] handleAddSet:', e)
     }
   }, [history.id, haptics])
 
@@ -246,8 +246,8 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
       // Recalculate PRs OUTSIDE of write
       await recalculateSetPrs(exerciseId)
       haptics.onDelete()
-    } catch {
-      // DB error
+    } catch (e) {
+      if (__DEV__) console.error('[HistoryDetailScreen] handleDeleteSet:', e)
     } finally {
       setDeleteSetTarget(null)
     }
@@ -258,8 +258,8 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
       await softDeleteHistory(history.id)
       haptics.onDelete()
       navigation.goBack()
-    } catch {
-      // DB error
+    } catch (e) {
+      if (__DEV__) console.error('[HistoryDetailScreen] handleDeleteWorkout:', e)
     } finally {
       setShowDeleteWorkout(false)
     }

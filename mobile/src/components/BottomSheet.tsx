@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Easing, Dimensions, BackHandler } from 'react-native'
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Easing, BackHandler, useWindowDimensions } from 'react-native'
 import { Portal } from '@gorhom/portal'
 import { borderRadius, spacing, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
-
-const screenHeight = Dimensions.get('window').height
 
 interface BottomSheetProps {
   visible: boolean
@@ -52,6 +50,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 }) => {
   const { colors, neuShadow } = useTheme()
   const styles = useStyles(colors)
+  const { height: screenHeight } = useWindowDimensions()
   const [showContent, setShowContent] = useState(visible)
   const slideAnim = useRef(new Animated.Value(screenHeight)).current
   const fadeAnim = useRef(new Animated.Value(0)).current

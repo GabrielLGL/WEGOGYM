@@ -198,7 +198,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
             }}
             keyExtractor={i => i.id}
             renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: 20 }}
+            contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: spacing.lg }}
           />
         </View>
 
@@ -235,7 +235,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
               setIsProgramModalVisible(true)
             }}
           >
-            <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} />
+            <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} />
             <Text style={styles.sheetOptionText}>{t.programs.self}</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -246,7 +246,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
               navigation.navigate('Assistant')
             }}
           >
-            <Ionicons name="hardware-chip-outline" size={20} color={colors.primary} style={{ marginRight: 20, width: 30 }} />
+            <Ionicons name="hardware-chip-outline" size={20} color={colors.primary} style={{ marginRight: spacing.lg, width: 30 }} />
             <Text style={styles.sheetOptionText}>{t.programs.automatic}</Text>
           </TouchableOpacity>
         </BottomSheet>
@@ -284,13 +284,13 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           title={selectedProgram?.name}
         >
           <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedProgram) prepareRenameProgram(selectedProgram); setIsOptionsVisible(false); if (renameTimerRef.current) clearTimeout(renameTimerRef.current); renameTimerRef.current = setTimeout(() => { setIsProgramModalVisible(true); renameTimerRef.current = null }, 300) }}>
-            <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.rename}</Text>
+            <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.rename}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateProgram}>
-            <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: 20, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.duplicate}</Text>
+            <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.duplicate}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); setAlertConfig({ title: `${t.programs.deleteTitle} ${selectedProgram?.name} ?`, message: t.programs.deleteMessage, onConfirm: async () => { await deleteProgram() } }); setIsAlertVisible(true); }}>
-            <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: 20, width: 30 }} /><Text style={[styles.sheetOptionText, { color: colors.danger }]}>{t.programs.delete}</Text>
+            <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={[styles.sheetOptionText, { color: colors.danger }]}>{t.programs.delete}</Text>
           </TouchableOpacity>
         </BottomSheet>
 
@@ -394,19 +394,19 @@ function useStyles(colors: ThemeColors) {
     sectionLabel: {
       color: colors.textSecondary,
       fontSize: fontSize.xs,
-      marginTop: 20,
-      marginBottom: 10,
+      marginTop: spacing.lg,
+      marginBottom: spacing.sm,
       fontWeight: 'bold',
       textTransform: 'uppercase',
-      marginLeft: 5,
+      marginLeft: spacing.xs,
     },
-    moveRow: { flexDirection: 'row', marginBottom: 10 },
+    moveRow: { flexDirection: 'row', marginBottom: spacing.sm },
     moveChip: {
       backgroundColor: colors.cardSecondary,
-      paddingHorizontal: 15,
-      paddingVertical: 10,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
       borderRadius: borderRadius.sm,
-      marginRight: 10,
+      marginRight: spacing.sm,
       borderWidth: 1,
       borderColor: colors.border,
     },
