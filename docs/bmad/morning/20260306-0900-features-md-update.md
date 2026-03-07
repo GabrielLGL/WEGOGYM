@@ -1,9 +1,13 @@
 # Mettre a jour FEATURES.md — cocher items MVP termines
 
-## Statut : En attente
+## Statut : 🟡 Partiellement résolu — 20260307
 
 ## Contexte
 Le fichier `FEATURES.md` liste toutes les features prevues. Les items MVP sont termines mais pas encore coches dans le fichier.
+
+### Avancement
+- ~6/10 items déjà cochés
+- **Reste à cocher** : Timer par exercice, Notes par exercice, Rappels/notifications, Play Store (implémentés mais non cochés dans le fichier)
 
 ## Actions
 1. Lire `FEATURES.md`

@@ -1,9 +1,14 @@
 # Configurer submit.production dans eas.json
 
-## Statut : En attente
+## Statut : 🟡 Partiellement résolu — 20260307
 
 ## Contexte
 `eas.json` a besoin d'une section `submit.production` pour automatiser la soumission au Play Store via `eas submit`.
+
+### Avancement
+- `submit.production: {}` existe déjà dans `eas.json` (squelette vide)
+- **Reste** : ajouter le bloc `android` (serviceAccountKeyPath, track, releaseStatus)
+- **Pré-requis** : créer/obtenir le Google service account key
 
 ## Actions
 1. Lire `eas.json`
