@@ -399,6 +399,14 @@ export const fr = {
     sessionNote: 'Note séance',
     addSessionNote: 'Ajouter une note',
     sessionNotePlaceholder: 'Grip, tempo, sensation, ajustement...',
+    targetLabel: 'Objectif',
+    reps: 'reps',
+    lastPerfLabel: 'Dernière : Moy.',
+    lastPerfOn: 'sur',
+    lastPerfSet: 'série',
+    lastPerfSets: 'séries',
+    suggestionLabel: 'Suggestion',
+    noSetsMessage: 'Aucune série définie.',
   },
 
   programDetail: {

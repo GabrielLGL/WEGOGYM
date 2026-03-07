@@ -398,6 +398,14 @@ export const en: typeof fr = {
     sessionNote: 'Session note',
     addSessionNote: 'Add a note',
     sessionNotePlaceholder: 'Grip, tempo, feel, adjustment...',
+    targetLabel: 'Target',
+    reps: 'reps',
+    lastPerfLabel: 'Last: Avg.',
+    lastPerfOn: 'over',
+    lastPerfSet: 'set',
+    lastPerfSets: 'sets',
+    suggestionLabel: 'Suggestion',
+    noSetsMessage: 'No sets defined.',
   },
 
   programDetail: {

@@ -300,8 +300,11 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           title={alertConfig.title}
           message={alertConfig.message}
           onConfirm={async () => {
-            await alertConfig.onConfirm()
-            setIsAlertVisible(false)
+            try {
+              await alertConfig.onConfirm()
+            } finally {
+              setIsAlertVisible(false)
+            }
           }}
           onCancel={() => setIsAlertVisible(false)}
           confirmText={t.common.delete}

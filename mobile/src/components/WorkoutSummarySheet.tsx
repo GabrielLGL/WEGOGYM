@@ -60,7 +60,7 @@ function getMotivationMessage(totalPrs: number, volumeGain: number, colors: Them
 }
 
 function formatWeight(w: number): string {
-  return w % 1 === 0 ? `${w}` : `${w}`
+  return w % 1 === 0 ? `${w}` : `${w.toFixed(1)}`
 }
 
 export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({

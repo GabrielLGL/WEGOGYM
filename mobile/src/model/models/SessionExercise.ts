@@ -15,8 +15,8 @@ export default class SessionExercise extends Model {
   @field('sets_target_max') setsTargetMax?: number
   @text('reps_target') repsTarget?: string
   @field('weight_target') weightTarget?: number
-  @field('superset_id') supersetId?: string | null
-  @field('superset_type') supersetType?: string | null
+  @text('superset_id') supersetId?: string | null
+  @text('superset_type') supersetType?: string | null
   @field('superset_position') supersetPosition?: number | null
   @text('notes') notes?: string
   @field('rest_time') restTime?: number | null

@@ -298,21 +298,21 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
       )}
       {sessionExercise.setsTarget != null && (
         <Text style={styles.target}>
-          Objectif : {sessionExercise.setsTarget}×{sessionExercise.repsTarget ?? '?'} reps
+          {t.workout.targetLabel} : {sessionExercise.setsTarget}×{sessionExercise.repsTarget ?? '?'} {t.workout.reps}
         </Text>
       )}
       {lastPerformance && (
         <Text style={styles.lastPerfText}>
-          Dernière : Moy. {lastPerformance.avgWeight} kg × {lastPerformance.avgReps} sur {lastPerformance.setsCount} série{lastPerformance.setsCount > 1 ? 's' : ''}
+          {t.workout.lastPerfLabel} {lastPerformance.avgWeight} kg × {lastPerformance.avgReps} {t.workout.lastPerfOn} {lastPerformance.setsCount} {lastPerformance.setsCount > 1 ? t.workout.lastPerfSets : t.workout.lastPerfSet}
         </Text>
       )}
       {suggestion && (
         <Text style={styles.suggestionText}>
-          Suggestion : {suggestion.label}
+          {t.workout.suggestionLabel} : {suggestion.label}
         </Text>
       )}
       {setsCount === 0 ? (
-        <Text style={styles.noSetsText}>Aucune série définie.</Text>
+        <Text style={styles.noSetsText}>{t.workout.noSetsMessage}</Text>
       ) : (
         setOrders.map(setOrder => {
           const key = `${sessionExercise.id}_${setOrder}`
@@ -348,18 +348,21 @@ export const WorkoutExerciseCard = withObservables(
   }: {
     sessionExercise: SessionExercise
     historyId: string
-  }) => ({
-    exercise: sessionExercise.exercise.observe(),
-    lastPerformance: sessionExercise.exercise.observe().pipe(
-      switchMap(exercise =>
-        from(getLastPerformanceForExercise(exercise.id, historyId ?? ''))
+  }) => {
+    const exercise$ = sessionExercise.exercise.observe()
+    return {
+      exercise: exercise$,
+      lastPerformance: exercise$.pipe(
+        switchMap(exercise =>
+          from(getLastPerformanceForExercise(exercise.id, historyId ?? ''))
+        ),
+        catchError(err => {
+          if (__DEV__) console.error('WorkoutExerciseCard: lastPerformance error', err)
+          return of(null)
+        })
       ),
-      catchError(err => {
-        if (__DEV__) console.error('WorkoutExerciseCard: lastPerformance error', err)
-        return of(null)
-      })
-    ),
-  })
+    }
+  }
 )(WorkoutExerciseCardContent)
 
 // --- Styles ---

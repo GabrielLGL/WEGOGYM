@@ -154,7 +154,7 @@ export function buildWeeklyActivity(
     const isToday = dateKey === todayKey
     const isPast = dayDate < today
 
-    const dayHistories = histories.filter(h => toDateKey(h.startTime) === dateKey)
+    const dayHistories = histories.filter(h => h.deletedAt === null && toDateKey(h.startTime) === dateKey)
 
     const daySessions = dayHistories.map(h => {
       const historySets = sets.filter(s => s.history.id === h.id)
