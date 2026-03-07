@@ -61,6 +61,12 @@ export const fr = {
       recomp: 'Perdre du gras, gagner du muscle',
       health: 'Rester en forme',
     },
+    programChoice: {
+      title: 'Choisissez votre programme',
+      sessions: 'séances',
+      importing: 'Importation...',
+      skip: 'Commencer sans programme',
+    },
   },
 
   settings: {

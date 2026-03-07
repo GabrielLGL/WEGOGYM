@@ -54,8 +54,8 @@ describe('buildRecapExercises', () => {
   it('builds recap for exercise with validated sets', async () => {
     const se = makeSE('se1', 3)
     const validatedSets = {
-      'se1_1': { reps: 10, weight: 80 },
-      'se1_2': { reps: 8, weight: 90 },
+      'se1_1': { reps: 10, weight: 80, isPr: false },
+      'se1_2': { reps: 8, weight: 90, isPr: false },
     }
 
     const result = await buildRecapExercises([se as any], validatedSets, 'h1')
@@ -79,7 +79,7 @@ describe('buildRecapExercises', () => {
       exercise: { fetch: jest.fn().mockResolvedValue(null) },
     }
     const validatedSets = {
-      'se1_1': { reps: 10, weight: 80 },
+      'se1_1': { reps: 10, weight: 80, isPr: false },
     }
 
     const result = await buildRecapExercises([se as any], validatedSets, 'h1')
@@ -90,9 +90,9 @@ describe('buildRecapExercises', () => {
     const se1 = makeSE('se1', 2)
     const se2 = makeSE('se2', 2)
     const validatedSets = {
-      'se1_1': { reps: 10, weight: 80 },
-      'se2_1': { reps: 8, weight: 60 },
-      'se2_2': { reps: 6, weight: 70 },
+      'se1_1': { reps: 10, weight: 80, isPr: false },
+      'se2_1': { reps: 8, weight: 60, isPr: false },
+      'se2_2': { reps: 6, weight: 70, isPr: false },
     }
 
     const result = await buildRecapExercises([se1 as any, se2 as any], validatedSets, 'h1')
@@ -110,7 +110,7 @@ describe('buildRecapExercises', () => {
     })
 
     const se = makeSE('se1', 2)
-    const validatedSets = { 'se1_1': { reps: 10, weight: 90 } }
+    const validatedSets = { 'se1_1': { reps: 10, weight: 90, isPr: false } }
 
     const result = await buildRecapExercises([se as any], validatedSets, 'h1')
     expect(result[0].prevMaxWeight).toBe(100)

@@ -63,6 +63,12 @@ export const en: typeof fr = {
       recomp: 'Lose fat, build muscle',
       health: 'Stay fit',
     },
+    programChoice: {
+      title: 'Choose your program',
+      sessions: 'sessions',
+      importing: 'Importing...',
+      skip: 'Start without a program',
+    },
   },
 
   settings: {

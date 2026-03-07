@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { BottomSheet } from './BottomSheet'
 import { useHaptics } from '../hooks/useHaptics'
 import { useTheme } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { spacing, borderRadius, fontSize } from '../theme'
 import type { ThemeColors } from '../theme'
 import { PRESET_PROGRAMS } from '../model/onboardingPrograms'
@@ -23,6 +24,7 @@ export const OnboardingSheet: React.FC<Props> = ({
 }) => {
   const haptics = useHaptics()
   const { colors } = useTheme()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const [isImporting, setIsImporting] = useState(false)
 
@@ -45,7 +47,7 @@ export const OnboardingSheet: React.FC<Props> = ({
   }
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Choisissez votre programme">
+    <BottomSheet visible={visible} onClose={onClose} title={t.onboarding.programChoice.title}>
       {PRESET_PROGRAMS.map(preset => (
         <TouchableOpacity
           key={preset.name}
@@ -57,12 +59,12 @@ export const OnboardingSheet: React.FC<Props> = ({
           <View style={styles.cardHeader}>
             <Text style={styles.cardName}>{preset.name}</Text>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{preset.sessions.length} séances</Text>
+              <Text style={styles.badgeText}>{preset.sessions.length} {t.onboarding.programChoice.sessions}</Text>
             </View>
           </View>
           <Text style={styles.cardDescription}>{preset.description}</Text>
           {isImporting && (
-            <Text style={styles.importingText}>Importation...</Text>
+            <Text style={styles.importingText}>{t.onboarding.programChoice.importing}</Text>
           )}
         </TouchableOpacity>
       ))}
@@ -73,7 +75,7 @@ export const OnboardingSheet: React.FC<Props> = ({
         disabled={isImporting}
         activeOpacity={0.7}
       >
-        <Text style={styles.skipText}>Commencer sans programme</Text>
+        <Text style={styles.skipText}>{t.onboarding.programChoice.skip}</Text>
       </TouchableOpacity>
     </BottomSheet>
   )
