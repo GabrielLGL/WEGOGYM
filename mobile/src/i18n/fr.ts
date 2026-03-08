@@ -51,6 +51,7 @@ export const fr = {
       subtitle: 'Influence les plages de répétitions et le type de programmes recommandés',
     },
     confirmHint: 'Pour modifier vos préférences, rendez-vous dans Paramètres',
+    saveError: 'Impossible d\'enregistrer. Veuillez réessayer.',
     levels: {
       beginner: 'Débutant',
       intermediate: 'Intermédiaire',

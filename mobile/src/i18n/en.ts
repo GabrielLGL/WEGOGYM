@@ -53,6 +53,7 @@ export const en: typeof fr = {
       subtitle: 'Influences rep ranges and recommended program types',
     },
     confirmHint: 'To update your preferences, go to Settings',
+    saveError: 'Unable to save. Please try again.',
     levels: {
       beginner: 'Beginner',
       intermediate: 'Intermediate',
