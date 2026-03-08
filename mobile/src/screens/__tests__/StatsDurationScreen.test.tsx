@@ -48,7 +48,7 @@ jest.mock('../../theme/chartConfig', () => ({
     decimalPlaces: 0,
     color: () => 'rgba(0,122,255,1)',
     labelColor: () => 'rgba(255,255,255,1)',
-    style: { borderRadius: 16 },
+    style: { borderRadius: 14 },
   }),
 }))
 

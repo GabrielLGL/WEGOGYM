@@ -387,13 +387,13 @@ function useStyles(colors: ThemeColors) {
     },
     barBg: {
       height: 6,
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
       backgroundColor: colors.separator,
       overflow: 'hidden',
     },
     barFill: {
       height: 6,
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
       backgroundColor: colors.primary,
     },
   })

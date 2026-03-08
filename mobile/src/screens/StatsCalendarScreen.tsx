@@ -814,7 +814,7 @@ function useStyles(colors: ThemeColors) {
     },
     detailSetChip: {
       backgroundColor: colors.cardSecondary,
-      borderRadius: 6,
+      borderRadius: borderRadius.xs,
       paddingHorizontal: spacing.sm,
       paddingVertical: 3,
     },
@@ -864,7 +864,7 @@ function useStyles(colors: ThemeColors) {
     dayBox: {
       width: DAY_SIZE,
       height: DAY_SIZE,
-      borderRadius: 8,
+      borderRadius: borderRadius.sm,
       alignItems: 'center',
       justifyContent: 'center',
     },

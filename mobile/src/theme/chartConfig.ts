@@ -1,4 +1,4 @@
-import { colors as staticColors } from './index'
+import { colors as staticColors, borderRadius } from './index'
 import type { ThemeColors } from './index'
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -31,7 +31,7 @@ export function createChartConfig(options: {
     decimalPlaces,
     color: (opacity = 1) => `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, ${opacity})`,
-    style: { borderRadius: 16 },
+    style: { borderRadius: borderRadius.md },
     ...(showDots ? { propsForDots: { r: '4', strokeWidth: '2', stroke: colors.primary } } : {}),
   }
 }

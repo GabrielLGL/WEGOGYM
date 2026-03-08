@@ -458,7 +458,7 @@ function useStyles(colors: ThemeColors) {
       alignItems: 'center',
       paddingHorizontal: spacing.md,
       height: 44,
-      borderRadius: 22,
+      borderRadius: borderRadius.xl,
       gap: spacing.xs,
     },
     selectionBarCreateText: { color: colors.primaryText, fontSize: fontSize.sm, fontWeight: '600' },

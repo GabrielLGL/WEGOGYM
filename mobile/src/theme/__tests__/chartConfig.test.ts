@@ -1,5 +1,5 @@
 import { createChartConfig } from '../chartConfig'
-import { colors } from '../index'
+import { colors, borderRadius } from '../index'
 
 describe('createChartConfig', () => {
   it('returns chart config with default options', () => {
@@ -8,7 +8,7 @@ describe('createChartConfig', () => {
     expect(config.backgroundGradientFrom).toBe(colors.card)
     expect(config.backgroundGradientTo).toBe(colors.card)
     expect(config.decimalPlaces).toBe(0)
-    expect(config.style).toEqual({ borderRadius: 16 })
+    expect(config.style).toEqual({ borderRadius: borderRadius.md })
   })
 
   it('color callback returns rgba from theme primary color', () => {
