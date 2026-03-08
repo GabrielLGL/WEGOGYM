@@ -8,7 +8,7 @@ import { database } from '../index'
 import History from '../models/History'
 import Session from '../models/Session'
 import SessionExercise from '../models/SessionExercise'
-import WorkoutSet from '../models/Set'
+import SetModel from '../models/Set'
 
 /**
  * Crée une entrée History en base pour démarrer une séance en direct
@@ -113,7 +113,7 @@ export async function getLastSessionVolume(
   )[0]
 
   const sets = await database
-    .get<WorkoutSet>('sets')
+    .get<SetModel>('sets')
     .query(Q.where('history_id', mostRecent.id))
     .fetch()
 

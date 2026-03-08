@@ -10,7 +10,7 @@ export default class Program extends Model {
   } as const
 
   @text('name') name!: string
-  @field('position') position?: number
+  @field('position') position!: number | null
   @text('equipment') equipment!: string | null
   @field('frequency') frequency!: number | null
   @readonly @date('created_at') createdAt!: Date

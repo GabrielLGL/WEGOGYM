@@ -11,15 +11,15 @@ export default class SessionExercise extends Model {
   } as const
 
   @field('position') position!: number
-  @field('sets_target') setsTarget?: number
-  @field('sets_target_max') setsTargetMax?: number
-  @text('reps_target') repsTarget?: string
-  @field('weight_target') weightTarget?: number
-  @text('superset_id') supersetId?: string | null
-  @text('superset_type') supersetType?: string | null
-  @field('superset_position') supersetPosition?: number | null
-  @text('notes') notes?: string
-  @field('rest_time') restTime?: number | null
+  @field('sets_target') setsTarget!: number | null
+  @field('sets_target_max') setsTargetMax!: number | null
+  @text('reps_target') repsTarget!: string | null
+  @field('weight_target') weightTarget!: number | null
+  @text('superset_id') supersetId!: string | null
+  @text('superset_type') supersetType!: string | null
+  @field('superset_position') supersetPosition!: number | null
+  @text('notes') notes!: string | null
+  @field('rest_time') restTime!: number | null
 
   @relation('sessions', 'session_id') session!: Relation<Session>
   @relation('exercises', 'exercise_id') exercise!: Relation<Exercise>

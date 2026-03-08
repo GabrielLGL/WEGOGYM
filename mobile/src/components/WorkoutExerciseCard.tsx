@@ -26,7 +26,7 @@ interface WorkoutSetRowProps {
   onUpdateInput: (key: string, field: 'weight' | 'reps', value: string) => void
   onValidate: (setOrder: number, weight: string, reps: string) => Promise<void>
   onUnvalidate: (setOrder: number) => Promise<void>
-  repsTarget?: string
+  repsTarget?: string | null
 }
 
 interface WorkoutExerciseCardContentProps {

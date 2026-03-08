@@ -72,7 +72,7 @@ function useStyles(colors: ThemeColors) {
  * Configuration de l'observation des données.
  * On surveille la série ET l'exercice lié pour mettre à jour l'UI en direct.
  */
-const enhance = withObservables(['set'], ({ set }) => ({
+const enhance = withObservables(['set'], ({ set }: { set: Set }) => ({
   set: set.observe(),
   exercise: set.exercise.observe()
 }))

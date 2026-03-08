@@ -93,7 +93,7 @@ function useStyles(colors: ThemeColors) {
   })
 }
 
-export default withObservables(['program'], ({ program }) => ({
+export default withObservables(['program'], ({ program }: { program: Program }) => ({
   program: program.observe(),
   sessions: database.get<Session>('sessions').query(
     Q.where('program_id', program.id),

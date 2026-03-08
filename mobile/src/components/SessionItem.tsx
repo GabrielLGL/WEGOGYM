@@ -94,7 +94,7 @@ function useStyles(colors: ThemeColors) {
  * Cela permet au composant de se mettre à jour AUTOMATIQUEMENT
  * dès que le nom de la séance ou les exercices qui la composent changent.
  */
-export default withObservables(['session'], ({ session }) => ({
+export default withObservables(['session'], ({ session }: { session: Session }) => ({
   session: session.observe(), // Observe les changements directs sur la séance
   // Requête complexe : On observe les exercices dont l'ID est présent dans la table de liaison 'session_exercises' pour cette séance
   exercises: database.get<Exercise>('exercises').query(

@@ -11,8 +11,8 @@ export default class History extends Model {
   } as const
 
   @date('start_time') startTime!: Date
-  @date('end_time') endTime?: Date
-  @text('note') note?: string
+  @date('end_time') endTime!: Date | null
+  @text('note') note!: string | null
 
   @relation('sessions', 'session_id') session!: Relation<Session>
   @children('sets') sets!: Query<Set>
