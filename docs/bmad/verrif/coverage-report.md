@@ -1,6 +1,51 @@
 
 ---
 
+## Run P9 — 2026-03-07 (session test-coverage #3)
+
+| Métrique   | Avant (P8) | Après (P9) | Delta  |
+|------------|------------|------------|--------|
+| Statements | 79.30%     | 81.00%     | **+1.70%** |
+| Branches   | 67.85%     | 69.95%     | **+2.10%** |
+| Functions  | 72.27%     | 74.26%     | **+1.99%** |
+| Lines      | 77.35%     | 83.17%     | **+5.82%** |
+
+**1687 → 1737 tests (+50), 106 → 112 suites (+6)** — tous passent.
+
+### Fichiers ajoutés
+
+| Fichier | Tests ajoutés |
+|---------|---------------|
+| `hooks/__tests__/useWorkoutCompletion.test.ts` | 13 |
+| `model/utils/__tests__/dataManagementUtils.test.ts` | 3 |
+| `model/utils/__tests__/exerciseDescriptions.test.ts` | 8 |
+| `model/utils/__tests__/badgeConstants.test.ts` | 8 |
+| `model/utils/__tests__/barrels.test.ts` | 16 |
+| `components/__tests__/ScreenLoader.test.tsx` | 1 |
+| `model/utils/__tests__/workoutSessionUtils.test.ts` | +1 |
+| `services/ai/programGenerator/__tests__/exerciseSelector.test.ts` | +1 |
+
+### Couverture par fichier clé — état final P9
+
+| Fichier | Avant | Après |
+|---------|-------|-------|
+| `hooks/useWorkoutCompletion.ts` | 25.84% | **84.26%** |
+| `model/utils/dataManagementUtils.ts` | 0% | **100%** |
+| `model/utils/exerciseDescriptions.ts` | 0% | **100%** |
+| `model/utils/badgeConstants.ts` | 50% | **100%** |
+| `model/utils/databaseHelpers.ts` (barrel) | 0% | **100%** |
+| `model/utils/statsHelpers.ts` (barrel) | 0% | **100%** |
+| `components/ScreenLoader.tsx` | 0% | **100%** |
+| `model/utils/workoutSessionUtils.ts` | 90% | **92%** |
+| `services/ai/programGenerator/exerciseSelector.ts` | 84.61% | **100%** |
+
+### Config
+
+- Exclu `seedDevData.ts` (442 lignes, données dev-only sans logique) de la couverture
+- Exclu `migrations.ts` (single-line re-export) de la couverture
+
+---
+
 ## Run P8 — 2026-03-07 (session test-coverage #2)
 
 | Métrique   | Avant (P7) | Après (P8) | Delta  |
