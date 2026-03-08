@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo } from 'react'
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native'
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react'
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Animated, LayoutAnimation, UIManager, Platform } from 'react-native'
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
@@ -32,6 +32,10 @@ interface Props {
   exercises: Exercise[]
   user: User | null
   navigation: NativeStackNavigationProp<RootStackParamList>
+}
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true)
 }
 
 export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercises, exercises, navigation }) => {
@@ -80,7 +84,22 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [isGroupTypeVisible, setIsGroupTypeVisible] = useState(false)
 
-  const toggleSelection = (se: SessionExercise) => {
+  // --- TOAST FEEDBACK ---
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const toastOpacity = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    if (!toastMessage) return
+    Animated.timing(toastOpacity, { toValue: 1, duration: 200, useNativeDriver: true }).start()
+    const timer = setTimeout(() => {
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+        setToastMessage(null)
+      })
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [toastMessage, toastOpacity])
+
+  const toggleSelection = useCallback((se: SessionExercise) => {
     if (!selectionMode) {
       setSelectionMode(true)
       setSelectedItems(new Set([se.id]))
@@ -96,27 +115,40 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       if (next.size === 0) setSelectionMode(false)
       return next
     })
-  }
+  }, [selectionMode])
 
   const cancelSelection = () => {
+    haptics.onPress()
     setSelectionMode(false)
     setSelectedItems(new Set())
   }
 
   const handleCreateGroup = async (type: 'superset' | 'circuit') => {
-    const items = sessionExercises.filter(se => selectedItems.has(se.id))
-    if (items.length < 2) return
-    await groupExercises(items, type)
-    setIsGroupTypeVisible(false)
-    cancelSelection()
+    try {
+      const items = sessionExercises.filter(se => selectedItems.has(se.id))
+      if (items.length < 2) return
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+      await groupExercises(items, type)
+      setIsGroupTypeVisible(false)
+      cancelSelection()
+      setToastMessage(t.sessionDetail.superset.groupCreated)
+    } catch (e) {
+      if (__DEV__) console.warn('handleCreateGroup error:', e)
+    }
   }
 
   const handleUngroup = async (se: SessionExercise) => {
-    haptics.onPress()
-    await ungroupExercise(se, sessionExercises)
+    try {
+      haptics.onPress()
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+      await ungroupExercise(se, sessionExercises)
+      setToastMessage(t.sessionDetail.superset.groupRemoved)
+    } catch (e) {
+      if (__DEV__) console.warn('handleUngroup error:', e)
+    }
   }
 
-  const getGroupInfo = (se: SessionExercise): { type: string; isFirst: boolean; isLast: boolean } | undefined => {
+  const getGroupInfo = useCallback((se: SessionExercise): { type: string; isFirst: boolean; isLast: boolean } | undefined => {
     if (!se.supersetId) return undefined
     const groupMembers = sessionExercises
       .filter(s => s.supersetId === se.supersetId)
@@ -127,7 +159,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       isFirst: idx === 0,
       isLast: idx === groupMembers.length - 1,
     }
-  }
+  }, [sessionExercises])
 
   useLayoutEffect(() => { navigation.setOptions({ title: session.name, headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text }) }, [navigation, session.name, colors])
 
@@ -198,8 +230,11 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
             <Ionicons name="close" size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.selectionBarText}>
-            {selectedItems.size} {t.sessionDetail.superset.selectExercises}
+            {t.sessionDetail.superset.selectInstruction}
           </Text>
+          <View style={styles.selectionBarBadge}>
+            <Text style={styles.selectionBarBadgeText}>{selectedItems.size}</Text>
+          </View>
           <TouchableOpacity
             onPress={() => {
               if (selectedItems.size < 2) return
@@ -208,7 +243,8 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
             style={[styles.selectionBarCreateBtn, selectedItems.size < 2 && { opacity: 0.4 }]}
             disabled={selectedItems.size < 2}
           >
-            <Ionicons name="link" size={18} color={colors.background} />
+            <Ionicons name="checkmark" size={18} color={colors.primaryText} />
+            <Text style={styles.selectionBarCreateText}>{t.common.confirm}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -219,8 +255,19 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
           keyExtractor={item => item.id}
           renderItem={renderDraggableItem}
           onDragEnd={({ data }) => reorderExercises(data)}
-          contentContainerStyle={{ paddingHorizontal: 0, paddingTop: FOOTER_PADDING_TOP, paddingBottom: LIST_PADDING_BOTTOM }}
-          ListEmptyComponent={<Text style={styles.emptyText}>{t.sessionDetail.noExercises}</Text>}
+          extraData={sessionExercises.map(se => `${se.id}:${se.supersetId ?? ''}`).join(',')}
+          contentContainerStyle={{ paddingHorizontal: 0, paddingTop: spacing.sm, paddingBottom: spacing.lg }}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Ionicons name="barbell-outline" size={48} color={colors.placeholder} />
+              <Text style={styles.emptyText}>{t.sessionDetail.noExercises}</Text>
+            </View>
+          }
+          ListFooterComponent={
+            sessionExercises.length >= 2 && !sessionExercises.some(se => se.supersetId) ? (
+              <Text style={styles.hintText}>{t.sessionDetail.superset.hint}</Text>
+            ) : null
+          }
         />
       </View>
 
@@ -255,7 +302,8 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
                     setSelectionMode(true)
                   }}
                 >
-                  <Ionicons name="link" size={18} color={colors.primary} />
+                  <Ionicons name="link" size={16} color={colors.primary} />
+                  <Text style={styles.supersetButtonText}>{t.sessionDetail.superset.groupButton}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -352,27 +400,28 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
         </TouchableOpacity>
       </BottomSheet>
 
+      {/* --- TOAST FEEDBACK --- */}
+      {toastMessage && (
+        <Animated.View style={[styles.toast, { opacity: toastOpacity }]}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </Animated.View>
+      )}
+
     </SafeAreaView>
   )
 }
-
-const SCREEN_PADDING_H = 20
-const FOOTER_PADDING_BOTTOM = 30
-const FOOTER_PADDING_TOP = 10
-const BTN_PADDING = 18
-const BTN_MARGIN_BOTTOM = 10
-const LIST_PADDING_BOTTOM = 20
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     listWrapper: { flex: 1 },
-    emptyText: { color: colors.placeholder, textAlign: 'center', marginTop: 50, fontSize: fontSize.md, fontStyle: 'italic' },
+    emptyContainer: { alignItems: 'center', marginTop: spacing.xxl, gap: spacing.ms },
+    emptyText: { color: colors.placeholder, textAlign: 'center', fontSize: fontSize.md, fontStyle: 'italic' },
 
-    footerContainer: { paddingHorizontal: SCREEN_PADDING_H, paddingBottom: FOOTER_PADDING_BOTTOM, paddingTop: FOOTER_PADDING_TOP, borderTopWidth: 1, borderTopColor: colors.card },
-    launchButton: { backgroundColor: colors.primary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: BTN_MARGIN_BOTTOM },
-    launchButtonText: { color: colors.text, fontWeight: 'bold', fontSize: fontSize.sm },
-    addButton: { backgroundColor: colors.cardSecondary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+    footerContainer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.card },
+    launchButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: spacing.sm },
+    launchButtonText: { color: colors.primaryText, fontWeight: 'bold', fontSize: fontSize.sm },
+    addButton: { backgroundColor: colors.cardSecondary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
     addButtonText: { color: colors.primary, fontWeight: 'bold', fontSize: fontSize.sm },
 
     // Selection bar
@@ -387,14 +436,26 @@ function useStyles(colors: ThemeColors) {
     },
     selectionBarBtn: { padding: spacing.sm },
     selectionBarText: { flex: 1, color: colors.text, fontSize: fontSize.sm, marginLeft: spacing.sm },
-    selectionBarCreateBtn: {
+    selectionBarBadge: {
       backgroundColor: colors.primary,
-      width: 36,
-      height: 36,
-      borderRadius: 18,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
       justifyContent: 'center',
       alignItems: 'center',
+      marginRight: spacing.sm,
     },
+    selectionBarBadgeText: { color: colors.primaryText, fontSize: fontSize.xs, fontWeight: 'bold' },
+    selectionBarCreateBtn: {
+      backgroundColor: colors.primary,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      height: 44,
+      borderRadius: 22,
+      gap: spacing.xs,
+    },
+    selectionBarCreateText: { color: colors.primaryText, fontSize: fontSize.sm, fontWeight: '600' },
 
     // Footer row
     footerRow: {
@@ -404,14 +465,17 @@ function useStyles(colors: ThemeColors) {
     },
     supersetButton: {
       backgroundColor: colors.cardSecondary,
-      width: 50,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      paddingHorizontal: spacing.md,
       height: 50,
       borderRadius: borderRadius.md,
       justifyContent: 'center',
-      alignItems: 'center',
       borderWidth: 1,
       borderColor: colors.border,
     },
+    supersetButtonText: { color: colors.primary, fontSize: fontSize.sm, fontWeight: '600' },
 
     // Group type sheet
     sheetOption: {
@@ -423,7 +487,7 @@ function useStyles(colors: ThemeColors) {
     },
     sheetOptionText: { flex: 1 },
     sheetOptionTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: '600' },
-    sheetOptionDesc: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2 },
+    sheetOptionDesc: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: borderRadius.xxs },
 
     // Rest time input
     restTimeLabel: { color: colors.textSecondary, marginBottom: spacing.xs, fontSize: fontSize.xs },
@@ -434,6 +498,29 @@ function useStyles(colors: ThemeColors) {
     confirmBtn: { flex: 0.48, backgroundColor: colors.primary, padding: spacing.ms, borderRadius: borderRadius.sm, alignItems: 'center' },
     cancelBtn: { flex: 0.48, backgroundColor: colors.secondaryButton, padding: spacing.ms, borderRadius: borderRadius.sm, alignItems: 'center' },
     btnText: { color: colors.text, fontWeight: 'bold' },
+
+    // Toast
+    toast: {
+      position: 'absolute',
+      bottom: spacing.xxl,
+      left: spacing.lg,
+      right: spacing.lg,
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.ms,
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+    },
+    toastText: { color: colors.primaryText, fontSize: fontSize.sm, fontWeight: '600' },
+
+    // Hint
+    hintText: {
+      color: colors.placeholder,
+      fontSize: fontSize.xs,
+      textAlign: 'center',
+      marginTop: spacing.lg,
+      paddingHorizontal: spacing.lg,
+    },
   }), [colors])
 }
 

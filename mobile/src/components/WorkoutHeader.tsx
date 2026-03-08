@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet, Platform } from 'react-native'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 interface WorkoutHeaderProps {
@@ -18,7 +19,8 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
   totalSetsTarget,
 }) => {
   const { colors, neuShadow } = useTheme()
-  const styles = useStyles(colors)
+  const { t } = useLanguage()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const progressPercent = totalSetsTarget > 0 ? (completedSets / totalSetsTarget) * 100 : 0
 
   return (
@@ -31,8 +33,8 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
         </View>
       </View>
 
-      <Text style={[styles.setsCounter, { color: completedSets > 0 ? colors.success : colors.textSecondary }]}>
-        {completedSets} / {totalSetsTarget} séries
+      <Text style={[styles.setsCounter, { color: completedSets > 0 ? colors.primary : colors.textSecondary }]}>
+        {completedSets} / {totalSetsTarget} {t.workout.setsLabel}
       </Text>
 
       {totalSetsTarget > 0 && (
@@ -44,7 +46,7 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
   )
 }
 
-function useStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: {
       backgroundColor: colors.card,
@@ -89,7 +91,7 @@ function useStyles(colors: ThemeColors) {
       overflow: 'hidden',
     },
     progressFill: {
-      backgroundColor: colors.success,
+      backgroundColor: colors.primary,
       height: 3,
     },
   })

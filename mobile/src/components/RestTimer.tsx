@@ -4,6 +4,7 @@ import { Audio } from 'expo-av'
 import { useHaptics } from '../hooks/useHaptics'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import {
   scheduleRestEndNotification,
@@ -31,6 +32,7 @@ const RestTimer: React.FC<Props> = ({
   soundEnabled = true,
 }) => {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const [timeLeft, setTimeLeft] = useState(duration)
@@ -169,11 +171,11 @@ const RestTimer: React.FC<Props> = ({
     <Animated.View style={[styles.container, { transform: [{ translateY: animValue }] }]}>
       <TouchableOpacity style={styles.content} onPress={closeTimer} activeOpacity={0.9}>
         <View style={styles.left}>
-          <Text style={styles.label}>REPOS EN COURS</Text>
+          <Text style={styles.label}>{t.workout.restInProgress}</Text>
           <Text style={[styles.timer, { color: timerColor }]}>{formatTime(timeLeft)}</Text>
         </View>
         <View style={styles.hintChip}>
-          <Text style={styles.hint}>Ignorer</Text>
+          <Text style={styles.hint}>{t.workout.skipRest}</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>

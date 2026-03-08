@@ -192,7 +192,11 @@ describe('WorkoutExerciseCard', () => {
         />
       )
 
-      expect(getByText('80 kg × 10 reps')).toBeTruthy()
+      expect(getByText('80')).toBeTruthy()
+      expect(getByText('kg')).toBeTruthy()
+      expect(getByText('×')).toBeTruthy()
+      expect(getByText('10')).toBeTruthy()
+      expect(getByText('reps')).toBeTruthy()
     })
 
     it('affiche le badge PR quand isPr est true', () => {

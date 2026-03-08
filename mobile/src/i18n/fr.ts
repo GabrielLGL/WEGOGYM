@@ -70,6 +70,12 @@ export const fr = {
   },
 
   settings: {
+    groups: {
+      profile: 'PROFIL',
+      training: 'ENTRAÎNEMENT',
+      assistant: 'ASSISTANT',
+      system: 'SYSTÈME',
+    },
     profile: {
       title: 'Mon profil',
       name: 'Prénom',
@@ -284,6 +290,9 @@ export const fr = {
       groupTypeTitle: 'Type de groupe',
       supersetDesc: '2 exercices en alternance',
       circuitDesc: '3+ exercices en rotation',
+      groupButton: 'Grouper',
+      selectInstruction: 'Cochez les exercices à grouper',
+      hint: 'Astuce : groupez vos exercices en superset via le bouton "Grouper"',
     },
   },
 
@@ -401,6 +410,7 @@ export const fr = {
     supersetRound: 'Superset',
     circuitRound: 'Circuit',
     noRestSuperset: 'Pas de repos — exercice suivant du groupe',
+    roundLabel: 'Série',
     exerciseNote: 'Note exercice',
     sessionNote: 'Note séance',
     addSessionNote: 'Ajouter une note',
@@ -413,6 +423,9 @@ export const fr = {
     lastPerfSets: 'séries',
     suggestionLabel: 'Suggestion',
     noSetsMessage: 'Aucune série définie.',
+    setsLabel: 'séries',
+    restInProgress: 'REPOS EN COURS',
+    skipRest: 'Ignorer',
   },
 
   programDetail: {

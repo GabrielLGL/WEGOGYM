@@ -72,6 +72,12 @@ export const en: typeof fr = {
   },
 
   settings: {
+    groups: {
+      profile: 'PROFILE',
+      training: 'TRAINING',
+      assistant: 'ASSISTANT',
+      system: 'SYSTEM',
+    },
     profile: {
       title: 'My profile',
       name: 'First name',
@@ -284,6 +290,9 @@ export const en: typeof fr = {
       groupTypeTitle: 'Group type',
       supersetDesc: '2 exercises alternating',
       circuitDesc: '3+ exercises in rotation',
+      groupButton: 'Group',
+      selectInstruction: 'Check exercises to group',
+      hint: 'Tip: group exercises into supersets with the "Group" button',
     },
   },
 
@@ -400,6 +409,7 @@ export const en: typeof fr = {
     supersetRound: 'Superset',
     circuitRound: 'Circuit',
     noRestSuperset: 'No rest — next exercise in group',
+    roundLabel: 'Round',
     exerciseNote: 'Exercise note',
     sessionNote: 'Session note',
     addSessionNote: 'Add a note',
@@ -412,6 +422,9 @@ export const en: typeof fr = {
     lastPerfSets: 'sets',
     suggestionLabel: 'Suggestion',
     noSetsMessage: 'No sets defined.',
+    setsLabel: 'sets',
+    restInProgress: 'REST IN PROGRESS',
+    skipRest: 'Skip',
   },
 
   programDetail: {
