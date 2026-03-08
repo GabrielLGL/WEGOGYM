@@ -41,6 +41,7 @@
 | 2026-03-08 | 20 | 20 | 20 | 20 | 20 | **100/100** | ↑ +5 (1737 tests, cov 81% stmts, +50 tests, coverage 80%+ atteint) |
 | 2026-03-08 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.16% stmts, 3 CRIT + 4 WARN fixés: i18n, useMemo, useCallback) |
 | 2026-03-08 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 0 corrections nécessaires) |
+| 2026-03-09 | 20 | 20 | 20 | 15 | 20 | **95/100** | ↓ -5 (1737 tests, cov 82.07%, 6 CRIT + 4 WARN fixés: duplicateSession, CGU version, code mort, i18n BadgeCelebration, ~10 magic numbers restants) |
 
 ---
 
