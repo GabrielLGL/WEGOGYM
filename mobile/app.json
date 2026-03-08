@@ -46,12 +46,13 @@
       "web"
     ],
     "extra": {
-      "eas": {
-        "projectId": "2f547162-0beb-4cfa-90c1-e6b8095203ae"
-      },
       "sentryDsn": null,
       "supabaseUrl": "https://tcuchypwztvghiywhobo.supabase.co",
-      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjdWNoeXB3enR2Z2hpeXdob2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNTMzNTcsImV4cCI6MjA4NzYyOTM1N30.OOcclOVpPYzLF4p9MAE57Lsr3UKFawjRKeNCbxBsOlc"
-    }
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjdWNoeXB3enR2Z2hpeXdob2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNTMzNTcsImV4cCI6MjA4NzYyOTM1N30.OOcclOVpPYzLF4p9MAE57Lsr3UKFawjRKeNCbxBsOlc",
+      "eas": {
+        "projectId": "953438a0-48fb-4c9a-8b03-4ea2f5225e80"
+      }
+    },
+    "owner": "gabriellgl"
   }
 }
