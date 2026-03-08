@@ -50,6 +50,10 @@ export default class User extends Model {
   // Tutoriel contextuel — version 28
   @field('tutorial_completed') tutorialCompleted!: boolean
 
+  // Disclaimer & CGU — version 33
+  @field('disclaimer_accepted') disclaimerAccepted!: boolean
+  @text('cgu_version_accepted') cguVersionAccepted!: string | null
+
   // Rappels d'entraînement — version 31
   @field('reminders_enabled') remindersEnabled!: boolean
   @text('reminder_days') reminderDays!: string | null  // JSON: "[1,3,5]" (ISO weekday)

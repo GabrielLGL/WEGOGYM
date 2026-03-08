@@ -68,5 +68,17 @@ export const migrations = schemaMigrations({
       toVersion: 32,
       steps: [],
     },
+    {
+      toVersion: 33,
+      steps: [
+        addColumns({
+          table: 'users',
+          columns: [
+            { name: 'disclaimer_accepted', type: 'boolean' },
+            { name: 'cgu_version_accepted', type: 'string', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })

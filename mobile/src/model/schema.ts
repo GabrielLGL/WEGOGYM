@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 32, // v32 : remove ai_api_key from SQLite (moved to expo-secure-store)
+  version: 33, // v33 : add disclaimer_accepted + cgu_version_accepted to users
   tables: [
     tableSchema({
       name: 'programs',
@@ -97,6 +97,8 @@ export const mySchema = appSchema({
             {name: 'reminder_days', type: 'string', isOptional: true},
             {name: 'reminder_hour', type: 'number'},
             {name: 'reminder_minute', type: 'number'},
+            {name: 'disclaimer_accepted', type: 'boolean'},
+            {name: 'cgu_version_accepted', type: 'string', isOptional: true},
             {name: 'created_at', type: 'number'},
             {name: 'updated_at', type: 'number'}
         ]

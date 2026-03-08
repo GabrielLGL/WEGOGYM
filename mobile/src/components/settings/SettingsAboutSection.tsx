@@ -1,9 +1,12 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { SettingsStyles } from './settingsStyles'
+import type { RootStackParamList } from '../../navigation'
 
 interface SettingsAboutSectionProps {
   styles: SettingsStyles
@@ -12,9 +15,23 @@ interface SettingsAboutSectionProps {
 export const SettingsAboutSection: React.FC<SettingsAboutSectionProps> = ({ styles }) => {
   const colors = useColors()
   const { t } = useLanguage()
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   return (
     <>
+      {/* Section CGU */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={styles.sectionTitleRow}
+          onPress={() => navigation.navigate('Legal')}
+        >
+          <View style={styles.sectionAccent} />
+          <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+          <Text style={styles.sectionTitle}>{t.settings.legal}</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} style={{ marginLeft: 'auto' }} />
+        </TouchableOpacity>
+      </View>
+
       {/* Section A propos */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>

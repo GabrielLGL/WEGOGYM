@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, ToastAndroid, Platform } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { View, Text, StyleSheet, SafeAreaView, StatusBar, ToastAndroid, Platform, ScrollView, TouchableOpacity } from 'react-native'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
 
 import { database } from '../model'
 import User from '../model/models/User'
@@ -16,6 +16,7 @@ import type { Language } from '../i18n'
 import {
   USER_LEVELS,
   USER_GOALS,
+  CGU_VERSION,
   type UserLevel,
   type UserGoal,
 } from '../model/constants'
@@ -27,13 +28,49 @@ export default function OnboardingScreen() {
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<OnboardingNavigation>()
+  const route = useRoute<NativeStackScreenProps<RootStackParamList, 'Onboarding'>['route']>()
   const haptics = useHaptics()
   const { t, language, setLanguage } = useLanguage()
 
-  const [step, setStep] = useState<0 | 1 | 2>(0)
+  const disclaimerOnly = route.params?.disclaimerOnly ?? false
+
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0)
   const [selectedLevel, setSelectedLevel] = useState<UserLevel | null>(null)
   const [selectedGoal, setSelectedGoal] = useState<UserGoal | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+
+  const totalSteps = disclaimerOnly ? 1 : 4
+
+  const handleAcceptDisclaimer = async () => {
+    haptics.onPress()
+    setIsSaving(true)
+    try {
+      const users = await database.get<User>('users').query().fetch()
+      const user = users[0]
+      if (user) {
+        await database.write(async () => {
+          await user.update(u => {
+            u.disclaimerAccepted = true
+            u.cguVersionAccepted = CGU_VERSION
+          })
+        })
+      }
+
+      if (disclaimerOnly) {
+        haptics.onSuccess()
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
+      } else {
+        setIsSaving(false)
+        setStep(1)
+      }
+    } catch (error) {
+      if (__DEV__) console.error('Disclaimer save failed:', error)
+      if (Platform.OS === 'android') {
+        ToastAndroid.show(t.onboarding.saveError, ToastAndroid.SHORT)
+      }
+      setIsSaving(false)
+    }
+  }
 
   const handleSelectLanguage = async (lang: Language) => {
     haptics.onSelect()
@@ -42,22 +79,27 @@ export default function OnboardingScreen() {
 
   const handleNextFromLanguage = () => {
     haptics.onPress()
-    setStep(1)
-  }
-
-  const handleNextFromLevel = () => {
-    haptics.onPress()
     setStep(2)
   }
 
-  const handleBackToLanguage = () => {
+  const handleBackToDisclaimer = () => {
     haptics.onSelect()
     setStep(0)
   }
 
-  const handleBackToLevel = () => {
+  const handleNextFromLevel = () => {
+    haptics.onPress()
+    setStep(3)
+  }
+
+  const handleBackToLanguage = () => {
     haptics.onSelect()
     setStep(1)
+  }
+
+  const handleBackToLevel = () => {
+    haptics.onSelect()
+    setStep(2)
   }
 
   const handleConfirm = async () => {
@@ -83,24 +125,61 @@ export default function OnboardingScreen() {
         ToastAndroid.show(t.onboarding.confirmHint, ToastAndroid.LONG)
       }
 
-      navigation.replace('Home')
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
     } catch (error) {
       if (__DEV__) console.error('Onboarding save failed:', error)
+      if (Platform.OS === 'android') {
+        ToastAndroid.show(t.onboarding.saveError, ToastAndroid.SHORT)
+      }
       setIsSaving(false)
     }
   }
 
+  const handleOpenCGU = () => {
+    haptics.onSelect()
+    navigation.navigate('Legal')
+  }
+
+  const renderDots = () => (
+    <View style={styles.dotsRow}>
+      {Array.from({ length: totalSteps }, (_, i) => (
+        <View key={i} style={[styles.dot, step === i && styles.dotActive]} />
+      ))}
+    </View>
+  )
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Progress dots — 3 steps */}
-        <View style={styles.dotsRow}>
-          <View style={[styles.dot, step === 0 && styles.dotActive]} />
-          <View style={[styles.dot, step === 1 && styles.dotActive]} />
-          <View style={[styles.dot, step === 2 && styles.dotActive]} />
-        </View>
+        {renderDots()}
 
         {step === 0 ? (
+          <>
+            <Text style={styles.title}>{t.disclaimer.title}</Text>
+
+            <ScrollView style={styles.cardsContainer} showsVerticalScrollIndicator={false}>
+              <Text style={styles.disclaimerBody}>{t.disclaimer.body}</Text>
+
+              <TouchableOpacity onPress={handleOpenCGU} style={styles.cguLinkContainer}>
+                <Text style={[styles.cguLink, { color: colors.primary }]}>
+                  {t.disclaimer.cguLink}
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.footer}>
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onPress={handleAcceptDisclaimer}
+                disabled={isSaving}
+              >
+                {t.disclaimer.acceptButton}
+              </Button>
+            </View>
+          </>
+        ) : step === 1 ? (
           <>
             <Text style={styles.title}>{t.onboarding.language.title}</Text>
             <Text style={styles.subtitle}>{t.onboarding.language.subtitle}</Text>
@@ -120,18 +199,26 @@ export default function OnboardingScreen() {
               />
             </View>
 
-            <View style={styles.footer}>
+            <View style={styles.footerRow}>
+              <Button
+                variant="secondary"
+                size="lg"
+                onPress={handleBackToDisclaimer}
+                style={styles.backButton}
+              >
+                {t.common.back}
+              </Button>
               <Button
                 variant="primary"
                 size="lg"
-                fullWidth
                 onPress={handleNextFromLanguage}
+                style={styles.confirmButton}
               >
                 {t.common.next}
               </Button>
             </View>
           </>
-        ) : step === 1 ? (
+        ) : step === 2 ? (
           <>
             <Text style={styles.title}>{t.onboarding.level.title}</Text>
             <Text style={styles.subtitle}>{t.onboarding.level.subtitle}</Text>
@@ -248,6 +335,20 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       marginBottom: spacing.xl,
       lineHeight: 20,
+    },
+    disclaimerBody: {
+      color: colors.textSecondary,
+      fontSize: fontSize.bodyMd,
+      lineHeight: 24,
+      marginTop: spacing.md,
+    },
+    cguLinkContainer: {
+      marginTop: spacing.xl,
+      marginBottom: spacing.lg,
+    },
+    cguLink: {
+      fontSize: fontSize.md,
+      fontWeight: '600',
     },
     cardsContainer: {
       flex: 1,
