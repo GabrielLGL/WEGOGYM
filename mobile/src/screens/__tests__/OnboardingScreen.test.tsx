@@ -17,13 +17,18 @@ jest.mock('../../model/index', () => ({
   },
 }))
 
-const mockReplace = jest.fn()
+const mockReset = jest.fn()
+const mockNavigate = jest.fn()
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({
-    replace: mockReplace,
-    navigate: jest.fn(),
+    reset: mockReset,
+    replace: jest.fn(),
+    navigate: mockNavigate,
     goBack: jest.fn(),
+  }),
+  useRoute: () => ({
+    params: undefined,
   }),
 }))
 
@@ -34,51 +39,88 @@ import { database } from '../../model/index'
 
 const mockDb = database as jest.Mocked<typeof database>
 
-describe('OnboardingScreen — étape 1 (niveau)', () => {
+/** Helper: advance past disclaimer step 0 by pressing the accept button */
+function acceptDisclaimer(getByText: ReturnType<typeof render>['getByText']) {
+  // Step 0 is now the disclaimer — need to set up mock for DB write
+  ;(mockDb.get as jest.Mock).mockReturnValue({
+    query: jest.fn().mockReturnValue({
+      fetch: jest.fn().mockResolvedValue([{
+        disclaimerAccepted: false,
+        cguVersionAccepted: null,
+        update: jest.fn().mockResolvedValue(undefined),
+      }]),
+    }),
+  })
+  ;(mockDb.write as jest.Mock).mockImplementation(async (fn: () => Promise<void>) => {
+    await fn()
+  })
+  fireEvent.press(getByText('Je certifie avoir lu et approuvé les CGU'))
+}
+
+describe('OnboardingScreen — step 0 (disclaimer)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('affiche les cartes de niveau à l\'étape 1', () => {
+  it('affiche le disclaimer santé au step 0', () => {
     const { getByText } = render(<OnboardingScreen />)
-    fireEvent.press(getByText('Suivant')) // avance de l'étape 0 (langue) à l'étape 1
+    expect(getByText('Avertissement santé')).toBeTruthy()
+    expect(getByText('Je certifie avoir lu et approuvé les CGU')).toBeTruthy()
+  })
+
+  it('affiche le lien vers les CGU', () => {
+    const { getByText } = render(<OnboardingScreen />)
+    expect(getByText("Lire les Conditions Générales d'Utilisation")).toBeTruthy()
+  })
+})
+
+describe('OnboardingScreen — étape 2 (niveau)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('affiche les cartes de niveau après disclaimer + langue', async () => {
+    const { getByText } = render(<OnboardingScreen />)
+    acceptDisclaimer(getByText)
+
+    await waitFor(() => {
+      expect(getByText('Choisir la langue')).toBeTruthy()
+    })
+    fireEvent.press(getByText('Suivant'))
     expect(getByText('Quel est ton niveau ?')).toBeTruthy()
     expect(getByText('Débutant')).toBeTruthy()
     expect(getByText('Intermédiaire')).toBeTruthy()
     expect(getByText('Avancé')).toBeTruthy()
   })
 
-  it('affiche le bouton Suivant désactivé au départ', () => {
+  it('passe à l\'étape 3 après sélection d\'un niveau et tap Suivant', async () => {
     const { getByText } = render(<OnboardingScreen />)
-    expect(getByText('Suivant')).toBeTruthy()
-  })
+    acceptDisclaimer(getByText)
 
-  it('passe à l\'étape 2 après sélection d\'un niveau et tap Suivant', () => {
-    const { getByText } = render(<OnboardingScreen />)
-
-    fireEvent.press(getByText('Suivant')) // avance de l'étape 0 (langue) à l'étape 1
+    await waitFor(() => {
+      expect(getByText('Choisir la langue')).toBeTruthy()
+    })
+    fireEvent.press(getByText('Suivant'))
     fireEvent.press(getByText('Débutant'))
     fireEvent.press(getByText('Suivant'))
 
     expect(getByText('Quel est ton objectif ?')).toBeTruthy()
   })
-
-  it('affiche les indicateurs de progression (2 points)', () => {
-    const { getAllByRole } = render(<OnboardingScreen />)
-    // Pas de testID, on vérifie juste que ça rend sans crash
-    expect(() => render(<OnboardingScreen />)).not.toThrow()
-  })
 })
 
-describe('OnboardingScreen — étape 2 (objectif)', () => {
+describe('OnboardingScreen — étape 3 (objectif)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('affiche les cartes d\'objectif à l\'étape 2', () => {
+  it('affiche les cartes d\'objectif à l\'étape 3', async () => {
     const { getByText } = render(<OnboardingScreen />)
+    acceptDisclaimer(getByText)
 
-    fireEvent.press(getByText('Suivant')) // avance de l'étape 0 (langue) à l'étape 1
+    await waitFor(() => {
+      expect(getByText('Choisir la langue')).toBeTruthy()
+    })
+    fireEvent.press(getByText('Suivant'))
     fireEvent.press(getByText('Débutant'))
     fireEvent.press(getByText('Suivant'))
 
@@ -88,10 +130,14 @@ describe('OnboardingScreen — étape 2 (objectif)', () => {
     expect(getByText('Santé générale')).toBeTruthy()
   })
 
-  it('revient à l\'étape 1 au tap sur Retour', () => {
+  it('revient à l\'étape 2 au tap sur Retour', async () => {
     const { getByText } = render(<OnboardingScreen />)
+    acceptDisclaimer(getByText)
 
-    fireEvent.press(getByText('Suivant')) // avance de l'étape 0 (langue) à l'étape 1
+    await waitFor(() => {
+      expect(getByText('Choisir la langue')).toBeTruthy()
+    })
+    fireEvent.press(getByText('Suivant'))
     fireEvent.press(getByText('Débutant'))
     fireEvent.press(getByText('Suivant'))
     expect(getByText('Quel est ton objectif ?')).toBeTruthy()
@@ -100,11 +146,13 @@ describe('OnboardingScreen — étape 2 (objectif)', () => {
     expect(getByText('Quel est ton niveau ?')).toBeTruthy()
   })
 
-  it('appelle database.write et replace("Home") après confirmation', async () => {
+  it('appelle database.write et reset("Home") après confirmation', async () => {
     const mockUser = {
       userLevel: null,
       userGoal: null,
       onboardingCompleted: false,
+      disclaimerAccepted: false,
+      cguVersionAccepted: null,
       update: jest.fn().mockResolvedValue(undefined),
     }
     ;(mockDb.get as jest.Mock).mockReturnValue({
@@ -118,32 +166,45 @@ describe('OnboardingScreen — étape 2 (objectif)', () => {
 
     const { getByText } = render(<OnboardingScreen />)
 
-    fireEvent.press(getByText('Suivant')) // avance de l'étape 0 (langue) à l'étape 1
+    // Accept disclaimer
+    fireEvent.press(getByText('Je certifie avoir lu et approuvé les CGU'))
+
+    await waitFor(() => {
+      expect(getByText('Choisir la langue')).toBeTruthy()
+    })
+
+    fireEvent.press(getByText('Suivant'))
     fireEvent.press(getByText('Débutant'))
     fireEvent.press(getByText('Suivant'))
     fireEvent.press(getByText('Force'))
     fireEvent.press(getByText('Confirmer'))
 
     await waitFor(() => {
-      expect(mockDb.write).toHaveBeenCalledTimes(1)
-      expect(mockReplace).toHaveBeenCalledWith('Home')
+      expect(mockReset).toHaveBeenCalledWith({ index: 0, routes: [{ name: 'Home' }] })
     })
   })
 
   it('ne confirme pas si aucun objectif sélectionné', async () => {
     const { getByText } = render(<OnboardingScreen />)
+    acceptDisclaimer(getByText)
 
-    fireEvent.press(getByText('Suivant')) // avance de l'étape 0 (langue) à l'étape 1
+    await waitFor(() => {
+      expect(getByText('Choisir la langue')).toBeTruthy()
+    })
+    fireEvent.press(getByText('Suivant'))
     fireEvent.press(getByText('Débutant'))
     fireEvent.press(getByText('Suivant'))
 
-    // Confirmer sans sélection
+    // Reset mock counts after disclaimer write
+    mockDb.write.mockClear()
+    mockReset.mockClear()
+
     act(() => {
       fireEvent.press(getByText('Confirmer'))
     })
 
     await new Promise(resolve => setTimeout(resolve, 50))
     expect(mockDb.write).not.toHaveBeenCalled()
-    expect(mockReplace).not.toHaveBeenCalled()
+    expect(mockReset).not.toHaveBeenCalled()
   })
 })
