@@ -39,6 +39,7 @@
 | 2026-03-07 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1558 tests, 2 CRIT + 5 WARN fixés: i18n WorkoutExerciseCard, soft-delete filter, double observe, dialog stuck, formatWeight) |
 | 2026-03-07 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1687 tests, cov 79.3%, TSC isPr fix + OnboardingSheet i18n) |
 | 2026-03-08 | 20 | 20 | 20 | 20 | 20 | **100/100** | ↑ +5 (1737 tests, cov 81% stmts, +50 tests, coverage 80%+ atteint) |
+| 2026-03-08 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.16% stmts, 3 CRIT + 4 WARN fixés: i18n, useMemo, useCallback) |
 
 ---
 
@@ -90,3 +91,4 @@
 | 20260307-0242 | 95 | 20 | 20 | 20 | 20 | 15 | full |
 | 20260307-2224 | 95 | 20 | 20 | 20 | 20 | 15 | full |
 | 20260308-cov  | 100 | 20 | 20 | 20 | 20 | 20 | test-coverage |
+| 20260308-1401 | 100 | 20 | 20 | 20 | 20 | 20 | full |
