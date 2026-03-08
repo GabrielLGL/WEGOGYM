@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Easing, BackHandler, useWindowDimensions } from 'react-native'
 import { Portal } from '@gorhom/portal'
 import { borderRadius, spacing, fontSize } from '../theme'
@@ -132,7 +132,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       ...StyleSheet.absoluteFillObject,
       justifyContent: 'flex-end',
@@ -166,5 +166,5 @@ function useStyles(colors: ThemeColors) {
       textAlign: 'center',
       marginBottom: spacing.lg,
     },
-  })
+  }), [colors])
 }

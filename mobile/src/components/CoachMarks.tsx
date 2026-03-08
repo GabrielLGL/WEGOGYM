@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import {
   View,
   Text,
@@ -53,6 +53,8 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
   const [currentStep, setCurrentStep] = useState(0)
   const [targetLayout, setTargetLayout] = useState<TargetLayout | null>(null)
   const [ready, setReady] = useState(false)
+  const retryCountRef = useRef(0)
+  const retryTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const fadeAnim = useRef(new Animated.Value(0)).current
   const tooltipAnim = useRef(new Animated.Value(0)).current
@@ -61,7 +63,10 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
   const step = steps[currentStep]
   const isLastStep = currentStep === totalSteps - 1
 
-  // Measure target element position
+  const MAX_MEASURE_RETRIES = 5
+  const MEASURE_RETRY_DELAY = 300
+
+  // Measure target element position (with retry on failure)
   const measureTarget = useCallback(() => {
     if (!step?.targetRef?.current) {
       setTargetLayout(null)
@@ -69,6 +74,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
     }
     step.targetRef.current.measureInWindow((x, y, width, height) => {
       if (width > 0 && height > 0) {
+        retryCountRef.current = 0
         setTargetLayout({ x, y, width, height })
       } else {
         setTargetLayout(null)
@@ -106,25 +112,55 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
     if (visible) {
       const timer = setTimeout(() => {
         setReady(true)
+        retryCountRef.current = 0
         measureTarget()
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: ANIMATION_DURATION,
           useNativeDriver: true,
         }).start()
-      }, 400)
+      }, 600)
       return () => clearTimeout(timer)
     } else {
       setReady(false)
       setCurrentStep(0)
+      retryCountRef.current = 0
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = null
+      }
       fadeAnim.setValue(0)
       tooltipAnim.setValue(0)
     }
   }, [visible])
 
+  // Retry measurement when targetLayout is null
+  useEffect(() => {
+    if (!ready || !visible || targetLayout !== null) return
+
+    if (retryCountRef.current >= MAX_MEASURE_RETRIES) {
+      // Measurement failed after retries — auto-dismiss to avoid blocking UI
+      handleComplete()
+      return
+    }
+
+    retryTimerRef.current = setTimeout(() => {
+      retryCountRef.current += 1
+      measureTarget()
+    }, MEASURE_RETRY_DELAY)
+
+    return () => {
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = null
+      }
+    }
+  }, [ready, visible, targetLayout, measureTarget, handleComplete])
+
   // Re-measure on step change
   useEffect(() => {
     if (!ready) return
+    retryCountRef.current = 0
     tooltipAnim.setValue(0)
     measureTarget()
     Animated.timing(tooltipAnim, {
@@ -276,7 +312,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       ...StyleSheet.absoluteFillObject,
       zIndex: 9999,
@@ -339,5 +375,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       fontWeight: '700',
     },
-  })
+  }), [colors])
 }

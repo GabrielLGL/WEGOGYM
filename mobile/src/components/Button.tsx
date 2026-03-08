@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { borderRadius, spacing, fontSize } from '../theme'
@@ -124,7 +124,7 @@ export const Button: React.FC<ButtonProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     // Base
     base: {
       borderRadius: borderRadius.sm,
@@ -199,5 +199,5 @@ function useStyles(colors: ThemeColors) {
     textDisabled: {
       opacity: 0.6,
     },
-  })
+  }), [colors])
 }
