@@ -18,6 +18,7 @@ export const SettingsAboutSection: React.FC<SettingsAboutSectionProps> = ({ styl
       {/* Section A propos */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
+          <View style={styles.sectionAccent} />
           <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
           <Text style={styles.sectionTitle}>{t.settings.about.title}</Text>
         </View>
@@ -32,7 +33,7 @@ export const SettingsAboutSection: React.FC<SettingsAboutSectionProps> = ({ styl
           <Text style={styles.infoValue}>1.0.0</Text>
         </View>
 
-        <View style={styles.infoRow}>
+        <View style={[styles.infoRow, styles.settingRowLast]}>
           <Text style={styles.infoLabel}>{t.settings.about.developedWith}</Text>
           <Text style={styles.infoValue}>React Native + WatermelonDB</Text>
         </View>
@@ -41,6 +42,7 @@ export const SettingsAboutSection: React.FC<SettingsAboutSectionProps> = ({ styl
       {/* Section Aide */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
+          <View style={styles.sectionAccent} />
           <Ionicons name="help-circle-outline" size={18} color={colors.primary} />
           <Text style={styles.sectionTitle}>{t.settings.help.title}</Text>
         </View>

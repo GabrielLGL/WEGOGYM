@@ -5,6 +5,9 @@ import { borderRadius, spacing, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 
+const OVERLAY_FADE_IN = 200
+const OVERLAY_FADE_OUT = 150
+
 interface BottomSheetProps {
   visible: boolean
   onClose: () => void
@@ -70,7 +73,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 200,
+          duration: OVERLAY_FADE_IN,
           useNativeDriver: true,
         }),
         Animated.timing(slideAnim, {
@@ -84,7 +87,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
-          duration: 150,
+          duration: OVERLAY_FADE_OUT,
           useNativeDriver: true,
         }),
         Animated.timing(slideAnim, {

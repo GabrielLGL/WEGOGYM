@@ -97,20 +97,24 @@ export const SettingsTimerSection: React.FC<SettingsTimerSectionProps> = ({
   return (
     <View style={styles.section}>
       <View style={styles.sectionTitleRow}>
+        <View style={styles.sectionAccent} />
         <Ionicons name="time-outline" size={18} color={colors.primary} />
         <Text style={styles.sectionTitle}>{t.settings.timer.title}</Text>
       </View>
 
-      <View style={styles.settingRow}>
+      <View style={timerEnabled ? styles.settingRow : [styles.settingRow, styles.settingRowLast]}>
         <View style={styles.settingInfo}>
-          <Text style={styles.settingLabel}>{t.settings.timer.enable}</Text>
+          <View style={styles.settingLabelRow}>
+            <Ionicons name="timer-outline" size={16} color={colors.textSecondary} />
+            <Text style={styles.settingLabel}>{t.settings.timer.enable}</Text>
+          </View>
           <Text style={styles.settingDescription}>{t.settings.timer.enableDescription}</Text>
         </View>
         <Switch
           value={timerEnabled}
           onValueChange={handleToggleTimer}
           trackColor={{ false: colors.cardSecondary, true: colors.primary }}
-          thumbColor={colors.text}
+          thumbColor={colors.switchThumb}
         />
       </View>
 
@@ -118,7 +122,10 @@ export const SettingsTimerSection: React.FC<SettingsTimerSectionProps> = ({
         <>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>{t.settings.timer.duration}</Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="hourglass-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.timer.duration}</Text>
+              </View>
               <Text style={styles.settingDescription}>{t.settings.timer.durationDescription}</Text>
             </View>
             <View style={styles.inputGroup}>
@@ -137,27 +144,33 @@ export const SettingsTimerSection: React.FC<SettingsTimerSectionProps> = ({
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>{t.settings.timer.vibration}</Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="phone-portrait-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.timer.vibration}</Text>
+              </View>
               <Text style={styles.settingDescription}>{t.settings.timer.vibrationDescription}</Text>
             </View>
             <Switch
               value={vibrationEnabled}
               onValueChange={handleToggleVibration}
               trackColor={{ false: colors.cardSecondary, true: colors.primary }}
-              thumbColor={colors.text}
+              thumbColor={colors.switchThumb}
             />
           </View>
 
-          <View style={styles.settingRow}>
+          <View style={[styles.settingRow, styles.settingRowLast]}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>{t.settings.timer.sound}</Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="volume-high-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.timer.sound}</Text>
+              </View>
               <Text style={styles.settingDescription}>{t.settings.timer.soundDescription}</Text>
             </View>
             <Switch
               value={timerSoundEnabled}
               onValueChange={handleToggleTimerSound}
               trackColor={{ false: colors.cardSecondary, true: colors.primary }}
-              thumbColor={colors.text}
+              thumbColor={colors.switchThumb}
             />
           </View>
         </>

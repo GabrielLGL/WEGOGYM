@@ -106,6 +106,8 @@ export const fr = {
       vibrationDescription: 'Vibration haptic à la fin du minuteur',
       sound: 'Son fin de repos',
       soundDescription: 'Bip sonore à la fin du minuteur',
+      notifTitle: 'Repos terminé !',
+      notifBody: 'Prêt pour la prochaine série ?',
     },
     reminders: {
       title: 'Rappels d\'entraînement',

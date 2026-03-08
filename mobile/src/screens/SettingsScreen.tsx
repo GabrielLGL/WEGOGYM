@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { View, Text, TextInput, SafeAreaView, ScrollView, Switch, TouchableOpacity, UIManager, Platform } from 'react-native'
+import { View, Text, TextInput, SafeAreaView, ScrollView, Switch, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { map } from 'rxjs/operators'
@@ -11,6 +11,9 @@ import { useTheme, useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { Language } from '../i18n'
 import { OnboardingCard } from '../components/OnboardingCard'
+import { LevelBadge } from '../components/LevelBadge'
+import { XPProgressBar } from '../components/XPProgressBar'
+import { xpToNextLevel } from '../model/utils/gamificationHelpers'
 import { spacing } from '../theme'
 import {
   USER_LEVELS,
@@ -29,10 +32,6 @@ import {
 
 interface Props {
   user: User | null
-}
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true)
 }
 
 const SettingsContent: React.FC<Props> = ({ user }) => {
@@ -118,6 +117,25 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
     }
   }
 
+  const userLevel = user?.level ?? 1
+  const userXP = user?.totalXp ?? 0
+  const xpInfo = xpToNextLevel(userXP, userLevel)
+  const displayName = user?.name || t.settings.profile.namePlaceholder
+  const initials = displayName.slice(0, 2).toUpperCase()
+  const levelLabel = user?.userLevel ? t.onboarding.levels[user.userLevel as UserLevel] : ''
+  const goalLabel = user?.userGoal ? t.onboarding.goals[user.userGoal as UserGoal] : ''
+  const subtitle = [levelLabel, goalLabel].filter(Boolean).join(' · ')
+
+  const toggleLevel = () => {
+    haptics.onSelect()
+    setEditingLevel(!editingLevel)
+  }
+
+  const toggleGoal = () => {
+    haptics.onSelect()
+    setEditingGoal(!editingGoal)
+  }
+
   return (
     <LinearGradient
       colors={[colors.bgGradientStart, colors.bgGradientEnd]}
@@ -127,15 +145,37 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+        {/* Profile Header Hero */}
+        <View style={styles.profileHeader}>
+          <View style={styles.profileAvatar}>
+            <Text style={styles.profileAvatarText}>{initials}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={styles.profileName}>{displayName}</Text>
+              <LevelBadge level={userLevel} />
+            </View>
+            {subtitle ? <Text style={styles.profileSubtitle}>{subtitle}</Text> : null}
+            <XPProgressBar currentXP={xpInfo.current} requiredXP={xpInfo.required} percentage={xpInfo.percentage} />
+          </View>
+        </View>
+
+        {/* Group: PROFIL */}
+        <Text style={styles.groupLabel}>{t.settings.groups.profile}</Text>
+
         {/* Section Mon profil */}
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
+            <View style={styles.sectionAccent} />
             <Ionicons name="person-outline" size={18} color={colors.primary} />
             <Text style={styles.sectionTitle}>{t.settings.profile.title}</Text>
           </View>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>{t.settings.profile.name}</Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="person-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.profile.name}</Text>
+              </View>
               <Text style={styles.settingDescription}>{t.settings.profile.nameDescription}</Text>
             </View>
             <TextInput
@@ -153,11 +193,14 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
           {/* Niveau */}
           <TouchableOpacity
             style={styles.settingRow}
-            onPress={() => setEditingLevel(!editingLevel)}
+            onPress={toggleLevel}
             activeOpacity={0.7}
           >
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>{t.settings.profile.level}</Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="trophy-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.profile.level}</Text>
+              </View>
               <Text style={styles.settingDescription}>{t.settings.profile.levelDescription}</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
@@ -187,12 +230,15 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
 
           {/* Objectif */}
           <TouchableOpacity
-            style={styles.settingRow}
-            onPress={() => setEditingGoal(!editingGoal)}
+            style={[styles.settingRow, styles.settingRowLast]}
+            onPress={toggleGoal}
             activeOpacity={0.7}
           >
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>{t.settings.profile.goal}</Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="flag-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.profile.goal}</Text>
+              </View>
               <Text style={styles.settingDescription}>{t.settings.profile.goalDescription}</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
@@ -224,14 +270,18 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
         {/* Section Apparence */}
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
+            <View style={styles.sectionAccent} />
             <Ionicons name="color-palette-outline" size={18} color={colors.primary} />
             <Text style={styles.sectionTitle}>{t.settings.appearance.title}</Text>
           </View>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>
-                {isDark ? t.settings.appearance.darkMode : t.settings.appearance.lightMode}
-              </Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name={isDark ? 'moon-outline' : 'sunny-outline'} size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>
+                  {isDark ? t.settings.appearance.darkMode : t.settings.appearance.lightMode}
+                </Text>
+              </View>
               <Text style={styles.settingDescription}>
                 {isDark ? t.settings.appearance.darkDescription : t.settings.appearance.lightDescription}
               </Text>
@@ -243,13 +293,16 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
                 await toggleTheme()
               }}
               trackColor={{ false: colors.cardSecondary, true: colors.primary }}
-              thumbColor={colors.text}
+              thumbColor={colors.switchThumb}
             />
           </View>
           {/* Langue */}
-          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+          <View style={[styles.settingRow, styles.settingRowLast]}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>{t.settings.appearance.language}</Text>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="language-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.appearance.language}</Text>
+              </View>
               <Text style={styles.settingDescription}>{t.settings.appearance.languageDescription}</Text>
             </View>
           </View>
@@ -265,12 +318,15 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
                 activeOpacity={0.7}
               >
                 <Text style={[styles.languageBtnText, language === lang && styles.languageBtnTextActive]}>
-                  {lang === 'fr' ? t.onboarding.language.fr : t.onboarding.language.en}
+                  {lang === 'fr' ? `\u{1F1EB}\u{1F1F7} ${t.onboarding.language.fr}` : `\u{1F1EC}\u{1F1E7} ${t.onboarding.language.en}`}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
+
+        {/* Group: ENTRAÎNEMENT */}
+        <Text style={styles.groupLabel}>{t.settings.groups.training}</Text>
 
         {/* Timer */}
         <SettingsTimerSection
@@ -300,8 +356,14 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
           setStreakTarget={setStreakTarget}
         />
 
+        {/* Group: ASSISTANT */}
+        <Text style={styles.groupLabel}>{t.settings.groups.assistant}</Text>
+
         {/* AI */}
         <SettingsAISection styles={styles} />
+
+        {/* Group: SYSTÈME */}
+        <Text style={styles.groupLabel}>{t.settings.groups.system}</Text>
 
         {/* Data */}
         <SettingsDataSection user={user} styles={styles} />

@@ -30,6 +30,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { useWorkoutCompletion } from '../hooks/useWorkoutCompletion'
 import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
+import { WorkoutSupersetBlock } from '../components/WorkoutSupersetBlock'
 import { WorkoutSummarySheet } from '../components/WorkoutSummarySheet'
 import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
@@ -37,7 +38,7 @@ import RestTimer from '../components/RestTimer'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RouteProp } from '@react-navigation/native'
 import { RootStackParamList } from '../navigation'
-import { spacing, fontSize, borderRadius } from '../theme'
+import { spacing, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
@@ -47,9 +48,13 @@ import {
   requestNotificationPermission,
 } from '../services/notificationService'
 
+const KEYBOARD_OFFSET = 120
+const FOOTER_BOTTOM_PADDING = 120
+const TIMER_BOTTOM_OFFSET = 80
+
 type WorkoutListItem =
-  | { type: 'exercise'; data: SessionExercise; supersetId: string | null }
-  | { type: 'supersetHeader'; supersetId: string; supersetType: string; count: number }
+  | { type: 'exercise'; data: SessionExercise }
+  | { type: 'supersetBlock'; supersetId: string; supersetType: string; exercises: SessionExercise[] }
 
 function buildWorkoutList(sessionExercises: SessionExercise[]): WorkoutListItem[] {
   const result: WorkoutListItem[] = []
@@ -57,17 +62,21 @@ function buildWorkoutList(sessionExercises: SessionExercise[]): WorkoutListItem[
 
   for (const se of sessionExercises) {
     const groupId = se.supersetId
-    if (groupId && !seenGroups.has(groupId)) {
-      seenGroups.add(groupId)
-      const groupMembers = sessionExercises.filter(s => s.supersetId === groupId)
-      result.push({
-        type: 'supersetHeader',
-        supersetId: groupId,
-        supersetType: se.supersetType ?? 'superset',
-        count: groupMembers.length,
-      })
+    if (groupId) {
+      if (!seenGroups.has(groupId)) {
+        seenGroups.add(groupId)
+        const groupMembers = sessionExercises.filter(s => s.supersetId === groupId)
+        result.push({
+          type: 'supersetBlock',
+          supersetId: groupId,
+          supersetType: se.supersetType ?? 'superset',
+          exercises: groupMembers,
+        })
+      }
+      // Skip individual exercises that are part of a group — they're in the block
+    } else {
+      result.push({ type: 'exercise', data: se })
     }
-    result.push({ type: 'exercise', data: se, supersetId: groupId ?? null })
   }
   return result
 }
@@ -117,7 +126,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   useEffect(() => () => { isMountedRef.current = false }, [])
 
   const haptics = useHaptics()
-  const footerSlide = useKeyboardAnimation(120)
+  const footerSlide = useKeyboardAnimation(KEYBOARD_OFFSET)
   const { formattedTime } = useWorkoutTimer(startTimestampRef.current)
   const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet, unvalidateSet } =
     useWorkoutState(sessionExercises, historyId)
@@ -275,21 +284,18 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   }, [validateSet, sessionExercises, validatedSets, user?.timerEnabled, user?.restDuration, haptics])
 
   const renderWorkoutItem = useCallback(({ item: listItem }: { item: WorkoutListItem }) => {
-    if (listItem.type === 'supersetHeader') {
-      const label = listItem.supersetType === 'circuit'
-        ? t.workout.circuitRound
-        : t.workout.supersetRound
-      const color = listItem.supersetType === 'circuit'
-        ? colors.warning
-        : colors.primary
+    if (listItem.type === 'supersetBlock') {
       return (
-        <View style={styles.supersetHeader}>
-          <View style={[styles.supersetHeaderLine, { backgroundColor: color }]} />
-          <Text style={[styles.supersetHeaderText, { color }]}>
-            {label} ({listItem.count})
-          </Text>
-          <View style={[styles.supersetHeaderLine, { backgroundColor: color }]} />
-        </View>
+        <WorkoutSupersetBlock
+          sessionExercises={listItem.exercises}
+          supersetType={listItem.supersetType}
+          historyId={historyId}
+          setInputs={setInputs}
+          validatedSets={validatedSets}
+          onUpdateInput={updateSetInput}
+          onValidateSet={handleValidateSet}
+          onUnvalidateSet={unvalidateSet}
+        />
       )
     }
     return (
@@ -303,7 +309,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         onUnvalidateSet={unvalidateSet}
       />
     )
-  }, [t, colors, styles, historyId, setInputs, validatedSets, updateSetInput, handleValidateSet, unvalidateSet])
+  }, [historyId, setInputs, validatedSets, updateSetInput, handleValidateSet, unvalidateSet])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -317,9 +323,9 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       {historyId ? (
         <FlatList
           data={workoutList}
-          keyExtractor={(item, index) =>
-            item.type === 'supersetHeader'
-              ? `header_${item.supersetId}`
+          keyExtractor={(item) =>
+            item.type === 'supersetBlock'
+              ? `block_${item.supersetId}`
               : `exercise_${item.data.id}`
           }
           keyboardShouldPersistTaps="handled"
@@ -419,7 +425,7 @@ function useStyles(colors: ThemeColors) {
     container: { flex: 1, backgroundColor: colors.background },
     listContent: {
       paddingHorizontal: spacing.md,
-      paddingBottom: 120, // extra space for floating footer + timer
+      paddingBottom: FOOTER_BOTTOM_PADDING, // extra space for floating footer + timer
     },
     emptyText: {
       color: colors.placeholder,
@@ -430,7 +436,7 @@ function useStyles(colors: ThemeColors) {
     },
     timerContainer: {
       position: 'absolute',
-      bottom: 80,
+      bottom: TIMER_BOTTOM_OFFSET,
       left: 0,
       right: 0,
     },
@@ -441,22 +447,6 @@ function useStyles(colors: ThemeColors) {
       borderTopWidth: 1,
       borderTopColor: colors.card,
       backgroundColor: colors.background,
-    },
-    supersetHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: spacing.sm,
-      gap: spacing.sm,
-    },
-    supersetHeaderLine: {
-      flex: 1,
-      height: 1,
-    },
-    supersetHeaderText: {
-      fontSize: fontSize.xs,
-      fontWeight: '800',
-      letterSpacing: 1,
-      textTransform: 'uppercase',
     },
   }), [colors])
 }

@@ -16,9 +16,14 @@ import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import type { SetInputData, ValidatedSetData, LastPerformance } from '../types/workout'
 
+const INPUT_DEBOUNCE_MS = 300
+const SET_BADGE_SIZE = 28
+const VALIDATE_BTN_SIZE = 40
+const UNDO_BTN_SIZE = 28
+
 // --- Types ---
 
-interface WorkoutSetRowProps {
+export interface WorkoutSetRowProps {
   setOrder: number
   inputKey: string
   input: SetInputData
@@ -42,7 +47,7 @@ interface WorkoutExerciseCardContentProps {
 
 // --- WorkoutSetRow ---
 
-const WorkoutSetRow = React.memo(function WorkoutSetRow({
+export const WorkoutSetRow = React.memo(function WorkoutSetRow({
   setOrder,
   inputKey,
   input,
@@ -80,13 +85,13 @@ const WorkoutSetRow = React.memo(function WorkoutSetRow({
   const handleWeightChange = useCallback((v: string) => {
     setLocalWeight(v)
     if (weightTimerRef.current) clearTimeout(weightTimerRef.current)
-    weightTimerRef.current = setTimeout(() => onUpdateInput(inputKey, 'weight', v), 300)
+    weightTimerRef.current = setTimeout(() => onUpdateInput(inputKey, 'weight', v), INPUT_DEBOUNCE_MS)
   }, [inputKey, onUpdateInput])
 
   const handleRepsChange = useCallback((v: string) => {
     setLocalReps(v)
     if (repsTimerRef.current) clearTimeout(repsTimerRef.current)
-    repsTimerRef.current = setTimeout(() => onUpdateInput(inputKey, 'reps', v), 300)
+    repsTimerRef.current = setTimeout(() => onUpdateInput(inputKey, 'reps', v), INPUT_DEBOUNCE_MS)
   }, [inputKey, onUpdateInput])
 
   const handleValidate = useCallback(() => {
@@ -113,18 +118,20 @@ const WorkoutSetRow = React.memo(function WorkoutSetRow({
     return (
       <View style={[styles.setRow, styles.setRowValidated]}>
         <View style={styles.setBadgeValidated}>
-          <Ionicons name="checkmark" size={14} color={colors.background} />
+          <Ionicons name="checkmark" size={16} color={colors.background} />
         </View>
-        <Text style={styles.validatedText}>
-          {validated.weight} kg × {validated.reps} reps
-        </Text>
+        <Text style={styles.validatedWeight}>{validated.weight}</Text>
+        <Text style={styles.validatedUnit}>kg</Text>
+        <Text style={styles.validatedMultiply}>×</Text>
+        <Text style={styles.validatedWeight}>{validated.reps}</Text>
+        <Text style={styles.validatedUnit}>reps</Text>
         {validated.isPr && (
           <View style={styles.prChip}>
             <Text style={styles.prBadge}>PR !</Text>
           </View>
         )}
-        <TouchableOpacity onPress={() => onUnvalidate(setOrder)} style={styles.validateBtnActive} testID="validate-btn">
-          <Ionicons name="close-outline" size={18} color={colors.primary} />
+        <TouchableOpacity onPress={() => onUnvalidate(setOrder)} style={styles.undoBtn} testID="validate-btn">
+          <Ionicons name="arrow-undo-outline" size={14} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
     )
@@ -139,45 +146,43 @@ const WorkoutSetRow = React.memo(function WorkoutSetRow({
   const { valid } = validateSetInput(localWeight, localReps)
 
   return (
-    <View style={[styles.setRow, neuShadow.pressed]}>
+    <View style={styles.setRow}>
       <View style={styles.setBadge}>
         <Text style={styles.setBadgeText}>{setOrder}</Text>
       </View>
-      <View style={styles.inputGroup}>
+      <View style={[styles.inputBlock, weightError && styles.inputBlockError]}>
         <TextInput
-          style={[styles.input, styles.inputWeight, weightError && styles.inputError]}
+          style={styles.inputField}
           value={localWeight}
           onChangeText={handleWeightChange}
           placeholder="0"
           placeholderTextColor={colors.placeholder}
           keyboardType="numeric"
-          editable
           textAlign="center"
         />
         <Text style={styles.inputSuffix}>kg</Text>
       </View>
-      <View style={styles.inputGroup}>
+      <View style={[styles.inputBlock, styles.inputBlockReps, repsError && styles.inputBlockError]}>
         <TextInput
-          style={[styles.input, styles.inputReps, repsError && styles.inputError]}
+          style={styles.inputField}
           value={localReps}
           onChangeText={handleRepsChange}
           placeholder={repsTarget ?? '6-8'}
           placeholderTextColor={colors.placeholder}
           keyboardType="numeric"
-          editable
           textAlign="center"
         />
         <Text style={styles.inputSuffix}>reps</Text>
       </View>
       <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
         <TouchableOpacity
-          style={[styles.validateBtn, !valid && styles.validateBtnDisabled]}
+          style={[styles.validateBtn, valid && styles.validateBtnReady, !valid && styles.validateBtnDisabled]}
           onPress={handleValidate}
           disabled={!valid}
           activeOpacity={0.7}
           testID="validate-btn"
         >
-          <Ionicons name="checkmark-outline" size={18} color={valid ? colors.primary : colors.border} />
+          <Ionicons name="checkmark" size={22} color={valid ? colors.primary : colors.border} />
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -257,7 +262,7 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
       style={[
         styles.card,
         neuShadow.elevated,
-        { borderLeftColor: isComplete ? colors.success : 'transparent' },
+        { borderLeftColor: isComplete ? colors.primary : 'transparent' },
       ]}
     >
       <Text style={styles.exerciseName}>{exercise.name}</Text>
@@ -441,114 +446,139 @@ function createStyles(colors: ThemeColors) {
     setRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: spacing.sm,
+      paddingVertical: spacing.ms,
       paddingHorizontal: spacing.sm,
       borderRadius: borderRadius.sm,
       marginBottom: spacing.xs,
       gap: spacing.sm,
     },
     setRowValidated: {
-      backgroundColor: colors.successBg,
+      backgroundColor: colors.primary + '18',
       borderRadius: borderRadius.sm,
-      paddingHorizontal: spacing.sm,
     },
 
-    // Badge circulaire numéroté (état non validé)
+    // Badge circulaire numerote (etat non valide)
     setBadge: {
-      width: 28,
-      height: 28,
-      borderRadius: borderRadius.md,
+      width: SET_BADGE_SIZE,
+      height: SET_BADGE_SIZE,
+      borderRadius: SET_BADGE_SIZE / 2,
+      backgroundColor: colors.cardSecondary,
       borderWidth: 1.5,
-      borderColor: colors.primary,
+      borderColor: colors.border + '60',
       justifyContent: 'center',
       alignItems: 'center',
     },
-    // Badge avec checkmark (état validé)
+    // Badge avec checkmark (etat valide)
     setBadgeValidated: {
-      width: 28,
-      height: 28,
-      borderRadius: borderRadius.md,
+      width: SET_BADGE_SIZE,
+      height: SET_BADGE_SIZE,
+      borderRadius: SET_BADGE_SIZE / 2,
       backgroundColor: colors.primary,
       justifyContent: 'center',
       alignItems: 'center',
     },
     setBadgeText: {
-      color: colors.primary,
+      color: colors.textSecondary,
       fontSize: fontSize.xs,
       fontWeight: '700',
     },
 
-    // Input group
-    inputGroup: {
+    // Unified input block (input + suffix together)
+    inputBlock: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.xs,
-    },
-    input: {
       backgroundColor: colors.cardSecondary,
       borderRadius: borderRadius.sm,
-      color: colors.text,
-      fontSize: fontSize.md,
-      paddingVertical: spacing.xs,
       borderWidth: 1,
-      borderColor: 'transparent',
+      borderColor: colors.border + '30',
+      paddingRight: spacing.xs,
+      flex: 1,
     },
-    inputWeight: { width: 62 },
-    inputReps: { width: 52 },
-    inputError: {
+    inputBlockReps: {
+      flex: 1,
+    },
+    inputBlockError: {
       borderColor: colors.danger,
     },
+    inputField: {
+      flex: 1,
+      color: colors.text,
+      fontSize: fontSize.md,
+      fontWeight: '600',
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.xs,
+      textAlign: 'center',
+    },
     inputSuffix: {
-      color: colors.textSecondary,
-      fontSize: fontSize.xs,
-      width: 28,
+      color: colors.placeholder,
+      fontSize: fontSize.caption,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
 
-    // Validate button (not validated)
+    // Validate button
     validateBtn: {
-      width: spacing.xl,
-      height: spacing.xl,
+      width: VALIDATE_BTN_SIZE,
+      height: VALIDATE_BTN_SIZE,
       borderRadius: borderRadius.lg,
       backgroundColor: 'transparent',
       borderWidth: 1.5,
-      borderColor: colors.primary,
+      borderColor: colors.border,
       justifyContent: 'center',
       alignItems: 'center',
       marginLeft: 'auto',
     },
+    validateBtnReady: {
+      backgroundColor: colors.primaryBg,
+      borderColor: colors.primary,
+    },
     validateBtnDisabled: {
-      borderColor: colors.border,
+      borderColor: colors.border + '50',
       backgroundColor: 'transparent',
     },
-    validateBtnActive: {
-      width: spacing.xl,
-      height: spacing.xl,
-      borderRadius: borderRadius.lg,
-      backgroundColor: colors.successBg,
-      borderWidth: 1,
-      borderColor: colors.primary + '60',
+
+    // Undo button (validated state)
+    undoBtn: {
+      width: UNDO_BTN_SIZE,
+      height: UNDO_BTN_SIZE,
+      borderRadius: borderRadius.md,
+      backgroundColor: colors.cardSecondary,
       justifyContent: 'center',
       alignItems: 'center',
       marginLeft: 'auto',
     },
 
-    // Validated state
-    validatedText: {
+    // Validated state text
+    validatedWeight: {
       color: colors.text,
-      fontSize: fontSize.md,
-      fontWeight: '700',
-      flex: 1,
+      fontSize: fontSize.bodyMd,
+      fontWeight: '800',
+    },
+    validatedUnit: {
+      color: colors.textSecondary,
+      fontSize: fontSize.caption,
+      fontWeight: '600',
+      marginLeft: 2,
+    },
+    validatedMultiply: {
+      color: colors.placeholder,
+      fontSize: fontSize.sm,
+      fontWeight: '400',
+      marginHorizontal: spacing.xs,
     },
     prChip: {
-      backgroundColor: colors.primaryBg,
-      borderRadius: borderRadius.sm,
-      paddingHorizontal: spacing.xs,
-      paddingVertical: 2,
+      backgroundColor: colors.primary + '25',
+      borderRadius: borderRadius.xs,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      marginLeft: spacing.xs,
     },
     prBadge: {
       color: colors.primary,
       fontSize: fontSize.xs,
       fontWeight: '800',
+      letterSpacing: 0.5,
     },
   })
 }

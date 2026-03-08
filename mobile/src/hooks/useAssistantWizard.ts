@@ -10,6 +10,9 @@ import type User from '../model/models/User'
 import type { AIFormData, AILevel, AISplit } from '../services/ai/types'
 import type { RootStackParamList } from '../navigation/index'
 
+const PROGRESS_ANIM_DURATION = 250
+const STEP_FADEIN_DURATION = 200
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type FormValue = string | number | string[]
@@ -334,7 +337,7 @@ export function useAssistantWizard({
     const progress = totalSteps > 1 ? currentStep / (totalSteps - 1) : 0
     Animated.timing(progressAnim, {
       toValue: progress,
-      duration: 250,
+      duration: PROGRESS_ANIM_DURATION,
       useNativeDriver: false,
     }).start()
   }, [currentStep, totalSteps, progressAnim])
@@ -363,7 +366,7 @@ export function useAssistantWizard({
     pendingFadeIn.current = false
     Animated.timing(contentAnim, {
       toValue: 1,
-      duration: 200,
+      duration: STEP_FADEIN_DURATION,
       useNativeDriver: false,
     }).start()
   }, [currentStep, contentAnim])

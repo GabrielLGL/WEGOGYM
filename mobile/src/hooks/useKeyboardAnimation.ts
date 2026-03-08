@@ -17,6 +17,8 @@ import { Keyboard, Animated, Platform } from 'react-native'
  *   <TextInput />
  * </Animated.View>
  */
+const KEYBOARD_ANIM_DURATION = 250
+
 export function useKeyboardAnimation(offset: number = -50) {
   const slideAnim = useRef(new Animated.Value(0)).current
 
@@ -29,7 +31,7 @@ export function useKeyboardAnimation(offset: number = -50) {
     const keyboardDidShowListener = Keyboard.addListener(showEvent, () => {
       Animated.timing(slideAnim, {
         toValue: offset,
-        duration: 250,
+        duration: KEYBOARD_ANIM_DURATION,
         useNativeDriver: true,
       }).start()
     })
@@ -37,7 +39,7 @@ export function useKeyboardAnimation(offset: number = -50) {
     const keyboardDidHideListener = Keyboard.addListener(hideEvent, () => {
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 250,
+        duration: KEYBOARD_ANIM_DURATION,
         useNativeDriver: true,
       }).start()
     })

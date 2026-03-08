@@ -88,7 +88,7 @@ const CatalogItem = memo<CatalogItemProps>(({ item, onPress, colors }) => {
 })
 
 function useItemStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     row: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -119,7 +119,7 @@ function useItemStyles(colors: ThemeColors) {
       marginTop: 3,
       textTransform: 'capitalize',
     },
-  })
+  }), [colors])
 }
 
 // ── Composant détail exercice (dans BottomSheet) ──────────────────────────────
@@ -331,7 +331,11 @@ const ExerciseCatalogScreen: React.FC = () => {
     const offset = currentOffsetRef.current
     try {
       const result = await searchCatalogExercises({ query: q, offset, limit: PAGE_SIZE })
-      setExercises(prev => [...prev, ...result.exercises])
+      setExercises(prev => {
+        const existingIds = new Set(prev.map(e => e.id))
+        const newExercises = result.exercises.filter(e => !existingIds.has(e.id))
+        return [...prev, ...newExercises]
+      })
       setHasMore(result.hasMore)
       hasMoreRef.current = result.hasMore
       currentOffsetRef.current = offset + result.exercises.length

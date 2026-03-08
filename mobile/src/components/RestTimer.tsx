@@ -12,6 +12,14 @@ import {
 } from '../services/notificationService'
 import { createBeepSound } from '../utils/timerBeep'
 
+const TIMER_INTERVAL_MS = 100
+const HAPTIC_DELAY_1 = 400
+const HAPTIC_DELAY_2 = 800
+const AUTO_CLOSE_DELAY = 1000
+const TIMER_ENTRY_OFFSET = 50
+const TIMER_WARNING_THRESHOLD_S = 10
+const TIMER_ANIM_DURATION = 200
+
 interface Props {
   duration: number // en secondes
   onClose: () => void
@@ -41,7 +49,7 @@ const RestTimer: React.FC<Props> = ({
   const hapticTimer2Ref = useRef<NodeJS.Timeout | null>(null)
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null)
   const endTimeRef = useRef<number>(Date.now() + duration * 1000) // Heure de fin cible
-  const animValue = useRef(new Animated.Value(50)).current // Animation de montée légère
+  const animValue = useRef(new Animated.Value(TIMER_ENTRY_OFFSET)).current // Animation de montée légère
   const progressAnim = useRef(new Animated.Value(1)).current
   const notificationIdRef = useRef<string | null>(null)
   const soundRef = useRef<Audio.Sound | null>(null)
@@ -56,7 +64,7 @@ const RestTimer: React.FC<Props> = ({
 
   useEffect(() => {
     if (notificationEnabled) {
-      scheduleRestEndNotification(duration)
+      scheduleRestEndNotification(duration, t.settings.timer.notifTitle, t.settings.timer.notifBody)
         .then(id => {
           notificationIdRef.current = id
         })
@@ -106,7 +114,7 @@ const RestTimer: React.FC<Props> = ({
     updateTimer()
 
     // Mise à jour toutes les 100ms pour un affichage fluide
-    timerRef.current = setInterval(updateTimer, 100)
+    timerRef.current = setInterval(updateTimer, TIMER_INTERVAL_MS)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
@@ -126,8 +134,8 @@ const RestTimer: React.FC<Props> = ({
     // Triple vibration forte (conditionnelle)
     if (vibrationEnabledRef.current) {
       haptics.onDelete()
-      hapticTimer1Ref.current = setTimeout(() => haptics.onDelete(), 400)
-      hapticTimer2Ref.current = setTimeout(() => haptics.onDelete(), 800)
+      hapticTimer1Ref.current = setTimeout(() => haptics.onDelete(), HAPTIC_DELAY_1)
+      hapticTimer2Ref.current = setTimeout(() => haptics.onDelete(), HAPTIC_DELAY_2)
     }
 
     // Son beep (conditionnel)
@@ -145,7 +153,7 @@ const RestTimer: React.FC<Props> = ({
     }
 
     // Fermeture automatique après 1 secondes
-    closeTimerRef.current = setTimeout(closeTimer, 1000)
+    closeTimerRef.current = setTimeout(closeTimer, AUTO_CLOSE_DELAY)
   }
 
   const closeTimer = () => {
@@ -154,7 +162,7 @@ const RestTimer: React.FC<Props> = ({
       notificationIdRef.current = null
     }
 
-    Animated.timing(animValue, { toValue: 50, duration: 200, useNativeDriver: true }).start(() => {
+    Animated.timing(animValue, { toValue: TIMER_ENTRY_OFFSET, duration: TIMER_ANIM_DURATION, useNativeDriver: true }).start(() => {
       onClose()
     })
   }
@@ -165,7 +173,7 @@ const RestTimer: React.FC<Props> = ({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`
   }
 
-  const timerColor = timeLeft <= 10 ? colors.warning : colors.text
+  const timerColor = timeLeft <= TIMER_WARNING_THRESHOLD_S ? colors.warning : colors.text
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY: animValue }] }]}>

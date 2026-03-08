@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, memo, useRef, useMemo } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, UIManager, BackHandler, Keyboard } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, BackHandler, Keyboard } from 'react-native'
+import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
@@ -25,10 +26,6 @@ import { fontSize, spacing, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useLanguage } from '../contexts/LanguageContext'
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true)
-}
 
 interface Props { exercises: Exercise[] }
 
@@ -197,7 +194,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
                 }}
                 style={styles.searchFakeInput}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <View style={styles.searchFakeRow}>
                   <Ionicons name="search-outline" size={16} color={colors.placeholder} />
                   <Text style={styles.searchFakeText}>{t.exercises.search}</Text>
                 </View>
@@ -238,7 +235,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
               onChange={setFilterEquipment}
               noneLabel={t.exercises.allEquipment}
               labelMap={t.equipmentNames}
-              style={[styles.filterRow, { marginTop: HEADER_PADDING_V }]}
+              style={[styles.filterRow, styles.filterRowSecond]}
             />
           </View>
         </View>
@@ -249,7 +246,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
               keyExtractor={item => item.id}
               renderItem={renderExerciseItem}
               style={styles.list}
-              contentContainerStyle={{ paddingHorizontal: SCREEN_PADDING_H, paddingBottom: LIST_PADDING_BOTTOM }}
+              contentContainerStyle={styles.listContent}
               ItemSeparatorComponent={renderSeparator}
               ListEmptyComponent={<Text style={styles.emptyList}>{t.exercises.noExercises}</Text>}
               initialNumToRender={15}
@@ -331,75 +328,60 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   )
 }
 
-const SCREEN_PADDING_H = 20
-const HEADER_PADDING_V = 10
-const HEADER_PADDING_BOTTOM = 15
 const SEARCH_HEIGHT = 45
-const SEARCH_PADDING_H = 15
-const LIST_ITEM_PADDING_V = 15
-const FONT_SIZE_EXO_TITLE = 17
-const FONT_SIZE_LABEL = 13
-const ICON_PADDING = 10
-const INPUT_MARGIN_BOTTOM = 20
-const EQUIP_ROW_MARGIN_BOTTOM = 30
-const EQUIP_BORDER_RADIUS = 10
-const BTN_PADDING = 14
 const LIST_PADDING_BOTTOM = 150
 
 function useExerciseItemStyles(colors: ThemeColors) {
-  return StyleSheet.create({
-    exoItem: { paddingVertical: LIST_ITEM_PADDING_V, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  return useMemo(() => StyleSheet.create({
+    exoItem: { paddingVertical: spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     exoInfo: { flex: 1 },
-    exoTitle: { color: colors.text, fontSize: FONT_SIZE_EXO_TITLE, fontWeight: '600' },
-    exoSubtitle: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL, marginTop: 3 },
-    moreBtn: { padding: ICON_PADDING },
+    exoTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: '600' },
+    exoSubtitle: { color: colors.textSecondary, fontSize: fontSize.sm, marginTop: spacing.xs },
+    moreBtn: { padding: spacing.sm },
     moreIcon: { color: colors.placeholder, fontSize: fontSize.lg, fontWeight: 'bold' },
-  })
+  }), [colors])
 }
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
     baseContainer: { flex: 1, backgroundColor: colors.background },
     container: { flex: 1 },
-    header: { paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, paddingBottom: HEADER_PADDING_BOTTOM },
-    headerTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: HEADER_PADDING_BOTTOM, height: SEARCH_HEIGHT },
-    searchFakeInput: { flex: 1, backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: SEARCH_PADDING_H, height: SEARCH_HEIGHT, justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
+    header: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.md },
+    headerTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, height: SEARCH_HEIGHT },
+    searchFakeInput: { flex: 1, backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, height: SEARCH_HEIGHT, justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
+    searchFakeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     searchFakeText: { color: colors.textSecondary, fontSize: fontSize.bodyMd },
-    searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: SEARCH_PADDING_H, height: SEARCH_HEIGHT, borderWidth: 1, borderColor: colors.primary },
+    searchBarContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, height: SEARCH_HEIGHT, borderWidth: 1, borderColor: colors.primary },
     searchInput: { flex: 1, color: colors.text, fontSize: fontSize.md },
     closeSearchText: { color: colors.primary, marginLeft: spacing.sm, fontWeight: '600' },
-    searchFilters: { marginBottom: 5 },
+    searchFilters: { marginBottom: spacing.xs },
     filterRow: { flexDirection: 'row' },
+    filterRowSecond: { marginTop: spacing.sm },
     listWrapper: { flex: 1 },
     list: { flex: 1 },
-    exoItem: { paddingVertical: LIST_ITEM_PADDING_V, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    exoInfo: { flex: 1 },
-    exoTitle: { color: colors.text, fontSize: FONT_SIZE_EXO_TITLE, fontWeight: '600' },
-    exoSubtitle: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL, marginTop: 3 },
-    moreBtn: { padding: ICON_PADDING },
-    moreIcon: { color: colors.placeholder, fontSize: fontSize.lg, fontWeight: 'bold' },
+    listContent: { paddingHorizontal: spacing.lg, paddingBottom: LIST_PADDING_BOTTOM },
     separator: { height: 1, backgroundColor: colors.card },
-    emptyList: { color: colors.textSecondary, textAlign: 'center', marginTop: 50, fontStyle: 'italic' },
-    footerFloating: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: SCREEN_PADDING_H, paddingTop: HEADER_PADDING_V, paddingBottom: spacing.md, backgroundColor: colors.background },
+    emptyList: { color: colors.textSecondary, textAlign: 'center', marginTop: spacing.xxl, fontStyle: 'italic' },
+    footerFloating: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.md, backgroundColor: colors.background },
     addButton: { backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 8 },
     addButtonText: { color: colors.primaryText, fontWeight: 'bold', fontSize: fontSize.md },
 
-    label: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL, marginBottom: spacing.sm, fontWeight: '600', textTransform: 'uppercase' },
-    input: { backgroundColor: colors.cardSecondary, color: colors.text, padding: LIST_ITEM_PADDING_V, borderRadius: borderRadius.md, fontSize: fontSize.md, marginBottom: INPUT_MARGIN_BOTTOM },
-    chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: INPUT_MARGIN_BOTTOM },
+    label: { color: colors.textSecondary, fontSize: fontSize.sm, marginBottom: spacing.sm, fontWeight: '600', textTransform: 'uppercase' },
+    input: { backgroundColor: colors.cardSecondary, color: colors.text, padding: spacing.md, borderRadius: borderRadius.md, fontSize: fontSize.md, marginBottom: spacing.lg },
+    chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: spacing.lg },
     chip: { paddingVertical: spacing.sm, paddingHorizontal: spacing.ms, borderRadius: borderRadius.lg, backgroundColor: colors.cardSecondary, marginRight: spacing.sm, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
     chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
     chipText: { color: colors.textSecondary, fontSize: fontSize.xs },
     chipTextActive: { color: colors.text, fontWeight: 'bold' },
-    equipRow: { flexDirection: 'row', marginBottom: EQUIP_ROW_MARGIN_BOTTOM },
-    equipBtn: { paddingVertical: ICON_PADDING, paddingHorizontal: SEARCH_PADDING_H, borderRadius: EQUIP_BORDER_RADIUS, backgroundColor: colors.cardSecondary, marginRight: spacing.sm },
+    equipRow: { flexDirection: 'row', marginBottom: spacing.xl },
+    equipBtn: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: borderRadius.sm, backgroundColor: colors.cardSecondary, marginRight: spacing.sm },
     equipBtnActive: { backgroundColor: colors.secondaryButton, borderWidth: 1, borderColor: colors.primary },
-    equipText: { color: colors.textSecondary, fontSize: FONT_SIZE_LABEL },
+    equipText: { color: colors.textSecondary, fontSize: fontSize.sm },
     equipTextActive: { color: colors.text, fontWeight: 'bold' },
-    cancelBtn: { flex: 0.47, backgroundColor: colors.secondaryButton, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center' },
-    confirmBtn: { flex: 0.47, backgroundColor: colors.primary, padding: BTN_PADDING, borderRadius: borderRadius.md, alignItems: 'center' },
+    cancelBtn: { flex: 0.47, backgroundColor: colors.secondaryButton, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center' },
+    confirmBtn: { flex: 0.47, backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center' },
     btnText: { color: colors.text, fontWeight: 'bold' },
-    sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: LIST_ITEM_PADDING_V },
+    sheetOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.md },
     sheetText: { color: colors.text, fontSize: fontSize.md },
   }), [colors])
 }
@@ -421,16 +403,18 @@ const ExercisesScreen = () => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
+        <GHTouchableOpacity
           testID="globe-catalog-button"
           onPress={() => {
             haptics.onPress()
             navigation.navigate('ExerciseCatalog')
           }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          activeOpacity={0.7}
           style={{ marginRight: spacing.md }}
         >
           <Ionicons name="globe-outline" size={24} color={colors.primary} />
-        </TouchableOpacity>
+        </GHTouchableOpacity>
       ),
     })
   }, [navigation, colors.primary, haptics])

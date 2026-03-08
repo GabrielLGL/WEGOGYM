@@ -5,6 +5,9 @@ import { borderRadius, spacing, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
+import { useLanguage } from '../contexts/LanguageContext'
+
+const DIALOG_ANIM_DURATION = 200
 
 interface AlertDialogProps {
   visible: boolean
@@ -46,12 +49,15 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   message,
   onConfirm,
   onCancel,
-  confirmText = 'Confirmer',
-  cancelText = 'Annuler',
+  confirmText: confirmTextProp,
+  cancelText: cancelTextProp,
   confirmColor,
   hideCancel = false,
 }) => {
   const { colors, neuShadow } = useTheme()
+  const { t } = useLanguage()
+  const confirmText = confirmTextProp ?? t.common.confirm
+  const cancelText = cancelTextProp ?? t.common.cancel
   const styles = useStyles(colors)
   const effectiveConfirmColor = confirmColor ?? colors.danger
   const haptics = useHaptics()
@@ -62,7 +68,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: DIALOG_ANIM_DURATION, useNativeDriver: true }),
         Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 20 }),
       ]).start()
     } else {

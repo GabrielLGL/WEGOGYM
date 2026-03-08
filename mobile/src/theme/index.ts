@@ -10,7 +10,7 @@ export const colors = {
   // Actions
   primary: '#00cec9',
   danger: '#ff6b6b',
-  success: '#00cec9',
+
   warning: '#FF9500',
 
   // Neutrals
@@ -33,7 +33,7 @@ export const colors = {
   shadow: '#16181d',
 
   // Transparent tints (pour les chips et fonds semi-transparents)
-  successBg: 'rgba(0, 206, 201, 0.12)',
+
   primaryBg: 'rgba(0, 206, 201, 0.15)',
   surfaceOverlay: 'rgba(255, 255, 255, 0.08)',
 
@@ -48,6 +48,9 @@ export const colors = {
 
   // Text on primary-colored surfaces (buttons, badges)
   primaryText: '#ffffff',
+
+  // Switch thumb
+  switchThumb: '#dfe6e9',
 
   // Heatmap calendar intensity (index 0 = rest, 1-3 = activity levels)
   intensityColors: ['#252830', '#004d4a', '#007875', '#00cec9'] as [string, string, string, string],
@@ -163,7 +166,7 @@ export const lightColors = {
   cardSecondary: '#e4e9f0',
   primary: '#6c5ce7',
   danger: '#ff6b6b',
-  success: '#006d6b',
+
   warning: '#e17055',
   border: '#b8c1cc',
   separator: '#b8c1cc',
@@ -174,7 +177,7 @@ export const lightColors = {
   bottomSheetOverlay: 'rgba(20, 25, 30, 0.45)',
   secondaryButton: '#dde2e6',
   shadow: '#b0b8c1',
-  successBg: 'rgba(0, 109, 107, 0.12)',
+
   primaryBg: 'rgba(108, 92, 231, 0.12)',
   surfaceOverlay: 'rgba(0, 0, 0, 0.06)',
   neuShadowDark: '#8a9bb0',
@@ -187,6 +190,9 @@ export const lightColors = {
 
   // Text on primary-colored surfaces (buttons, badges)
   primaryText: '#ffffff',
+
+  // Switch thumb
+  switchThumb: '#ffffff',
 
   // Heatmap calendar intensity (index 0 = rest, 1-3 = activity levels)
   intensityColors: ['#c5cad2', '#c5bef6', '#9b90ed', '#6c5ce7'] as [string, string, string, string],

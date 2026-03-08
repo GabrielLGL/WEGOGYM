@@ -16,6 +16,7 @@ export const SettingsAISection: React.FC<SettingsAISectionProps> = ({ styles }) 
   return (
     <View style={styles.section}>
       <View style={styles.sectionTitleRow}>
+        <View style={styles.sectionAccent} />
         <Ionicons name="hardware-chip-outline" size={18} color={colors.primary} />
         <Text style={styles.sectionTitle}>{t.settings.ai.title}</Text>
       </View>

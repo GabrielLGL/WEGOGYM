@@ -41,6 +41,9 @@ import type { CoachMarkStep } from '../components/CoachMarks'
 import { useCoachMarks } from '../hooks/useCoachMarks'
 import type { RootStackParamList } from '../navigation'
 
+const DEFAULT_STATUS_BAR_HEIGHT = 44
+const DAY_CHIP_MIN_HEIGHT = 84
+
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 type HomeNavigation = NativeStackNavigationProp<RootStackParamList, 'Home'>
@@ -400,7 +403,7 @@ function useStyles(colors: ThemeColors) {
     },
     content: {
       padding: spacing.md,
-      paddingTop: (StatusBar.currentHeight ?? 44) + spacing.sm,
+      paddingTop: (StatusBar.currentHeight ?? DEFAULT_STATUS_BAR_HEIGHT) + spacing.sm,
       paddingBottom: spacing.xl,
     },
     // Header Card
@@ -556,7 +559,7 @@ function useStyles(colors: ThemeColors) {
       borderRadius: borderRadius.sm,
       padding: spacing.xs,
       alignItems: 'center',
-      minHeight: 84,
+      minHeight: DAY_CHIP_MIN_HEIGHT,
     },
     dayChipToday: {
       borderWidth: 1.5,

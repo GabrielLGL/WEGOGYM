@@ -4,6 +4,7 @@ import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
 import type Exercise from '../models/Exercise'
 import type { ExercisePR, ExerciseFrequency, StatsContext } from './statsTypes'
+import { EPLEY_FORMULA_DIVISOR, TOP_EXERCISES_DEFAULT_LIMIT } from '../constants'
 
 export function computePRsByExercise(
   sets: WorkoutSet[],
@@ -38,7 +39,7 @@ export function computePRsByExercise(
       weight,
       reps,
       date,
-      orm1: Math.round(weight * (1 + reps / 30)),
+      orm1: Math.round(weight * (1 + reps / EPLEY_FORMULA_DIVISOR)),
     }))
     .sort((a, b) => b.date - a.date)
 }
@@ -47,7 +48,7 @@ export function computeTopExercisesByFrequency(
   sets: WorkoutSet[],
   exercises: Exercise[],
   histories: History[],
-  limit: number = 5,
+  limit: number = TOP_EXERCISES_DEFAULT_LIMIT,
   ctx?: Pick<StatsContext, 'historyIds'>
 ): ExerciseFrequency[] {
   const exerciseNames = new Map(exercises.map(e => [e.id, e.name]))

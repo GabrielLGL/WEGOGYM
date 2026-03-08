@@ -2,6 +2,7 @@
 
 import type History from '../models/History'
 import type { DurationStats } from './statsTypes'
+import { MINUTE_MS, MINUTES_PER_HOUR, DURATION_CHART_SESSION_LIMIT } from '../constants'
 
 export const MIN_VALID_DURATION_MIN = 10
 
@@ -12,7 +13,7 @@ export function computeDurationStats(histories: History[]): DurationStats {
     .map(h => ({
       id: h.id,
       date: h.startTime.getTime(),
-      durationMin: Math.round((h.endTime!.getTime() - h.startTime.getTime()) / 60000),
+      durationMin: Math.round((h.endTime!.getTime() - h.startTime.getTime()) / MINUTE_MS),
     }))
     .filter(e => e.durationMin >= MIN_VALID_DURATION_MIN)
     .sort((a, b) => a.date - b.date)
@@ -26,17 +27,17 @@ export function computeDurationStats(histories: History[]): DurationStats {
 
   return {
     avgMin: Math.round(totalMin / durations.length),
-    totalHours: Math.round((totalMin / 60) * 10) / 10,
+    totalHours: Math.round((totalMin / MINUTES_PER_HOUR) * 10) / 10,
     minMin: Math.min(...durations),
     maxMin: Math.max(...durations),
-    perSession: withDuration.slice(-30),
+    perSession: withDuration.slice(-DURATION_CHART_SESSION_LIMIT),
     historyAll: [...withDuration].reverse(),
   }
 }
 
 export function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
+  if (minutes < MINUTES_PER_HOUR) return `${minutes} min`
+  const h = Math.floor(minutes / MINUTES_PER_HOUR)
+  const m = minutes % MINUTES_PER_HOUR
   return m > 0 ? `${h}h ${m}min` : `${h}h`
 }

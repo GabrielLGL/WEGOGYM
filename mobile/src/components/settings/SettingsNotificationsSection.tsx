@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react'
-import { View, Text, Switch, TouchableOpacity, LayoutAnimation, FlatList, Platform } from 'react-native'
+import { View, Text, Switch, TouchableOpacity, FlatList, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { database } from '../../model/index'
 import User from '../../model/models/User'
@@ -82,7 +82,6 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
       await setupReminderChannel()
       setPermissionDenied(false)
     }
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     setRemindersEnabled(enabled)
     haptics.onPress()
     await saveReminders(enabled, reminderDays, reminderHour, reminderMinute)
@@ -150,20 +149,24 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
       {/* Section Rappels */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
+          <View style={styles.sectionAccent} />
           <Ionicons name="notifications-outline" size={18} color={colors.primary} />
           <Text style={styles.sectionTitle}>{t.settings.reminders.title}</Text>
         </View>
 
-        <View style={styles.settingRow}>
+        <View style={remindersEnabled ? styles.settingRow : [styles.settingRow, styles.settingRowLast]}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>{t.settings.reminders.enable}</Text>
+            <View style={styles.settingLabelRow}>
+              <Ionicons name="notifications-outline" size={16} color={colors.textSecondary} />
+              <Text style={styles.settingLabel}>{t.settings.reminders.enable}</Text>
+            </View>
             <Text style={styles.settingDescription}>{t.settings.reminders.enableDescription}</Text>
           </View>
           <Switch
             value={remindersEnabled}
             onValueChange={handleToggleReminders}
             trackColor={{ false: colors.cardSecondary, true: colors.primary }}
-            thumbColor={colors.text}
+            thumbColor={colors.switchThumb}
           />
         </View>
 
@@ -173,9 +176,12 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
 
         {remindersEnabled && (
           <>
-            <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+            <View style={[styles.settingRow, styles.settingRowLast]}>
               <View style={styles.settingInfo}>
-                <Text style={styles.settingLabel}>{t.settings.reminders.days}</Text>
+                <View style={styles.settingLabelRow}>
+                  <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
+                  <Text style={styles.settingLabel}>{t.settings.reminders.days}</Text>
+                </View>
               </View>
             </View>
             <View style={styles.reminderDaysRow}>
@@ -202,7 +208,7 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
             </View>
 
             <TouchableOpacity
-              style={styles.settingRow}
+              style={[styles.settingRow, styles.settingRowLast]}
               onPress={() => {
                 setTempHour(reminderHour)
                 setTempMinute(reminderMinute)
@@ -212,7 +218,10 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
               activeOpacity={0.7}
             >
               <View style={styles.settingInfo}>
-                <Text style={styles.settingLabel}>{t.settings.reminders.time}</Text>
+                <View style={styles.settingLabelRow}>
+                  <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
+                  <Text style={styles.settingLabel}>{t.settings.reminders.time}</Text>
+                </View>
               </View>
               <View style={styles.reminderTimeDisplay}>
                 <Text style={styles.reminderTimeText}>
@@ -270,12 +279,16 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
       {/* Section Gamification */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
+          <View style={styles.sectionAccent} />
           <Ionicons name="star-outline" size={18} color={colors.primary} />
           <Text style={styles.sectionTitle}>{t.settings.gamification.title}</Text>
         </View>
-        <View style={styles.settingRow}>
+        <View style={[styles.settingRow, styles.settingRowLast]}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>{t.settings.gamification.weeklyGoal}</Text>
+            <View style={styles.settingLabelRow}>
+              <Ionicons name="flame-outline" size={16} color={colors.textSecondary} />
+              <Text style={styles.settingLabel}>{t.settings.gamification.weeklyGoal}</Text>
+            </View>
             <Text style={styles.settingDescription}>{t.settings.gamification.weeklyGoalDescription}</Text>
           </View>
         </View>

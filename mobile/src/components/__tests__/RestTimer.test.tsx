@@ -125,7 +125,7 @@ describe('RestTimer', () => {
         jest.advanceTimersByTime(0)
       })
 
-      expect(mockSchedule).toHaveBeenCalledWith(90)
+      expect(mockSchedule).toHaveBeenCalledWith(90, expect.any(String), expect.any(String))
     })
 
     it('should annuler la notification au démontage quand notificationEnabled=true', async () => {
@@ -153,7 +153,7 @@ describe('RestTimer', () => {
         jest.advanceTimersByTime(0)
       })
 
-      expect(mockSchedule).toHaveBeenCalledWith(60)
+      expect(mockSchedule).toHaveBeenCalledWith(60, expect.any(String), expect.any(String))
     })
 
     it('annule la notification dans finishTimer quand notificationIdRef est défini', async () => {

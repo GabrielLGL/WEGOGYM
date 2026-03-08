@@ -166,7 +166,7 @@ These are bugs that have been found and fixed before. **Never reintroduce them:*
 - **Colors**: `colors.background`, `colors.card`, `colors.primary`, `colors.danger`, etc.
 - **Spacing**: `spacing.xs` (4), `spacing.sm` (8), `spacing.ms` (12), `spacing.md` (16), `spacing.lg` (24), `spacing.xl` (32), `spacing.xxl` (40)
 - **BorderRadius**: `borderRadius.xxs` (2), `borderRadius.xs` (4), `borderRadius.sm` (10), `borderRadius.md` (14), `borderRadius.lg` (20), `borderRadius.xl` (26)
-- **FontSize**: `fontSize.caption` (11), `fontSize.xs` (12), `fontSize.sm` (14), `fontSize.bodyMd` (15), `fontSize.md` (16), `fontSize.lg` (18), `fontSize.xl` (20), `fontSize.xxl` (24), `fontSize.xxxl` (28), `fontSize.hero` (32), `fontSize.jumbo` (48)
+- **FontSize**: `fontSize.caption` (11), `fontSize.xs` (12), `fontSize.sm` (14), `fontSize.bodyMd` (15), `fontSize.md` (16), `fontSize.lg` (18), `fontSize.xl` (20), `fontSize.xxl` (24), `fontSize.xxxl` (28), `fontSize.title` (26), `fontSize.jumbo` (48)
 - **Common Styles**: `commonStyles.modalContainer`, `commonStyles.overlay`, etc.
 
 ## 5. Coding Standards

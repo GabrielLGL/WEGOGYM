@@ -25,6 +25,7 @@ import {
   addRetroactiveSet,
   recalculateSetPrs,
 } from '../model/utils/databaseHelpers'
+import { DEFAULT_REPS, MINUTE_MS } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
 import { useHaptics } from '../hooks/useHaptics'
@@ -150,7 +151,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
   const durationText = useMemo(() => {
     if (!history.endTime) return null
     const ms = history.endTime.getTime() - history.startTime.getTime()
-    const mins = Math.round(ms / 60000)
+    const mins = Math.round(ms / MINUTE_MS)
     if (mins < 60) return `${mins} min`
     const h = Math.floor(mins / 60)
     const m = mins % 60
@@ -219,7 +220,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
     const lastSet = existingSets[existingSets.length - 1]
     const nextOrder = lastSet ? lastSet.setOrder + 1 : 1
     const defaultWeight = lastSet ? lastSet.weight : 0
-    const defaultReps = lastSet ? lastSet.reps : 10
+    const defaultReps = lastSet ? lastSet.reps : DEFAULT_REPS
 
     try {
       await addRetroactiveSet({

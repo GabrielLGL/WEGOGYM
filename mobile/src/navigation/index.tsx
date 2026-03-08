@@ -40,6 +40,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
 import ScreenLoader from '../components/ScreenLoader'
 import { database } from '../model'
 import User from '../model/models/User'
+import { updateReminders } from '../services/notificationService'
 import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
 import type { GeneratedPlan } from '../services/ai/types'
@@ -230,6 +231,10 @@ export default function AppNavigator() {
       const savedLang = user?.languageMode
       if (savedLang === 'fr' || savedLang === 'en') {
         setInitialLang(savedLang)
+      }
+      if (user?.remindersEnabled) {
+        const days = user.reminderDays ? JSON.parse(user.reminderDays) : [1, 3, 5]
+        updateReminders(true, days, user.reminderHour ?? 18, user.reminderMinute ?? 0)
       }
       setReady(true)
     }).catch(error => {

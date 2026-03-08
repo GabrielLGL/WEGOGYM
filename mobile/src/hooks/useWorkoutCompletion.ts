@@ -16,6 +16,7 @@ import {
   buildRecapExercises,
   getLastSessionVolume,
 } from '../model/utils/databaseHelpers'
+import { DAY_MS } from '../model/constants'
 import {
   calculateSessionXP,
   calculateSessionTonnage,
@@ -62,8 +63,8 @@ function getWeekStartTimestamp(isoWeek: string): number {
   const week = parseInt(weekStr, 10)
   const jan4 = new Date(Date.UTC(year, 0, 4))
   const dayOfWeek = jan4.getUTCDay() || 7
-  const mondayWeek1 = new Date(jan4.getTime() - (dayOfWeek - 1) * 86400000)
-  const target = new Date(mondayWeek1.getTime() + (week - 1) * 7 * 86400000)
+  const mondayWeek1 = new Date(jan4.getTime() - (dayOfWeek - 1) * DAY_MS)
+  const target = new Date(mondayWeek1.getTime() + (week - 1) * 7 * DAY_MS)
   return target.getTime()
 }
 

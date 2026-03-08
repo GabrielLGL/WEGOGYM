@@ -15,6 +15,7 @@ import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { AlertDialog } from '../AlertDialog'
 import { BottomSheet } from '../BottomSheet'
+import { Button } from '../Button'
 import type { SettingsStyles } from './settingsStyles'
 
 interface SettingsDataSectionProps {
@@ -143,39 +144,39 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
     <>
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
+          <View style={styles.sectionAccent} />
           <Ionicons name="save-outline" size={18} color={colors.primary} />
           <Text style={styles.sectionTitle}>{t.settings.data.title}</Text>
         </View>
-        <TouchableOpacity
-          style={[styles.exportButton, (exporting || importing) && styles.exportButtonDisabled]}
-          onPress={handleExportPress}
-          disabled={exporting || importing}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.exportButtonText}>
+        <View style={styles.dataButtonGap}>
+          <Button
+            variant="primary"
+            fullWidth
+            onPress={handleExportPress}
+            disabled={exporting || importing}
+            enableHaptics={false}
+          >
             {exporting ? t.settings.data.exportLoading : t.settings.data.exportLabel}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.importButton, (exporting || importing) && styles.exportButtonDisabled]}
-          onPress={handleImportPress}
-          disabled={exporting || importing}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.importButtonText}>
+          </Button>
+          <Button
+            variant="secondary"
+            fullWidth
+            onPress={handleImportPress}
+            disabled={exporting || importing}
+            enableHaptics={false}
+          >
             {importing ? t.settings.data.importLoading : t.settings.data.importLabel}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.deleteAllButton, (exporting || importing || deleting) && styles.exportButtonDisabled]}
-          onPress={() => { haptics.onPress(); setShowDeleteConfirm(true) }}
-          disabled={exporting || importing || deleting}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.deleteAllButtonText}>
+          </Button>
+          <Button
+            variant="danger"
+            fullWidth
+            onPress={() => { haptics.onPress(); setShowDeleteConfirm(true) }}
+            disabled={exporting || importing || deleting}
+            enableHaptics={false}
+          >
             {deleting ? t.settings.data.deleteAllLoading : t.settings.data.deleteAllLabel}
-          </Text>
-        </TouchableOpacity>
+          </Button>
+        </View>
         <Text style={styles.exportHint}>{t.settings.data.exportHint}</Text>
       </View>
 

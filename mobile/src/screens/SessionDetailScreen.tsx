@@ -26,6 +26,12 @@ import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useLanguage } from '../contexts/LanguageContext'
 
+const TOAST_FADE_IN = 200
+const TOAST_FADE_OUT = 300
+const TOAST_DURATION = 2000
+const MODAL_OPEN_DELAY = 300
+const SELECTION_BADGE_SIZE = 28
+
 interface Props {
   session: Session
   sessionExercises: SessionExercise[]
@@ -90,12 +96,12 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
 
   useEffect(() => {
     if (!toastMessage) return
-    Animated.timing(toastOpacity, { toValue: 1, duration: 200, useNativeDriver: true }).start()
+    Animated.timing(toastOpacity, { toValue: 1, duration: TOAST_FADE_IN, useNativeDriver: true }).start()
     const timer = setTimeout(() => {
-      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+      Animated.timing(toastOpacity, { toValue: 0, duration: TOAST_FADE_OUT, useNativeDriver: true }).start(() => {
         setToastMessage(null)
       })
-    }, 2000)
+    }, TOAST_DURATION)
     return () => clearTimeout(timer)
   }, [toastMessage, toastOpacity])
 
@@ -438,9 +444,9 @@ function useStyles(colors: ThemeColors) {
     selectionBarText: { flex: 1, color: colors.text, fontSize: fontSize.sm, marginLeft: spacing.sm },
     selectionBarBadge: {
       backgroundColor: colors.primary,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
+      width: SELECTION_BADGE_SIZE,
+      height: SELECTION_BADGE_SIZE,
+      borderRadius: SELECTION_BADGE_SIZE / 2,
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: spacing.sm,

@@ -108,6 +108,8 @@ export const en: typeof fr = {
       vibrationDescription: 'Haptic vibration when timer ends',
       sound: 'End of rest sound',
       soundDescription: 'Beep sound when timer ends',
+      notifTitle: 'Rest complete!',
+      notifBody: 'Ready for the next set?',
     },
     reminders: {
       title: 'Training Reminders',

@@ -7,6 +7,11 @@ import { toDateKey } from './statsDateUtils'
 import { formatVolume } from './statsVolume'
 import type { Language } from '../../i18n'
 import { translations } from '../../i18n'
+import {
+  DAY_MS, WEEK_MS, STREAK_LOOKUP_DAYS,
+  MIN_MOTIVATIONAL_STREAK, RETURNING_GAP_DAYS,
+  REGULARITY_WINDOW_DAYS,
+} from '../constants'
 
 function getActiveDayStrings(histories: History[]): Set<string> {
   const days = new Set<string>()
@@ -39,7 +44,7 @@ export function computeCurrentStreak(histories: History[]): number {
   let streak = 0
   const today = new Date()
 
-  for (let i = 0; i < 365; i++) {
+  for (let i = 0; i < STREAK_LOOKUP_DAYS; i++) {
     const d = new Date(today)
     d.setDate(today.getDate() - i)
     const key = toDateKey(d)
@@ -68,7 +73,7 @@ export function computeRecordStreak(histories: History[]): number {
   for (let i = 1; i < sortedDays.length; i++) {
     const prev = new Date(sortedDays[i - 1])
     const curr = new Date(sortedDays[i])
-    const diffDays = Math.round((curr.getTime() - prev.getTime()) / (24 * 60 * 60 * 1000))
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / DAY_MS)
 
     if (diffDays === 1) {
       currentStreak++
@@ -92,12 +97,12 @@ export function computeMotivationalPhrase(
 
   // 1. Streak ≥ 3
   const streak = computeCurrentStreak(activeHistories)
-  if (streak >= 3) {
+  if (streak >= MIN_MOTIVATIONAL_STREAK) {
     return m.streak.replace('{n}', String(streak))
   }
 
   // 2. PR cette semaine (7 derniers jours)
-  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  const oneWeekAgo = Date.now() - WEEK_MS
   const hasPRThisWeek = sets.some(
     s => s.isPr && activeHistoryIds.has(s.history.id) && s.createdAt.getTime() > oneWeekAgo
   )
@@ -111,9 +116,9 @@ export function computeMotivationalPhrase(
       (a, b) => b.startTime.getTime() - a.startTime.getTime()
     )[0]
     const daysSinceLast = Math.floor(
-      (Date.now() - lastSession.startTime.getTime()) / (24 * 60 * 60 * 1000)
+      (Date.now() - lastSession.startTime.getTime()) / DAY_MS
     )
-    if (daysSinceLast > 4) {
+    if (daysSinceLast > RETURNING_GAP_DAYS) {
       return m.returning.replace('{n}', String(daysSinceLast))
     }
   }
@@ -124,7 +129,7 @@ export function computeMotivationalPhrase(
   }
 
   // 5. Régularité ≥ 4 séances/semaine (sur 4 semaines)
-  const fourWeeksAgo = Date.now() - 28 * 24 * 60 * 60 * 1000
+  const fourWeeksAgo = Date.now() - REGULARITY_WINDOW_DAYS * DAY_MS
   const recentCount = activeHistories.filter(h => h.startTime.getTime() > fourWeeksAgo).length
   const avgPerWeek = recentCount / 4
   if (avgPerWeek >= 4) {

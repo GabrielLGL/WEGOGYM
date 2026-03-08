@@ -5,6 +5,7 @@ import type WorkoutSet from '../models/Set'
 import type Exercise from '../models/Exercise'
 import type { StatsPeriod, StatsContext, MuscleRepartitionEntry, MuscleWeekEntry, WeeklySetsChartResult, MonthlySetsChartResult } from './statsTypes'
 import { getPeriodStart } from './statsDateUtils'
+import { WEEK_MS, MUSCLE_TOP_N, MUSCLE_WEEK_CHART_LIMIT, MONTHLY_CHART_MAX_MONTHS } from '../constants'
 
 export function getMondayOfCurrentWeek(): number {
   const now = new Date()
@@ -48,8 +49,8 @@ export function computeMuscleRepartition(
   if (muscleVolume.size === 0) return []
 
   const sorted = Array.from(muscleVolume.entries()).sort((a, b) => b[1] - a[1])
-  const top7 = sorted.slice(0, 7)
-  const othersVolume = sorted.slice(7).reduce((sum, [, v]) => sum + v, 0)
+  const top7 = sorted.slice(0, MUSCLE_TOP_N)
+  const othersVolume = sorted.slice(MUSCLE_TOP_N).reduce((sum, [, v]) => sum + v, 0)
   const allEntries: Array<[string, number]> =
     othersVolume > 0 ? [...top7, [othersLabel, othersVolume]] : top7
 
@@ -89,7 +90,7 @@ export function computeSetsPerMuscleWeek(
 
   return Array.from(setsPerMuscle.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 8)
+    .slice(0, MUSCLE_WEEK_CHART_LIMIT)
     .map(([muscle, setsCount]) => ({ muscle, sets: setsCount }))
 }
 
@@ -113,7 +114,6 @@ export function computeWeeklySetsChart(
 ): WeeklySetsChartResult {
   const weeksToShow = options.weeksToShow ?? 4
   const { muscleFilter, ctx } = options
-  const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
   const currentMonday = getMondayOfCurrentWeek()
   const windowStartMonday = currentMonday + (options.weekOffset * weeksToShow - (weeksToShow - 1)) * WEEK_MS
@@ -215,8 +215,8 @@ export function computeMonthlySetsChart(
     if (m > 11) { m = 0; y++ }
   }
 
-  // Keep at most the last 12 months
-  const months = allMonths.slice(-12)
+  // Keep at most the last N months
+  const months = allMonths.slice(-MONTHLY_CHART_MAX_MONTHS)
   const resultLabels: string[] = []
   const data: number[] = []
 

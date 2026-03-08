@@ -8,6 +8,7 @@ import Exercise from '../model/models/Exercise'
 import PerformanceLog from '../model/models/PerformanceLog'
 import { validateWorkoutInput } from '../model/utils/validationHelpers'
 import { parseNumericInput, parseIntegerInput, getNextPosition } from '../model/utils/databaseHelpers'
+import { MIN_SETS, MAX_SETS, MIN_WEIGHT_KG, MAX_WEIGHT_KG, MIN_REST_TIME_S, MAX_REST_TIME_S } from '../model/constants'
 import { useLanguage } from '../contexts/LanguageContext'
 
 /**
@@ -121,13 +122,13 @@ export function useSessionManager(
       const exo = await selectedSessionExercise.exercise.fetch()
       if (!exo) return false
 
-      const setsVal = Math.min(Math.max(parseIntegerInput(targetSets), 1), 10)
-      const weightVal = Math.min(Math.max(parseNumericInput(targetWeight), 0), 999)
+      const setsVal = Math.min(Math.max(parseIntegerInput(targetSets), MIN_SETS), MAX_SETS)
+      const weightVal = Math.min(Math.max(parseNumericInput(targetWeight), MIN_WEIGHT_KG), MAX_WEIGHT_KG)
       const repsVal = parseIntegerInput(targetReps)
 
       const restTimeParsed = targetRestTime.trim() === '' ? null : parseInt(targetRestTime, 10)
       const restTimeVal = restTimeParsed !== null && !isNaN(restTimeParsed)
-        ? Math.min(Math.max(restTimeParsed, 10), 600)
+        ? Math.min(Math.max(restTimeParsed, MIN_REST_TIME_S), MAX_REST_TIME_S)
         : null
 
       await database.write(async () => {

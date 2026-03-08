@@ -2,6 +2,7 @@ import { Platform } from 'react-native'
 
 const CHANNEL_ID = 'rest-timer'
 const REMINDER_CHANNEL_ID = 'training-reminders'
+const VIBRATION_PATTERN = [0, 400, 200, 400]
 
 // Lazy-load expo-notifications to avoid crashing when the native module
 // (ExpoPushTokenManager) is unavailable (e.g. Expo Go, missing native build).
@@ -21,7 +22,7 @@ export async function setupNotificationChannel(): Promise<void> {
     name: 'Minuteur de repos',
     importance: Notifications.AndroidImportance.HIGH,
     sound: 'default',
-    vibrationPattern: [0, 400, 200, 400],
+    vibrationPattern: VIBRATION_PATTERN,
   })
 }
 
@@ -37,7 +38,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 export async function scheduleRestEndNotification(
-  durationSeconds: number
+  durationSeconds: number,
+  title = 'Repos terminé !',
+  body = 'Prêt pour la prochaine série ?'
 ): Promise<string | null> {
   const Notifications = getNotifications()
   if (!Notifications) return null
@@ -45,8 +48,8 @@ export async function scheduleRestEndNotification(
   try {
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Repos terminé !',
-        body: 'Prêt pour la prochaine série ?',
+        title,
+        body,
         sound: 'default',
       },
       trigger: {
@@ -75,7 +78,7 @@ export async function setupReminderChannel(): Promise<void> {
     name: 'Rappels d\'entraînement',
     importance: Notifications.AndroidImportance.HIGH,
     sound: 'default',
-    vibrationPattern: [0, 400, 200, 400],
+    vibrationPattern: VIBRATION_PATTERN,
   })
 }
 

@@ -7,11 +7,86 @@ import { spacing, borderRadius, fontSize, type ThemeColors, getThemeNeuShadow } 
 
 export type NeuShadow = ReturnType<typeof getThemeNeuShadow>
 
+const AVATAR_SIZE = 56
+const RADIO_SIZE = 18
+const STREAK_BTN_SIZE = 44
+const INPUT_WIDTH = 80
+const NAME_INPUT_WIDTH = 140
+const TIME_PICKER_MAX_HEIGHT = 200
+
 export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) {
   return StyleSheet.create({
+    // Profile header hero
+    profileHeader: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
+      marginBottom: spacing.lg,
+      ...neuShadow.elevated,
+    },
+    profileAvatar: {
+      width: AVATAR_SIZE,
+      height: AVATAR_SIZE,
+      borderRadius: AVATAR_SIZE / 2,
+      backgroundColor: colors.primaryBg,
+      borderWidth: 2,
+      borderColor: colors.primary,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      marginRight: spacing.md,
+    },
+    profileAvatarText: {
+      fontSize: fontSize.xl,
+      fontWeight: '700' as const,
+      color: colors.primary,
+    },
+    profileInfo: {
+      flex: 1,
+    },
+    profileName: {
+      fontSize: fontSize.lg,
+      fontWeight: '700' as const,
+      color: colors.text,
+      marginBottom: 2,
+    },
+    profileSubtitle: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: spacing.sm,
+    },
+    // Group labels
+    groupLabel: {
+      fontSize: fontSize.xs,
+      fontWeight: '700' as const,
+      color: colors.textSecondary,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase' as const,
+      marginBottom: spacing.sm,
+      marginTop: spacing.sm,
+      marginLeft: spacing.xs,
+    },
+    // Section accent bar
+    sectionAccent: {
+      width: 3,
+      height: 20,
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.xxs,
+    },
+    // Setting label with icon
+    settingLabelRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing.sm,
+    },
+    // Last row in a section (no bottom border)
+    settingRowLast: {
+      borderBottomWidth: 0,
+    },
     section: {
       backgroundColor: colors.card,
-      borderRadius: borderRadius.md,
+      borderRadius: borderRadius.lg,
       padding: spacing.lg,
       marginBottom: spacing.lg,
       ...neuShadow.elevatedSm,
@@ -24,7 +99,7 @@ export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) 
     },
     sectionTitle: {
       color: colors.text,
-      fontSize: fontSize.xl,
+      fontSize: fontSize.lg,
       fontWeight: 'bold',
     },
     settingRow: {
@@ -58,10 +133,10 @@ export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) 
       color: colors.text,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      borderRadius: borderRadius.sm,
+      borderRadius: borderRadius.md,
       fontSize: fontSize.md,
       fontWeight: 'bold',
-      width: 80,
+      width: INPUT_WIDTH,
       textAlign: 'center',
     },
     inputUnit: {
@@ -70,7 +145,7 @@ export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) 
       marginLeft: spacing.sm,
     },
     nameInput: {
-      width: 140,
+      width: NAME_INPUT_WIDTH,
       textAlign: 'right',
     },
     profileCards: {
@@ -128,8 +203,8 @@ export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) 
       backgroundColor: colors.cardSecondary,
     },
     radioCircle: {
-      width: 18,
-      height: 18,
+      width: RADIO_SIZE,
+      height: RADIO_SIZE,
       borderRadius: borderRadius.sm,
       borderWidth: 2,
       borderColor: colors.textSecondary,
@@ -171,9 +246,9 @@ export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) 
       paddingVertical: spacing.sm,
     },
     streakTargetBtn: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
+      width: STREAK_BTN_SIZE,
+      height: STREAK_BTN_SIZE,
+      borderRadius: STREAK_BTN_SIZE / 2,
       backgroundColor: colors.cardSecondary,
       alignItems: 'center',
       justifyContent: 'center',
@@ -197,52 +272,14 @@ export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) 
       marginLeft: spacing.xs,
     },
     // Data section
-    exportButton: {
-      backgroundColor: colors.primary,
-      borderRadius: borderRadius.sm,
-      padding: spacing.md,
-      alignItems: 'center' as const,
-      ...neuShadow.elevatedSm,
-    },
-    exportButtonDisabled: {
-      opacity: 0.6,
-    },
-    exportButtonText: {
-      color: colors.primaryText,
-      fontSize: fontSize.md,
-      fontWeight: '600' as const,
+    dataButtonGap: {
+      gap: spacing.sm,
     },
     exportHint: {
       color: colors.textSecondary,
       fontSize: fontSize.sm,
       textAlign: 'center' as const,
       marginTop: spacing.sm,
-    },
-    importButton: {
-      backgroundColor: colors.cardSecondary,
-      borderRadius: borderRadius.sm,
-      padding: spacing.md,
-      alignItems: 'center' as const,
-      marginTop: spacing.sm,
-      ...neuShadow.elevatedSm,
-    },
-    importButtonText: {
-      color: colors.text,
-      fontSize: fontSize.md,
-      fontWeight: '600' as const,
-    },
-    deleteAllButton: {
-      backgroundColor: colors.danger,
-      borderRadius: borderRadius.sm,
-      padding: spacing.md,
-      alignItems: 'center' as const,
-      marginTop: spacing.sm,
-      ...neuShadow.elevatedSm,
-    },
-    deleteAllButtonText: {
-      color: colors.primaryText,
-      fontSize: fontSize.md,
-      fontWeight: '600' as const,
     },
     sheetOption: {
       flexDirection: 'row' as const,
@@ -350,7 +387,7 @@ export function createSettingsStyles(colors: ThemeColors, neuShadow: NeuShadow) 
       marginBottom: spacing.sm,
     },
     timePickerList: {
-      maxHeight: 200,
+      maxHeight: TIME_PICKER_MAX_HEIGHT,
     },
     timePickerItem: {
       paddingVertical: spacing.sm,

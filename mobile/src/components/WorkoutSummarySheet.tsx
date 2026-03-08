@@ -10,6 +10,8 @@ import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import type { RecapExerciseData, RecapComparisonData } from '../types/workout'
 
+const NOTE_DEBOUNCE_MS = 500
+
 interface WorkoutSummarySheetProps {
   visible: boolean
   onClose: () => void
@@ -94,7 +96,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       if (historyId) updateHistoryNote(historyId, text).catch(e => { if (__DEV__) console.error('[WorkoutSummarySheet] updateHistoryNote (debounce):', e) })
-    }, 500)
+    }, NOTE_DEBOUNCE_MS)
   }
 
   const handleClose = useCallback(() => {
@@ -181,7 +183,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                     <Text style={styles.exoName}>{exo.exerciseName}</Text>
                     {exo.setsTarget > 0 && (
                       isComplete
-                        ? <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                        ? <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
                         : <Text style={styles.incompleteBadge}>
                             {exo.setsValidated}/{exo.setsTarget}
                           </Text>
@@ -210,10 +212,10 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                 <Text style={styles.progressionLabel}>{t.workoutSummary.totalVolume}</Text>
                 {recapComparison.volumeGain > 0 ? (
                   <View style={styles.row}>
-                    <Text style={[styles.progressionDelta, { color: colors.success }]}>
+                    <Text style={[styles.progressionDelta, { color: colors.primary }]}>
                       +{recapComparison.volumeGain.toFixed(1)} kg
                     </Text>
-                    <Ionicons name="chevron-up-outline" size={12} color={colors.success} />
+                    <Ionicons name="chevron-up-outline" size={12} color={colors.primary} />
                   </View>
                 ) : recapComparison.volumeGain < 0 ? (
                   <View style={styles.row}>
@@ -237,14 +239,14 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                 <View style={styles.row}>
                   <Text style={[
                     styles.progressionDelta,
-                    { color: exo.currMaxWeight > exo.prevMaxWeight ? colors.success : colors.danger }
+                    { color: exo.currMaxWeight > exo.prevMaxWeight ? colors.primary : colors.danger }
                   ]}>
                     {formatWeight(exo.prevMaxWeight)} → {formatWeight(exo.currMaxWeight)} kg
                   </Text>
                   <Ionicons
                     name={exo.currMaxWeight > exo.prevMaxWeight ? 'chevron-up-outline' : 'chevron-down-outline'}
                     size={12}
-                    color={exo.currMaxWeight > exo.prevMaxWeight ? colors.success : colors.danger}
+                    color={exo.currMaxWeight > exo.prevMaxWeight ? colors.primary : colors.danger}
                   />
                 </View>
               </View>
@@ -396,7 +398,7 @@ function createStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
     },
     progressionFirstTime: {
-      color: colors.success,
+      color: colors.primary,
       fontSize: fontSize.sm,
       fontWeight: '600',
       textAlign: 'center',

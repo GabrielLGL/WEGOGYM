@@ -7,8 +7,10 @@ import type Session from '../models/Session'
 import type { StatsPeriod, StatsContext, VolumeStats, VolumeWeekEntry, HeatmapDay, WeekDayActivity, WeeklyActivityData } from './statsTypes'
 import { getPeriodStart, toDateKey } from './statsDateUtils'
 import { getMondayOfCurrentWeek } from './statsMuscle'
-
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+import {
+  WEEK_MS, DAY_MS, MINUTE_MS, PERIOD_1M_DAYS, PERIOD_3M_DAYS,
+  VOLUME_CHART_WEEKS, TOP_EXERCISES_VOLUME_LIMIT, HEATMAP_DAYS,
+} from '../constants'
 
 export function computeVolumeStats(
   sets: WorkoutSet[],
@@ -23,14 +25,14 @@ export function computeVolumeStats(
 
   const periodStart = getPeriodStart(period)
   const periodLengthMs =
-    period === '1m' ? 30 * 24 * 60 * 60 * 1000 :
-    period === '3m' ? 90 * 24 * 60 * 60 * 1000 : 0
+    period === '1m' ? PERIOD_1M_DAYS * DAY_MS :
+    period === '3m' ? PERIOD_3M_DAYS * DAY_MS : 0
   const prevStart = periodLengthMs > 0 ? periodStart - periodLengthMs : 0
 
   // Weekly buckets: 12 dernières semaines
   const now = Date.now()
-  const weekWindowStart = now - 12 * WEEK_MS
-  const weekBuckets = new Array<number>(12).fill(0)
+  const weekWindowStart = now - VOLUME_CHART_WEEKS * WEEK_MS
+  const weekBuckets = new Array<number>(VOLUME_CHART_WEEKS).fill(0)
 
   // Single pass
   let total = 0
@@ -46,7 +48,7 @@ export function computeVolumeStats(
     // Weekly bucket
     if (d >= weekWindowStart && d < now) {
       const bucketIdx = Math.floor((d - weekWindowStart) / WEEK_MS)
-      if (bucketIdx >= 0 && bucketIdx < 12) {
+      if (bucketIdx >= 0 && bucketIdx < VOLUME_CHART_WEEKS) {
         weekBuckets[bucketIdx] += vol
       }
     }
@@ -66,7 +68,7 @@ export function computeVolumeStats(
 
   // Build perWeek labels
   const perWeek: VolumeWeekEntry[] = []
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < VOLUME_CHART_WEEKS; i++) {
     const weekEnd = weekWindowStart + (i + 1) * WEEK_MS
     const weekDate = new Date(weekEnd)
     perWeek.push({
@@ -84,7 +86,7 @@ export function computeVolumeStats(
   const exerciseNames = new Map(exercises.map(e => [e.id, e.name]))
   const topExercises = Array.from(volumeByExercise.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
+    .slice(0, TOP_EXERCISES_VOLUME_LIMIT)
     .map(([id, vol]) => ({
       exerciseId: id,
       name: exerciseNames.get(id) ?? id,
@@ -111,7 +113,7 @@ export function buildHeatmapData(histories: History[]): HeatmapDay[] {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  for (let i = 364; i >= 0; i--) {
+  for (let i = HEATMAP_DAYS; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(today.getDate() - i)
     const key = toDateKey(d)
@@ -130,8 +132,6 @@ export function buildHeatmapData(histories: History[]): HeatmapDay[] {
 export function formatVolume(kg: number, locale = 'fr-FR'): string {
   return `${Math.round(kg).toLocaleString(locale)} kg`
 }
-
-const DAY_MS = 24 * 60 * 60 * 1000
 
 export function buildWeeklyActivity(
   histories: History[],
@@ -161,7 +161,7 @@ export function buildWeeklyActivity(
       const setCount = historySets.length
       const volumeKg = Math.round(historySets.reduce((acc, s) => acc + s.weight * s.reps, 0) * 10) / 10
       const durationMin = h.endTime != null
-        ? Math.round((h.endTime.getTime() - h.startTime.getTime()) / 60000)
+        ? Math.round((h.endTime.getTime() - h.startTime.getTime()) / MINUTE_MS)
         : null
       const sessionName = sessionNames.get(h.session.id) ?? sessionFallback
       return { sessionName, setCount, volumeKg, durationMin }

@@ -5,6 +5,7 @@
  */
 import type { Language } from '../../i18n'
 import { translations } from '../../i18n'
+import { MAX_LEVEL, KG_PER_TONNE, DAY_MS } from '../constants'
 
 // ─── Constantes XP ──────────────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ export function xpCumulativeForLevel(level: number): number {
 export function calculateLevel(totalXp: number): number {
   let level = 1
   let cumulative = 0
-  while (level < 100) {
+  while (level < MAX_LEVEL) {
     const nextRequired = xpForLevel(level + 1)
     if (cumulative + nextRequired > totalXp) break
     cumulative += nextRequired
@@ -62,7 +63,7 @@ export function xpToNextLevel(totalXp: number, currentLevel: number): {
   required: number
   percentage: number
 } {
-  if (currentLevel >= 100) {
+  if (currentLevel >= MAX_LEVEL) {
     return { current: 0, required: 0, percentage: 100 }
   }
   const cumulativeForCurrent = xpCumulativeForLevel(currentLevel)
@@ -87,7 +88,7 @@ export function getCurrentISOWeek(now: Date = new Date()): string {
   // Ajuster au jeudi de la semaine (ISO 8601)
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / DAY_MS) + 1) / 7)
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`
 }
 
@@ -104,7 +105,7 @@ export function getPreviousISOWeek(isoWeek: string): string {
     const dayOfDec28 = dec28.getUTCDay() || 7
     dec28.setUTCDate(dec28.getUTCDate() + 4 - dayOfDec28)
     const yearStart = new Date(Date.UTC(dec28.getUTCFullYear(), 0, 1))
-    week = Math.ceil((((dec28.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+    week = Math.ceil((((dec28.getTime() - yearStart.getTime()) / DAY_MS) + 1) / 7)
   }
   return `${year}-W${String(week).padStart(2, '0')}`
 }
@@ -172,8 +173,8 @@ export function calculateSessionTonnage(
 
 /** Formate un tonnage en string lisible. */
 export function formatTonnage(totalKg: number): string {
-  if (totalKg >= 1000) {
-    return `${(totalKg / 1000).toFixed(1)} t`
+  if (totalKg >= KG_PER_TONNE) {
+    return `${(totalKg / KG_PER_TONNE).toFixed(1)} t`
   }
   return `${Math.round(totalKg)} kg`
 }
@@ -260,8 +261,8 @@ export function detectMilestones(
     if (before.totalTonnage < threshold && after.totalTonnage >= threshold) {
       const data = TONNAGE_MILESTONE_DATA[threshold]
       const msgKey = TONNAGE_KEY_MAP[threshold]
-      const title = threshold >= 1_000
-        ? m.tonnageTitleTons.replace('{n}', String(threshold / 1000))
+      const title = threshold >= KG_PER_TONNE
+        ? m.tonnageTitleTons.replace('{n}', String(threshold / KG_PER_TONNE))
         : m.tonnageTitleKg.replace('{n}', String(threshold))
       events.push({
         type: 'tonnage',

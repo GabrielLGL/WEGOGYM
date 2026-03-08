@@ -5,6 +5,8 @@
  * Centralise la logique de validation pour cohérence et maintenabilité.
  */
 
+import { MIN_REPS, MAX_REPS } from '../constants'
+
 /**
  * Vérifie si un texte est valide (non vide après trim)
  *
@@ -77,13 +79,13 @@ export function validateWorkoutInput(
     const repsParts = reps.split('-')
     if (repsParts.length === 1) {
       const n = parseInt(repsParts[0], 10)
-      if (isNaN(n) || n < 1 || n > 99) {
+      if (isNaN(n) || n < MIN_REPS || n > MAX_REPS) {
         errors.push('Le nombre de répétitions doit être un entier entre 1 et 99')
       }
     } else if (repsParts.length === 2) {
       const rMin = parseInt(repsParts[0], 10)
       const rMax = parseInt(repsParts[1], 10)
-      if (isNaN(rMin) || isNaN(rMax) || rMin < 1 || rMax < 1 || rMin > 99 || rMax > 99) {
+      if (isNaN(rMin) || isNaN(rMax) || rMin < MIN_REPS || rMax < MIN_REPS || rMin > MAX_REPS || rMax > MAX_REPS) {
         errors.push('La range de reps doit être entre 1 et 99')
       } else if (rMin > rMax) {
         errors.push('Le min de reps doit être ≤ au max')
