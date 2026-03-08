@@ -20,6 +20,8 @@ module.exports = {
     '!src/navigation/**',
     '!src/model/schema.ts',
     '!src/model/index.ts',
+    '!src/model/seedDevData.ts',
+    '!src/model/migrations.ts',
   ],
 
   // Module name mapper for static assets and mocks

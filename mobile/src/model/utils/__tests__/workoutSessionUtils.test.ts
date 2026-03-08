@@ -12,6 +12,7 @@ import {
   createWorkoutHistory,
   completeWorkoutHistory,
   updateHistoryNote,
+  updateSessionExerciseNotes,
   getLastSessionVolume,
   softDeleteHistory,
 } from '../workoutSessionUtils'
@@ -209,5 +210,23 @@ describe('softDeleteHistory', () => {
 
     expect(mockWrite).toHaveBeenCalled()
     expect(capturedUpdate.deletedAt).toBeInstanceOf(Date)
+  })
+})
+
+describe('updateSessionExerciseNotes', () => {
+  it('updates the notes field on a SessionExercise', async () => {
+    const captured: Record<string, unknown> = {}
+    const mockSE = {
+      update: jest.fn().mockImplementation((cb: (se: Record<string, unknown>) => void) => {
+        const se: Record<string, unknown> = { notes: '' }
+        cb(se)
+        Object.assign(captured, se)
+      }),
+    }
+
+    await updateSessionExerciseNotes(mockSE as any, 'New note here')
+
+    expect(mockWrite).toHaveBeenCalled()
+    expect(captured.notes).toBe('New note here')
   })
 })

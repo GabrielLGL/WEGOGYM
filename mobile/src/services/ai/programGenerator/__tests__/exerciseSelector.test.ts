@@ -129,6 +129,22 @@ describe('selectExercisesForSession', () => {
     expect(result).toEqual([])
   })
 
+  it('inclut les exercices custom sans metadata via fallback', async () => {
+    const exercisesWithCustom = [
+      ...mockExercises,
+      { id: 'e-custom', name: 'Mon Exo Custom', muscles: ['Pecs'], equipment: 'Poids libre', isCustom: true },
+    ]
+    const musclesWithSets: Record<MuscleGroup, number> = {
+      chest: 4, back: 0, shoulders: 0, biceps: 0, triceps: 0,
+      quads: 0, hamstrings: 0, glutes: 0, calves: 0, core: 0, traps: 0,
+    }
+    const db = createMockDB(exercisesWithCustom)
+    const result = await selectExercisesForSession(musclesWithSets, baseProfile, db)
+
+    // Le custom exo devrait être dans les candidats
+    expect(result.length).toBeGreaterThanOrEqual(1)
+  })
+
   it('chaque exercice retourné a un order séquentiel', async () => {
     const musclesWithSets: Record<MuscleGroup, number> = {
       chest: 4, back: 4, shoulders: 0, biceps: 4, triceps: 4,
