@@ -1,0 +1,50 @@
+# Dependencies (reinstalled on EAS servers)
+node_modules/
+
+# Expo cache
+.expo/
+dist/
+web-build/
+
+# Tests (not needed for build)
+**/__tests__/
+**/__mocks__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+jest.config.js
+jest.setup.js
+coverage/
+
+# Docs & reports
+docs/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Secrets (should never be uploaded)
+*.jks
+*.keystore
+key.json
+google-service-account.json
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Root-level dirs (outside mobile/ but may be included)
+../web/
+../docs/
+../_bmad/
+../scripts/
+../node_modules/
+../.git/
