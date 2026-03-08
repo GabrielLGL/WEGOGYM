@@ -21,6 +21,18 @@ export const fr = {
     removed: 'Retiré',
   },
 
+  disclaimer: {
+    title: 'Avertissement santé',
+    body: 'Kore est un outil de suivi d\'entraînement. Les programmes et suggestions proposés ne constituent pas un avis médical.\n\nConsultez un professionnel de santé avant de commencer ou modifier un programme d\'exercice physique.\n\nVous êtes seul responsable de votre pratique sportive.',
+    cguLink: 'Lire les Conditions Générales d\'Utilisation',
+    acceptButton: 'Je certifie avoir lu et approuvé les CGU',
+  },
+
+  legal: {
+    title: 'Conditions d\'utilisation',
+    fallbackContent: '1. Objet\nKore est une application mobile de suivi de musculation et d\'entraînement physique. Elle permet de créer des programmes, suivre ses séances et consulter ses statistiques.\n\n2. Acceptation\nL\'utilisation de Kore implique l\'acceptation pleine et entière des présentes conditions générales d\'utilisation.\n\n3. Avertissement santé\nKore ne fournit aucun avis médical. Les programmes, suggestions et recommandations générés par l\'application (y compris par intelligence artificielle) sont fournis à titre informatif uniquement. Consultez un professionnel de santé avant de commencer ou modifier tout programme d\'exercice physique.\n\n4. Limitation de responsabilité\nL\'éditeur de Kore décline toute responsabilité en cas de blessure, accident ou dommage survenu lors de l\'utilisation de l\'application ou de la mise en pratique des programmes proposés. L\'utilisateur est seul responsable de sa pratique sportive.\n\n5. Données personnelles\nToutes les données sont stockées localement sur votre appareil. Aucune donnée personnelle n\'est collectée, transmise ou stockée sur un serveur distant.\n\n6. Propriété intellectuelle\nL\'application Kore, son design, son code source et son contenu sont la propriété de l\'éditeur. Toute reproduction, distribution ou modification non autorisée est interdite.\n\n7. Modification des CGU\nL\'éditeur se réserve le droit de modifier les présentes conditions à tout moment. L\'utilisateur sera informé des modifications lors du prochain lancement de l\'application.\n\n8. Contact\nPour toute question : contact@kore-app.net',
+  },
+
   onboarding: {
     language: {
       title: 'Choisir la langue',
@@ -176,6 +188,7 @@ export const fr = {
       version: 'Version',
       developedWith: 'Développé avec',
     },
+    legal: 'Conditions d\'utilisation',
     help: {
       title: 'Aide',
       navigationTitle: 'Navigation :',
@@ -248,6 +261,7 @@ export const fr = {
     badges: 'Mes Badges',
     assistantPreview: 'Programme généré',
     catalogueGlobal: 'Catalogue global',
+    legal: 'Conditions d\'utilisation',
   },
 
   programs: {
@@ -332,6 +346,8 @@ export const fr = {
   },
 
   badges: {
+    newBadge: 'Nouveau badge !',
+    great: 'Super !',
     unlocked: 'badges débloqués',
     categories: {
       sessions: 'Séances',

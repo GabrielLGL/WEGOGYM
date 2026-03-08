@@ -99,6 +99,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
 
   // Fetch Exercise objects for display
   useEffect(() => {
+    let cancelled = false
     const exerciseIds = [...new Set(sets.map(s => getExerciseId(s)))]
 
     if (exerciseIds.length === 0) return
@@ -108,11 +109,14 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
       .query(Q.where('id', Q.oneOf(exerciseIds)))
       .fetch()
       .then(exos => {
+        if (cancelled) return
         const map: Record<string, Exercise> = {}
         for (const e of exos) map[e.id] = e
         setExercises(map)
       })
       .catch((e) => { if (__DEV__) console.error('[HistoryDetailScreen] fetchExercises:', e) })
+
+    return () => { cancelled = true }
   }, [sets])
 
   // Group sets by exercise

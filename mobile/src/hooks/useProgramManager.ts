@@ -156,8 +156,14 @@ export function useProgramManager(onSuccess?: () => void) {
               newSE.exercise.set(exoRecord)
               newSE.position = se.position
               newSE.setsTarget = se.setsTarget
+              newSE.setsTargetMax = se.setsTargetMax
               newSE.repsTarget = se.repsTarget
               newSE.weightTarget = se.weightTarget
+              newSE.restTime = se.restTime
+              newSE.notes = se.notes
+              newSE.supersetId = se.supersetId
+              newSE.supersetType = se.supersetType
+              newSE.supersetPosition = se.supersetPosition
             })
           }
         }

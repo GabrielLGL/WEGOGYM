@@ -1,10 +1,11 @@
-import React, { type ComponentProps } from 'react'
+import React, { type ComponentProps, useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheet } from './BottomSheet'
 import { Button } from './Button'
 import { spacing, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
 
@@ -16,6 +17,7 @@ interface BadgeCelebrationProps {
 
 export function BadgeCelebration({ visible, badge, onClose }: BadgeCelebrationProps) {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
 
   if (!badge) return null
@@ -24,11 +26,11 @@ export function BadgeCelebration({ visible, badge, onClose }: BadgeCelebrationPr
     <BottomSheet visible={visible} onClose={onClose}>
       <View style={styles.content}>
         <Ionicons name={badge.icon as ComponentProps<typeof Ionicons>['name']} size={fontSize.jumbo} color={colors.primary} style={{ marginBottom: spacing.md }} />
-        <Text style={styles.headline}>Nouveau badge !</Text>
+        <Text style={styles.headline}>{t.badges.newBadge}</Text>
         <Text style={styles.title}>{badge.title}</Text>
         <Text style={styles.description}>{badge.description}</Text>
         <Button variant="primary" size="md" onPress={onClose} enableHaptics={false}>
-          Super !
+          {t.badges.great}
         </Button>
       </View>
     </BottomSheet>
@@ -36,7 +38,7 @@ export function BadgeCelebration({ visible, badge, onClose }: BadgeCelebrationPr
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     content: {
       alignItems: 'center',
       paddingVertical: spacing.md,
@@ -61,5 +63,5 @@ function useStyles(colors: ThemeColors) {
       marginBottom: spacing.lg,
       textAlign: 'center',
     },
-  })
+  }), [colors])
 }

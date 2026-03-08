@@ -35,18 +35,26 @@ const AssistantPreviewScreen = React.lazy(() => import('../screens/AssistantPrev
 const CreateExerciseScreen = React.lazy(() => import('../screens/CreateExerciseScreen'))
 const ExerciseCatalogScreen = React.lazy(() => import('../screens/ExerciseCatalogScreen'))
 const HistoryDetailScreen = React.lazy(() => import('../screens/HistoryDetailScreen'))
+const LegalScreen = React.lazy(() => import('../screens/LegalScreen'))
 
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import ScreenLoader from '../components/ScreenLoader'
 import { database } from '../model'
 import User from '../model/models/User'
+import { CGU_VERSION } from '../model/constants'
+
+function isVersionOlder(accepted: string, required: string): boolean {
+  const [aMaj, aMin] = accepted.split('.').map(Number)
+  const [rMaj, rMin] = required.split('.').map(Number)
+  return aMaj < rMaj || (aMaj === rMaj && (aMin ?? 0) < (rMin ?? 0))
+}
 import { updateReminders } from '../services/notificationService'
 import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
 import type { GeneratedPlan } from '../services/ai/types'
 
 export type RootStackParamList = {
-  Onboarding: undefined;
+  Onboarding: { disclaimerOnly?: boolean } | undefined;
   Home: { celebrations?: { milestones: MilestoneEvent[]; badges: BadgeDefinition[] } } | undefined;
   Badges: undefined;
   Programs: undefined;
@@ -68,6 +76,7 @@ export type RootStackParamList = {
   CreateExercise: undefined;
   ExerciseCatalog: undefined;
   HistoryDetail: { historyId: string };
+  Legal: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -130,6 +139,7 @@ function AppContent() {
   const { t } = useLanguage()
   const navigationRef = useNavigationContainerRef<RootStackParamList>()
   const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | null>(null)
+  const [initialParams, setInitialParams] = useState<Record<string, unknown> | undefined>(undefined)
 
   const navTheme = {
     ...DarkTheme,
@@ -147,7 +157,14 @@ function AppContent() {
   useEffect(() => {
     database.get<User>('users').query().fetch().then(users => {
       const user = users[0]
-      setInitialRoute(!user || !user.onboardingCompleted ? 'Onboarding' : 'Home')
+      if (!user || !user.onboardingCompleted) {
+        setInitialRoute('Onboarding')
+      } else if (isVersionOlder(user.cguVersionAccepted ?? '0', CGU_VERSION)) {
+        setInitialRoute('Onboarding')
+        setInitialParams({ disclaimerOnly: true })
+      } else {
+        setInitialRoute('Home')
+      }
     }).catch(error => {
       if (__DEV__) console.error('[Navigation] DB fetch failed:', error)
       setInitialRoute('Onboarding')
@@ -176,6 +193,7 @@ function AppContent() {
             name="Onboarding"
             component={OnboardingScreen}
             options={{ headerShown: false }}
+            initialParams={initialRoute === 'Onboarding' ? initialParams as RootStackParamList['Onboarding'] : undefined}
           />
           {/* Dashboard principal */}
           <Stack.Screen
@@ -205,6 +223,7 @@ function AppContent() {
           <Stack.Screen name="CreateExercise" component={CreateExerciseScreen} options={{ title: t.exercises.newTitle }} />
           <Stack.Screen name="ExerciseCatalog" component={ExerciseCatalogScreen} options={{ title: t.navigation.catalogueGlobal }} />
           <Stack.Screen name="HistoryDetail" component={HistoryDetailScreen} options={{ title: '' }} />
+          <Stack.Screen name="Legal" component={LegalScreen} options={{ title: t.navigation.legal }} />
         </Stack.Navigator>
       </Suspense>
     </NavigationContainer>
@@ -233,7 +252,8 @@ export default function AppNavigator() {
         setInitialLang(savedLang)
       }
       if (user?.remindersEnabled) {
-        const days = user.reminderDays ? JSON.parse(user.reminderDays) : [1, 3, 5]
+        let days = [1, 3, 5]
+        try { days = user.reminderDays ? JSON.parse(user.reminderDays) : days } catch { /* corrupted data, use default */ }
         updateReminders(true, days, user.reminderHour ?? 18, user.reminderMinute ?? 0)
       }
       setReady(true)

@@ -226,21 +226,26 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   }, [summaryVisible, handleClose])
 
   const handleConfirmEnd = useCallback(async () => {
-    const result = await completeWorkout()
-    if (!result) return
+    try {
+      const result = await completeWorkout()
+      if (!result) return
 
-    setDurationSeconds(result.durationSeconds)
-    setSessionXPGained(result.sessionXPGained)
-    setNewLevelResult(result.newLevel)
-    setNewStreakResult(result.newStreak)
-    setRecapExercises(result.recapExercises)
-    setRecapComparison(result.recapComparison)
-    if (result.milestones.length > 0) setMilestones(result.milestones)
-    if (result.newBadges.length > 0) setNewBadges(result.newBadges)
+      setDurationSeconds(result.durationSeconds)
+      setSessionXPGained(result.sessionXPGained)
+      setNewLevelResult(result.newLevel)
+      setNewStreakResult(result.newStreak)
+      setRecapExercises(result.recapExercises)
+      setRecapComparison(result.recapComparison)
+      if (result.milestones.length > 0) setMilestones(result.milestones)
+      if (result.newBadges.length > 0) setNewBadges(result.newBadges)
 
-    setConfirmEndVisible(false)
-    setSummaryVisible(true)
-    haptics.onMajorSuccess()
+      setConfirmEndVisible(false)
+      setSummaryVisible(true)
+      haptics.onMajorSuccess()
+    } catch (e) {
+      if (__DEV__) console.error('[WorkoutScreen] handleConfirmEnd failed:', e)
+      setConfirmEndVisible(false)
+    }
   }, [completeWorkout, haptics])
 
   const handleConfirmAbandon = useCallback(async () => {

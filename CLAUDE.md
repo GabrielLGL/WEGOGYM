@@ -17,7 +17,7 @@
 ## 2. Architecture & Data Flow
 - **Pattern:** Offline-first, Reactive.
 - **Data Access:** MUST use `withObservables` HOC from `@nozbe/with-observables`.
-- **Schema:** v32 (`mobile/src/model/schema.ts`).
+- **Schema:** v33 (`mobile/src/model/schema.ts`).
 - **Models:**
   - `Program` (1:N) `Session` (1:N) `SessionExercise`
   - `History` (Soft-delete `deleted_at`) -> `Set`
@@ -44,7 +44,7 @@ mobile/src/
 │   ├── utils/            # Database & validation utilities
 │   │   ├── databaseHelpers.ts    # getNextPosition, filterExercises, etc.
 │   │   └── validationHelpers.ts  # validateWorkoutInput, isValidText, etc.
-│   ├── schema.ts         # Database schema v32
+│   ├── schema.ts         # Database schema v33
 │   ├── index.ts          # Database initialization
 │   └── constants.ts      # MUSCLES_LIST, EQUIPMENT_LIST
 ├── navigation/           # React Navigation setup
