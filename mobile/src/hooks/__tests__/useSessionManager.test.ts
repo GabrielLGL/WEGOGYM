@@ -27,6 +27,7 @@ import { database } from '../../model/index'
 import { getNextPosition, parseNumericInput, parseIntegerInput } from '../../model/utils/databaseHelpers'
 import { validateWorkoutInput } from '../../model/utils/validationHelpers'
 import { Platform, ToastAndroid } from 'react-native'
+import { mockSessionExercise, mockSession as mockSessionFactory, mockExercise } from '../../model/utils/__tests__/testFactories'
 
 const mockWrite = database.write as jest.Mock
 const mockGet = database.get as jest.Mock
@@ -36,7 +37,7 @@ const mockParseIntegerInput = parseIntegerInput as jest.Mock
 const mockValidateWorkoutInput = validateWorkoutInput as jest.Mock
 const mockToastShow = ToastAndroid.show as jest.Mock
 
-const mockSession = { id: 'sess-1' }
+const testSession = mockSessionFactory({ id: 'sess-1' })
 
 const createMockSessionExercise = (overrides: {
   id?: string
@@ -44,18 +45,19 @@ const createMockSessionExercise = (overrides: {
   setsTargetMax?: number
   repsTarget?: string
   weightTarget?: number
-} = {}) => ({
-  id: overrides.id ?? 'se-1',
-  setsTarget: overrides.setsTarget ?? 3,
-  setsTargetMax: overrides.setsTargetMax ?? 0,
-  repsTarget: overrides.repsTarget ?? '10',
-  weightTarget: overrides.weightTarget ?? 60,
-  exercise: { fetch: jest.fn().mockResolvedValue({ id: 'exo-1' }) },
-  update: jest.fn().mockImplementation(async (fn: (se: Record<string, unknown>) => void) => {
-    fn({ setsTarget: 0, setsTargetMax: 0, repsTarget: '', weightTarget: 0 })
-  }),
-  destroyPermanently: jest.fn().mockResolvedValue(undefined),
-})
+} = {}) =>
+  mockSessionExercise({
+    id: overrides.id ?? 'se-1',
+    setsTarget: overrides.setsTarget ?? 3,
+    setsTargetMax: overrides.setsTargetMax ?? 0,
+    repsTarget: overrides.repsTarget ?? '10',
+    weightTarget: overrides.weightTarget ?? 60,
+    exercise: { id: 'exo-1', fetch: jest.fn().mockResolvedValue({ id: 'exo-1' }) },
+    update: jest.fn().mockImplementation(async (fn: (se: Record<string, unknown>) => void) => {
+      fn({ setsTarget: 0, setsTargetMax: 0, repsTarget: '', weightTarget: 0 })
+    }),
+    destroyPermanently: jest.fn().mockResolvedValue(undefined),
+  })
 
 describe('useSessionManager', () => {
   let mockCreate: jest.Mock
@@ -93,7 +95,7 @@ describe('useSessionManager', () => {
 
   describe('initial state', () => {
     it('should initialize with empty inputs', () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       expect(result.current.targetSets).toBe('')
       expect(result.current.targetReps).toBe('')
@@ -102,7 +104,7 @@ describe('useSessionManager', () => {
     })
 
     it('should expose all required functions', () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       expect(result.current).toHaveProperty('addExercise')
       expect(result.current).toHaveProperty('updateTargets')
@@ -113,14 +115,14 @@ describe('useSessionManager', () => {
 
     it('should reflect isFormValid = true when inputs are valid', () => {
       mockValidateWorkoutInput.mockReturnValue({ valid: true })
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       expect(result.current.isFormValid).toBe(true)
     })
 
     it('should reflect isFormValid = false when inputs are invalid', () => {
       mockValidateWorkoutInput.mockReturnValue({ valid: false })
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       expect(result.current.isFormValid).toBe(false)
     })
@@ -131,12 +133,12 @@ describe('useSessionManager', () => {
   describe('addExercise', () => {
     it('should return false when validation fails', async () => {
       mockValidateWorkoutInput.mockReturnValue({ valid: false })
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
-      const mockExercise = { id: 'exo-1' }
+      const { result } = renderHook(() => useSessionManager(testSession))
+      const testExercise = mockExercise({ id: 'exo-1' })
 
       let success: boolean
       await act(async () => {
-        success = await result.current.addExercise('exo-1', '3', '10', '60', mockExercise as any)
+        success = await result.current.addExercise('exo-1', '3', '10', '60', testExercise)
       })
 
       expect(success!).toBe(false)
@@ -144,11 +146,11 @@ describe('useSessionManager', () => {
     })
 
     it('should return false when exercise is null or undefined', async () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       let success: boolean
       await act(async () => {
-        success = await result.current.addExercise('exo-1', '3', '10', '60', null as any)
+        success = await result.current.addExercise('exo-1', '3', '10', '60', null!)
       })
 
       expect(success!).toBe(false)
@@ -156,12 +158,12 @@ describe('useSessionManager', () => {
     })
 
     it('should create session_exercise and performance_log on success', async () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
-      const mockExercise = { id: 'exo-1' }
+      const { result } = renderHook(() => useSessionManager(testSession))
+      const testExercise = mockExercise({ id: 'exo-1' })
 
       let success: boolean
       await act(async () => {
-        success = await result.current.addExercise('exo-1', '3', '10', '60', mockExercise as any)
+        success = await result.current.addExercise('exo-1', '3', '10', '60', testExercise)
       })
 
       expect(success!).toBe(true)
@@ -172,11 +174,11 @@ describe('useSessionManager', () => {
     })
 
     it('should call getNextPosition for the session', async () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
-      const mockExercise = { id: 'exo-1' }
+      const { result } = renderHook(() => useSessionManager(testSession))
+      const testExercise = mockExercise({ id: 'exo-1' })
 
       await act(async () => {
-        await result.current.addExercise('exo-1', '3', '10', '60', mockExercise as any)
+        await result.current.addExercise('exo-1', '3', '10', '60', testExercise)
       })
 
       expect(mockGetNextPosition).toHaveBeenCalledWith('session_exercises', expect.anything())
@@ -184,11 +186,11 @@ describe('useSessionManager', () => {
 
     it('should call onSuccess callback', async () => {
       const onSuccess = jest.fn()
-      const { result } = renderHook(() => useSessionManager(mockSession as any, onSuccess))
-      const mockExercise = { id: 'exo-1' }
+      const { result } = renderHook(() => useSessionManager(testSession, onSuccess))
+      const testExercise = mockExercise({ id: 'exo-1' })
 
       await act(async () => {
-        await result.current.addExercise('exo-1', '3', '10', '60', mockExercise as any)
+        await result.current.addExercise('exo-1', '3', '10', '60', testExercise)
       })
 
       expect(onSuccess).toHaveBeenCalledTimes(1)
@@ -196,12 +198,12 @@ describe('useSessionManager', () => {
 
     it('should return false on database error', async () => {
       mockWrite.mockRejectedValue(new Error('DB error'))
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
-      const mockExercise = { id: 'exo-1' }
+      const { result } = renderHook(() => useSessionManager(testSession))
+      const testExercise = mockExercise({ id: 'exo-1' })
 
       let success: boolean
       await act(async () => {
-        success = await result.current.addExercise('exo-1', '3', '10', '60', mockExercise as any)
+        success = await result.current.addExercise('exo-1', '3', '10', '60', testExercise)
       })
 
       expect(success!).toBe(false)
@@ -213,7 +215,7 @@ describe('useSessionManager', () => {
 
   describe('updateTargets', () => {
     it('should return false when selectedSessionExercise is null', async () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       let success: boolean
       await act(async () => {
@@ -226,10 +228,10 @@ describe('useSessionManager', () => {
     it('should return false when form is not valid', async () => {
       mockValidateWorkoutInput.mockReturnValue({ valid: false })
       const mockSE = createMockSessionExercise()
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        result.current.setSelectedSessionExercise(mockSE as any)
+        result.current.setSelectedSessionExercise(mockSE)
       })
 
       let success: boolean
@@ -243,11 +245,11 @@ describe('useSessionManager', () => {
 
     it('should return false when exercise fetch returns null', async () => {
       const mockSE = createMockSessionExercise()
-      mockSE.exercise.fetch.mockResolvedValue(null)
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      ;(mockSE.exercise.fetch as jest.Mock).mockResolvedValue(null)
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        result.current.setSelectedSessionExercise(mockSE as any)
+        result.current.setSelectedSessionExercise(mockSE)
         result.current.setTargetSets('3')
         result.current.setTargetReps('10')
       })
@@ -262,10 +264,10 @@ describe('useSessionManager', () => {
 
     it('should update targets and create performance_log', async () => {
       const mockSE = createMockSessionExercise()
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        result.current.setSelectedSessionExercise(mockSE as any)
+        result.current.setSelectedSessionExercise(mockSE)
         result.current.setTargetSets('4')
         result.current.setTargetReps('8')
         result.current.setTargetWeight('80')
@@ -285,10 +287,10 @@ describe('useSessionManager', () => {
     it('should call onSuccess and reset form after update', async () => {
       const onSuccess = jest.fn()
       const mockSE = createMockSessionExercise()
-      const { result } = renderHook(() => useSessionManager(mockSession as any, onSuccess))
+      const { result } = renderHook(() => useSessionManager(testSession, onSuccess))
 
       await act(async () => {
-        result.current.setSelectedSessionExercise(mockSE as any)
+        result.current.setSelectedSessionExercise(mockSE)
         result.current.setTargetSets('4')
         result.current.setTargetReps('8')
         result.current.setTargetWeight('80')
@@ -308,10 +310,10 @@ describe('useSessionManager', () => {
     it('should return false on database error', async () => {
       mockWrite.mockRejectedValue(new Error('DB error'))
       const mockSE = createMockSessionExercise()
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        result.current.setSelectedSessionExercise(mockSE as any)
+        result.current.setSelectedSessionExercise(mockSE)
         result.current.setTargetSets('3')
         result.current.setTargetReps('10')
       })
@@ -331,10 +333,10 @@ describe('useSessionManager', () => {
       ;(mockSE.update as jest.Mock).mockImplementationOnce(
         async (fn: (se: Record<string, unknown>) => void) => { fn(captured) }
       )
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        result.current.setSelectedSessionExercise(mockSE as any)
+        result.current.setSelectedSessionExercise(mockSE)
         result.current.setTargetSets('99')
         result.current.setTargetReps('10')
       })
@@ -353,10 +355,10 @@ describe('useSessionManager', () => {
       ;(mockSE.update as jest.Mock).mockImplementationOnce(
         async (fn: (se: Record<string, unknown>) => void) => { fn(captured) }
       )
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        result.current.setSelectedSessionExercise(mockSE as any)
+        result.current.setSelectedSessionExercise(mockSE)
         result.current.setTargetSets('3')
         result.current.setTargetReps('10')
         result.current.setTargetWeight('1500')
@@ -375,11 +377,11 @@ describe('useSessionManager', () => {
   describe('removeExercise', () => {
     it('should destroy the session exercise inside database.write', async () => {
       const mockSE = createMockSessionExercise()
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       let success: boolean
       await act(async () => {
-        success = await result.current.removeExercise(mockSE as any)
+        success = await result.current.removeExercise(mockSE)
       })
 
       expect(success!).toBe(true)
@@ -391,10 +393,10 @@ describe('useSessionManager', () => {
       ;(Platform as { OS: string }).OS = 'android'
 
       const mockSE = createMockSessionExercise()
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        await result.current.removeExercise(mockSE as any)
+        await result.current.removeExercise(mockSE)
       })
 
       expect(mockToastShow).toHaveBeenCalledWith('Retiré', ToastAndroid.SHORT)
@@ -406,10 +408,10 @@ describe('useSessionManager', () => {
       ;(Platform as { OS: string }).OS = 'ios'
 
       const mockSE = createMockSessionExercise()
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        await result.current.removeExercise(mockSE as any)
+        await result.current.removeExercise(mockSE)
       })
 
       expect(mockToastShow).not.toHaveBeenCalled()
@@ -417,12 +419,12 @@ describe('useSessionManager', () => {
 
     it('should return false on error', async () => {
       const mockSE = createMockSessionExercise()
-      mockSE.destroyPermanently.mockRejectedValue(new Error('Delete failed'))
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      ;(mockSE.destroyPermanently as jest.Mock).mockRejectedValue(new Error('Delete failed'))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       let success: boolean
       await act(async () => {
-        success = await result.current.removeExercise(mockSE as any)
+        success = await result.current.removeExercise(mockSE)
       })
 
       expect(success!).toBe(false)
@@ -434,10 +436,10 @@ describe('useSessionManager', () => {
   describe('prepareEditTargets', () => {
     it('should populate state from session exercise', () => {
       const mockSE = createMockSessionExercise({ id: 'se-2', setsTarget: 4, repsTarget: '12', weightTarget: 75 })
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       act(() => {
-        result.current.prepareEditTargets(mockSE as any)
+        result.current.prepareEditTargets(mockSE)
       })
 
       expect(result.current.selectedSessionExercise).toBe(mockSE)
@@ -447,19 +449,16 @@ describe('useSessionManager', () => {
     })
 
     it('should handle null/undefined optional fields gracefully', () => {
-      const mockSE = {
+      const mockSE = mockSessionExercise({
         id: 'se-3',
-        setsTarget: undefined,
-        repsTarget: undefined,
-        weightTarget: undefined,
-        exercise: { fetch: jest.fn() },
-        update: jest.fn(),
-        destroyPermanently: jest.fn(),
-      }
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+        setsTarget: null,
+        repsTarget: null,
+        weightTarget: null,
+      })
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       act(() => {
-        result.current.prepareEditTargets(mockSE as any)
+        result.current.prepareEditTargets(mockSE)
       })
 
       expect(result.current.targetSets).toBe('')
@@ -472,7 +471,7 @@ describe('useSessionManager', () => {
 
   describe('resetTargets', () => {
     it('should clear all target inputs', () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       act(() => {
         result.current.setTargetSets('3')
@@ -507,14 +506,14 @@ describe('useSessionManager', () => {
         return se
       })
       const items = [
-        { id: 'se-1', prepareUpdate: mockPrepareUpdate },
-        { id: 'se-2', prepareUpdate: mockPrepareUpdate },
+        mockSessionExercise({ id: 'se-1', prepareUpdate: mockPrepareUpdate }),
+        mockSessionExercise({ id: 'se-2', prepareUpdate: mockPrepareUpdate }),
       ]
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       let success: boolean
       await act(async () => {
-        success = await result.current.reorderExercises(items as any)
+        success = await result.current.reorderExercises(items)
       })
 
       expect(success!).toBe(true)
@@ -532,21 +531,21 @@ describe('useSessionManager', () => {
         return se
       })
       const items = [
-        { id: 'se-1', prepareUpdate: mockPrepareUpdate },
-        { id: 'se-2', prepareUpdate: mockPrepareUpdate },
-        { id: 'se-3', prepareUpdate: mockPrepareUpdate },
+        mockSessionExercise({ id: 'se-1', prepareUpdate: mockPrepareUpdate }),
+        mockSessionExercise({ id: 'se-2', prepareUpdate: mockPrepareUpdate }),
+        mockSessionExercise({ id: 'se-3', prepareUpdate: mockPrepareUpdate }),
       ]
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       await act(async () => {
-        await result.current.reorderExercises(items as any)
+        await result.current.reorderExercises(items)
       })
 
       expect(capturedPositions).toEqual([0, 1, 2])
     })
 
     it('should return true with an empty items array', async () => {
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       let success: boolean
       await act(async () => {
@@ -558,7 +557,7 @@ describe('useSessionManager', () => {
 
     it('should return false on error', async () => {
       mockWrite.mockRejectedValueOnce(new Error('Write failed'))
-      const { result } = renderHook(() => useSessionManager(mockSession as any))
+      const { result } = renderHook(() => useSessionManager(testSession))
 
       let success: boolean
       await act(async () => {

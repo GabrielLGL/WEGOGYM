@@ -29,6 +29,7 @@ import { deleteAllData } from '../dataManagementUtils'
 import { database } from '../../index'
 import { deleteApiKey } from '../../../services/secureKeyStore'
 import { cancelAllReminders } from '../../../services/notificationService'
+import { mockUser } from './testFactories'
 
 const mockWrite = database.write as jest.Mock
 const mockGet = database.get as jest.Mock
@@ -68,7 +69,7 @@ describe('deleteAllData', () => {
     }
     mockGet.mockImplementation((name: string) => collections[name])
 
-    const mockUser = {
+    const testUser = mockUser({
       prepareUpdate: jest.fn((fn: (u: Record<string, unknown>) => void) => {
         const u: Record<string, unknown> = {}
         fn(u)
@@ -77,9 +78,9 @@ describe('deleteAllData', () => {
         expect(u.onboardingCompleted).toBe(false)
         return 'user-update-op'
       }),
-    }
+    })
 
-    await deleteAllData(mockUser as any)
+    await deleteAllData(testUser)
 
     expect(mockWrite).toHaveBeenCalledTimes(1)
     expect(cancelAllReminders).toHaveBeenCalled()

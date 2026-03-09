@@ -9,6 +9,7 @@ jest.mock('../../index', () => ({
 
 import { buildRecapExercises } from '../exerciseStatsUtils'
 import { database } from '../../index'
+import { mockSessionExercise } from './testFactories'
 
 const mockGet = database.get as jest.Mock
 
@@ -17,17 +18,18 @@ beforeEach(() => {
 })
 
 function makeSE(id: string, setsTarget: number) {
-  return {
+  return mockSessionExercise({
     id,
     setsTarget,
     exercise: {
+      id: `exo-${id}`,
       fetch: jest.fn().mockResolvedValue({
         id: `exo-${id}`,
         name: `Exercise ${id}`,
         muscles: ['Pecs'],
       }),
     },
-  }
+  })
 }
 
 describe('buildRecapExercises', () => {
@@ -47,7 +49,7 @@ describe('buildRecapExercises', () => {
 
   it('skips exercises with no validated sets', async () => {
     const se = makeSE('se1', 3)
-    const result = await buildRecapExercises([se as any], {}, 'h1')
+    const result = await buildRecapExercises([se], {}, 'h1')
     expect(result).toEqual([])
   })
 
@@ -58,7 +60,7 @@ describe('buildRecapExercises', () => {
       'se1_2': { reps: 8, weight: 90, isPr: false },
     }
 
-    const result = await buildRecapExercises([se as any], validatedSets, 'h1')
+    const result = await buildRecapExercises([se], validatedSets, 'h1')
 
     expect(result).toHaveLength(1)
     expect(result[0].exerciseName).toBe('Exercise se1')
@@ -73,16 +75,16 @@ describe('buildRecapExercises', () => {
   })
 
   it('skips exercise when exercise.fetch returns null', async () => {
-    const se = {
+    const se = mockSessionExercise({
       id: 'se1',
       setsTarget: 2,
-      exercise: { fetch: jest.fn().mockResolvedValue(null) },
-    }
+      exercise: { id: 'se1', fetch: jest.fn().mockResolvedValue(null) },
+    })
     const validatedSets = {
       'se1_1': { reps: 10, weight: 80, isPr: false },
     }
 
-    const result = await buildRecapExercises([se as any], validatedSets, 'h1')
+    const result = await buildRecapExercises([se], validatedSets, 'h1')
     expect(result).toEqual([])
   })
 
@@ -95,7 +97,7 @@ describe('buildRecapExercises', () => {
       'se2_2': { reps: 6, weight: 70, isPr: false },
     }
 
-    const result = await buildRecapExercises([se1 as any, se2 as any], validatedSets, 'h1')
+    const result = await buildRecapExercises([se1, se2], validatedSets, 'h1')
     expect(result).toHaveLength(2)
     expect(result[0].setsValidated).toBe(1)
     expect(result[1].setsValidated).toBe(2)
@@ -112,7 +114,7 @@ describe('buildRecapExercises', () => {
     const se = makeSE('se1', 2)
     const validatedSets = { 'se1_1': { reps: 10, weight: 90, isPr: false } }
 
-    const result = await buildRecapExercises([se as any], validatedSets, 'h1')
+    const result = await buildRecapExercises([se], validatedSets, 'h1')
     expect(result[0].prevMaxWeight).toBe(100)
   })
 })

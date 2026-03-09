@@ -17,6 +17,7 @@ import {
   softDeleteHistory,
 } from '../workoutSessionUtils'
 import { database } from '../../index'
+import { mockSessionExercise } from './testFactories'
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock
@@ -216,15 +217,15 @@ describe('softDeleteHistory', () => {
 describe('updateSessionExerciseNotes', () => {
   it('updates the notes field on a SessionExercise', async () => {
     const captured: Record<string, unknown> = {}
-    const mockSE = {
+    const mockSE = mockSessionExercise({
       update: jest.fn().mockImplementation((cb: (se: Record<string, unknown>) => void) => {
         const se: Record<string, unknown> = { notes: '' }
         cb(se)
         Object.assign(captured, se)
       }),
-    }
+    })
 
-    await updateSessionExerciseNotes(mockSE as any, 'New note here')
+    await updateSessionExerciseNotes(mockSE, 'New note here')
 
     expect(mockWrite).toHaveBeenCalled()
     expect(captured.notes).toBe('New note here')

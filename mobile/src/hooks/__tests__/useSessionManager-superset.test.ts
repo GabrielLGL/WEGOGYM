@@ -27,11 +27,12 @@ jest.mock('@nozbe/watermelondb', () => ({
 import { renderHook, act } from '@testing-library/react-native'
 import { useSessionManager } from '../useSessionManager'
 import { database } from '../../model/index'
+import { mockSession as mockSessionFactory, mockSessionExercise } from '../../model/utils/__tests__/testFactories'
 
 const mockWrite = database.write as jest.Mock
 const mockBatch = (database as unknown as { batch: jest.Mock }).batch
 
-const mockSession = { id: 'sess-1' }
+const testSession = mockSessionFactory({ id: 'sess-1' })
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -43,11 +44,11 @@ beforeEach(() => {
 
 describe('groupExercises', () => {
   it('returns false when items length < 2', async () => {
-    const { result } = renderHook(() => useSessionManager(mockSession as any))
+    const { result } = renderHook(() => useSessionManager(testSession))
 
     let success: boolean
     await act(async () => {
-      success = await result.current.groupExercises([{ id: 'se1' }] as any, 'superset')
+      success = await result.current.groupExercises([mockSessionExercise({ id: 'se1' })], 'superset')
     })
 
     expect(success!).toBe(false)
@@ -64,16 +65,16 @@ describe('groupExercises', () => {
     })
 
     const items = [
-      { id: 'se1', prepareUpdate: mockPrepareUpdate },
-      { id: 'se2', prepareUpdate: mockPrepareUpdate },
+      mockSessionExercise({ id: 'se1', prepareUpdate: mockPrepareUpdate }),
+      mockSessionExercise({ id: 'se2', prepareUpdate: mockPrepareUpdate }),
     ]
 
     const onSuccess = jest.fn()
-    const { result } = renderHook(() => useSessionManager(mockSession as any, onSuccess))
+    const { result } = renderHook(() => useSessionManager(testSession, onSuccess))
 
     let success: boolean
     await act(async () => {
-      success = await result.current.groupExercises(items as any, 'superset')
+      success = await result.current.groupExercises(items, 'superset')
     })
 
     expect(success!).toBe(true)
@@ -96,15 +97,15 @@ describe('groupExercises', () => {
     })
 
     const items = [
-      { id: 'se1', prepareUpdate: mockPrepareUpdate },
-      { id: 'se2', prepareUpdate: mockPrepareUpdate },
-      { id: 'se3', prepareUpdate: mockPrepareUpdate },
+      mockSessionExercise({ id: 'se1', prepareUpdate: mockPrepareUpdate }),
+      mockSessionExercise({ id: 'se2', prepareUpdate: mockPrepareUpdate }),
+      mockSessionExercise({ id: 'se3', prepareUpdate: mockPrepareUpdate }),
     ]
 
-    const { result } = renderHook(() => useSessionManager(mockSession as any))
+    const { result } = renderHook(() => useSessionManager(testSession))
 
     await act(async () => {
-      await result.current.groupExercises(items as any, 'circuit')
+      await result.current.groupExercises(items, 'circuit')
     })
 
     expect(capturedUpdates[0].supersetType).toBe('circuit')
@@ -113,11 +114,11 @@ describe('groupExercises', () => {
 
   it('returns false on database error', async () => {
     mockWrite.mockRejectedValueOnce(new Error('DB error'))
-    const { result } = renderHook(() => useSessionManager(mockSession as any))
+    const { result } = renderHook(() => useSessionManager(testSession))
 
     let success: boolean
     await act(async () => {
-      success = await result.current.groupExercises([{ id: '1' }, { id: '2' }] as any, 'superset')
+      success = await result.current.groupExercises([mockSessionExercise({ id: '1' }), mockSessionExercise({ id: '2' })], 'superset')
     })
 
     expect(success!).toBe(false)
@@ -128,12 +129,12 @@ describe('groupExercises', () => {
 
 describe('ungroupExercise', () => {
   it('returns false when exercise has no supersetId', async () => {
-    const se = { id: 'se1', supersetId: null }
-    const { result } = renderHook(() => useSessionManager(mockSession as any))
+    const se = mockSessionExercise({ id: 'se1', supersetId: null })
+    const { result } = renderHook(() => useSessionManager(testSession))
 
     let success: boolean
     await act(async () => {
-      success = await result.current.ungroupExercise(se as any, [])
+      success = await result.current.ungroupExercise(se, [])
     })
 
     expect(success!).toBe(false)
@@ -149,16 +150,16 @@ describe('ungroupExercise', () => {
       return se
     })
 
-    const se1 = { id: 'se1', supersetId: 'g1', prepareUpdate: mockPrepareUpdate }
-    const se2 = { id: 'se2', supersetId: 'g1', prepareUpdate: mockPrepareUpdate }
+    const se1 = mockSessionExercise({ id: 'se1', supersetId: 'g1', prepareUpdate: mockPrepareUpdate })
+    const se2 = mockSessionExercise({ id: 'se2', supersetId: 'g1', prepareUpdate: mockPrepareUpdate })
     const allExercises = [se1, se2]
 
     const onSuccess = jest.fn()
-    const { result } = renderHook(() => useSessionManager(mockSession as any, onSuccess))
+    const { result } = renderHook(() => useSessionManager(testSession, onSuccess))
 
     let success: boolean
     await act(async () => {
-      success = await result.current.ungroupExercise(se1 as any, allExercises as any)
+      success = await result.current.ungroupExercise(se1, allExercises)
     })
 
     expect(success!).toBe(true)
@@ -184,16 +185,16 @@ describe('ungroupExercise', () => {
       return se
     })
 
-    const se1 = { id: 'se1', supersetId: 'g1', supersetPosition: 0, update: mockUpdate }
-    const se2 = { id: 'se2', supersetId: 'g1', supersetPosition: 1, prepareUpdate: mockPrepareUpdate }
-    const se3 = { id: 'se3', supersetId: 'g1', supersetPosition: 2, prepareUpdate: mockPrepareUpdate }
+    const se1 = mockSessionExercise({ id: 'se1', supersetId: 'g1', supersetPosition: 0, update: mockUpdate })
+    const se2 = mockSessionExercise({ id: 'se2', supersetId: 'g1', supersetPosition: 1, prepareUpdate: mockPrepareUpdate })
+    const se3 = mockSessionExercise({ id: 'se3', supersetId: 'g1', supersetPosition: 2, prepareUpdate: mockPrepareUpdate })
     const allExercises = [se1, se2, se3]
 
-    const { result } = renderHook(() => useSessionManager(mockSession as any))
+    const { result } = renderHook(() => useSessionManager(testSession))
 
     let success: boolean
     await act(async () => {
-      success = await result.current.ungroupExercise(se1 as any, allExercises as any)
+      success = await result.current.ungroupExercise(se1, allExercises)
     })
 
     expect(success!).toBe(true)
@@ -204,13 +205,13 @@ describe('ungroupExercise', () => {
 
   it('returns false on database error', async () => {
     mockWrite.mockRejectedValueOnce(new Error('DB error'))
-    const se = { id: 'se1', supersetId: 'g1' }
-    const allExercises = [se, { id: 'se2', supersetId: 'g1' }]
-    const { result } = renderHook(() => useSessionManager(mockSession as any))
+    const se = mockSessionExercise({ id: 'se1', supersetId: 'g1' })
+    const allExercises = [se, mockSessionExercise({ id: 'se2', supersetId: 'g1' })]
+    const { result } = renderHook(() => useSessionManager(testSession))
 
     let success: boolean
     await act(async () => {
-      success = await result.current.ungroupExercise(se as any, allExercises as any)
+      success = await result.current.ungroupExercise(se, allExercises)
     })
 
     expect(success!).toBe(false)

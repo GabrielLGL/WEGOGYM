@@ -11,6 +11,7 @@ jest.mock('../../index', () => ({
 }))
 
 import { EXERCISE_DESCRIPTIONS, seedExerciseDescriptions } from '../exerciseDescriptions'
+import { mockDatabase } from './testFactories'
 
 describe('EXERCISE_DESCRIPTIONS', () => {
   it('is a non-empty object', () => {
@@ -44,17 +45,9 @@ describe('EXERCISE_DESCRIPTIONS', () => {
 
 describe('seedExerciseDescriptions', () => {
   it('returns 0 when no exercises match', async () => {
-    const mockDb = {
-      get: jest.fn().mockReturnValue({
-        query: jest.fn().mockReturnValue({
-          fetch: jest.fn().mockResolvedValue([]),
-        }),
-      }),
-      write: jest.fn(),
-      batch: jest.fn(),
-    }
+    const mockDb = mockDatabase()
 
-    const count = await seedExerciseDescriptions(mockDb as any)
+    const count = await seedExerciseDescriptions(mockDb)
     expect(count).toBe(0)
     expect(mockDb.write).not.toHaveBeenCalled()
   })
@@ -64,17 +57,15 @@ describe('seedExerciseDescriptions', () => {
       { name: 'Développé Couché Barre', animationKey: 'bench_press_barbell', description: 'already set' },
       { name: 'Unknown Exercise', animationKey: '', description: '' },
     ]
-    const mockDb = {
+    const mockDb = mockDatabase({
       get: jest.fn().mockReturnValue({
         query: jest.fn().mockReturnValue({
           fetch: jest.fn().mockResolvedValue(exercises),
         }),
       }),
-      write: jest.fn(),
-      batch: jest.fn(),
-    }
+    })
 
-    const count = await seedExerciseDescriptions(mockDb as any)
+    const count = await seedExerciseDescriptions(mockDb)
     expect(count).toBe(0)
   })
 
@@ -93,17 +84,15 @@ describe('seedExerciseDescriptions', () => {
         }),
       },
     ]
-    const mockDb = {
+    const mockDb = mockDatabase({
       get: jest.fn().mockReturnValue({
         query: jest.fn().mockReturnValue({
           fetch: jest.fn().mockResolvedValue(exercises),
         }),
       }),
-      write: jest.fn(async (fn: () => Promise<void>) => fn()),
-      batch: jest.fn(),
-    }
+    })
 
-    const count = await seedExerciseDescriptions(mockDb as any)
+    const count = await seedExerciseDescriptions(mockDb)
     expect(count).toBe(1)
     expect(mockDb.write).toHaveBeenCalledTimes(1)
     expect(updatedFields[0].animationKey).toBe('bench_press_barbell')
@@ -125,17 +114,15 @@ describe('seedExerciseDescriptions', () => {
         }),
       },
     ]
-    const mockDb = {
+    const mockDb = mockDatabase({
       get: jest.fn().mockReturnValue({
         query: jest.fn().mockReturnValue({
           fetch: jest.fn().mockResolvedValue(exercises),
         }),
       }),
-      write: jest.fn(async (fn: () => Promise<void>) => fn()),
-      batch: jest.fn(),
-    }
+    })
 
-    await seedExerciseDescriptions(mockDb as any)
+    await seedExerciseDescriptions(mockDb)
     // animationKey should NOT be overwritten
     expect(updatedFields[0].animationKey).toBe('existing_key')
   })
