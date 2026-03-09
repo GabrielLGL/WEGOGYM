@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react'
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import {
   View,
   Text,
@@ -60,7 +60,7 @@ type CelebrationItem =
 interface Tile {
   icon: keyof typeof Ionicons.glyphMap
   label: string
-  route: string
+  route: keyof RootStackParamList
 }
 
 interface Section {
@@ -142,7 +142,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
     navigation.setParams({ celebrations: undefined })
   }, [route.params?.celebrations, navigation])
 
-  const handleCloseCelebration = () => {
+  const handleCloseCelebration = useCallback(() => {
     setCelebrationQueue(prev => {
       if (prev.length > 0) {
         setCurrentCelebration(prev[0])
@@ -151,7 +151,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
       setCurrentCelebration(null)
       return prev
     })
-  }
+  }, [])
 
   const user = users[0] ?? null
 
@@ -197,7 +197,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
     try {
-      navigation.navigate(tile.route as keyof RootStackParamList as never)
+      navigation.navigate(tile.route as never)
     } catch {
       if (__DEV__) console.warn(`[HomeScreen] Route "${tile.route}" non disponible`)
     }

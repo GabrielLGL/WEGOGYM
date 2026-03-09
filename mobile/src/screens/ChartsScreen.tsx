@@ -160,7 +160,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
               <>
                 <LineChart
                   data={chartData}
-                  width={screenWidth - 40}
+                  width={screenWidth - spacing.lg * 2}
                   height={200}
                   chartConfig={chartConfig}
                   style={styles.chart}
@@ -302,54 +302,44 @@ export const ChartsContent: React.FC<Props> = ({ exercises }) => {
   )
 }
 
-const SCREEN_PADDING_H = 20
-const CHART_BORDER_RADIUS = 16
-const FILTER_PADDING_V = 10
-const SELECTOR_PADDING_V = 15
-const CHIP_MARGIN_RIGHT = 10
-const FONT_SIZE_CHIP = 13
 const LIST_PADDING_BOTTOM = 100
-const CHART_MARGIN_BOTTOM = 20
-const HISTORY_TITLE_MARGIN_TOP = 25
-const HISTORY_TITLE_MARGIN_BOTTOM = 15
-const LOG_ROW_PADDING = 15
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    filtersWrapper: { paddingVertical: FILTER_PADDING_V, borderBottomWidth: 1, borderBottomColor: colors.card },
-    filterRow: { paddingHorizontal: SCREEN_PADDING_H },
+    filtersWrapper: { paddingVertical: spacing.ms, borderBottomWidth: 1, borderBottomColor: colors.card },
+    filterRow: { paddingHorizontal: spacing.lg },
     selectorContainer: {
-      paddingVertical: SELECTOR_PADDING_V,
+      paddingVertical: spacing.md,
       borderBottomWidth: 1,
       borderBottomColor: colors.card,
       backgroundColor: colors.background,
     },
-    exoScroll: { paddingHorizontal: SCREEN_PADDING_H },
+    exoScroll: { paddingHorizontal: spacing.lg },
     exoChip: {
       paddingHorizontal: spacing.md,
-      paddingVertical: FILTER_PADDING_V,
+      paddingVertical: spacing.ms,
       borderRadius: borderRadius.md,
       backgroundColor: colors.cardSecondary,
-      marginRight: CHIP_MARGIN_RIGHT,
+      marginRight: spacing.sm,
     },
     exoChipActive: { backgroundColor: colors.primary },
-    exoChipText: { color: colors.textSecondary, fontSize: FONT_SIZE_CHIP, fontWeight: '600' },
+    exoChipText: { color: colors.textSecondary, fontSize: fontSize.sm, fontWeight: '600' },
     exoChipTextActive: { color: colors.text },
     contentArea: { flex: 1 },
     statsContainer: { flex: 1 },
-    listContent: { padding: SCREEN_PADDING_H, paddingBottom: LIST_PADDING_BOTTOM },
-    chartWrapper: { marginBottom: CHART_MARGIN_BOTTOM },
-    chart: { borderRadius: CHART_BORDER_RADIUS, marginVertical: spacing.sm },
-    historyTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: 'bold', marginTop: HISTORY_TITLE_MARGIN_TOP, marginBottom: HISTORY_TITLE_MARGIN_BOTTOM },
+    listContent: { padding: spacing.lg, paddingBottom: LIST_PADDING_BOTTOM },
+    chartWrapper: { marginBottom: spacing.lg },
+    chart: { borderRadius: borderRadius.md, marginVertical: spacing.sm },
+    historyTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: 'bold', marginTop: spacing.lg, marginBottom: spacing.md },
     logRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
       backgroundColor: colors.card,
-      padding: LOG_ROW_PADDING,
+      padding: spacing.md,
       borderRadius: borderRadius.md,
-      marginBottom: CHIP_MARGIN_RIGHT,
+      marginBottom: spacing.sm,
       borderLeftWidth: 3,
       borderLeftColor: colors.primary,
     },
@@ -358,7 +348,7 @@ function useStyles(colors: ThemeColors) {
     logDate: { color: colors.placeholder, fontSize: fontSize.caption, marginTop: 2, marginBottom: 6 },
     setDetailText: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2 },
     actionBtns: { flexDirection: 'row', gap: spacing.sm },
-    actionBtn: { padding: CHIP_MARGIN_RIGHT },
+    actionBtn: { padding: spacing.sm },
     emptyState: { marginTop: 50, paddingHorizontal: spacing.xxl },
     emptyText: {
       color: colors.placeholder,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import SessionExercise from '../model/models/SessionExercise'
 import {
   saveWorkoutSet,
@@ -76,15 +76,15 @@ export function useWorkoutState(
   // ne pas écraser les saisies en cours de l'utilisateur.
   }, [])
 
-  const updateSetInput = (key: string, field: 'weight' | 'reps', value: string) => {
+  const updateSetInput = useCallback((key: string, field: 'weight' | 'reps', value: string) => {
     setSetInputs(prev => {
       const next = { ...prev, [key]: { ...prev[key], [field]: value } }
       setInputsRef.current = next
       return next
     })
-  }
+  }, [])
 
-  const validateSet = async (
+  const validateSet = useCallback(async (
     sessionExercise: SessionExercise,
     setOrder: number
   ): Promise<boolean> => {
@@ -123,9 +123,9 @@ export function useWorkoutState(
       if (__DEV__) console.error('Failed to save workout set:', error)
       return false
     }
-  }
+  }, [historyId])
 
-  const unvalidateSet = async (
+  const unvalidateSet = useCallback(async (
     sessionExercise: SessionExercise,
     setOrder: number
   ): Promise<boolean> => {
@@ -152,7 +152,7 @@ export function useWorkoutState(
       if (__DEV__) console.error('Failed to delete workout set:', error)
       return false
     }
-  }
+  }, [historyId, validatedSets])
 
   return {
     setInputs,

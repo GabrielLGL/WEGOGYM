@@ -61,6 +61,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
 
   const fadeAnim = useRef(new Animated.Value(0)).current
   const tooltipAnim = useRef(new Animated.Value(0)).current
+  const completedRef = useRef(false)
 
   const totalSteps = steps.length
   const step = steps[currentStep]
@@ -84,6 +85,8 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
 
   // Handlers (defined before effects to avoid forward references)
   const handleComplete = useCallback(() => {
+    if (completedRef.current) return
+    completedRef.current = true
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 150,
@@ -136,6 +139,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
       setCurrentStep(0)
       setRetryCount(0)
       setDismissed(false)
+      completedRef.current = false
       fadeAnim.setValue(0)
       tooltipAnim.setValue(0)
     }
