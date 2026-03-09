@@ -198,7 +198,7 @@ const ExerciseDetail: React.FC<ExerciseDetailProps> = ({
 }
 
 function useDetailStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       maxHeight: 500,
     },
@@ -268,7 +268,7 @@ function useDetailStyles(colors: ThemeColors) {
       marginTop: spacing.sm,
       marginBottom: spacing.md,
     },
-  })
+  }), [colors])
 }
 
 // ── Écran principal ───────────────────────────────────────────────────────────
