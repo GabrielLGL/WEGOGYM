@@ -103,7 +103,6 @@ export const fontSize = {
   jumbo: 48,
 }
 
-
 /**
  * Ombres neumorphiques dark — Platform-aware
  * iOS : shadowColor + shadowOffset + shadowOpacity + shadowRadius
@@ -237,7 +236,6 @@ export const neuShadowLight = {
     borderColor: '#c8d0da',
   },
 }
-
 
 /** Type union des deux palettes */
 export type ThemeColors = typeof colors

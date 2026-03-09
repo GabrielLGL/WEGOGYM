@@ -91,10 +91,14 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
     const durationSeconds = Math.floor((now - startTimestamp) / 1000)
     const activeHistoryId = historyRef.current?.id || historyId
 
+    let historyCompleted = false
     if (activeHistoryId) {
-      await completeWorkoutHistory(activeHistoryId, now).catch(e => {
+      try {
+        await completeWorkoutHistory(activeHistoryId, now)
+        historyCompleted = true
+      } catch (e) {
         if (__DEV__) console.error('[useWorkoutCompletion] completeWorkoutHistory:', e)
-      })
+      }
     }
 
     let sessionXPGained = 0
@@ -104,7 +108,7 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
     let newBadges: BadgeDefinition[] = []
 
     // ── Gamification ──
-    if (user && completedSets > 0) {
+    if (user && completedSets > 0 && historyCompleted) {
       try {
         const setsArray = Object.values(validatedSets).map(s => ({
           weight: s.weight,
