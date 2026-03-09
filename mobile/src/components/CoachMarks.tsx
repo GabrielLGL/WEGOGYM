@@ -139,7 +139,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
       fadeAnim.setValue(0)
       tooltipAnim.setValue(0)
     }
-  }, [visible])
+  }, [visible, measureTarget, fadeAnim, tooltipAnim])
 
   // Retry measurement when targetLayout is null
   useEffect(() => {
@@ -169,7 +169,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
       duration: ANIMATION_DURATION,
       useNativeDriver: true,
     }).start()
-  }, [currentStep, ready])
+  }, [currentStep, ready, measureTarget, tooltipAnim])
 
   // Android back handler
   useEffect(() => {
