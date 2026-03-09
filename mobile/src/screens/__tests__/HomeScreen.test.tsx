@@ -1,4 +1,12 @@
 // Mocks AVANT les imports
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import { HomeContent } from '../HomeScreen'
+import type User from '../../model/models/User'
+import type History from '../../model/models/History'
+import type WorkoutSet from '../../model/models/Set'
+import type Session from '../../model/models/Session'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
   PortalProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -64,14 +72,6 @@ jest.mock('../../model/utils/statsHelpers', () => ({
     }))
   ),
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import { HomeContent } from '../HomeScreen'
-import type User from '../../model/models/User'
-import type History from '../../model/models/History'
-import type WorkoutSet from '../../model/models/Set'
-import type Session from '../../model/models/Session'
 
 const makeUser = (overrides: Partial<User> = {}): User => ({
   id: 'user-1',

@@ -1,13 +1,6 @@
 /**
  * Tests for workoutSessionUtils.ts — DB-dependent functions, mocked.
  */
-jest.mock('../../index', () => ({
-  database: {
-    get: jest.fn(),
-    write: jest.fn(),
-  },
-}))
-
 import {
   createWorkoutHistory,
   completeWorkoutHistory,
@@ -18,6 +11,13 @@ import {
 } from '../workoutSessionUtils'
 import { database } from '../../index'
 import { mockSessionExercise } from './testFactories'
+
+jest.mock('../../index', () => ({
+  database: {
+    get: jest.fn(),
+    write: jest.fn(),
+  },
+}))
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock

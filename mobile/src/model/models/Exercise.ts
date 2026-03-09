@@ -50,7 +50,7 @@ export default class Exercise extends Model {
     try {
       // Analyse la chaîne JSON, retourne un tableau vide si vide
       return JSON.parse(this._muscles || '[]')
-    } catch (e) {
+    } catch {
       // Sécurité en cas de JSON malformé
       return []
     }

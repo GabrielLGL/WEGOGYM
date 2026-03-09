@@ -10,8 +10,6 @@ import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RootStackParamList } from '../navigation'
-
-type ExercisesNavigation = NativeStackNavigationProp<RootStackParamList>
 import { CustomModal } from '../components/CustomModal'
 import { BottomSheet } from '../components/BottomSheet'
 import { AlertDialog } from '../components/AlertDialog'
@@ -28,6 +26,8 @@ import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useLanguage } from '../contexts/LanguageContext'
 
+type ExercisesNavigation = NativeStackNavigationProp<RootStackParamList>
+
 interface Props { exercises: Exercise[] }
 
 interface ExerciseItemProps {
@@ -38,7 +38,7 @@ interface ExerciseItemProps {
 }
 
 const ExerciseItem = memo<ExerciseItemProps>(
-  ({ item, onOptionsPress, onPress, colors }) => {
+  function ExerciseItem({ item, onOptionsPress, onPress, colors }) {
     const styles = useExerciseItemStyles(colors)
     const { t } = useLanguage()
     const muscleNames = item.muscles?.map(m => t.muscleNames[m as keyof typeof t.muscleNames] ?? m) ?? []

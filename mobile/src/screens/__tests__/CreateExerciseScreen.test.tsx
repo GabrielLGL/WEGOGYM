@@ -1,5 +1,9 @@
 // Mocks AVANT les imports
 
+import React from 'react'
+import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import CreateExerciseScreen from '../CreateExerciseScreen'
+
 const mockGoBack = jest.fn()
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
@@ -45,10 +49,6 @@ jest.mock('../../components/AlertDialog', () => ({
     )
   },
 }))
-
-import React from 'react'
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
-import CreateExerciseScreen from '../CreateExerciseScreen'
 
 describe('CreateExerciseScreen', () => {
   beforeEach(() => {

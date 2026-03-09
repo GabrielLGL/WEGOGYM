@@ -1,6 +1,8 @@
 import React from 'react'
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
 
+import { AssistantScreenInner } from '../AssistantScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -27,8 +29,6 @@ jest.mock('../../services/ai/aiService', () => ({
 jest.mock('@react-navigation/native', () => ({
   useFocusEffect: jest.fn(),
 }))
-
-import { AssistantScreenInner } from '../AssistantScreen'
 
 const mockNavigation = {
   navigate: jest.fn(),

@@ -1,4 +1,7 @@
 // Mock database avant les imports
+import { BASIC_EXERCISES, seedExercises } from '../seed'
+import { database } from '../index'
+
 jest.mock('../index', () => ({
   database: {
     get: jest.fn(),
@@ -6,9 +9,6 @@ jest.mock('../index', () => ({
     batch: jest.fn(),
   },
 }))
-
-import { BASIC_EXERCISES, seedExercises } from '../seed'
-import { database } from '../index'
 
 describe('seed — BASIC_EXERCISES', () => {
   it('est un tableau non vide', () => {

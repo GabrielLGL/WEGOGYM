@@ -1,15 +1,15 @@
 /**
  * Extended tests for workoutSessionUtils.ts — softDeleteHistory + edge cases
  */
+import { softDeleteHistory, getLastSessionVolume } from '../workoutSessionUtils'
+import { database } from '../../index'
+
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
     write: jest.fn(),
   },
 }))
-
-import { softDeleteHistory, getLastSessionVolume } from '../workoutSessionUtils'
-import { database } from '../../index'
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock

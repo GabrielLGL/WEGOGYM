@@ -31,7 +31,6 @@ import { useLanguage } from '../contexts/LanguageContext'
 const TOAST_FADE_IN = 200
 const TOAST_FADE_OUT = 300
 const TOAST_DURATION = 2000
-const MODAL_OPEN_DELAY = 300
 const SELECTION_BADGE_SIZE = 28
 
 interface Props {
@@ -63,15 +62,11 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     targetRestTime,
     setTargetRestTime,
     isFormValid,
-    // Selected exercise
-    selectedSessionExercise,
-    setSelectedSessionExercise,
     // Operations
     addExercise,
     updateTargets,
     removeExercise,
     prepareEditTargets,
-    resetTargets,
     reorderExercises,
     groupExercises,
     ungroupExercise,

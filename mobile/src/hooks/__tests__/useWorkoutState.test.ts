@@ -1,14 +1,4 @@
 // Mock helpers BEFORE imports to avoid SQLiteAdapter initialization
-jest.mock('../../model/utils/databaseHelpers', () => ({
-  saveWorkoutSet: jest.fn(),
-  getMaxWeightForExercise: jest.fn(),
-  deleteWorkoutSet: jest.fn(),
-  getLastSetsForExercises: jest.fn(),
-}))
-jest.mock('../../model/utils/validationHelpers', () => ({
-  validateSetInput: jest.fn(),
-}))
-
 import { renderHook, act } from '@testing-library/react-native'
 import { useWorkoutState } from '../useWorkoutState'
 import {
@@ -19,6 +9,16 @@ import {
 } from '../../model/utils/databaseHelpers'
 import { validateSetInput } from '../../model/utils/validationHelpers'
 import { mockSessionExercise } from '../../model/utils/__tests__/testFactories'
+
+jest.mock('../../model/utils/databaseHelpers', () => ({
+  saveWorkoutSet: jest.fn(),
+  getMaxWeightForExercise: jest.fn(),
+  deleteWorkoutSet: jest.fn(),
+  getLastSetsForExercises: jest.fn(),
+}))
+jest.mock('../../model/utils/validationHelpers', () => ({
+  validateSetInput: jest.fn(),
+}))
 
 const mockSaveWorkoutSet = saveWorkoutSet as jest.Mock
 const mockGetMaxWeightForExercise = getMaxWeightForExercise as jest.Mock

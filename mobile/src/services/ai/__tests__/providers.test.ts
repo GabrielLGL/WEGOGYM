@@ -1,7 +1,7 @@
 import { createClaudeProvider } from '../claudeProvider'
 import { createOpenAIProvider, testOpenAIConnection } from '../openaiProvider'
 import { createGeminiProvider, testGeminiConnection } from '../geminiProvider'
-import type { AIFormData, DBContext, ExerciseInfo } from '../types'
+import type { AIFormData, DBContext } from '../types'
 
 // JSON valide conforme à GeneratedPlan
 const VALID_PLAN_JSON =

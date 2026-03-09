@@ -2,6 +2,9 @@
  * Tests for exerciseDescriptions.ts — EXERCISE_DESCRIPTIONS + seedExerciseDescriptions
  */
 
+import { EXERCISE_DESCRIPTIONS, seedExerciseDescriptions } from '../exerciseDescriptions'
+import { mockDatabase } from './testFactories'
+
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
@@ -10,16 +13,13 @@ jest.mock('../../index', () => ({
   },
 }))
 
-import { EXERCISE_DESCRIPTIONS, seedExerciseDescriptions } from '../exerciseDescriptions'
-import { mockDatabase } from './testFactories'
-
 describe('EXERCISE_DESCRIPTIONS', () => {
   it('is a non-empty object', () => {
     expect(Object.keys(EXERCISE_DESCRIPTIONS).length).toBeGreaterThan(0)
   })
 
   it('each entry has animationKey and description strings', () => {
-    for (const [name, data] of Object.entries(EXERCISE_DESCRIPTIONS)) {
+    for (const [_name, data] of Object.entries(EXERCISE_DESCRIPTIONS)) {
       expect(typeof data.animationKey).toBe('string')
       expect(data.animationKey.length).toBeGreaterThan(0)
       expect(typeof data.description).toBe('string')

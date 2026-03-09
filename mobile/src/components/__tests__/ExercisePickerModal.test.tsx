@@ -1,4 +1,11 @@
 // Mocks AVANT tous les imports
+import React from 'react'
+import { render, fireEvent, act } from '@testing-library/react-native'
+import { ExercisePickerModal } from '../ExercisePickerModal'
+import { filterExercises } from '../../model/utils/databaseHelpers'
+import { validateWorkoutInput } from '../../model/utils/validationHelpers'
+import type Exercise from '../../model/models/Exercise'
+
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }))
@@ -97,13 +104,6 @@ jest.mock('../../components/ExerciseTargetInputs', () => ({
     )
   },
 }))
-
-import React from 'react'
-import { render, fireEvent, act } from '@testing-library/react-native'
-import { ExercisePickerModal } from '../ExercisePickerModal'
-import { filterExercises } from '../../model/utils/databaseHelpers'
-import { validateWorkoutInput } from '../../model/utils/validationHelpers'
-import type Exercise from '../../model/models/Exercise'
 
 const mockFilterExercises = filterExercises as jest.Mock
 const mockValidateWorkoutInput = validateWorkoutInput as jest.Mock

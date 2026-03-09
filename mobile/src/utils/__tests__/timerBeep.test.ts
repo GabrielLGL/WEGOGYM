@@ -2,6 +2,9 @@
  * Tests for timerBeep.ts — WAV generation and Audio.Sound creation
  */
 
+import { Audio } from 'expo-av'
+import { createBeepSound } from '../timerBeep'
+
 jest.mock('expo-av', () => ({
   Audio: {
     Sound: {
@@ -14,9 +17,6 @@ jest.mock('expo-av', () => ({
     },
   },
 }))
-
-import { Audio } from 'expo-av'
-import { createBeepSound } from '../timerBeep'
 
 const mockCreateAsync = Audio.Sound.createAsync as jest.Mock
 

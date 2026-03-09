@@ -4,6 +4,13 @@
 
 // We need to test the module-level functions and the hook
 
+import { renderHook, act } from '@testing-library/react-native'
+import { useWorkoutCompletion } from '../useWorkoutCompletion'
+import { database } from '../../model/index'
+import { completeWorkoutHistory, buildRecapExercises, getLastSessionVolume } from '../../model/utils/databaseHelpers'
+import { calculateSessionXP, calculateSessionTonnage } from '../../model/utils/gamificationHelpers'
+import { mockUser as mockUserFactory } from '../../model/utils/__tests__/testFactories'
+
 jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn(),
@@ -27,13 +34,6 @@ jest.mock('../../model/utils/gamificationHelpers', () => ({
 jest.mock('../../model/utils/badgeHelpers', () => ({
   checkBadges: jest.fn().mockReturnValue([]),
 }))
-
-import { renderHook, act } from '@testing-library/react-native'
-import { useWorkoutCompletion } from '../useWorkoutCompletion'
-import { database } from '../../model/index'
-import { completeWorkoutHistory, buildRecapExercises, getLastSessionVolume } from '../../model/utils/databaseHelpers'
-import { calculateSessionXP, calculateSessionTonnage } from '../../model/utils/gamificationHelpers'
-import { mockUser as mockUserFactory } from '../../model/utils/__tests__/testFactories'
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock
@@ -205,7 +205,6 @@ describe('useWorkoutCompletion', () => {
     })
 
     // Setup mock chain for weekSessionCount query + getTotalSessionCount + distinct exercises + badges
-    let callCount = 0
     mockGet.mockImplementation(() => ({
       query: jest.fn().mockReturnValue({
         fetchCount: jest.fn().mockResolvedValue(3),

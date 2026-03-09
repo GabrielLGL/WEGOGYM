@@ -16,8 +16,8 @@ export interface DurationStats {
   totalHours: number
   minMin: number
   maxMin: number
-  perSession: Array<{ date: number; durationMin: number }>
-  historyAll: Array<{ id: string; date: number; durationMin: number }>
+  perSession: { date: number; durationMin: number }[]
+  historyAll: { id: string; date: number; durationMin: number }[]
 }
 
 export interface VolumeWeekEntry {

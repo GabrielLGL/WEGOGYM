@@ -1,7 +1,6 @@
 import type { UserProfile, MuscleGroup } from './types'
 import {
   WEEKLY_VOLUME_TABLE,
-  MUSCLES_BY_PATTERN,
   MAX_SETS_PER_MUSCLE_PER_SESSION,
   MAX_TOTAL_SETS_PER_SESSION,
 } from './tables'

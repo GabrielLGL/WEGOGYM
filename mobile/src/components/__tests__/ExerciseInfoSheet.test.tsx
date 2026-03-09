@@ -1,3 +1,8 @@
+import React from 'react'
+import { render, act } from '@testing-library/react-native'
+import { ExerciseInfoSheet } from '../ExerciseInfoSheet'
+import type Exercise from '../../model/models/Exercise'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
 }))
@@ -9,11 +14,6 @@ jest.mock('@expo/vector-icons', () => ({
 jest.mock('expo-image', () => ({
   Image: 'Image',
 }))
-
-import React from 'react'
-import { render, act } from '@testing-library/react-native'
-import { ExerciseInfoSheet } from '../ExerciseInfoSheet'
-import type Exercise from '../../model/models/Exercise'
 
 const makeExercise = (overrides: Partial<Record<string, unknown>> = {}): Exercise => ({
   id: 'ex-1',

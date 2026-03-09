@@ -1,4 +1,9 @@
 // Mock databaseHelpers pour éviter l'init JSI de SQLiteAdapter
+import React from 'react'
+import { render } from '@testing-library/react-native'
+import { LastPerformanceBadge } from '../LastPerformanceBadge'
+import type { LastPerformance } from '../../types/workout'
+
 jest.mock('../../model/utils/databaseHelpers', () => ({
   formatRelativeDate: jest.fn((date: Date) => {
     const now = Date.now()
@@ -9,11 +14,6 @@ jest.mock('../../model/utils/databaseHelpers', () => ({
     return `il y a ${diffDays} jours`
   }),
 }))
-
-import React from 'react'
-import { render } from '@testing-library/react-native'
-import { LastPerformanceBadge } from '../LastPerformanceBadge'
-import type { LastPerformance } from '../../types/workout'
 
 const makeLastPerformance = (overrides: Partial<LastPerformance> = {}): LastPerformance => ({
   maxWeight: 80,

@@ -1,4 +1,12 @@
 // Mocks AVANT les imports
+import React from 'react'
+import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
+import { SessionDetailContent } from '../SessionDetailScreen'
+import { useSessionManager } from '../../hooks/useSessionManager'
+import type Session from '../../model/models/Session'
+import type SessionExercise from '../../model/models/SessionExercise'
+import type User from '../../model/models/User'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
   PortalProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -133,14 +141,6 @@ jest.mock('../../components/RestTimer', () => {
     default: () => React.createElement(View, null, React.createElement(Text, null, 'RestTimer')),
   }
 })
-
-import React from 'react'
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
-import { SessionDetailContent } from '../SessionDetailScreen'
-import { useSessionManager } from '../../hooks/useSessionManager'
-import type Session from '../../model/models/Session'
-import type SessionExercise from '../../model/models/SessionExercise'
-import type User from '../../model/models/User'
 
 // Get mock function references from the mocked module
 const getSessionManagerMocks = () => (useSessionManager as jest.Mock).mock.results[0]?.value

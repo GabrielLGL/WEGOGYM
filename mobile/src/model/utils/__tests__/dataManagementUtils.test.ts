@@ -2,8 +2,13 @@
  * Tests for dataManagementUtils.ts — deleteAllData
  */
 
-import { Q } from '@nozbe/watermelondb'
 import * as FileSystem from 'expo-file-system'
+
+import { deleteAllData } from '../dataManagementUtils'
+import { database } from '../../index'
+import { deleteApiKey } from '../../../services/secureKeyStore'
+import { cancelAllReminders } from '../../../services/notificationService'
+import { mockUser } from './testFactories'
 
 // Mock dependencies
 jest.mock('../../index', () => ({
@@ -25,12 +30,6 @@ jest.mock('../../../services/notificationService', () => ({
   cancelAllReminders: jest.fn().mockResolvedValue(undefined),
 }))
 
-import { deleteAllData } from '../dataManagementUtils'
-import { database } from '../../index'
-import { deleteApiKey } from '../../../services/secureKeyStore'
-import { cancelAllReminders } from '../../../services/notificationService'
-import { mockUser } from './testFactories'
-
 const mockWrite = database.write as jest.Mock
 const mockGet = database.get as jest.Mock
 
@@ -40,7 +39,7 @@ beforeEach(() => {
   ;(FileSystem.readDirectoryAsync as jest.Mock).mockResolvedValue([])
 })
 
-function mockCollectionQuery(records: Array<{ prepareDestroyPermanently: () => unknown }>) {
+function mockCollectionQuery(records: { prepareDestroyPermanently: () => unknown }[]) {
   return {
     query: jest.fn().mockReturnValue({
       fetch: jest.fn().mockResolvedValue(records),

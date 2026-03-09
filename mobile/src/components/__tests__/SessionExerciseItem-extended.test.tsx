@@ -1,6 +1,12 @@
 /**
  * Extended tests for SessionExerciseItem — selection mode, groupInfo, info sheet, notes
  */
+import React from 'react'
+import { render, fireEvent, act } from '@testing-library/react-native'
+import { SessionExerciseItem } from '../SessionExerciseItem'
+import type SessionExercise from '../../model/models/SessionExercise'
+import type Exercise from '../../model/models/Exercise'
+
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }))
@@ -27,12 +33,6 @@ jest.mock('../../model/index', () => ({
     }),
   },
 }))
-
-import React from 'react'
-import { render, fireEvent, act } from '@testing-library/react-native'
-import { SessionExerciseItem } from '../SessionExerciseItem'
-import type SessionExercise from '../../model/models/SessionExercise'
-import type Exercise from '../../model/models/Exercise'
 
 const makeSessionExercise = (overrides: Partial<SessionExercise> = {}): SessionExercise => ({
   id: 'se-1',

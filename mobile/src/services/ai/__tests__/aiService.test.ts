@@ -1,4 +1,14 @@
 // Mocks AVANT les imports (hoistés par Jest)
+import { generatePlan, testProviderConnection } from '../aiService'
+import { createClaudeProvider } from '../claudeProvider'
+import { createOpenAIProvider, testOpenAIConnection } from '../openaiProvider'
+import { createGeminiProvider, testGeminiConnection } from '../geminiProvider'
+import { offlineEngine } from '../offlineEngine'
+import { database } from '../../../model'
+import { getApiKey } from '../../secureKeyStore'
+import type { AIFormData } from '../types'
+import { mockUser } from '../../../model/utils/__tests__/testFactories'
+
 jest.mock('@nozbe/watermelondb', () => ({
   Q: {
     where: jest.fn().mockReturnValue({}),
@@ -49,16 +59,6 @@ jest.mock('../geminiProvider', () => ({
 jest.mock('../../secureKeyStore', () => ({
   getApiKey: jest.fn().mockResolvedValue(null),
 }))
-
-import { generatePlan, testProviderConnection } from '../aiService'
-import { createClaudeProvider } from '../claudeProvider'
-import { createOpenAIProvider, testOpenAIConnection } from '../openaiProvider'
-import { createGeminiProvider, testGeminiConnection } from '../geminiProvider'
-import { offlineEngine } from '../offlineEngine'
-import { database } from '../../../model'
-import { getApiKey } from '../../secureKeyStore'
-import type { AIFormData } from '../types'
-import { mockUser } from '../../../model/utils/__tests__/testFactories'
 
 const mockGetApiKey = getApiKey as jest.MockedFunction<typeof getApiKey>
 
@@ -186,11 +186,11 @@ describe('aiService', () => {
   describe('generatePlan — buildDBContext branches', () => {
     // Helper pour configurer le mock de database.get par table
     function setupMockDB({
-      exercises = [] as Array<{ id: string; name: string; muscles: string[]; equipment?: string }>,
-      histories = [] as Array<{ id: string }>,
-      sets = [] as Array<{ exercise: { id: string } }>,
-      recentExercises = [] as Array<{ id: string; name: string; muscles: string[]; equipment?: string }>,
-      performanceLogs = [] as Array<{ exercise: { id: string }; weight: number }>,
+      exercises = [] as { id: string; name: string; muscles: string[]; equipment?: string }[],
+      histories = [] as { id: string }[],
+      sets = [] as { exercise: { id: string } }[],
+      recentExercises = [] as { id: string; name: string; muscles: string[]; equipment?: string }[],
+      performanceLogs = [] as { exercise: { id: string }; weight: number }[],
     } = {}) {
       let exerciseFetchCount = 0
       mockDbGet.mockImplementation((table: string) => {

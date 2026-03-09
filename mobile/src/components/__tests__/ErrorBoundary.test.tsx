@@ -3,12 +3,12 @@ import { render, fireEvent } from '@testing-library/react-native'
 import { Text } from 'react-native'
 import { ErrorBoundary } from '../ErrorBoundary'
 
+import { captureError } from '../../services/sentry'
+
 // Mock Sentry
 jest.mock('../../services/sentry', () => ({
   captureError: jest.fn(),
 }))
-
-import { captureError } from '../../services/sentry'
 
 const mockCaptureError = captureError as jest.Mock
 
@@ -118,7 +118,7 @@ describe('ErrorBoundary', () => {
 
   describe('handleReset', () => {
     it('should réinitialiser l\'état d\'erreur après avoir appuyé sur "Réessayer"', () => {
-      const { getByText, queryByText } = render(
+      const { getByText } = render(
         <ErrorBoundary>
           <ThrowingComponent shouldThrow={true} />
         </ErrorBoundary>

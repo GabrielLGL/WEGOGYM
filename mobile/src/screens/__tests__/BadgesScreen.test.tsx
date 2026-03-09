@@ -3,6 +3,12 @@
  * withObservables mocked as identity — default export IS BadgesScreenBase.
  * ThemeContext mocked globally via moduleNameMapper.
  */
+import React from 'react'
+import { render } from '@testing-library/react-native'
+import { BadgesScreenBase as BadgesScreen } from '../BadgesScreen'
+import { BADGES_LIST, BADGE_CATEGORY_LABELS } from '../../model/utils/badgeConstants'
+import type UserBadge from '../../model/models/UserBadge'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -36,12 +42,6 @@ jest.mock('../../contexts/LanguageContext', () => {
     LanguageProvider: ({ children }: { children: React.ReactNode }) => children,
   }
 })
-
-import React from 'react'
-import { render } from '@testing-library/react-native'
-import { BadgesScreenBase as BadgesScreen } from '../BadgesScreen'
-import { BADGES_LIST, BADGE_CATEGORY_LABELS } from '../../model/utils/badgeConstants'
-import type UserBadge from '../../model/models/UserBadge'
 
 // With withObservables mocked as identity, the default export IS BadgesScreenBase,
 // which accepts { userBadges: UserBadge[] } directly.

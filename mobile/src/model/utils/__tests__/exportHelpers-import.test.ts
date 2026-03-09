@@ -1,6 +1,10 @@
 /**
  * Tests for exportHelpers.ts — importAllData (lines 75-104)
  */
+import * as FileSystem from 'expo-file-system'
+import { importAllData } from '../exportHelpers'
+import { database } from '../../index'
+
 jest.mock('expo-file-system', () => ({
   documentDirectory: 'file:///test-dir/',
   writeAsStringAsync: jest.fn().mockResolvedValue(undefined),
@@ -32,10 +36,6 @@ jest.mock('../../schema', () => ({
     },
   },
 }))
-
-import * as FileSystem from 'expo-file-system'
-import { importAllData } from '../exportHelpers'
-import { database } from '../../index'
 
 const mockReadAsStringAsync = FileSystem.readAsStringAsync as jest.Mock
 const mockDbGet = database.get as jest.Mock

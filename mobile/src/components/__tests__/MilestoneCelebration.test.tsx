@@ -1,4 +1,9 @@
 // Mocks AVANT les imports
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import { MilestoneCelebration } from '../MilestoneCelebration'
+import type { MilestoneEvent } from '../../model/utils/gamificationHelpers'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
 }))
@@ -14,11 +19,6 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
   NotificationFeedbackType: { Success: 'Success', Error: 'Error' },
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import { MilestoneCelebration } from '../MilestoneCelebration'
-import type { MilestoneEvent } from '../../model/utils/gamificationHelpers'
 
 const milestone: MilestoneEvent = {
   type: 'session',

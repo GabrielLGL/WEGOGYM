@@ -37,11 +37,10 @@ function buildColumns(data: HeatmapDay[]): WeekColumn[] {
   return columns
 }
 
-function getMonthLabels(data: HeatmapDay[], monthNames: string[]): Array<{ label: string; colIndex: number }> {
-  const labels: Array<{ label: string; colIndex: number }> = []
+function getMonthLabels(data: HeatmapDay[], monthNames: string[]): { label: string; colIndex: number }[] {
+  const labels: { label: string; colIndex: number }[] = []
   let currentMonth = -1
   let colIndex = 0
-  let dayInCol = 0
 
   for (const day of data) {
     const month = parseInt(day.date.substring(5, 7), 10) - 1
@@ -49,10 +48,8 @@ function getMonthLabels(data: HeatmapDay[], monthNames: string[]): Array<{ label
       currentMonth = month
       labels.push({ label: monthNames[month], colIndex })
     }
-    dayInCol++
     if (day.dayOfWeek === 6) {
       colIndex++
-      dayInCol = 0
     }
   }
 

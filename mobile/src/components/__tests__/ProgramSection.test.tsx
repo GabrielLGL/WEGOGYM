@@ -1,4 +1,10 @@
 // Mocks AVANT tous les imports
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import ProgramSection from '../ProgramSection'
+import type Program from '../../model/models/Program'
+import type Session from '../../model/models/Session'
+
 jest.mock('@nozbe/with-observables', () => (
   (_keys: string[], _fn: () => object) =>
     (Component: React.ComponentType<object>) => Component
@@ -13,12 +19,6 @@ jest.mock('../../model/index', () => ({
     }),
   },
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import ProgramSection from '../ProgramSection'
-import type Program from '../../model/models/Program'
-import type Session from '../../model/models/Session'
 
 // --- Helpers de fabrication ---
 

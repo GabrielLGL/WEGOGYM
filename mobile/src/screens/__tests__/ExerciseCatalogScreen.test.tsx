@@ -1,5 +1,12 @@
 // Mocks AVANT les imports
 
+import React from 'react'
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
+import type { CatalogExercise } from '../../services/exerciseCatalog'
+
+// Import after mocks
+import ExerciseCatalogScreen from '../ExerciseCatalogScreen'
+
 const mockSearchCatalogExercises = jest.fn()
 const mockMapCatalogToLocal = jest.fn()
 
@@ -84,10 +91,6 @@ jest.mock('../../components/Button', () => ({
   },
 }))
 
-import React from 'react'
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
-import type { CatalogExercise } from '../../services/exerciseCatalog'
-
 const makeCatalogExercise = (overrides: Partial<CatalogExercise> = {}): CatalogExercise => ({
   id: 'cat-1',
   name: 'Bench Press',
@@ -100,9 +103,6 @@ const makeCatalogExercise = (overrides: Partial<CatalogExercise> = {}): CatalogE
   gif_original_url: null,
   ...overrides,
 })
-
-// Import after mocks
-import ExerciseCatalogScreen from '../ExerciseCatalogScreen'
 
 describe('ExerciseCatalogScreen', () => {
   beforeEach(() => {

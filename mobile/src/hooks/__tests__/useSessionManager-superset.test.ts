@@ -1,6 +1,11 @@
 /**
  * Extended tests for useSessionManager — groupExercises & ungroupExercise
  */
+import { renderHook, act } from '@testing-library/react-native'
+import { useSessionManager } from '../useSessionManager'
+import { database } from '../../model/index'
+import { mockSession as mockSessionFactory, mockSessionExercise } from '../../model/utils/__tests__/testFactories'
+
 jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn(),
@@ -23,11 +28,6 @@ jest.mock('react-native', () => ({
 jest.mock('@nozbe/watermelondb', () => ({
   Q: { where: jest.fn().mockReturnValue({}) },
 }))
-
-import { renderHook, act } from '@testing-library/react-native'
-import { useSessionManager } from '../useSessionManager'
-import { database } from '../../model/index'
-import { mockSession as mockSessionFactory, mockSessionExercise } from '../../model/utils/__tests__/testFactories'
 
 const mockWrite = database.write as jest.Mock
 const mockBatch = (database as unknown as { batch: jest.Mock }).batch
@@ -56,7 +56,7 @@ describe('groupExercises', () => {
   })
 
   it('groups 2+ exercises as superset via database.batch', async () => {
-    const capturedUpdates: Array<Record<string, unknown>> = []
+    const capturedUpdates: Record<string, unknown>[] = []
     const mockPrepareUpdate = jest.fn().mockImplementation(function (this: Record<string, unknown>, fn: (se: Record<string, unknown>) => void) {
       const se: Record<string, unknown> = { supersetId: null, supersetType: null, supersetPosition: null }
       fn(se)
@@ -88,7 +88,7 @@ describe('groupExercises', () => {
   })
 
   it('groups as circuit type', async () => {
-    const capturedUpdates: Array<Record<string, unknown>> = []
+    const capturedUpdates: Record<string, unknown>[] = []
     const mockPrepareUpdate = jest.fn().mockImplementation(function (this: Record<string, unknown>, fn: (se: Record<string, unknown>) => void) {
       const se: Record<string, unknown> = { supersetId: null, supersetType: null, supersetPosition: null }
       fn(se)
@@ -142,7 +142,7 @@ describe('ungroupExercise', () => {
   })
 
   it('dissolves entire group when only 2 members (removing leaves 1)', async () => {
-    const capturedUpdates: Array<Record<string, unknown>> = []
+    const capturedUpdates: Record<string, unknown>[] = []
     const mockPrepareUpdate = jest.fn().mockImplementation((fn: (se: Record<string, unknown>) => void) => {
       const se: Record<string, unknown> = { supersetId: 'g1', supersetType: 'superset', supersetPosition: 0 }
       fn(se)
@@ -173,7 +173,7 @@ describe('ungroupExercise', () => {
   })
 
   it('removes only the selected exercise from group of 3+', async () => {
-    const capturedPositions: Array<number | null> = []
+    const capturedPositions: (number | null)[] = []
     const mockUpdate = jest.fn().mockImplementation(async (fn: (se: Record<string, unknown>) => void) => {
       const se: Record<string, unknown> = { supersetId: 'g1', supersetType: 'superset', supersetPosition: 0 }
       fn(se)

@@ -5,7 +5,6 @@
 
 import { Q } from '@nozbe/watermelondb'
 import { database } from '../index'
-import Exercise from '../models/Exercise'
 import History from '../models/History'
 import Session from '../models/Session'
 import SessionExercise from '../models/SessionExercise'
@@ -21,7 +20,7 @@ export interface ExerciseSessionStat {
   sessionName: string
   startTime: Date
   maxWeight: number
-  sets: Array<{ weight: number; reps: number; setOrder: number }>
+  sets: { weight: number; reps: number; setOrder: number }[]
 }
 
 /**
@@ -200,7 +199,7 @@ export async function buildRecapExercises(
 
   for (const se of sessionExercises) {
     const setsTarget = se.setsTarget ?? 0
-    const seSets: Array<{ reps: number; weight: number }> = []
+    const seSets: { reps: number; weight: number }[] = []
     let currMaxWeight = 0
 
     for (let order = 1; order <= setsTarget; order++) {

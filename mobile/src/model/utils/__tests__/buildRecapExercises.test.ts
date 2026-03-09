@@ -1,15 +1,15 @@
 /**
  * Tests for exerciseStatsUtils.ts — buildRecapExercises (lines 196-230)
  */
+import { buildRecapExercises } from '../exerciseStatsUtils'
+import { database } from '../../index'
+import { mockSessionExercise } from './testFactories'
+
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
   },
 }))
-
-import { buildRecapExercises } from '../exerciseStatsUtils'
-import { database } from '../../index'
-import { mockSessionExercise } from './testFactories'
 
 const mockGet = database.get as jest.Mock
 

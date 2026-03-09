@@ -4,6 +4,14 @@
  * useProgramManager mocked to avoid DB calls.
  * ThemeContext mocked globally via moduleNameMapper.
  */
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import { ProgramDetailScreenInner as ProgramDetailScreen } from '../ProgramDetailScreen'
+import type Program from '../../model/models/Program'
+import type Session from '../../model/models/Session'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import type { RootStackParamList } from '../../navigation/index'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -101,14 +109,6 @@ jest.mock('../../components/ProgramDetailBottomSheet', () => ({
     return mockReact.createElement(Text, null, session.name)
   },
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import { ProgramDetailScreenInner as ProgramDetailScreen } from '../ProgramDetailScreen'
-import type Program from '../../model/models/Program'
-import type Session from '../../model/models/Session'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import type { RootStackParamList } from '../../navigation/index'
 
 const mockNavigation = {
   navigate: jest.fn(),

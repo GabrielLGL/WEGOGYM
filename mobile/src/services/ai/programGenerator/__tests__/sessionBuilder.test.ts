@@ -3,12 +3,12 @@ import { PARAMS_TABLE, MAX_TOTAL_SETS_PER_SESSION } from '../tables'
 import type { UserProfile, MuscleGroup, PGSessionExercise } from '../types'
 import type { Database } from '@nozbe/watermelondb'
 
+import { selectExercisesForSession } from '../exerciseSelector'
+
 // Mock exerciseSelector pour isoler sessionBuilder
 jest.mock('../exerciseSelector', () => ({
   selectExercisesForSession: jest.fn(),
 }))
-
-import { selectExercisesForSession } from '../exerciseSelector'
 
 const mockSelectExercises = selectExercisesForSession as jest.MockedFunction<typeof selectExercisesForSession>
 

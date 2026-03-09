@@ -1,13 +1,13 @@
 // Mock the database AVANT tous les imports pour éviter SQLiteAdapter JSI
-jest.mock('../../model/index', () => ({ database: { get: jest.fn() } }))
-jest.mock('../../model/utils/databaseHelpers', () => ({
-  filterAndSearchExercises: jest.fn(),
-}))
-
 import { renderHook, act } from '@testing-library/react-native'
 import { useExerciseFilters } from '../useExerciseFilters'
 import { filterAndSearchExercises } from '../../model/utils/databaseHelpers'
 import Exercise from '../../model/models/Exercise'
+
+jest.mock('../../model/index', () => ({ database: { get: jest.fn() } }))
+jest.mock('../../model/utils/databaseHelpers', () => ({
+  filterAndSearchExercises: jest.fn(),
+}))
 
 const mockFilterAndSearch = filterAndSearchExercises as jest.Mock
 
@@ -255,7 +255,7 @@ describe('useExerciseFilters', () => {
 
   describe('mise à jour de la liste d\'entrée', () => {
     it('should recalculer filteredExercises quand exercises change', () => {
-      const { result, rerender } = renderHook(
+      const { rerender } = renderHook(
         ({ exercises }) => useExerciseFilters(exercises),
         { initialProps: { exercises: exercisesFixture } }
       )

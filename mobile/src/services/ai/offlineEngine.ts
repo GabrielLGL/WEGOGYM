@@ -448,13 +448,13 @@ function generateProgram(form: AIFormData, context: DBContext): GeneratedPlan {
   const splitGroups = (split && split !== 'auto') ? SPLITS[splitName] : getSplit(daysPerWeek)
   const sessionNames = SESSION_NAMES[splitName]
 
-  const rawPlans: Array<[string[], string]> = Array.from(
+  const rawPlans: [string[], string][] = Array.from(
     { length: daysPerWeek },
     (_, i) => [splitGroups[i % splitGroups.length], sessionNames[i] ?? `Séance ${i + 1}`]
   )
 
   // Sessions contenant les muscles focus passent en premier (stable sort)
-  let sessionPlans: Array<[string[], string]>
+  let sessionPlans: [string[], string][]
   if (musclesFocus.length > 0) {
     const focusPlans = rawPlans.filter(([muscles]) => musclesFocus.some(m => muscles.includes(m)))
     const otherPlans = rawPlans.filter(([muscles]) => !musclesFocus.some(m => muscles.includes(m)))

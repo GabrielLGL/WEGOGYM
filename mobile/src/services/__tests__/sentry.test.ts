@@ -1,4 +1,7 @@
 // Mock @sentry/react-native avant tous les imports
+import { initSentry, captureError } from '../sentry'
+import * as Sentry from '@sentry/react-native'
+
 jest.mock('@sentry/react-native', () => ({
   init: jest.fn(),
   captureException: jest.fn(),
@@ -16,9 +19,6 @@ jest.mock('expo-constants', () => ({
     },
   },
 }))
-
-import { initSentry, captureError } from '../sentry'
-import * as Sentry from '@sentry/react-native'
 
 const mockInit = Sentry.init as jest.Mock
 const mockCaptureException = Sentry.captureException as jest.Mock

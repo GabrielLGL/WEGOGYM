@@ -1,6 +1,4 @@
 // Mock the database to avoid SQLiteAdapter JSI initialization in test environment
-jest.mock('../../index', () => ({ database: { get: jest.fn() } }))
-
 import {
   parseNumericInput,
   parseIntegerInput,
@@ -25,9 +23,10 @@ import {
   getLastSetsForExercises,
 } from '../databaseHelpers'
 import { database } from '../../index'
-import Exercise from '../../models/Exercise'
 import type { PresetProgram } from '../../onboardingPrograms'
 import { mockExercise, mockSet, mockHistory, mockSession } from './testFactories'
+
+jest.mock('../../index', () => ({ database: { get: jest.fn() } }))
 
 const mockGet = database.get as jest.Mock
 

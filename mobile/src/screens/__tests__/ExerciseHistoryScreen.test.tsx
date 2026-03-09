@@ -5,6 +5,10 @@
  */
 
 // Mock exercise data injected by the withObservables mock below
+import React from 'react'
+import { render } from '@testing-library/react-native'
+import ExerciseHistoryScreen from '../ExerciseHistoryScreen'
+
 const mockExercise = {
   id: 'ex1',
   name: 'Bench Press',
@@ -59,10 +63,6 @@ jest.mock('@react-navigation/native', () => ({
   useRoute: () => ({ params: { exerciseId: 'ex1' } }),
   useNavigation: () => ({ navigate: jest.fn() }),
 }))
-
-import React from 'react'
-import { render } from '@testing-library/react-native'
-import ExerciseHistoryScreen from '../ExerciseHistoryScreen'
 
 describe('ExerciseHistoryScreen', () => {
   it('renders without crashing', () => {

@@ -21,7 +21,7 @@ export interface RecapExerciseData {
   exerciseName: string
   setsValidated: number
   setsTarget: number
-  sets: Array<{ reps: number; weight: number }>
+  sets: { reps: number; weight: number }[]
   prevMaxWeight: number
   currMaxWeight: number
   muscles: string[]

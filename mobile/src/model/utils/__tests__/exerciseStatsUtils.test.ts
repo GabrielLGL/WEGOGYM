@@ -3,12 +3,6 @@
  * Pure function `buildExerciseStatsFromData` is tested without DB mocks.
  * Async DB functions use the mock.
  */
-jest.mock('../../index', () => ({
-  database: {
-    get: jest.fn(),
-  },
-}))
-
 import {
   buildExerciseStatsFromData,
   getExerciseStatsFromSets,
@@ -19,6 +13,12 @@ import { database } from '../../index'
 import type History from '../../models/History'
 import type WorkoutSet from '../../models/Set'
 import type Session from '../../models/Session'
+
+jest.mock('../../index', () => ({
+  database: {
+    get: jest.fn(),
+  },
+}))
 
 const mockGet = database.get as jest.Mock
 

@@ -1,5 +1,11 @@
 // Mocks AVANT les imports
 
+import React from 'react'
+import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import { ExercisesContent } from '../ExercisesScreen'
+import { useExerciseManager } from '../../hooks/useExerciseManager'
+import type Exercise from '../../model/models/Exercise'
+
 const mockUpdateExercise = jest.fn().mockResolvedValue(true)
 const mockDeleteExercise = jest.fn().mockResolvedValue(true)
 const mockLoadExerciseForEdit = jest.fn()
@@ -117,12 +123,6 @@ jest.mock('../../components/AlertDialog', () => ({
     )
   },
 }))
-
-import React from 'react'
-import { render, fireEvent, waitFor } from '@testing-library/react-native'
-import { ExercisesContent } from '../ExercisesScreen'
-import { useExerciseManager } from '../../hooks/useExerciseManager'
-import type Exercise from '../../model/models/Exercise'
 
 const makeExercise = (overrides: Partial<Exercise> = {}): Exercise => ({
   id: 'ex-1',

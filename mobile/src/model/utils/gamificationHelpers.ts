@@ -166,7 +166,7 @@ export function updateStreak(
 
 /** Calcule le tonnage d'une seance (somme poids × reps). */
 export function calculateSessionTonnage(
-  sets: ReadonlyArray<{ weight: number; reps: number }>
+  sets: readonly { weight: number; reps: number }[]
 ): number {
   return sets.reduce((total, s) => total + s.weight * s.reps, 0)
 }

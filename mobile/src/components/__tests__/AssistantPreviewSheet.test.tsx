@@ -1,4 +1,10 @@
 // Mocks AVANT tous les imports
+import React from 'react'
+import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import { AssistantPreviewSheet } from '../AssistantPreviewSheet'
+import { useHaptics } from '../../hooks/useHaptics'
+import type { GeneratedPlan } from '../../services/ai/types'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
@@ -42,12 +48,6 @@ jest.mock('../../hooks/useHaptics', () => ({
     onMajorSuccess: jest.fn(),
   }),
 }))
-
-import React from 'react'
-import { render, fireEvent, waitFor } from '@testing-library/react-native'
-import { AssistantPreviewSheet } from '../AssistantPreviewSheet'
-import { useHaptics } from '../../hooks/useHaptics'
-import type { GeneratedPlan } from '../../services/ai/types'
 
 const mockUseHaptics = useHaptics as jest.Mock
 

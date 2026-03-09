@@ -1,4 +1,10 @@
 // Mocks AVANT les imports
+import React from 'react'
+import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
+import { BackHandler } from 'react-native'
+import { WorkoutContent } from '../WorkoutScreen'
+import { createWorkoutHistory, completeWorkoutHistory } from '../../model/utils/databaseHelpers'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
   PortalProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -131,12 +137,6 @@ jest.mock('../../components/RestTimer', () => {
       ),
   }
 })
-
-import React from 'react'
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
-import { BackHandler } from 'react-native'
-import { WorkoutContent } from '../WorkoutScreen'
-import { createWorkoutHistory, completeWorkoutHistory } from '../../model/utils/databaseHelpers'
 
 const mockCreateWorkoutHistory = createWorkoutHistory as jest.Mock
 const mockCompleteWorkoutHistory = completeWorkoutHistory as jest.Mock

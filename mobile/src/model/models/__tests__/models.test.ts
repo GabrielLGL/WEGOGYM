@@ -1,4 +1,13 @@
 // Mock WatermelonDB AVANT les imports — évite l'initialisation de SQLiteAdapter (JSI)
+import Exercise from '../Exercise'
+import History from '../History'
+import PerformanceLog from '../PerformanceLog'
+import Program from '../Program'
+import Session from '../Session'
+import SessionExercise from '../SessionExercise'
+import Set from '../Set'
+import User from '../User'
+
 jest.mock('@nozbe/watermelondb', () => ({
   Model: class Model {
     static table = ''
@@ -41,15 +50,6 @@ jest.mock('@nozbe/watermelondb/decorators', () => ({
   relation: () => () => {},
   children: () => () => {},
 }))
-
-import Exercise from '../Exercise'
-import History from '../History'
-import PerformanceLog from '../PerformanceLog'
-import Program from '../Program'
-import Session from '../Session'
-import SessionExercise from '../SessionExercise'
-import Set from '../Set'
-import User from '../User'
 
 // --- Exercise ---
 
@@ -241,14 +241,14 @@ describe('Program', () => {
   describe('duplicate', () => {
     const buildMockDB = ({
       programCount = 2,
-      sessions = [] as Array<{ id: string; name: string; position: number }>,
-      sessionExercises = [] as Array<{
+      _sessions = [] as { id: string; name: string; position: number }[],
+      sessionExercises = [] as {
         position: number
         setsTarget: number
         repsTarget: string
         weightTarget: number
         exercise: { fetch: jest.Mock }
-      }>,
+      }[],
     } = {}) => {
       const mockCreate = jest.fn().mockImplementation(
         async (fn: (r: Record<string, unknown>) => void) => {

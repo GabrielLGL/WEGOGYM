@@ -51,7 +51,7 @@ export function computeMuscleRepartition(
   const sorted = Array.from(muscleVolume.entries()).sort((a, b) => b[1] - a[1])
   const top7 = sorted.slice(0, MUSCLE_TOP_N)
   const othersVolume = sorted.slice(MUSCLE_TOP_N).reduce((sum, [, v]) => sum + v, 0)
-  const allEntries: Array<[string, number]> =
+  const allEntries: [string, number][] =
     othersVolume > 0 ? [...top7, [othersLabel, othersVolume]] : top7
 
   const totalVolume = allEntries.reduce((sum, [, v]) => sum + v, 0)
@@ -206,7 +206,7 @@ export function computeMonthlySetsChart(
   const currentMonth = now.getMonth()
 
   // Collect all months from oldest to current
-  const allMonths: Array<{ year: number; month: number }> = []
+  const allMonths: { year: number; month: number }[] = []
   let y = oldestDate.getFullYear()
   let m = oldestDate.getMonth()
   while (y < currentYear || (y === currentYear && m <= currentMonth)) {

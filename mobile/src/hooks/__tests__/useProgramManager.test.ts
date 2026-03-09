@@ -1,4 +1,11 @@
 // Mock the database BEFORE imports to avoid SQLiteAdapter JSI initialization
+import { renderHook, act } from '@testing-library/react-native'
+import { useProgramManager } from '../useProgramManager'
+import { database } from '../../model/index'
+import { getNextPosition } from '../../model/utils/databaseHelpers'
+import { isValidText } from '../../model/utils/validationHelpers'
+import { mockProgram as mockProgramFactory, mockSession as mockSessionFactory } from '../../model/utils/__tests__/testFactories'
+
 jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn(),
@@ -15,13 +22,6 @@ jest.mock('../../model/utils/validationHelpers', () => ({
 jest.mock('@nozbe/watermelondb', () => ({
   Q: { where: jest.fn().mockReturnValue({}), oneOf: jest.fn().mockReturnValue({}) },
 }))
-
-import { renderHook, act } from '@testing-library/react-native'
-import { useProgramManager } from '../useProgramManager'
-import { database } from '../../model/index'
-import { getNextPosition } from '../../model/utils/databaseHelpers'
-import { isValidText } from '../../model/utils/validationHelpers'
-import { mockProgram as mockProgramFactory, mockSession as mockSessionFactory } from '../../model/utils/__tests__/testFactories'
 
 const mockWrite = database.write as jest.Mock
 const mockGet = database.get as jest.Mock

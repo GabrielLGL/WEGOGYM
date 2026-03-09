@@ -1,4 +1,9 @@
 // Mocks AVANT les imports
+import React from 'react'
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
+import OnboardingScreen from '../OnboardingScreen'
+import { database } from '../../model/index'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -31,11 +36,6 @@ jest.mock('@react-navigation/native', () => ({
     params: undefined,
   }),
 }))
-
-import React from 'react'
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
-import OnboardingScreen from '../OnboardingScreen'
-import { database } from '../../model/index'
 
 const mockDb = database as jest.Mocked<typeof database>
 

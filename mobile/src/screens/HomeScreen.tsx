@@ -126,7 +126,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
     },
   ], [t])
 
-  const [celebrationQueue, setCelebrationQueue] = useState<CelebrationItem[]>([])
+  const [_celebrationQueue, setCelebrationQueue] = useState<CelebrationItem[]>([])
   const [currentCelebration, setCurrentCelebration] = useState<CelebrationItem | null>(null)
 
   useEffect(() => {

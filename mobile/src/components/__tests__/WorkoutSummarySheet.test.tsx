@@ -1,4 +1,9 @@
 // Mock databaseHelpers avant tous les imports (évite SQLiteAdapter JSI)
+import React from 'react'
+import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
+import { WorkoutSummarySheet } from '../WorkoutSummarySheet'
+import { updateHistoryNote } from '../../model/utils/databaseHelpers'
+
 jest.mock('../../model/utils/databaseHelpers', () => ({
   updateHistoryNote: jest.fn().mockResolvedValue(undefined),
 }))
@@ -15,11 +20,6 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
   NotificationFeedbackType: { Success: 'Success', Error: 'Error' },
 }))
-
-import React from 'react'
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
-import { WorkoutSummarySheet } from '../WorkoutSummarySheet'
-import { updateHistoryNote } from '../../model/utils/databaseHelpers'
 
 const mockUpdateHistoryNote = updateHistoryNote as jest.Mock
 

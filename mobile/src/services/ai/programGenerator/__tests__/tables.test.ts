@@ -18,7 +18,7 @@ describe('WEEKLY_VOLUME_TABLE', () => {
   })
 
   it('chaque objectif contient 3 niveaux', () => {
-    for (const goal of Object.keys(WEEKLY_VOLUME_TABLE) as Array<keyof typeof WEEKLY_VOLUME_TABLE>) {
+    for (const goal of Object.keys(WEEKLY_VOLUME_TABLE) as (keyof typeof WEEKLY_VOLUME_TABLE)[]) {
       expect(Object.keys(WEEKLY_VOLUME_TABLE[goal])).toEqual(
         expect.arrayContaining(['beginner', 'intermediate', 'advanced'])
       )
@@ -26,8 +26,8 @@ describe('WEEKLY_VOLUME_TABLE', () => {
   })
 
   it('chaque entrée a min < optimal < max', () => {
-    for (const goal of Object.keys(WEEKLY_VOLUME_TABLE) as Array<keyof typeof WEEKLY_VOLUME_TABLE>) {
-      for (const level of Object.keys(WEEKLY_VOLUME_TABLE[goal]) as Array<keyof typeof WEEKLY_VOLUME_TABLE[typeof goal]>) {
+    for (const goal of Object.keys(WEEKLY_VOLUME_TABLE) as (keyof typeof WEEKLY_VOLUME_TABLE)[]) {
+      for (const level of Object.keys(WEEKLY_VOLUME_TABLE[goal]) as (keyof typeof WEEKLY_VOLUME_TABLE[typeof goal])[]) {
         const spec = WEEKLY_VOLUME_TABLE[goal][level]
         expect(spec.min).toBeLessThan(spec.optimal)
         expect(spec.optimal).toBeLessThan(spec.max)
@@ -53,7 +53,7 @@ describe('PARAMS_TABLE', () => {
   })
 
   it('tous les objectifs ont restCompound > restIsolation', () => {
-    for (const goal of Object.keys(PARAMS_TABLE) as Array<keyof typeof PARAMS_TABLE>) {
+    for (const goal of Object.keys(PARAMS_TABLE) as (keyof typeof PARAMS_TABLE)[]) {
       expect(PARAMS_TABLE[goal].restCompound).toBeGreaterThan(PARAMS_TABLE[goal].restIsolation)
     }
   })

@@ -1,6 +1,9 @@
 /**
  * Extended tests for workoutSetUtils.ts — covers addRetroactiveSet & recalculateSetPrs
  */
+import { addRetroactiveSet, recalculateSetPrs } from '../workoutSetUtils'
+import { database } from '../../index'
+
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
@@ -8,9 +11,6 @@ jest.mock('../../index', () => ({
     batch: jest.fn(),
   },
 }))
-
-import { addRetroactiveSet, recalculateSetPrs } from '../workoutSetUtils'
-import { database } from '../../index'
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock
@@ -50,7 +50,7 @@ describe('addRetroactiveSet', () => {
       return {}
     })
 
-    const result = await addRetroactiveSet({
+    await addRetroactiveSet({
       historyId: 'h1',
       exerciseId: 'e1',
       weight: 80,

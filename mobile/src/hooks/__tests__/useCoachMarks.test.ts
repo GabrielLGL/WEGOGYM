@@ -1,16 +1,16 @@
 /**
  * Tests for useCoachMarks hook
  */
+import { renderHook, act } from '@testing-library/react-native'
+import { useCoachMarks } from '../useCoachMarks'
+import { database } from '../../model/index'
+import { mockUser } from '../../model/utils/__tests__/testFactories'
+
 jest.mock('../../model/index', () => ({
   database: {
     write: jest.fn(),
   },
 }))
-
-import { renderHook, act } from '@testing-library/react-native'
-import { useCoachMarks } from '../useCoachMarks'
-import { database } from '../../model/index'
-import { mockUser } from '../../model/utils/__tests__/testFactories'
 
 const mockWrite = (database as unknown as { write: jest.Mock }).write
 

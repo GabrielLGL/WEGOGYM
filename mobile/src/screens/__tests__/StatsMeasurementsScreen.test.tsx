@@ -1,6 +1,8 @@
 import React from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react-native'
 
+import { StatsMeasurementsScreenBase } from '../StatsMeasurementsScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -23,7 +25,7 @@ jest.mock('../../model/index', () => ({
 jest.mock('react-native-chart-kit', () => {
   const { View, Text } = require('react-native')
   return {
-    LineChart: ({ data }: { data: { datasets: Array<{ data: number[] }> } }) => (
+    LineChart: ({ data }: { data: { datasets: { data: number[] }[] } }) => (
       <View testID="line-chart">
         <Text>LineChart-{data.datasets[0].data.length}pts</Text>
       </View>
@@ -60,8 +62,6 @@ jest.mock('../../theme/chartConfig', () => ({
     style: { borderRadius: 14 },
   }),
 }))
-
-import { StatsMeasurementsScreenBase } from '../StatsMeasurementsScreen'
 
 const makeMeasurement = (id: string, date: number, overrides = {}) =>
   ({

@@ -1,14 +1,14 @@
 // Mock WatermelonDB AVANT les imports
-jest.mock('@nozbe/with-observables', () => (
-  (_keys: string[], _fn: () => object) =>
-    (Component: React.ComponentType<object>) => Component
-))
-
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
 import SetItem from '../SetItem'
 import type Set from '../../model/models/Set'
 import type Exercise from '../../model/models/Exercise'
+
+jest.mock('@nozbe/with-observables', () => (
+  (_keys: string[], _fn: () => object) =>
+    (Component: React.ComponentType<object>) => Component
+))
 
 const makeSet = (overrides: Partial<Set> = {}): Set => ({
   id: 'set-1',

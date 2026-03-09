@@ -2,6 +2,8 @@ import React from 'react'
 import { render, act, fireEvent, waitFor } from '@testing-library/react-native'
 import { SettingsContent } from '../SettingsScreen'
 
+import { database } from '../../model/index'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -44,8 +46,6 @@ jest.mock('../../model/index', () => ({
     get: jest.fn(),
   },
 }))
-
-import { database } from '../../model/index'
 
 const mockWrite = database.write as jest.Mock
 
