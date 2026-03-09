@@ -290,20 +290,70 @@ export default function PrivacyPage() {
 
             {/* 7. App mobile */}
             <Section number="7" title="Application mobile Kore">
-              <div className="bg-[var(--bg)] rounded-[20px] shadow-neu-in p-6">
-                <p className="text-[var(--text-muted)] text-sm leading-relaxed">
-                  L&apos;application mobile Kore fonctionne{" "}
-                  <strong className="text-[var(--text-main)]">100% hors ligne</strong>.
-                  Toutes tes données d&apos;entraînement (séances, exercices, performances,
-                  historique) sont stockées{" "}
-                  <strong className="text-[var(--text-main)]">
-                    uniquement sur ton téléphone
-                  </strong>{" "}
-                  dans une base de données locale.
-                  <br /><br />
-                  Aucune donnée provenant de l&apos;application n&apos;est envoyée sur nos
-                  serveurs. Tes entraînements restent privés et sous ton contrôle total.
-                </p>
+              <p className="text-[var(--text-muted)] text-sm leading-relaxed mb-4">
+                L&apos;application mobile Kore est conçue pour respecter ta vie privée.
+              </p>
+              <div className="space-y-4">
+                <div className="bg-[var(--bg)] rounded-[20px] shadow-neu-in p-6">
+                  <p className="text-[var(--text-main)] text-sm font-semibold mb-2">
+                    Données d&apos;entraînement
+                  </p>
+                  <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+                    Toutes tes données (séances, exercices, performances, historique) sont
+                    stockées{" "}
+                    <strong className="text-[var(--text-main)]">
+                      uniquement en local sur ton appareil
+                    </strong>.
+                    Aucune de ces données n&apos;est transmise à nos serveurs.
+                  </p>
+                </div>
+                <div className="bg-[var(--bg)] rounded-[20px] shadow-neu-in p-6">
+                  <p className="text-[var(--text-main)] text-sm font-semibold mb-2">
+                    Compte utilisateur
+                  </p>
+                  <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+                    Kore ne requiert pas de création de compte. Aucune inscription
+                    n&apos;est nécessaire pour utiliser l&apos;application.
+                  </p>
+                </div>
+                <div className="bg-[var(--bg)] rounded-[20px] shadow-neu-in p-6">
+                  <p className="text-[var(--text-main)] text-sm font-semibold mb-2">
+                    Achats in-app
+                  </p>
+                  <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+                    Si tu souscris à Kore Pro, la transaction est gérée intégralement
+                    par Google Play Billing (Google LLC). Nous ne collectons ni ne stockons
+                    aucune donnée bancaire ou de paiement. Google peut collecter des données
+                    relatives à l&apos;achat conformément à sa propre{" "}
+                    <a
+                      href="https://policies.google.com/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--accent)] hover:underline"
+                    >
+                      politique de confidentialité
+                    </a>.
+                  </p>
+                </div>
+                <div className="bg-[var(--bg)] rounded-[20px] shadow-neu-in p-6">
+                  <p className="text-[var(--text-main)] text-sm font-semibold mb-2">
+                    Aucune publicité
+                  </p>
+                  <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+                    Kore ne contient aucune publicité et n&apos;intègre aucun SDK
+                    publicitaire ou de tracking analytique.
+                  </p>
+                </div>
+                <div className="bg-[var(--bg)] rounded-[20px] shadow-neu-in p-6">
+                  <p className="text-[var(--text-main)] text-sm font-semibold mb-2">
+                    Aucune donnée envoyée
+                  </p>
+                  <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+                    L&apos;application ne transmet aucune donnée personnelle à nos serveurs
+                    ou à des tiers, à l&apos;exception des données de transaction traitées
+                    par Google Play.
+                  </p>
+                </div>
               </div>
             </Section>
 
