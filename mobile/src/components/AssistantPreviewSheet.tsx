@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { BottomSheet } from './BottomSheet'
 import { useHaptics } from '../hooks/useHaptics'
@@ -141,7 +141,7 @@ export const AssistantPreviewSheet: React.FC<AssistantPreviewSheetProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     loadingContainer: {
       alignItems: 'center',
       paddingVertical: spacing.xxl,
@@ -240,5 +240,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.md,
       fontWeight: '600',
     },
-  })
+  }), [colors])
 }

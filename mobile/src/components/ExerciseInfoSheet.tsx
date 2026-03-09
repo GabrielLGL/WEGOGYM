@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
@@ -105,7 +105,7 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     animationContainer: {
       backgroundColor: colors.cardSecondary,
       borderRadius: borderRadius.md,
@@ -187,5 +187,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       fontWeight: '600',
     },
-  })
+  }), [colors])
 }

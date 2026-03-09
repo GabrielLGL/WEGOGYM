@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Text, StyleSheet } from 'react-native'
 import { fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -29,7 +29,7 @@ export function StreakIndicator({ currentStreak, streakTarget }: StreakIndicator
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     active: {
       fontSize: fontSize.sm,
       color: colors.text,
@@ -38,5 +38,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       color: colors.textSecondary,
     },
-  })
+  }), [colors])
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { spacing, fontSize } from '../theme'
@@ -24,7 +24,7 @@ export function LevelBadge({ level }: LevelBadgeProps) {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -35,5 +35,5 @@ function useStyles(colors: ThemeColors) {
       fontWeight: '700',
       color: colors.text,
     },
-  })
+  }), [colors])
 }

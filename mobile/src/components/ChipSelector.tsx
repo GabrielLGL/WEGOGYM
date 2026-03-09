@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StyleProp, ViewStyle } from 'react-native'
 import { borderRadius, spacing, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
@@ -111,7 +111,7 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flexDirection: 'row',
     },
@@ -137,5 +137,5 @@ function useStyles(colors: ThemeColors) {
       color: colors.primaryText,
       fontWeight: 'bold',
     },
-  })
+  }), [colors])
 }

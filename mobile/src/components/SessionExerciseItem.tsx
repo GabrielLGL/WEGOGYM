@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
@@ -157,7 +157,7 @@ export const SessionExerciseItem = withObservables(['item'], ({ item }: SessionE
 }))(SessionExerciseItemComponent)
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     itemContainer: {
       backgroundColor: colors.card,
       marginHorizontal: spacing.md,
@@ -273,5 +273,5 @@ function useStyles(colors: ThemeColors) {
     ungroupBtn: {
       marginLeft: 2,
     },
-  })
+  }), [colors])
 }

@@ -142,7 +142,7 @@ const HeatmapCalendarInner: React.FC<HeatmapCalendarProps> = ({ data }) => {
 export const HeatmapCalendar = React.memo(HeatmapCalendarInner)
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     monthRow: {
       flexDirection: 'row',
       position: 'relative',
@@ -180,5 +180,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.caption,
       color: colors.textSecondary,
     },
-  })
+  }), [colors])
 }

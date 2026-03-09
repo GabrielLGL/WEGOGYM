@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { formatRelativeDate } from '../model/utils/databaseHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -37,7 +37,7 @@ export const LastPerformanceBadge: React.FC<LastPerformanceBadgeProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -65,5 +65,5 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       fontSize: fontSize.xs,
     },
-  })
+  }), [colors])
 }

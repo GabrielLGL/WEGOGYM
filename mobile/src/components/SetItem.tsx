@@ -1,5 +1,5 @@
 // Importation de React
-import React from 'react'
+import React, { useMemo } from 'react'
 // Importation des composants React Native pour la structure et le style
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 // Importation du HOC withObservables pour lier le composant à la base de données
@@ -50,7 +50,7 @@ const SetItem: React.FC<Props> = ({ set, exercise, onLongPress }) => {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       padding: spacing.md,
       backgroundColor: colors.card,
@@ -65,7 +65,7 @@ function useStyles(colors: ThemeColors) {
     setOrder: { fontSize: fontSize.xs, color: colors.textSecondary },
     perf: { fontSize: fontSize.xl, fontWeight: 'bold', color: colors.primary },
     x: { fontSize: fontSize.sm, color: colors.textSecondary }
-  })
+  }), [colors])
 }
 
 /**

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
@@ -177,7 +177,7 @@ export { SessionPreviewRow }
 // --- Styles ---
 
 function useRowStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -207,11 +207,11 @@ function useRowStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       fontWeight: 'bold',
     },
-  })
+  }), [colors])
 }
 
 function useContentStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     emptyText: {
       color: colors.textSecondary,
       fontSize: fontSize.sm,
@@ -233,5 +233,5 @@ function useContentStyles(colors: ThemeColors) {
       fontWeight: 'bold',
       fontSize: fontSize.sm,
     },
-  })
+  }), [colors])
 }

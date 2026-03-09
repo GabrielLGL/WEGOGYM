@@ -1,5 +1,5 @@
 // Importation de React
-import React from 'react'
+import React, { useMemo } from 'react'
 // Importation des composants de base de React Native
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 // Importation du HOC withObservables pour lier le composant aux données WatermelonDB
@@ -73,7 +73,7 @@ const SessionItem: React.FC<Props> = ({ session, onPress, onOptionsPress, exerci
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flexDirection: 'row',
       backgroundColor: colors.card,
@@ -86,7 +86,7 @@ function useStyles(colors: ThemeColors) {
     title: { fontSize: fontSize.lg, fontWeight: 'bold', color: colors.text },
     preview: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: spacing.xs },
     moreIcon: { color: colors.placeholder, fontSize: fontSize.md, fontWeight: 'bold' },
-  })
+  }), [colors])
 }
 
 /**

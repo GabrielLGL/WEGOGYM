@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Animated } from 'react-native'
 import { Portal } from '@gorhom/portal'
 import { borderRadius, spacing, fontSize } from '../theme'
@@ -141,7 +141,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       ...StyleSheet.absoluteFillObject,
       justifyContent: 'center',
@@ -201,5 +201,5 @@ function useStyles(colors: ThemeColors) {
       fontWeight: 'bold',
       fontSize: fontSize.md,
     },
-  })
+  }), [colors])
 }

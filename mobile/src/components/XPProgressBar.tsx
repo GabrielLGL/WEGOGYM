@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -27,7 +27,7 @@ export function XPProgressBar({ currentXP, requiredXP, percentage }: XPProgressB
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       gap: spacing.xs,
     },
@@ -47,5 +47,5 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       textAlign: 'right',
     },
-  })
+  }), [colors])
 }

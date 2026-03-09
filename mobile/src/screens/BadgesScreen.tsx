@@ -112,7 +112,7 @@ function BadgesScreenBase({ userBadges }: Props) {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -152,7 +152,7 @@ function useStyles(colors: ThemeColors) {
     gridItem: {
       width: '31%',
     },
-  })
+  }), [colors])
 }
 
 // ─── withObservables ──────────────────────────────────────────────────────────

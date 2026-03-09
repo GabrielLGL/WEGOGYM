@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -212,7 +212,7 @@ export const ExerciseTargetInputs: React.FC<ExerciseTargetInputsProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     row: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -276,5 +276,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.md,
       marginBottom: spacing.md,
     },
-  })
+  }), [colors])
 }

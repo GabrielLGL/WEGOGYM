@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { spacing, fontSize, borderRadius } from '../theme'
@@ -192,7 +192,7 @@ export function WizardStepContent({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     // ── Chips multi-select ─────────────────────────────────────────────────
     chipsWrap: {
       flexDirection: 'row',
@@ -272,5 +272,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       marginTop: 2,
     },
-  })
+  }), [colors])
 }

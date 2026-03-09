@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
@@ -56,7 +56,7 @@ const ProgramSection: React.FC<Props> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       marginBottom: spacing.md,
       backgroundColor: colors.card,
@@ -92,7 +92,7 @@ function useStyles(colors: ThemeColors) {
       fontWeight: 'bold',
       letterSpacing: 1,
     },
-  })
+  }), [colors])
 }
 
 export default withObservables(['program'], ({ program }: { program: Program }) => ({

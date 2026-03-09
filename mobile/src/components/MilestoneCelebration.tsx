@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheet } from './BottomSheet'
@@ -35,7 +35,7 @@ export function MilestoneCelebration({ visible, milestone, onClose }: MilestoneC
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       alignItems: 'center',
       paddingVertical: spacing.md,
@@ -53,5 +53,5 @@ function useStyles(colors: ThemeColors) {
       marginBottom: spacing.lg,
       textAlign: 'center',
     },
-  })
+  }), [colors])
 }

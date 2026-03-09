@@ -216,7 +216,7 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     fullscreenPortal: {
       ...StyleSheet.absoluteFillObject,
       justifyContent: 'center',
@@ -301,5 +301,5 @@ function useStyles(colors: ThemeColors) {
       color: colors.text,
       fontWeight: 'bold',
     },
-  })
+  }), [colors])
 }

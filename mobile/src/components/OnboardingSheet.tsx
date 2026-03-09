@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { BottomSheet } from './BottomSheet'
 import { useHaptics } from '../hooks/useHaptics'
@@ -82,7 +82,7 @@ export const OnboardingSheet: React.FC<Props> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     card: {
       backgroundColor: colors.cardSecondary,
       borderRadius: borderRadius.md,
@@ -136,5 +136,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       fontWeight: '500',
     },
-  })
+  }), [colors])
 }

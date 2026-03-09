@@ -1,8 +1,9 @@
-import React, { type ComponentProps } from 'react'
+import React, { type ComponentProps, useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { spacing, fontSize, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
 
@@ -14,7 +15,10 @@ interface BadgeCardProps {
 
 export function BadgeCard({ badge, unlocked }: BadgeCardProps) {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
+
+  const badgeI18n = t.badges.list[badge.id as keyof typeof t.badges.list]
 
   return (
     <View style={[styles.card, !unlocked && styles.locked]}>
@@ -23,14 +27,14 @@ export function BadgeCard({ badge, unlocked }: BadgeCardProps) {
         style={[styles.title, !unlocked && styles.titleLocked]}
         numberOfLines={2}
       >
-        {badge.title}
+        {badgeI18n?.title ?? badge.title}
       </Text>
     </View>
   )
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     card: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.md,
@@ -52,5 +56,5 @@ function useStyles(colors: ThemeColors) {
     titleLocked: {
       color: colors.textSecondary,
     },
-  })
+  }), [colors])
 }

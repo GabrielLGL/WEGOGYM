@@ -349,7 +349,7 @@ export function StatsDurationScreenBase({ histories }: Props) {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -509,7 +509,7 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       textAlign: 'center',
     },
-  })
+  }), [colors])
 }
 
 const enhance = withObservables([], () => ({

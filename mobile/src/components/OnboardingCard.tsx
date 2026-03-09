@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { TouchableOpacity, Text, StyleSheet } from 'react-native'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -42,7 +42,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     card: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.md,
@@ -68,5 +68,5 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       marginTop: spacing.xs,
     },
-  })
+  }), [colors])
 }

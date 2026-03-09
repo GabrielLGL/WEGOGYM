@@ -418,7 +418,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -518,7 +518,7 @@ function useStyles(colors: ThemeColors) {
       marginTop: spacing.sm,
       marginBottom: spacing.lg,
     },
-  })
+  }), [colors])
 }
 
 // ─── withObservables layer 2: history → sets + session ───────────────────────

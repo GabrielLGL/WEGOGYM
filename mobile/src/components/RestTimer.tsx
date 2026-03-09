@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Platform } from 'react-native'
 import { Audio } from 'expo-av'
 import { useHaptics } from '../hooks/useHaptics'
@@ -193,7 +193,7 @@ const RestTimer: React.FC<Props> = ({
 export default RestTimer
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       marginHorizontal: spacing.md,
       marginBottom: spacing.sm,
@@ -231,5 +231,5 @@ function useStyles(colors: ThemeColors) {
       paddingHorizontal: spacing.sm,
     },
     hint: { color: colors.textSecondary, fontSize: fontSize.xs, fontWeight: '600' },
-  })
+  }), [colors])
 }

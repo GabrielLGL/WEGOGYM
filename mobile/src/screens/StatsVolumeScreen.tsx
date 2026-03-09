@@ -312,7 +312,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
 }
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -397,7 +397,7 @@ function useStyles(colors: ThemeColors) {
       borderRadius: borderRadius.xxs,
       backgroundColor: colors.primary,
     },
-  })
+  }), [colors])
 }
 
 const enhance = withObservables([], () => ({

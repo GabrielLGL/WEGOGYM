@@ -314,7 +314,7 @@ const HISTORY_TITLE_MARGIN_BOTTOM = 15
 const LOG_ROW_PADDING = 15
 
 function useStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     filtersWrapper: { paddingVertical: FILTER_PADDING_V, borderBottomWidth: 1, borderBottomColor: colors.card },
     filterRow: { paddingHorizontal: SCREEN_PADDING_H },
@@ -366,7 +366,7 @@ function useStyles(colors: ThemeColors) {
       fontStyle: 'italic',
       lineHeight: 22,
     },
-  })
+  }), [colors])
 }
 
 const ObservableContent = withObservables([], () => ({

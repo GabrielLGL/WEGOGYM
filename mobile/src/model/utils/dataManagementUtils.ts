@@ -63,6 +63,13 @@ export async function deleteAllData(user: User | null): Promise<void> {
         u.reminderDays = null
         u.reminderHour = 18
         u.reminderMinute = 0
+        u.tutorialCompleted = false
+        u.aiProvider = null
+        u.streakTarget = 3
+        u.timerEnabled = true
+        u.vibrationEnabled = true
+        u.timerSoundEnabled = true
+        u.restDuration = 90
       })] : []),
     )
   })
