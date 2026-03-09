@@ -50,6 +50,7 @@
 | 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.56% stmts, 3 CRIT + 5 WARN: AnimatedSplash theme, try/catch handlers, i18n, spacing tokens) |
 | 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.32% stmts, 2 CRIT null safety fixés: muscles optional chaining, startTime getTime) |
 | 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.29% stmts, 1 CRIT + 3 WARN + 1 SUGG fixés: isSaving finally, SQL cast, HeatmapCalendar i18n, dead exports) |
+| 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.26% stmts, 3 WARN fixés: useCallback perf FlatList, CoachMarks double-fire, ChartsScreen tokens) |
 
 ---
 
