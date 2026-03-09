@@ -3,3 +3,9 @@ docs/
 *.md
 .git/
 node_modules/
+_bmad/
+_bmad-output/
+.claude/
+.claudeignore
+coverage/
+*.log
