@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Animated, BackHandler, Platform } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Animated, BackHandler } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { database } from '../model/index'
 import withObservables from '@nozbe/with-observables'

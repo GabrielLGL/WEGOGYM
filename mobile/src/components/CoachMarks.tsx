@@ -7,7 +7,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   BackHandler,
-  Dimensions,
+  useWindowDimensions,
 } from 'react-native'
 import { Portal } from '@gorhom/portal'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -39,6 +39,8 @@ interface CoachMarksProps {
 const SPOTLIGHT_PADDING = 8
 const TOOLTIP_MARGIN = 12
 const ANIMATION_DURATION = 250
+const MAX_MEASURE_RETRIES = 5
+const MEASURE_RETRY_DELAY = 300
 
 export const CoachMarks: React.FC<CoachMarksProps> = ({
   visible,
@@ -49,12 +51,13 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
   const styles = useStyles(colors)
   const { t } = useLanguage()
   const haptics = useHaptics()
+  const { height: screenH } = useWindowDimensions()
 
   const [currentStep, setCurrentStep] = useState(0)
   const [targetLayout, setTargetLayout] = useState<TargetLayout | null>(null)
   const [ready, setReady] = useState(false)
-  const retryCountRef = useRef(0)
-  const retryTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
+  const [dismissed, setDismissed] = useState(false)
 
   const fadeAnim = useRef(new Animated.Value(0)).current
   const tooltipAnim = useRef(new Animated.Value(0)).current
@@ -63,10 +66,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
   const step = steps[currentStep]
   const isLastStep = currentStep === totalSteps - 1
 
-  const MAX_MEASURE_RETRIES = 5
-  const MEASURE_RETRY_DELAY = 300
-
-  // Measure target element position (with retry on failure)
+  // Measure target element position
   const measureTarget = useCallback(() => {
     if (!step?.targetRef?.current) {
       setTargetLayout(null)
@@ -74,7 +74,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
     }
     step.targetRef.current.measureInWindow((x, y, width, height) => {
       if (width > 0 && height > 0) {
-        retryCountRef.current = 0
+        setRetryCount(0)
         setTargetLayout({ x, y, width, height })
       } else {
         setTargetLayout(null)
@@ -89,6 +89,7 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
       duration: 150,
       useNativeDriver: true,
     }).start(() => {
+      setDismissed(true)
       onComplete()
     })
   }, [fadeAnim, onComplete])
@@ -107,12 +108,21 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
     handleComplete()
   }, [haptics, handleComplete])
 
+  // Global safety timeout — auto-dismiss if stuck
+  useEffect(() => {
+    if (!visible || dismissed) return
+    const timer = setTimeout(() => {
+      handleComplete()
+    }, 10_000)
+    return () => clearTimeout(timer)
+  }, [visible, dismissed, handleComplete])
+
   // Animate in on mount
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(() => {
         setReady(true)
-        retryCountRef.current = 0
+        setRetryCount(0)
         measureTarget()
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -124,11 +134,8 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
     } else {
       setReady(false)
       setCurrentStep(0)
-      retryCountRef.current = 0
-      if (retryTimerRef.current) {
-        clearTimeout(retryTimerRef.current)
-        retryTimerRef.current = null
-      }
+      setRetryCount(0)
+      setDismissed(false)
       fadeAnim.setValue(0)
       tooltipAnim.setValue(0)
     }
@@ -138,29 +145,23 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
   useEffect(() => {
     if (!ready || !visible || targetLayout !== null) return
 
-    if (retryCountRef.current >= MAX_MEASURE_RETRIES) {
-      // Measurement failed after retries — auto-dismiss to avoid blocking UI
+    if (retryCount >= MAX_MEASURE_RETRIES) {
       handleComplete()
       return
     }
 
-    retryTimerRef.current = setTimeout(() => {
-      retryCountRef.current += 1
+    const timer = setTimeout(() => {
+      setRetryCount(prev => prev + 1)
       measureTarget()
     }, MEASURE_RETRY_DELAY)
 
-    return () => {
-      if (retryTimerRef.current) {
-        clearTimeout(retryTimerRef.current)
-        retryTimerRef.current = null
-      }
-    }
-  }, [ready, visible, targetLayout, measureTarget, handleComplete])
+    return () => clearTimeout(timer)
+  }, [ready, visible, targetLayout, retryCount, measureTarget, handleComplete])
 
   // Re-measure on step change
   useEffect(() => {
     if (!ready) return
-    retryCountRef.current = 0
+    setRetryCount(0)
     tooltipAnim.setValue(0)
     measureTarget()
     Animated.timing(tooltipAnim, {
@@ -172,17 +173,15 @@ export const CoachMarks: React.FC<CoachMarksProps> = ({
 
   // Android back handler
   useEffect(() => {
-    if (!visible) return
+    if (!visible || dismissed) return
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
       handleSkip()
       return true
     })
     return () => handler.remove()
-  }, [visible, handleSkip])
+  }, [visible, dismissed, handleSkip])
 
-  if (!visible || !ready || !step) return null
-
-  const { height: screenH } = Dimensions.get('window')
+  if (!visible || !ready || !step || dismissed) return null
 
   // Spotlight rectangle (with padding)
   const spot = targetLayout
