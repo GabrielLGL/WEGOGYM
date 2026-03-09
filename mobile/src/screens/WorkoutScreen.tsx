@@ -212,7 +212,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     haptics.onPress()
     summaryModal.close()
     // La navigation vers Home (avec célébrations) est gérée par le useEffect ci-dessus
-  }, [haptics])
+  }, [haptics, summaryModal])
 
   // Back handler Android : prioritaire sur le GlobalBackHandler (LIFO)
   useEffect(() => {

@@ -833,6 +833,12 @@ export const en: typeof fr = {
     bodyweight: 'BW',
   },
 
+  heatmap: {
+    monthLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    less: 'Less',
+    more: 'More',
+  },
+
   charts: {
     setDetail: 'Set {order}: {weight} kg × {reps} reps',
     emptySelectExercise: 'Select an exercise to get started.',

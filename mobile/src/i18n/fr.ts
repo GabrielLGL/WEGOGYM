@@ -834,6 +834,12 @@ export const fr = {
     bodyweight: 'PC',
   },
 
+  heatmap: {
+    monthLabels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+    less: 'Moins',
+    more: 'Plus',
+  },
+
   charts: {
     setDetail: 'Série {order} : {weight} kg × {reps} reps',
     emptySelectExercise: 'Sélectionnez un exercice pour commencer.',

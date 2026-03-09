@@ -53,6 +53,7 @@ export default function AssistantPreviewScreen({ navigation, route }: Props) {
       }
     } catch (e) {
       if (__DEV__) console.error('[AssistantPreview] handleValidate:', e)
+    } finally {
       setIsSaving(false)
     }
   }, [haptics, plan, programName, mode, targetProgramId, navigation])
