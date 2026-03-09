@@ -1,11 +1,10 @@
-import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  PanResponder,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
@@ -15,11 +14,10 @@ import { database } from '../model'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
+import { useMonthNavigation } from '../hooks/useMonthNavigation'
+import { useCalendarDayDetail } from '../hooks/useCalendarDayDetail'
+import type { DayCell, WeekRow, DayDetail, SessionBlock } from '../hooks/useCalendarDayDetail'
 import History from '../model/models/History'
-import type Session from '../model/models/Session'
-import type Program from '../model/models/Program'
-import type SetModel from '../model/models/Set'
-import type Exercise from '../model/models/Exercise'
 import {
   computeCalendarData,
   computeCurrentStreak,
@@ -30,54 +28,13 @@ import {
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import type { Translations } from '../i18n'
 import type { ThemeColors } from '../theme'
 
 // ─── Constantes calendrier ────────────────────────────────────────────────────
 
 const DAY_SIZE = 38
 const DAY_GAP = 6
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface DayCell {
-  dateKey: string
-  date: Date
-  dayNumber: number
-  count: number
-  isFuture: boolean
-  isCurrentMonth: boolean
-}
-
-interface WeekRow {
-  days: DayCell[]
-}
-
-interface SetDetail {
-  setOrder: number
-  weight: number
-  reps: number
-  isPr: boolean
-}
-
-interface ExerciseDetail {
-  exerciseName: string
-  sets: SetDetail[]
-}
-
-interface SessionBlock {
-  historyId: string
-  programName: string
-  sessionName: string
-  durationMin: number | null
-  exercises: ExerciseDetail[]
-}
-
-interface DayDetail {
-  dateKey: string
-  label: string
-  count: number
-  sessions: SessionBlock[]
-}
 
 // ─── Génération de la grille mensuelle ────────────────────────────────────────
 
@@ -92,13 +49,11 @@ function generateMonthGrid(
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
 
-  // Reculer au lundi avant ou égal au 1er du mois
   const startDate = new Date(firstDay)
   const dow = startDate.getDay()
   const toMonday = dow === 0 ? 6 : dow - 1
   startDate.setDate(startDate.getDate() - toMonday)
 
-  // Avancer au dimanche sur ou après le dernier jour du mois
   const endDate = new Date(lastDay)
   const endDow = endDate.getDay()
   const toSunday = endDow === 0 ? 0 : 7 - endDow
@@ -146,6 +101,279 @@ function formatMonthTitle(year: number, month: number, locale: string): string {
   )
 }
 
+// ─── Sous-composants inline ─────────────────────────────────────────────────
+
+interface StreakBadgesProps {
+  currentStreak: number
+  recordStreak: number
+  colors: ThemeColors
+  styles: ReturnType<typeof useStyles>
+  t: Translations
+}
+
+function StreakBadges({ currentStreak, recordStreak, colors, styles, t }: StreakBadgesProps) {
+  return (
+    <View style={styles.streakRow}>
+      <View style={styles.streakCard}>
+        <Ionicons name="flame-outline" size={24} color={colors.danger} />
+        <Text style={styles.streakValue}>{currentStreak}</Text>
+        <Text style={styles.streakLabel}>{t.statsCalendar.streakCurrent}</Text>
+      </View>
+      <View style={styles.streakCard}>
+        <Ionicons name="trophy-outline" size={24} color={colors.warning} />
+        <Text style={styles.streakValue}>{recordStreak}</Text>
+        <Text style={styles.streakLabel}>{t.statsCalendar.streakRecord}</Text>
+      </View>
+    </View>
+  )
+}
+
+interface MonthNavigatorProps {
+  viewYear: number
+  viewMonth: number
+  locale: string
+  isCurrentMonth: boolean
+  onPrev: () => void
+  onNext: () => void
+  colors: ThemeColors
+  styles: ReturnType<typeof useStyles>
+  t: Translations
+}
+
+function MonthNavigator({
+  viewYear, viewMonth, locale, isCurrentMonth,
+  onPrev, onNext, colors, styles, t,
+}: MonthNavigatorProps) {
+  return (
+    <View style={styles.monthSelector}>
+      <TouchableOpacity
+        onPress={onPrev}
+        style={styles.arrowBtn}
+        accessibilityLabel={t.statsCalendar.prevMonth}
+      >
+        <Text style={styles.arrowText}>←</Text>
+      </TouchableOpacity>
+      <Text style={styles.monthTitle}>{formatMonthTitle(viewYear, viewMonth, locale)}</Text>
+      <TouchableOpacity
+        onPress={onNext}
+        style={[styles.arrowBtn, isCurrentMonth && styles.arrowDisabled]}
+        disabled={isCurrentMonth}
+        accessibilityLabel={t.statsCalendar.nextMonth}
+      >
+        <Text style={[styles.arrowText, isCurrentMonth && styles.arrowTextDisabled]}>→</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
+
+interface MonthStatsRowProps {
+  monthStats: { sessionCount: number; totalMin: number }
+  monthDurationLabel: string | null
+  isCurrentMonth: boolean
+  onToday: () => void
+  styles: ReturnType<typeof useStyles>
+  t: Translations
+}
+
+function MonthStatsRow({ monthStats, monthDurationLabel, isCurrentMonth, onToday, styles, t }: MonthStatsRowProps) {
+  return (
+    <>
+      <Text style={styles.monthStats}>
+        {monthStats.sessionCount}{' '}
+        {monthStats.sessionCount !== 1 ? t.statsCalendar.sessionCountPlural : t.statsCalendar.sessionCount}
+        {monthDurationLabel ? `   ·   ${monthDurationLabel} ${t.statsCalendar.totalDuration}` : ''}
+      </Text>
+      {!isCurrentMonth && (
+        <TouchableOpacity onPress={onToday} style={styles.todayBtn}>
+          <Text style={styles.todayBtnText}>{t.statsCalendar.today}</Text>
+        </TouchableOpacity>
+      )}
+    </>
+  )
+}
+
+interface CalendarGridProps {
+  weeks: WeekRow[]
+  todayKey: string
+  detail: DayDetail | null
+  panHandlers: ReturnType<typeof import('react-native').PanResponder.create>['panHandlers']
+  onDayPress: (day: DayCell) => void
+  colors: ThemeColors
+  styles: ReturnType<typeof useStyles>
+  t: Translations
+}
+
+function CalendarGrid({ weeks, todayKey, detail, panHandlers, onDayPress, colors, styles, t }: CalendarGridProps) {
+  return (
+    <View {...panHandlers} style={styles.calendarContainer}>
+      <View style={styles.dayLabelsRow}>
+        {(t.statsCalendar.dayLabels as unknown as string[]).map((label: string, i: number) => (
+          <Text key={i} style={styles.dayLabel}>{label}</Text>
+        ))}
+      </View>
+
+      {weeks.map((week, wi) => (
+        <View key={wi} style={styles.weekRow}>
+          {week.days.map((day, di) => {
+            if (!day.isCurrentMonth) {
+              return <View key={di} style={styles.daySpacer} />
+            }
+
+            const isToday = day.dateKey === todayKey
+            const isActive = !day.isFuture && day.count > 0
+            const isSelected = detail?.dateKey === day.dateKey
+
+            let bgColor = 'transparent'
+            let textColor: string = colors.border
+
+            if (day.isFuture) {
+              bgColor = 'transparent'
+              textColor = colors.border
+            } else if (isToday) {
+              bgColor = colors.primary
+              textColor = colors.text
+            } else if (isActive) {
+              bgColor = colors.primaryBg
+              textColor = colors.primary
+            } else {
+              bgColor = colors.intensityColors[0]
+              textColor = colors.textSecondary
+            }
+
+            const borderStyle = isSelected
+              ? { borderWidth: 2, borderColor: colors.text }
+              : {}
+
+            return (
+              <TouchableOpacity
+                key={di}
+                testID={`day-cell-${day.dateKey}`}
+                onPress={() => onDayPress(day)}
+                activeOpacity={day.isFuture ? 1 : 0.7}
+              >
+                <View style={[styles.dayBox, { backgroundColor: bgColor }, borderStyle]}>
+                  <Text style={[styles.dayNumber, { color: textColor }]}>{day.dayNumber}</Text>
+                </View>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+      ))}
+    </View>
+  )
+}
+
+interface CalendarLegendProps {
+  colors: ThemeColors
+  styles: ReturnType<typeof useStyles>
+  t: Translations
+}
+
+function CalendarLegend({ colors, styles, t }: CalendarLegendProps) {
+  return (
+    <View style={styles.legend}>
+      <View style={[styles.legendBox, { backgroundColor: colors.intensityColors[0] }]} />
+      <Text style={styles.legendText}>{t.statsCalendar.rest}</Text>
+      <View
+        style={[
+          styles.legendBox,
+          { backgroundColor: colors.primaryBg, borderWidth: 1, borderColor: colors.primary },
+        ]}
+      />
+      <Text style={styles.legendText}>{t.statsCalendar.active}</Text>
+    </View>
+  )
+}
+
+interface SessionDetailCardProps {
+  detail: DayDetail
+  expandedBlocks: Set<string>
+  onToggle: (historyId: string) => void
+  onDelete: (historyId: string) => void
+  colors: ThemeColors
+  styles: ReturnType<typeof useStyles>
+  t: Translations
+}
+
+function SessionDetailCard({ detail, expandedBlocks, onToggle, onDelete, colors, styles, t }: SessionDetailCardProps) {
+  return (
+    <View style={styles.detailCard}>
+      <Text style={styles.detailDate}>{detail.label}</Text>
+
+      {detail.count === 0 ? (
+        <Text style={styles.detailRest}>{t.statsCalendar.rest}</Text>
+      ) : (
+        detail.sessions.map((block: SessionBlock, blockIndex: number) => {
+          const isExpanded = expandedBlocks.has(block.historyId)
+          return (
+            <React.Fragment key={block.historyId}>
+              {blockIndex > 0 && <View style={styles.sessionDivider} />}
+
+              <View style={styles.sessionBlockHeader}>
+                <TouchableOpacity
+                  style={[styles.detailHeader, { flex: 1 }]}
+                  onPress={() => onToggle(block.historyId)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.detailProgramName} numberOfLines={1}>
+                    {block.programName || block.sessionName || t.statsCalendar.sessionFallback}
+                  </Text>
+                  <View style={styles.detailHeaderRight}>
+                    {block.durationMin != null && (
+                      <Text style={styles.detailDuration}>
+                        {formatDuration(block.durationMin)}
+                      </Text>
+                    )}
+                    <Ionicons
+                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={16}
+                      color={colors.textSecondary}
+                      style={styles.detailChevron}
+                    />
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteSessionBtn}
+                  onPress={() => onDelete(block.historyId)}
+                  accessibilityLabel={t.statsCalendar.deleteButton}
+                >
+                  <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                </TouchableOpacity>
+              </View>
+
+              {block.sessionName && block.sessionName !== block.programName && (
+                <Text style={styles.detailSessionName}>{block.sessionName}</Text>
+              )}
+
+              {isExpanded && (
+                <>
+                  {block.exercises.map((ex, ei) => (
+                    <View key={ei} style={styles.detailExercise}>
+                      <Text style={styles.detailExerciseName}>{ex.exerciseName}</Text>
+                      <View style={styles.detailSetsRow}>
+                        {ex.sets.map((s, si) => (
+                          <View key={si} style={[styles.detailSetChip, { flexDirection: 'row', alignItems: 'center', gap: spacing.xs }]}>
+                            <Text
+                              style={[styles.detailSetText, s.isPr && styles.detailSetPr]}
+                            >
+                              {s.weight > 0 ? `${s.weight} kg` : 'PC'} × {s.reps}
+                            </Text>
+                            {s.isPr && <Ionicons name="ribbon" size={12} color={colors.primary} />}
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  ))}
+                </>
+              )}
+            </React.Fragment>
+          )
+        })
+      )}
+    </View>
+  )
+}
+
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 interface Props {
@@ -157,47 +385,28 @@ export function StatsCalendarScreenBase({ histories }: Props) {
   const styles = useStyles(colors)
   const { t, language } = useLanguage()
   const locale = language === 'fr' ? 'fr-FR' : 'en-US'
-
-  const today = useMemo(() => new Date(), [])
-  const [viewYear, setViewYear] = useState(() => new Date().getFullYear())
-  const [viewMonth, setViewMonth] = useState(() => new Date().getMonth())
-  const [detail, setDetail] = useState<DayDetail | null>(null)
-  const [expandedBlocks, setExpandedBlocks] = useState<Set<string>>(new Set())
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const haptics = useHaptics()
 
-  const toggleBlock = (historyId: string) => {
-    setExpandedBlocks(prev => {
-      const next = new Set(prev)
-      if (next.has(historyId)) {
-        next.delete(historyId)
-      } else {
-        next.add(historyId)
-      }
-      return next
-    })
-  }
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
-  const handleConfirmDelete = useCallback(async () => {
-    if (!pendingDeleteId) return
-    try {
-      const target = histories.find(h => h.id === pendingDeleteId)
-      if (target) {
-        await database.write(async () => {
-          await target.update(h => {
-            h.deletedAt = new Date()
-          })
-        })
-      }
-    } catch (e) {
-      if (__DEV__) console.error('[StatsCalendarScreen] handleConfirmDelete error', e)
-    }
-    setPendingDeleteId(null)
-    setDetail(null)
-  }, [pendingDeleteId, histories])
+  const {
+    detail,
+    expandedBlocks,
+    handleDayPress,
+    toggleBlock,
+    clearDetail,
+  } = useCalendarDayDetail(histories, locale)
 
-  const isCurrentMonth =
-    viewYear === today.getFullYear() && viewMonth === today.getMonth()
+  const {
+    today,
+    viewYear,
+    viewMonth,
+    isCurrentMonth,
+    goToPrevMonth,
+    goToNextMonth,
+    goToToday,
+    panHandlers,
+  } = useMonthNavigation(clearDetail)
 
   const calendarData = useMemo(() => computeCalendarData(histories), [histories])
   const currentStreak = useMemo(() => computeCurrentStreak(histories), [histories])
@@ -207,7 +416,6 @@ export function StatsCalendarScreenBase({ histories }: Props) {
     [viewYear, viewMonth, calendarData]
   )
 
-  // Stats du mois affiché
   const monthStats = useMemo(() => {
     const prefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`
     let sessionCount = 0
@@ -236,203 +444,28 @@ export function StatsCalendarScreenBase({ histories }: Props) {
     return `${h}h ${m}min`
   }, [monthStats])
 
-  const goToPrevMonth = () => {
-    setDetail(null)
-    if (viewMonth === 0) {
-      setViewYear(y => y - 1)
-      setViewMonth(11)
-    } else {
-      setViewMonth(m => m - 1)
-    }
-  }
-
-  const goToNextMonth = () => {
-    if (isCurrentMonth) return
-    setDetail(null)
-    if (viewMonth === 11) {
-      setViewYear(y => y + 1)
-      setViewMonth(0)
-    } else {
-      setViewMonth(m => m + 1)
-    }
-  }
-
-  const goToToday = () => {
-    setDetail(null)
-    setViewYear(today.getFullYear())
-    setViewMonth(today.getMonth())
-  }
-
-  // Utiliser des refs pour éviter les closures périmées dans PanResponder
-  const navRef = useRef({ goToNextMonth, goToPrevMonth })
-  navRef.current = { goToNextMonth, goToPrevMonth }
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gs) =>
-        Math.abs(gs.dx) > 15 && Math.abs(gs.dy) < 40,
-      onPanResponderRelease: (_, gs) => {
-        if (gs.dx < -50) {
-          navRef.current.goToNextMonth()
-        } else if (gs.dx > 50) {
-          navRef.current.goToPrevMonth()
-        }
-      },
-    })
-  ).current
-
-  const handleDayPress = useCallback(async (day: DayCell) => {
-    if (day.isFuture || !day.isCurrentMonth) return
-
-    if (detail?.dateKey === day.dateKey) {
-      setDetail(null)
-      return
-    }
-
-    const label = day.date.toLocaleDateString(locale, {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    })
-
-    if (day.count === 0) {
-      setExpandedBlocks(new Set())
-      setDetail({
-        dateKey: day.dateKey,
-        label,
-        count: 0,
-        sessions: [],
-      })
-      return
-    }
-
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDeleteId) return
     try {
-      // 1. Filter histories for this day (already in memory)
-      const dayHistories = histories.filter(
-        h => h.deletedAt === null && toDateKey(h.startTime) === day.dateKey
-      )
-
-      const historyIds = dayHistories.map(h => h.id)
-
-      // 2. Batch fetch sessions (1 query)
-      const sessionIds = dayHistories
-        .map(h => (h._raw as Record<string, unknown>).session_id as string)
-        .filter(Boolean)
-      const uniqueSessionIds = [...new Set(sessionIds)]
-
-      const sessionsCollection = database.get<Session>('sessions')
-      const allSessions = uniqueSessionIds.length > 0
-        ? await sessionsCollection.query(Q.where('id', Q.oneOf(uniqueSessionIds))).fetch()
-        : []
-      const sessionMap = new Map(allSessions.map(s => [s.id, s]))
-
-      // 3. Batch fetch programs (1 query)
-      const programIds = allSessions
-        .map(s => (s._raw as Record<string, unknown>).program_id as string)
-        .filter(Boolean)
-      const uniqueProgramIds = [...new Set(programIds)]
-
-      const programsCollection = database.get<Program>('programs')
-      const allPrograms = uniqueProgramIds.length > 0
-        ? await programsCollection.query(Q.where('id', Q.oneOf(uniqueProgramIds))).fetch()
-        : []
-      const programMap = new Map(allPrograms.map(p => [p.id, p]))
-
-      // 4. Batch fetch sets (1 query)
-      const setsCollection = database.get<SetModel>('sets')
-      const allSets = historyIds.length > 0
-        ? await setsCollection.query(Q.where('history_id', Q.oneOf(historyIds))).fetch()
-        : []
-
-      // Group sets by history_id
-      const setsByHistory = new Map<string, SetModel[]>()
-      for (const s of allSets) {
-        const hId = (s._raw as Record<string, unknown>).history_id as string
-        const arr = setsByHistory.get(hId)
-        if (arr) {
-          arr.push(s)
-        } else {
-          setsByHistory.set(hId, [s])
-        }
-      }
-
-      // 5. Batch fetch exercises (1 query)
-      const exerciseIds = allSets
-        .map(s => (s._raw as Record<string, unknown>).exercise_id as string)
-        .filter(Boolean)
-      const uniqueExerciseIds = [...new Set(exerciseIds)]
-
-      const exercisesCollection = database.get<Exercise>('exercises')
-      const allExercises = uniqueExerciseIds.length > 0
-        ? await exercisesCollection.query(Q.where('id', Q.oneOf(uniqueExerciseIds))).fetch()
-        : []
-      const exerciseMap = new Map(allExercises.map(e => [e.id, e]))
-
-      // 6. Build results using Map lookups
-      const sessionBlocks: SessionBlock[] = dayHistories.map(h => {
-        let programName = ''
-        let sessionName = ''
-
-        const sId = (h._raw as Record<string, unknown>).session_id as string
-        const session = sId ? sessionMap.get(sId) : undefined
-        if (session) {
-          if (session.name) sessionName = session.name
-          const pId = (session._raw as Record<string, unknown>).program_id as string
-          const program = pId ? programMap.get(pId) : undefined
-          if (program?.name) programName = program.name
-        }
-
-        // Duration
-        let durationMin: number | null = null
-        if (h.endTime) {
-          const mins = Math.round(
-            (h.endTime.getTime() - h.startTime.getTime()) / 60000
-          )
-          if (mins > 0) durationMin = mins
-        }
-
-        // Group sets by exercise
-        const historySets = setsByHistory.get(h.id) ?? []
-        const exDetailMap = new Map<string, ExerciseDetail>()
-
-        for (const s of historySets) {
-          const eId = (s._raw as Record<string, unknown>).exercise_id as string
-          const ex = eId ? exerciseMap.get(eId) : undefined
-          const exName = ex?.name ?? 'Exercice inconnu'
-
-          let exDetail = exDetailMap.get(exName)
-          if (!exDetail) {
-            exDetail = { exerciseName: exName, sets: [] }
-            exDetailMap.set(exName, exDetail)
-          }
-          exDetail.sets.push({
-            setOrder: s.setOrder,
-            weight: s.weight,
-            reps: s.reps,
-            isPr: s.isPr,
+      const target = histories.find(h => h.id === pendingDeleteId)
+      if (target) {
+        await database.write(async () => {
+          await target.update(h => {
+            h.deletedAt = new Date()
           })
-        }
-
-        const exercises: ExerciseDetail[] = []
-        exDetailMap.forEach(exDetail => {
-          exDetail.sets.sort((a, b) => a.setOrder - b.setOrder)
-          exercises.push(exDetail)
         })
-
-        return { historyId: h.id, programName, sessionName, durationMin, exercises }
-      })
-
-      setExpandedBlocks(new Set())
-      setDetail({
-        dateKey: day.dateKey,
-        label,
-        count: day.count,
-        sessions: sessionBlocks,
-      })
+      }
     } catch (e) {
-      if (__DEV__) console.error('[StatsCalendarScreen] handleDayPress error', e)
+      if (__DEV__) console.error('[StatsCalendarScreen] handleConfirmDelete error', e)
     }
-  }, [detail, histories, locale])
+    setPendingDeleteId(null)
+    clearDetail()
+  }, [pendingDeleteId, histories, clearDetail])
+
+  const handleDeletePress = useCallback((historyId: string) => {
+    haptics.onDelete()
+    setPendingDeleteId(historyId)
+  }, [haptics])
 
   const todayKey = toDateKey(today)
 
@@ -442,144 +475,47 @@ export function StatsCalendarScreenBase({ histories }: Props) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Streak badges */}
-      <View style={styles.streakRow}>
-        <View style={styles.streakCard}>
-          <Ionicons name="flame-outline" size={24} color={colors.danger} />
-          <Text style={styles.streakValue}>{currentStreak}</Text>
-          <Text style={styles.streakLabel}>{t.statsCalendar.streakCurrent}</Text>
-        </View>
-        <View style={styles.streakCard}>
-          <Ionicons name="trophy-outline" size={24} color={colors.warning} />
-          <Text style={styles.streakValue}>{recordStreak}</Text>
-          <Text style={styles.streakLabel}>{t.statsCalendar.streakRecord}</Text>
-        </View>
-      </View>
+      <StreakBadges
+        currentStreak={currentStreak}
+        recordStreak={recordStreak}
+        colors={colors}
+        styles={styles}
+        t={t}
+      />
 
-      {/* Sélecteur de mois */}
-      <View style={styles.monthSelector}>
-        <TouchableOpacity
-          onPress={goToPrevMonth}
-          style={styles.arrowBtn}
-          accessibilityLabel={t.statsCalendar.prevMonth}
-        >
-          <Text style={styles.arrowText}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.monthTitle}>{formatMonthTitle(viewYear, viewMonth, locale)}</Text>
-        <TouchableOpacity
-          onPress={goToNextMonth}
-          style={[styles.arrowBtn, isCurrentMonth && styles.arrowDisabled]}
-          disabled={isCurrentMonth}
-          accessibilityLabel={t.statsCalendar.nextMonth}
-        >
-          <Text style={[styles.arrowText, isCurrentMonth && styles.arrowTextDisabled]}>
-            →
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <MonthNavigator
+        viewYear={viewYear}
+        viewMonth={viewMonth}
+        locale={locale}
+        isCurrentMonth={isCurrentMonth}
+        onPrev={goToPrevMonth}
+        onNext={goToNextMonth}
+        colors={colors}
+        styles={styles}
+        t={t}
+      />
 
-      {/* Stats du mois */}
-      <Text style={styles.monthStats}>
-        {monthStats.sessionCount}{' '}
-        {monthStats.sessionCount !== 1 ? t.statsCalendar.sessionCountPlural : t.statsCalendar.sessionCount}
-        {monthDurationLabel ? `   ·   ${monthDurationLabel} ${t.statsCalendar.totalDuration}` : ''}
-      </Text>
+      <MonthStatsRow
+        monthStats={monthStats}
+        monthDurationLabel={monthDurationLabel}
+        isCurrentMonth={isCurrentMonth}
+        onToday={goToToday}
+        styles={styles}
+        t={t}
+      />
 
-      {/* Bouton "Aujourd'hui" */}
-      {!isCurrentMonth && (
-        <TouchableOpacity onPress={goToToday} style={styles.todayBtn}>
-          <Text style={styles.todayBtnText}>{t.statsCalendar.today}</Text>
-        </TouchableOpacity>
-      )}
+      <CalendarGrid
+        weeks={weeks}
+        todayKey={todayKey}
+        detail={detail}
+        panHandlers={panHandlers}
+        onDayPress={handleDayPress}
+        colors={colors}
+        styles={styles}
+        t={t}
+      />
 
-      {/* Grille calendrier */}
-      <View {...panResponder.panHandlers} style={styles.calendarContainer}>
-        {/* Header jours */}
-        <View style={styles.dayLabelsRow}>
-          {t.statsCalendar.dayLabels.map((label, i) => (
-            <Text key={i} style={styles.dayLabel}>
-              {label}
-            </Text>
-          ))}
-        </View>
-
-        {/* Semaines */}
-        {weeks.map((week, wi) => (
-          <View key={wi} style={styles.weekRow}>
-            {week.days.map((day, di) => {
-              // Jours hors mois : spacer transparent, non interactif
-              if (!day.isCurrentMonth) {
-                return <View key={di} style={styles.daySpacer} />
-              }
-
-              const isToday = day.dateKey === todayKey
-              const isActive = !day.isFuture && day.count > 0
-              const isSelected = detail?.dateKey === day.dateKey
-
-              let bgColor = 'transparent'
-              let textColor: string = colors.border
-
-              if (day.isFuture) {
-                bgColor = 'transparent'
-                textColor = colors.border
-              } else if (isToday) {
-                bgColor = colors.primary
-                textColor = colors.text
-              } else if (isActive) {
-                bgColor = colors.primaryBg
-                textColor = colors.primary
-              } else {
-                bgColor = colors.intensityColors[0]
-                textColor = colors.textSecondary
-              }
-
-              const borderStyle = isSelected
-                ? { borderWidth: 2, borderColor: colors.text }
-                : {}
-
-              return (
-                <TouchableOpacity
-                  key={di}
-                  testID={`day-cell-${day.dateKey}`}
-                  onPress={() => handleDayPress(day)}
-                  activeOpacity={day.isFuture ? 1 : 0.7}
-                >
-                  <View
-                    style={[
-                      styles.dayBox,
-                      { backgroundColor: bgColor },
-                      borderStyle,
-                    ]}
-                  >
-                    <Text style={[styles.dayNumber, { color: textColor }]}>
-                      {day.dayNumber}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              )
-            })}
-          </View>
-        ))}
-      </View>
-
-      {/* Légende simplifiée */}
-      <View style={styles.legend}>
-        <View
-          style={[styles.legendBox, { backgroundColor: colors.intensityColors[0] }]}
-        />
-        <Text style={styles.legendText}>{t.statsCalendar.rest}</Text>
-        <View
-          style={[
-            styles.legendBox,
-            {
-              backgroundColor: colors.primaryBg,
-              borderWidth: 1,
-              borderColor: colors.primary,
-            },
-          ]}
-        />
-        <Text style={styles.legendText}>{t.statsCalendar.active}</Text>
-      </View>
+      <CalendarLegend colors={colors} styles={styles} t={t} />
 
       <AlertDialog
         visible={pendingDeleteId !== null}
@@ -591,85 +527,16 @@ export function StatsCalendarScreenBase({ histories }: Props) {
         cancelText={t.statsCalendar.deleteCancel}
       />
 
-      {/* Carte de détail */}
       {detail && (
-        <View style={styles.detailCard}>
-          <Text style={styles.detailDate}>{detail.label}</Text>
-
-          {detail.count === 0 ? (
-            <Text style={styles.detailRest}>{t.statsCalendar.rest}</Text>
-          ) : (
-            detail.sessions.map((block, blockIndex) => {
-              const isExpanded = expandedBlocks.has(block.historyId)
-              return (
-                <React.Fragment key={block.historyId}>
-                  {blockIndex > 0 && <View style={styles.sessionDivider} />}
-
-                  <View style={styles.sessionBlockHeader}>
-                    <TouchableOpacity
-                      style={[styles.detailHeader, { flex: 1 }]}
-                      onPress={() => toggleBlock(block.historyId)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.detailProgramName} numberOfLines={1}>
-                        {block.programName || block.sessionName || t.statsCalendar.sessionFallback}
-                      </Text>
-                      <View style={styles.detailHeaderRight}>
-                        {block.durationMin != null && (
-                          <Text style={styles.detailDuration}>
-                            {formatDuration(block.durationMin)}
-                          </Text>
-                        )}
-                        <Ionicons
-                          name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                          size={16}
-                          color={colors.textSecondary}
-                          style={styles.detailChevron}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.deleteSessionBtn}
-                      onPress={() => { haptics.onDelete(); setPendingDeleteId(block.historyId) }}
-                      accessibilityLabel={t.statsCalendar.deleteButton}
-                    >
-                      <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                    </TouchableOpacity>
-                  </View>
-
-                  {block.sessionName && block.sessionName !== block.programName && (
-                    <Text style={styles.detailSessionName}>{block.sessionName}</Text>
-                  )}
-
-                  {isExpanded && (
-                    <>
-                      {block.exercises.map((ex, ei) => (
-                        <View key={ei} style={styles.detailExercise}>
-                          <Text style={styles.detailExerciseName}>{ex.exerciseName}</Text>
-                          <View style={styles.detailSetsRow}>
-                            {ex.sets.map((s, si) => (
-                              <View key={si} style={[styles.detailSetChip, { flexDirection: 'row', alignItems: 'center', gap: spacing.xs }]}>
-                                <Text
-                                  style={[
-                                    styles.detailSetText,
-                                    s.isPr && styles.detailSetPr,
-                                  ]}
-                                >
-                                  {s.weight > 0 ? `${s.weight} kg` : 'PC'} × {s.reps}
-                                </Text>
-                                {s.isPr && <Ionicons name="ribbon" size={12} color={colors.primary} />}
-                              </View>
-                            ))}
-                          </View>
-                        </View>
-                      ))}
-                    </>
-                  )}
-                </React.Fragment>
-              )
-            })
-          )}
-        </View>
+        <SessionDetailCard
+          detail={detail}
+          expandedBlocks={expandedBlocks}
+          onToggle={toggleBlock}
+          onDelete={handleDeletePress}
+          colors={colors}
+          styles={styles}
+          t={t}
+        />
       )}
     </ScrollView>
   )

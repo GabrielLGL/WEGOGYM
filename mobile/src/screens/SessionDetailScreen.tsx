@@ -15,6 +15,7 @@ import { map } from 'rxjs/operators'
 import { CustomModal } from '../components/CustomModal'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useSessionManager } from '../hooks/useSessionManager'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { Ionicons } from '@expo/vector-icons'
@@ -77,9 +78,9 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   } = useSessionManager(session, haptics.onSuccess)
 
   // --- ÉTATS LOCAUX ---
-  const [isAddModalVisible, setIsAddModalVisible] = useState(false)
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
-  const [isAlertVisible, setIsAlertVisible] = useState(false)
+  const addModal = useModalState()
+  const editModal = useModalState()
+  const alertModal = useModalState()
   const [alertConfig, setAlertConfig] = useState<{
     title: string
     message: string
@@ -89,7 +90,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   // --- SUPERSET SELECTION MODE ---
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
-  const [isGroupTypeVisible, setIsGroupTypeVisible] = useState(false)
+  const groupTypeModal = useModalState()
 
   // --- TOAST FEEDBACK ---
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -136,11 +137,12 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       if (items.length < 2) return
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
       await groupExercises(items, type)
-      setIsGroupTypeVisible(false)
+      groupTypeModal.close()
       cancelSelection()
       setToastMessage(t.sessionDetail.superset.groupCreated)
     } catch (e) {
       if (__DEV__) console.warn('handleCreateGroup error:', e)
+      setToastMessage(t.common.error)
     }
   }
 
@@ -152,6 +154,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       setToastMessage(t.sessionDetail.superset.groupRemoved)
     } catch (e) {
       if (__DEV__) console.warn('handleUngroup error:', e)
+      setToastMessage(t.common.error)
     }
   }
 
@@ -178,7 +181,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     try {
       const success = await addExercise(exerciseId, sets, reps, weight, exo)
       if (success) {
-        setIsAddModalVisible(false)
+        addModal.close()
       }
     } catch (e) {
       if (__DEV__) console.error('handleAddExercise error:', e)
@@ -189,7 +192,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     try {
       const success = await updateTargets()
       if (success) {
-        setIsEditModalVisible(false)
+        editModal.close()
       }
     } catch (e) {
       if (__DEV__) console.error('handleUpdateTargets error:', e)
@@ -204,13 +207,13 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
         await removeExercise(se)
       }
     })
-    setIsAlertVisible(true)
+    alertModal.open()
   }, [t, removeExercise])
 
   const handleEditTargets = useCallback((se: SessionExercise) => {
     haptics.onPress()
     prepareEditTargets(se)
-    setIsEditModalVisible(true)
+    editModal.open()
   }, [haptics, prepareEditTargets])
 
   const renderDraggableItem = useCallback(({ item, drag, isActive }: RenderItemParams<SessionExercise>) => (
@@ -245,7 +248,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
           <TouchableOpacity
             onPress={() => {
               if (selectedItems.size < 2) return
-              setIsGroupTypeVisible(true)
+              groupTypeModal.open()
             }}
             style={[styles.selectionBarCreateBtn, selectedItems.size < 2 && { opacity: 0.4 }]}
             disabled={selectedItems.size < 2}
@@ -296,7 +299,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
                 style={[styles.addButton, { flex: 1 }]}
                 onPress={() => {
                   haptics.onPress()
-                  setIsAddModalVisible(true)
+                  addModal.open()
                 }}
               >
                 <Text style={styles.addButtonText}>{t.sessionDetail.addExercise}</Text>
@@ -320,8 +323,8 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
 
       {/* --- MODALE AJOUT EXERCICE --- */}
       <ExercisePickerModal
-        visible={isAddModalVisible}
-        onClose={() => setIsAddModalVisible(false)}
+        visible={addModal.isOpen}
+        onClose={addModal.close}
         exercises={exercises}
         onAdd={handleAddExercise}
         onHapticSelect={haptics.onSelect}
@@ -329,29 +332,29 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
 
       {/* --- MODALE Alerte Suppression --- */}
       <AlertDialog
-        visible={isAlertVisible}
+        visible={alertModal.isOpen}
         title={alertConfig.title}
         message={alertConfig.message}
         onConfirm={async () => {
           try {
             await alertConfig.onConfirm()
           } finally {
-            setIsAlertVisible(false)
+            alertModal.close()
           }
         }}
-        onCancel={() => setIsAlertVisible(false)}
+        onCancel={alertModal.close}
         confirmText={t.common.delete}
         cancelText={t.common.cancel}
       />
 
       {/* --- MODALE Edition (CustomModal) --- */}
       <CustomModal
-        visible={isEditModalVisible}
+        visible={editModal.isOpen}
         title={t.sessionDetail.editTarget}
-        onClose={() => setIsEditModalVisible(false)}
+        onClose={editModal.close}
         buttons={
             <>
-            <TouchableOpacity onPress={() => setIsEditModalVisible(false)} style={styles.cancelBtn}><Text style={styles.btnText}>{t.common.cancel}</Text></TouchableOpacity>
+            <TouchableOpacity onPress={editModal.close} style={styles.cancelBtn}><Text style={styles.btnText}>{t.common.cancel}</Text></TouchableOpacity>
             <TouchableOpacity onPress={handleUpdateTargets} style={[styles.confirmBtn, !isFormValid && { opacity: 0.3 }]} disabled={!isFormValid}><Text style={styles.btnText}>{t.common.save}</Text></TouchableOpacity>
             </>
         }
@@ -381,8 +384,8 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
 
       {/* --- BOTTOM SHEET TYPE DE GROUPE --- */}
       <BottomSheet
-        visible={isGroupTypeVisible}
-        onClose={() => setIsGroupTypeVisible(false)}
+        visible={groupTypeModal.isOpen}
+        onClose={groupTypeModal.close}
         title={t.sessionDetail.superset.groupTypeTitle}
       >
         <TouchableOpacity

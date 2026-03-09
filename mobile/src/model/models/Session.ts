@@ -14,6 +14,7 @@ export default class Session extends Model {
 
   @text('name') name!: string
   @field('position') position!: number
+  @field('program_id') programId!: string
   @relation('programs', 'program_id') program!: Relation<Program>
   
   @children('histories') histories!: Query<History>

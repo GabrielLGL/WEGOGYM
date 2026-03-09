@@ -29,6 +29,7 @@ import { DEFAULT_REPS, MINUTE_MS } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -79,7 +80,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
   const [noteText, setNoteText] = useState(history.note ?? '')
   const [exercises, setExercises] = useState<Record<string, Exercise>>({})
   const [deleteSetTarget, setDeleteSetTarget] = useState<WorkoutSet | null>(null)
-  const [showDeleteWorkout, setShowDeleteWorkout] = useState(false)
+  const deleteWorkoutModal = useModalState()
 
   // Initialize edits from sets
   useEffect(() => {
@@ -267,7 +268,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
     } catch (e) {
       if (__DEV__) console.error('[HistoryDetailScreen] handleDeleteWorkout:', e)
     } finally {
-      setShowDeleteWorkout(false)
+      deleteWorkoutModal.close()
     }
   }, [history.id, haptics, navigation])
 
@@ -381,7 +382,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
         size="lg"
         onPress={() => {
           haptics.onPress()
-          setShowDeleteWorkout(true)
+          deleteWorkoutModal.open()
         }}
         style={styles.deleteBtn}
       >
@@ -402,11 +403,11 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
 
       {/* AlertDialog: delete workout */}
       <AlertDialog
-        visible={showDeleteWorkout}
+        visible={deleteWorkoutModal.isOpen}
         title={t.historyDetail.deleteWorkoutTitle}
         message={t.historyDetail.deleteWorkoutMessage}
         onConfirm={handleDeleteWorkout}
-        onCancel={() => setShowDeleteWorkout(false)}
+        onCancel={() => deleteWorkoutModal.close()}
         confirmText={t.common.delete}
         cancelText={t.common.cancel}
         confirmColor={colors.danger}

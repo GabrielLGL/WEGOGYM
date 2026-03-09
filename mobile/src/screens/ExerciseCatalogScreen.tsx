@@ -292,7 +292,7 @@ const ExerciseCatalogScreen: React.FC = () => {
 
   // Refs pour éviter les race conditions
   const currentOffsetRef = useRef(0)
-  const isLoadingRef = useRef(false)
+  const abortRef = useRef<AbortController | null>(null)
   const isLoadingMoreRef = useRef(false)
   const hasMoreRef = useRef(true)
 
@@ -304,23 +304,30 @@ const ExerciseCatalogScreen: React.FC = () => {
   // ── Chargement initial / recherche ────────────────────────────────────────
 
   const loadInitial = useCallback(async (q: string) => {
-    if (isLoadingRef.current) return
-    isLoadingRef.current = true
+    // Annuler la requête précédente
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setIsLoading(true)
     setHasError(false)
     currentOffsetRef.current = 0
     hasMoreRef.current = true
     try {
-      const result = await searchCatalogExercises({ query: q, offset: 0, limit: PAGE_SIZE })
+      const result = await searchCatalogExercises({
+        query: q, offset: 0, limit: PAGE_SIZE, signal: controller.signal,
+      })
       setExercises(result.exercises)
       setHasMore(result.hasMore)
       hasMoreRef.current = result.hasMore
       currentOffsetRef.current = result.exercises.length
-    } catch {
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return
       setHasError(true)
     } finally {
-      setIsLoading(false)
-      isLoadingRef.current = false
+      if (!controller.signal.aborted) {
+        setIsLoading(false)
+      }
     }
   }, [])
 
@@ -329,8 +336,11 @@ const ExerciseCatalogScreen: React.FC = () => {
     isLoadingMoreRef.current = true
     setIsLoadingMore(true)
     const offset = currentOffsetRef.current
+    const controller = new AbortController()
     try {
-      const result = await searchCatalogExercises({ query: q, offset, limit: PAGE_SIZE })
+      const result = await searchCatalogExercises({
+        query: q, offset, limit: PAGE_SIZE, signal: controller.signal,
+      })
       setExercises(prev => {
         const existingIds = new Set(prev.map(e => e.id))
         const newExercises = result.exercises.filter(e => !existingIds.has(e.id))
@@ -339,7 +349,8 @@ const ExerciseCatalogScreen: React.FC = () => {
       setHasMore(result.hasMore)
       hasMoreRef.current = result.hasMore
       currentOffsetRef.current = offset + result.exercises.length
-    } catch {
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return
       // Échec silencieux sur load more
     } finally {
       setIsLoadingMore(false)
@@ -352,8 +363,19 @@ const ExerciseCatalogScreen: React.FC = () => {
     const timeout = setTimeout(() => {
       loadInitial(query)
     }, query.trim().length === 0 ? 0 : DEBOUNCE_MS)
-    return () => clearTimeout(timeout)
+    return () => {
+      clearTimeout(timeout)
+      abortRef.current?.abort()
+    }
   }, [query, loadInitial])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort()
+      isLoadingMoreRef.current = false
+    }
+  }, [])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 

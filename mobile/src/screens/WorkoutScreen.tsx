@@ -27,6 +27,7 @@ import { useWorkoutTimer } from '../hooks/useWorkoutTimer'
 import { useWorkoutState } from '../hooks/useWorkoutState'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useWorkoutCompletion } from '../hooks/useWorkoutCompletion'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { WorkoutHeader } from '../components/WorkoutHeader'
@@ -104,12 +105,12 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const summaryWasOpenRef = useRef(false)
 
   const [historyId, setHistoryId] = useState<string>('')
-  const [showRestTimer, setShowRestTimer] = useState(false)
+  const restTimerModal = useModalState()
   const [currentRestDuration, setCurrentRestDuration] = useState(user?.restDuration ?? 90)
-  const [confirmEndVisible, setConfirmEndVisible] = useState(false)
-  const [summaryVisible, setSummaryVisible] = useState(false)
-  const [abandonVisible, setAbandonVisible] = useState(false)
-  const [startErrorVisible, setStartErrorVisible] = useState(false)
+  const confirmEndModal = useModalState()
+  const summaryModal = useModalState()
+  const abandonModal = useModalState()
+  const startErrorModal = useModalState()
   const [durationSeconds, setDurationSeconds] = useState(0)
   const [milestones, setMilestones] = useState<MilestoneEvent[]>([])
   const [newBadges, setNewBadges] = useState<BadgeDefinition[]>([])
@@ -155,7 +156,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
   // Quand le résumé se ferme : naviguer vers Home avec les célébrations en params
   useEffect(() => {
-    if (summaryVisible) {
+    if (summaryModal.isOpen) {
       summaryWasOpenRef.current = true
     } else if (summaryWasOpenRef.current) {
       summaryWasOpenRef.current = false
@@ -170,7 +171,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         }],
       })
     }
-  }, [summaryVisible, navigation, milestones, newBadges])
+  }, [summaryModal.isOpen, navigation, milestones, newBadges])
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -191,7 +192,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       .catch(e => {
         if (cancelled) return
         if (__DEV__) console.error('[WorkoutScreen] createWorkoutHistory:', e)
-        setStartErrorVisible(true)
+        startErrorModal.open()
       })
     return () => { cancelled = true }
   }, [])
@@ -209,22 +210,22 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
   const handleClose = useCallback(() => {
     haptics.onPress()
-    setSummaryVisible(false)
+    summaryModal.close()
     // La navigation vers Home (avec célébrations) est gérée par le useEffect ci-dessus
   }, [haptics])
 
   // Back handler Android : prioritaire sur le GlobalBackHandler (LIFO)
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (summaryVisible) {
+      if (summaryModal.isOpen) {
         handleClose()
         return true
       }
-      setAbandonVisible(true)
+      abandonModal.open()
       return true
     })
     return () => backHandler.remove()
-  }, [summaryVisible, handleClose])
+  }, [summaryModal.isOpen, handleClose])
 
   const handleConfirmEnd = useCallback(async () => {
     try {
@@ -240,12 +241,12 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       if (result.milestones.length > 0) setMilestones(result.milestones)
       if (result.newBadges.length > 0) setNewBadges(result.newBadges)
 
-      setConfirmEndVisible(false)
-      setSummaryVisible(true)
+      confirmEndModal.close()
+      summaryModal.open()
       haptics.onMajorSuccess()
     } catch (e) {
       if (__DEV__) console.error('[WorkoutScreen] handleConfirmEnd failed:', e)
-      setConfirmEndVisible(false)
+      confirmEndModal.close()
     }
   }, [completeWorkout, haptics])
 
@@ -254,7 +255,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     if (activeHistoryId) {
       await completeWorkoutHistory(activeHistoryId, Date.now()).catch(e => { if (__DEV__) console.error('[WorkoutScreen] completeWorkoutHistory (abandon):', e) })
     }
-    setAbandonVisible(false)
+    abandonModal.close()
     navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
   }, [historyId, navigation])
 
@@ -275,13 +276,13 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         // Show rest timer only after completing a full round of the superset
         if (user?.timerEnabled && allGroupSetsDone) {
           setCurrentRestDuration(sessionExercise.restTime ?? user?.restDuration ?? 90)
-          setShowRestTimer(true)
+          restTimerModal.open()
         }
       } else {
         // Not in a superset: normal rest timer behavior
         if (user?.timerEnabled) {
           setCurrentRestDuration(sessionExercise.restTime ?? user?.restDuration ?? 90)
-          setShowRestTimer(true)
+          restTimerModal.open()
         }
       }
     } else {
@@ -351,11 +352,11 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         </View>
       )}
 
-      {showRestTimer && (
+      {restTimerModal.isOpen && (
         <View style={styles.timerContainer}>
           <RestTimer
             duration={currentRestDuration}
-            onClose={() => setShowRestTimer(false)}
+            onClose={restTimerModal.close}
             notificationEnabled={notificationPermissionRef.current}
             vibrationEnabled={user?.vibrationEnabled ?? true}
             soundEnabled={user?.timerSoundEnabled ?? true}
@@ -365,50 +366,50 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
       {/* Footer fixe - passe sous le clavier quand il est ouvert */}
       <Animated.View style={[styles.footer, { transform: [{ translateY: footerSlide }] }]}>
-        <Button variant="primary" onPress={() => setConfirmEndVisible(true)}>
+        <Button variant="primary" onPress={() => confirmEndModal.open()}>
           {t.workout.finishButton}
         </Button>
       </Animated.View>
 
       {/* AlertDialog — confirmation fin de seance */}
       <AlertDialog
-        visible={confirmEndVisible}
+        visible={confirmEndModal.isOpen}
         title={t.workout.finishTitle}
         message={t.workout.finishMessage}
         confirmText={t.workout.finishConfirm}
         cancelText={t.workout.continueLabel}
         confirmColor={colors.primary}
         onConfirm={handleConfirmEnd}
-        onCancel={() => setConfirmEndVisible(false)}
+        onCancel={confirmEndModal.close}
       />
 
       {/* AlertDialog — abandon seance (back Android) */}
       <AlertDialog
-        visible={abandonVisible}
+        visible={abandonModal.isOpen}
         title={t.workout.abandonTitle}
         message={t.workout.abandonMessage}
         confirmText={t.workout.abandonConfirm}
         cancelText={t.workout.continueLabel}
         confirmColor={colors.danger}
         onConfirm={handleConfirmAbandon}
-        onCancel={() => setAbandonVisible(false)}
+        onCancel={abandonModal.close}
       />
 
       {/* AlertDialog — erreur démarrage séance */}
       <AlertDialog
-        visible={startErrorVisible}
+        visible={startErrorModal.isOpen}
         title={t.workout.errorTitle}
         message={t.workout.errorMessage}
         confirmText={t.common.ok}
         confirmColor={colors.primary}
-        onConfirm={() => { setStartErrorVisible(false); navigation.goBack() }}
-        onCancel={() => { setStartErrorVisible(false); navigation.goBack() }}
+        onConfirm={() => { startErrorModal.close(); navigation.goBack() }}
+        onCancel={() => { startErrorModal.close(); navigation.goBack() }}
         hideCancel
       />
 
       {/* Resume de fin de seance */}
       <WorkoutSummarySheet
-        visible={summaryVisible}
+        visible={summaryModal.isOpen}
         onClose={handleClose}
         durationSeconds={durationSeconds}
         totalVolume={totalVolume}

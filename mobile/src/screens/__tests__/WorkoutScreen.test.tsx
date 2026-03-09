@@ -74,15 +74,18 @@ jest.mock('../../hooks/useHaptics', () => ({
   }),
 }))
 
-jest.mock('../../hooks/useModalState', () => ({
-  useModalState: jest.fn().mockReturnValue({
-    isOpen: false,
-    open: jest.fn(),
-    close: jest.fn(),
-    toggle: jest.fn(),
-    setIsOpen: jest.fn(),
-  }),
-}))
+jest.mock('../../hooks/useModalState', () => {
+  const { useState, useCallback } = require('react')
+  return {
+    useModalState: (initialState = false) => {
+      const [isOpen, setIsOpen] = useState(initialState)
+      const open = useCallback(() => setIsOpen(true), [])
+      const close = useCallback(() => setIsOpen(false), [])
+      const toggle = useCallback(() => setIsOpen((prev: boolean) => !prev), [])
+      return { isOpen, open, close, toggle, setIsOpen }
+    },
+  }
+})
 
 jest.mock('../../components/WorkoutExerciseCard', () => {
   const React = require('react')

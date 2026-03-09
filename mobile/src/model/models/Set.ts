@@ -33,6 +33,9 @@ export default class Set extends Model {
   // Colonne booléenne : vrai si cette série est un record personnel (Personal Record)
   @field('is_pr') isPr!: boolean
 
+  @field('history_id') historyId!: string
+  @field('exercise_id') exerciseId!: string
+
   // Relation "Belongs To" vers l'historique : permet d'accéder à l'objet History parent
   @relation('histories', 'history_id') history!: Relation<History>
 

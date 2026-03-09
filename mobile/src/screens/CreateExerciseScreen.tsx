@@ -5,6 +5,7 @@ import { database } from '../model/index'
 import Exercise from '../model/models/Exercise'
 import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import { AlertDialog } from '../components/AlertDialog'
@@ -57,7 +58,7 @@ export default function CreateExerciseScreen() {
   const [muscles, setMuscles] = useState<string[]>([])
   const [equipment, setEquipment] = useState('')
   const [description, setDescription] = useState('')
-  const [isErrorVisible, setIsErrorVisible] = useState(false)
+  const errorAlert = useModalState()
   const [errorMessage, setErrorMessage] = useState('')
 
   const isFormValid = validateExerciseInput(name, muscles, equipment).valid
@@ -83,7 +84,7 @@ export default function CreateExerciseScreen() {
       navigation.goBack()
     } catch {
       setErrorMessage(t.exercises.createError)
-      setIsErrorVisible(true)
+      errorAlert.open()
     }
   }
 
@@ -155,11 +156,11 @@ export default function CreateExerciseScreen() {
       </View>
 
       <AlertDialog
-        visible={isErrorVisible}
+        visible={errorAlert.isOpen}
         title={t.common.error}
         message={errorMessage}
-        onConfirm={() => setIsErrorVisible(false)}
-        onCancel={() => setIsErrorVisible(false)}
+        onConfirm={errorAlert.close}
+        onCancel={errorAlert.close}
         confirmText={t.common.ok}
         confirmColor={colors.primary}
         hideCancel

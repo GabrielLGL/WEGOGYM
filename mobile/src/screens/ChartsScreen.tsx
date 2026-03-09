@@ -25,6 +25,7 @@ import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
 import { ChipSelector } from '../components/ChipSelector'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { fontSize, borderRadius, spacing } from '../theme'
@@ -57,7 +58,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
-  const [isAlertVisible, setIsAlertVisible] = useState(false)
+  const alertModal = useModalState()
   const [selectedStat, setSelectedStat] = useState<ExerciseSessionStat | null>(null)
 
   const chartConfig = createChartConfig({ decimalPlaces: 1, showDots: true, colors })
@@ -101,7 +102,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
     } catch (e) {
       if (__DEV__) console.error('[ChartsScreen] handleDeleteStat error', e)
     } finally {
-      setIsAlertVisible(false)
+      alertModal.close()
       setSelectedStat(null)
     }
   }
@@ -132,7 +133,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
           onPress={() => {
             haptics.onPress()
             setSelectedStat(item)
-            setIsAlertVisible(true)
+            alertModal.open()
           }}
           style={styles.actionBtn}
           testID="delete-btn"
@@ -180,7 +181,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         contentContainerStyle={styles.listContent}
       />
       <AlertDialog
-        visible={isAlertVisible}
+        visible={alertModal.isOpen}
         title={t.charts.deleteSessionTitle}
         message={
           selectedStat
@@ -189,7 +190,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         }
         onConfirm={handleDeleteStat}
         onCancel={() => {
-          setIsAlertVisible(false)
+          alertModal.close()
           setSelectedStat(null)
         }}
         confirmText={t.common.delete}

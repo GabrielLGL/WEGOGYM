@@ -50,6 +50,8 @@ export interface CatalogSearchParams {
   limit?: number
   /** Décalage pour la pagination (défaut: 0) */
   offset?: number
+  /** AbortSignal pour annuler la requête en cours */
+  signal?: AbortSignal
 }
 
 /** Résultat paginé de `searchCatalogExercises`. */
@@ -131,7 +133,7 @@ export const EQUIPMENT_TO_LOCAL: Record<string, string> = {
 export async function searchCatalogExercises(
   params: CatalogSearchParams = {}
 ): Promise<CatalogSearchResult> {
-  const { query, body_part, equipment, limit = PAGE_SIZE, offset = 0 } = params
+  const { query, body_part, equipment, limit = PAGE_SIZE, offset = 0, signal } = params
 
   const searchParams = new URLSearchParams()
   searchParams.set(
@@ -156,7 +158,7 @@ export async function searchCatalogExercises(
 
   let res: Response
   try {
-    res = await fetch(url, { headers: HEADERS })
+    res = await fetch(url, { headers: HEADERS, signal })
   } catch {
     throw new Error('catalog_fetch_error')
   }

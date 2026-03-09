@@ -14,6 +14,7 @@ import { CustomModal } from '../components/CustomModal'
 import { AlertDialog } from '../components/AlertDialog'
 import { useProgramManager } from '../hooks/useProgramManager'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -50,10 +51,10 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
     prepareRenameSession,
   } = useProgramManager(haptics.onSuccess)
 
-  const [isSessionModalVisible, setIsSessionModalVisible] = useState(false)
-  const [isSessionOptionsVisible, setIsSessionOptionsVisible] = useState(false)
-  const [isAddSessionChoiceVisible, setIsAddSessionChoiceVisible] = useState(false)
-  const [isAlertVisible, setIsAlertVisible] = useState(false)
+  const sessionModal = useModalState()
+  const sessionOptionsModal = useModalState()
+  const addChoiceModal = useModalState()
+  const alertModal = useModalState()
   const [alertConfig, setAlertConfig] = useState({ title: '', message: '', onConfirm: async () => {} })
 
   const renameSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -70,44 +71,44 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
 
   const handleAddSession = useCallback(() => {
     haptics.onPress()
-    setIsAddSessionChoiceVisible(true)
+    addChoiceModal.open()
   }, [haptics])
 
   const handleAddSessionManual = useCallback(() => {
-    setIsAddSessionChoiceVisible(false)
+    addChoiceModal.close()
     setTargetProgram(program)
     setIsRenamingSession(false)
     setSessionNameInput('')
-    setIsSessionModalVisible(true)
+    sessionModal.open()
   }, [program, setTargetProgram, setIsRenamingSession, setSessionNameInput])
 
   const handleAddSessionAI = useCallback(() => {
     haptics.onPress()
-    setIsAddSessionChoiceVisible(false)
+    addChoiceModal.close()
     navigation.navigate('Assistant', { sessionMode: { targetProgramId: program.id } })
   }, [haptics, navigation, program.id])
 
   const handleSaveSession = async () => {
     const success = await saveSession()
     if (success) {
-      setIsSessionModalVisible(false)
+      sessionModal.close()
     }
   }
 
   const handleSessionOptions = useCallback((session: Session) => {
     haptics.onSelect()
     setSelectedSession(session)
-    setIsSessionOptionsVisible(true)
+    sessionOptionsModal.open()
   }, [haptics, setSelectedSession])
 
   const handleDuplicateSession = async () => {
-    setIsSessionOptionsVisible(false)
+    sessionOptionsModal.close()
     await duplicateSession()
   }
 
   const handleMoveSession = async (targetProg: Program) => {
     await moveSession(targetProg)
-    setIsSessionOptionsVisible(false)
+    sessionOptionsModal.close()
   }
 
   const renderSession = useCallback(({ item }: { item: Session }) => (
@@ -144,8 +145,8 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
 
       {/* Choix ajout séance : manuel ou IA */}
       <BottomSheet
-        visible={isAddSessionChoiceVisible}
-        onClose={() => setIsAddSessionChoiceVisible(false)}
+        visible={addChoiceModal.isOpen}
+        onClose={addChoiceModal.close}
         title={t.programDetail.addSessionTitle}
       >
         <TouchableOpacity style={styles.sheetOption} onPress={handleAddSessionManual}>
@@ -166,18 +167,18 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
 
       {/* Options Séance BottomSheet */}
       <BottomSheet
-        visible={isSessionOptionsVisible}
-        onClose={() => setIsSessionOptionsVisible(false)}
+        visible={sessionOptionsModal.isOpen}
+        onClose={sessionOptionsModal.close}
         title={selectedSession?.name}
       >
         <TouchableOpacity
           style={styles.sheetOption}
           onPress={() => {
             if (selectedSession) prepareRenameSession(selectedSession)
-            setIsSessionOptionsVisible(false)
+            sessionOptionsModal.close()
             if (renameSessionTimerRef.current) clearTimeout(renameSessionTimerRef.current)
             renameSessionTimerRef.current = setTimeout(() => {
-              setIsSessionModalVisible(true)
+              sessionModal.open()
               renameSessionTimerRef.current = null
             }, 300)
           }}
@@ -204,13 +205,13 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
         <TouchableOpacity
           style={styles.sheetOption}
           onPress={() => {
-            setIsSessionOptionsVisible(false)
+            sessionOptionsModal.close()
             setAlertConfig({
               title: `${t.common.delete} ${selectedSession?.name} ?`,
               message: `${t.common.delete} ?`,
               onConfirm: async () => { await deleteSession() },
             })
-            setIsAlertVisible(true)
+            alertModal.open()
           }}
         >
           <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.lg, width: 30 }} />
@@ -220,14 +221,14 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
 
       {/* Session Modal (Création / Renommage) */}
       <CustomModal
-        visible={isSessionModalVisible}
+        visible={sessionModal.isOpen}
         title={isRenamingSession ? t.programDetail.renameSessionTitle : t.programDetail.addSessionTitle}
-        onClose={() => setIsSessionModalVisible(false)}
+        onClose={sessionModal.close}
         buttons={
           <>
             <TouchableOpacity
               style={[styles.modalButton, { backgroundColor: colors.secondaryButton }]}
-              onPress={() => setIsSessionModalVisible(false)}
+              onPress={sessionModal.close}
             >
               <Text style={styles.buttonText}>{t.common.cancel}</Text>
             </TouchableOpacity>
@@ -252,17 +253,17 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
 
       {/* AlertDialog Suppression */}
       <AlertDialog
-        visible={isAlertVisible}
+        visible={alertModal.isOpen}
         title={alertConfig.title}
         message={alertConfig.message}
         onConfirm={async () => {
           try {
             await alertConfig.onConfirm()
           } finally {
-            setIsAlertVisible(false)
+            alertModal.close()
           }
         }}
-        onCancel={() => setIsAlertVisible(false)}
+        onCancel={alertModal.close}
         confirmText={t.common.delete}
         cancelText={t.common.cancel}
       />

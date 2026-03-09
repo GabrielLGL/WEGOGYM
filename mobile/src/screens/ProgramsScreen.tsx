@@ -19,6 +19,7 @@ import User from '../model/models/User'
 import ProgramSection from '../components/ProgramSection'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
+import { useModalState } from '../hooks/useModalState'
 import { useProgramManager } from '../hooks/useProgramManager'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { importPresetProgram, markOnboardingCompleted } from '../model/utils/databaseHelpers'
@@ -59,13 +60,13 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   } = useProgramManager(haptics.onSuccess)
 
   // --- ÉTATS LOCAUX ---
-  const [isOnboardingVisible, setIsOnboardingVisible] = useState(false)
-  const [isProgramModalVisible, setIsProgramModalVisible] = useState(false)
-  const [isOptionsVisible, setIsOptionsVisible] = useState(false)
-  const [isCreateChoiceVisible, setIsCreateChoiceVisible] = useState(false)
-  const [isAlertVisible, setIsAlertVisible] = useState(false)
+  const onboardingModal = useModalState()
+  const programModal = useModalState()
+  const optionsModal = useModalState()
+  const createChoiceModal = useModalState()
+  const alertModal = useModalState()
   const [alertConfig, setAlertConfig] = useState({ title: '', message: '', onConfirm: async () => {} })
-  const [errorAlertVisible, setErrorAlertVisible] = useState(false)
+  const errorAlert = useModalState()
   const [errorAlertMessage, setErrorAlertMessage] = useState('')
 
   const renameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -78,8 +79,8 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
   // Sync du ref avec l'état courant
   useEffect(() => {
-    backHandlerVisibilityRef.current = { isCreateChoiceVisible, isOptionsVisible }
-  }, [isCreateChoiceVisible, isOptionsVisible])
+    backHandlerVisibilityRef.current = { isCreateChoiceVisible: createChoiceModal.isOpen, isOptionsVisible: optionsModal.isOpen }
+  }, [createChoiceModal.isOpen, optionsModal.isOpen])
 
   // --- GESTION BOUTON RETOUR ANDROID ---
   // Enregistré une seule fois (deps vides) — élimine la race condition
@@ -88,11 +89,11 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
     const backAction = () => {
       const v = backHandlerVisibilityRef.current
       if (v.isCreateChoiceVisible) {
-        setIsCreateChoiceVisible(false)
+        createChoiceModal.close()
         return true
       }
       if (v.isOptionsVisible) {
-        setIsOptionsVisible(false)
+        optionsModal.close()
         return true
       }
       return false
@@ -113,7 +114,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
   useEffect(() => {
     if (programs.length === 0 && user && !user.onboardingCompleted) {
-      const timer = setTimeout(() => setIsOnboardingVisible(true), 400)
+      const timer = setTimeout(() => onboardingModal.open(), 400)
       return () => clearTimeout(timer)
     }
   }, [programs, user])
@@ -122,7 +123,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
     try {
       await importPresetProgram(preset)
       await markOnboardingCompleted()
-      setIsOnboardingVisible(false)
+      onboardingModal.close()
       haptics.onSuccess()
     } catch (error) {
       if (__DEV__) console.error('[ProgramsScreen] Erreur import programme :', error)
@@ -133,10 +134,10 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   const handleSkipOnboarding = async () => {
     try {
       await markOnboardingCompleted()
-      setIsOnboardingVisible(false)
+      onboardingModal.close()
     } catch (error) {
       if (__DEV__) console.error('[ProgramsScreen] handleSkipOnboarding:', error)
-      setIsOnboardingVisible(false)
+      onboardingModal.close()
     }
   }
 
@@ -145,12 +146,12 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   const handleSaveProgram = async () => {
     const success = await saveProgram()
     if (success) {
-      setIsProgramModalVisible(false)
+      programModal.close()
     }
   }
 
   const handleDuplicateProgram = async () => {
-    setIsOptionsVisible(false)
+    optionsModal.close()
     await duplicateProgram()
   }
 
@@ -170,7 +171,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           onOptionsPress={() => {
             haptics.onSelect()
             setSelectedProgram(item)
-            setIsOptionsVisible(true)
+            optionsModal.open()
           }}
         />
       </View>
@@ -194,7 +195,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
               } catch (error) {
                 if (__DEV__) console.error('[ProgramsScreen] Drag-and-drop batch update failed:', error)
                 setErrorAlertMessage(t.programs.reorderError)
-                setErrorAlertVisible(true)
+                errorAlert.open()
               }
             }}
             keyExtractor={i => i.id}
@@ -208,7 +209,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
             style={styles.bigButton}
             onPress={() => {
               haptics.onPress()
-              setIsCreateChoiceVisible(true)
+              createChoiceModal.open()
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -222,18 +223,18 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
         {/* Choix création programme BottomSheet */}
         <BottomSheet
-          visible={isCreateChoiceVisible}
-          onClose={() => setIsCreateChoiceVisible(false)}
+          visible={createChoiceModal.isOpen}
+          onClose={createChoiceModal.close}
           title={t.programs.createLabel}
         >
           <TouchableOpacity
             style={styles.sheetOption}
             onPress={() => {
               haptics.onPress()
-              setIsCreateChoiceVisible(false)
+              createChoiceModal.close()
               setIsRenamingProgram(false)
               setProgramNameInput('')
-              setIsProgramModalVisible(true)
+              programModal.open()
             }}
           >
             <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} />
@@ -243,7 +244,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
             style={styles.sheetOption}
             onPress={() => {
               haptics.onPress()
-              setIsCreateChoiceVisible(false)
+              createChoiceModal.close()
               navigation.navigate('Assistant')
             }}
           >
@@ -254,12 +255,12 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
         {/* Programme Modal (Création / Renommage) */}
         <CustomModal
-          visible={isProgramModalVisible}
+          visible={programModal.isOpen}
           title={isRenamingProgram ? t.programs.renameTitle : t.programs.newTitle}
-          onClose={() => setIsProgramModalVisible(false)}
+          onClose={programModal.close}
           buttons={
             <>
-              <TouchableOpacity style={[styles.modalButton, {backgroundColor: colors.secondaryButton}]} onPress={() => setIsProgramModalVisible(false)}>
+              <TouchableOpacity style={[styles.modalButton, {backgroundColor: colors.secondaryButton}]} onPress={programModal.close}>
                 <Text style={styles.buttonText}>{t.common.cancel}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.modalButton, {backgroundColor: colors.primary}]} onPress={handleSaveProgram}>
@@ -280,45 +281,45 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
         {/* Options Programme BottomSheet */}
         <BottomSheet
-          visible={isOptionsVisible}
-          onClose={() => setIsOptionsVisible(false)}
+          visible={optionsModal.isOpen}
+          onClose={optionsModal.close}
           title={selectedProgram?.name}
         >
-          <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedProgram) prepareRenameProgram(selectedProgram); setIsOptionsVisible(false); if (renameTimerRef.current) clearTimeout(renameTimerRef.current); renameTimerRef.current = setTimeout(() => { setIsProgramModalVisible(true); renameTimerRef.current = null }, 300) }}>
+          <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedProgram) prepareRenameProgram(selectedProgram); optionsModal.close(); if (renameTimerRef.current) clearTimeout(renameTimerRef.current); renameTimerRef.current = setTimeout(() => { programModal.open(); renameTimerRef.current = null }, 300) }}>
             <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.rename}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateProgram}>
             <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.duplicate}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); setAlertConfig({ title: `${t.programs.deleteTitle} ${selectedProgram?.name} ?`, message: t.programs.deleteMessage, onConfirm: async () => { await deleteProgram() } }); setIsAlertVisible(true); }}>
+          <TouchableOpacity style={styles.sheetOption} onPress={() => { optionsModal.close(); setAlertConfig({ title: `${t.programs.deleteTitle} ${selectedProgram?.name} ?`, message: t.programs.deleteMessage, onConfirm: async () => { await deleteProgram() } }); alertModal.open(); }}>
             <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={[styles.sheetOptionText, { color: colors.danger }]}>{t.programs.delete}</Text>
           </TouchableOpacity>
         </BottomSheet>
 
         {/* Alerte Suppression Générique */}
         <AlertDialog
-          visible={isAlertVisible}
+          visible={alertModal.isOpen}
           title={alertConfig.title}
           message={alertConfig.message}
           onConfirm={async () => {
             try {
               await alertConfig.onConfirm()
             } finally {
-              setIsAlertVisible(false)
+              alertModal.close()
             }
           }}
-          onCancel={() => setIsAlertVisible(false)}
+          onCancel={alertModal.close}
           confirmText={t.common.delete}
           cancelText={t.common.cancel}
         />
 
         {/* Alerte Erreur */}
         <AlertDialog
-          visible={errorAlertVisible}
+          visible={errorAlert.isOpen}
           title={t.programs.errorTitle}
           message={errorAlertMessage}
-          onConfirm={() => setErrorAlertVisible(false)}
-          onCancel={() => setErrorAlertVisible(false)}
+          onConfirm={errorAlert.close}
+          onCancel={errorAlert.close}
           confirmText={t.common.ok}
           confirmColor={colors.primary}
           hideCancel
@@ -328,8 +329,8 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
 
       {/* Onboarding premier lancement */}
       <OnboardingSheet
-        visible={isOnboardingVisible}
-        onClose={() => setIsOnboardingVisible(false)}
+        visible={onboardingModal.isOpen}
+        onClose={onboardingModal.close}
         onProgramSelected={handleProgramSelected}
         onSkip={handleSkipOnboarding}
       />

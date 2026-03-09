@@ -44,6 +44,7 @@
 | 2026-03-09 | 20 | 20 | 20 | 15 | 20 | **95/100** | ↓ -5 (1737 tests, cov 82.07%, 6 CRIT + 4 WARN fixés: duplicateSession, CGU version, code mort, i18n BadgeCelebration, ~10 magic numbers restants) |
 | 2026-03-09 | 20 | 20 | 20 | 18 | 20 | **98/100** | ↑ +3 (1737 tests, 9 fixes: soft-delete filters, useDeferredMount DRY, i18n 3 composants, _muscles setter) |
 | 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | ↑ +2 (1737 tests, cov 82.23%, 39 fixes: useMemo useStyles 36 fichiers, i18n badges, deleteAllData reset) |
+| 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 3 /do validés: StatsCalendar refactor, race condition fix, useModalState 8 écrans) |
 
 ---
 

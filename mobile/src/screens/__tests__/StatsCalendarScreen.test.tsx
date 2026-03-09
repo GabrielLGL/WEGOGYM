@@ -12,12 +12,11 @@ jest.mock('../../model/index', () => {
   const mockSessionObj = {
     id: 'session-1',
     name: 'Push Day',
-    _raw: { program_id: 'program-1' },
+    programId: 'program-1',
   }
   const mockProgramObj = {
     id: 'program-1',
     name: 'PPL Push',
-    _raw: {},
   }
 
   const mockCollections: Record<string, unknown[]> = {
@@ -47,7 +46,7 @@ const makeHistory = (id: string, date: number, overrides = {}) =>
     startTime: new Date(date),
     endTime: new Date(date + 3600000),
     deletedAt: null,
-    _raw: { session_id: 'session-1' },
+    sessionId: 'session-1',
     session: {
       fetch: jest.fn().mockResolvedValue({
         name: 'Push Day',

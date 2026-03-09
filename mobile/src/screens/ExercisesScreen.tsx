@@ -95,32 +95,32 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   const infoSheet = useModalState()
   const [infoSheetExercise, setInfoSheetExercise] = useState<Exercise | null>(null)
 
-  const [isOptionsVisible, setIsOptionsVisible] = useState(false)
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
-  const [isAlertVisible, setIsAlertVisible] = useState(false)
-  const [isSearchVisible, setIsSearchVisible] = useState(false)
+  const optionsModal = useModalState()
+  const editModal = useModalState()
+  const alertModal = useModalState()
+  const searchModal = useModalState()
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setIsOptionsVisible(false)
-      setIsEditModalVisible(false)
-      setIsAlertVisible(false)
-      setIsSearchVisible(false)
+      optionsModal.close()
+      editModal.close()
+      alertModal.close()
+      searchModal.close()
       setSearchQuery('')
     })
     return unsubscribe
   }, [navigation])
 
   // --- GESTION BOUTON RETOUR ANDROID ---
-  const isOptionsVisibleRef = useRef(isOptionsVisible)
+  const isOptionsVisibleRef = useRef(optionsModal.isOpen)
   useEffect(() => {
-    isOptionsVisibleRef.current = isOptionsVisible
-  }, [isOptionsVisible])
+    isOptionsVisibleRef.current = optionsModal.isOpen
+  }, [optionsModal.isOpen])
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       if (isOptionsVisibleRef.current) {
-        setIsOptionsVisible(false)
+        optionsModal.close()
         return true // Consomme l'événement
       }
       return false // Laisse le comportement par défaut
@@ -145,24 +145,24 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   const handleUpdateExercise = async () => {
     const success = await updateExercise()
     if (success) {
-      setIsEditModalVisible(false)
-      setIsOptionsVisible(false)
+      editModal.close()
+      optionsModal.close()
     }
   }
 
   const handleDeleteExercise = async () => {
     const success = await deleteExercise()
     if (success) {
-      setIsAlertVisible(false)
-      setIsOptionsVisible(false)
+      alertModal.close()
+      optionsModal.close()
     }
   }
 
   const handleOptionsPress = useCallback((item: Exercise) => {
     haptics.onPress()
     setSelectedExercise(item)
-    setIsOptionsVisible(true)
-  }, [haptics, setSelectedExercise, setIsOptionsVisible])
+    optionsModal.open()
+  }, [haptics, setSelectedExercise, optionsModal])
 
   const handleRowPress = useCallback((item: Exercise) => {
     haptics.onSelect()
@@ -187,11 +187,11 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.headerTopRow}>
-            {!isSearchVisible ? (
+            {!searchModal.isOpen ? (
               <TouchableOpacity
                 onPress={() => {
                   haptics.onSelect()
-                  setIsSearchVisible(true)
+                  searchModal.open()
                 }}
                 style={styles.searchFakeInput}
               >
@@ -212,7 +212,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
                 />
                 <TouchableOpacity
                   onPress={() => {
-                    setIsSearchVisible(false)
+                    searchModal.close()
                     setSearchQuery('')
                   }}
                 >
@@ -273,23 +273,23 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
 
           {/* --- SURCOUCHES (PORTALISÉES) --- */}
 
-          <BottomSheet visible={isOptionsVisible} onClose={() => setIsOptionsVisible(false)} title={selectedExercise?.name}>
+          <BottomSheet visible={optionsModal.isOpen} onClose={optionsModal.close} title={selectedExercise?.name}>
             {selectedExercise?.isCustom && (
-              <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); if (selectedExercise) loadExerciseForEdit(selectedExercise); setIsEditModalVisible(true); }}>
+              <TouchableOpacity style={styles.sheetOption} onPress={() => { optionsModal.close(); if (selectedExercise) loadExerciseForEdit(selectedExercise); editModal.open(); }}>
                 <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.ms }} /><Text style={styles.sheetText}>{t.exercises.editTitle}</Text>
               </TouchableOpacity>
             )}
             {selectedExercise?.isCustom && (
-              <TouchableOpacity style={styles.sheetOption} onPress={() => { setIsOptionsVisible(false); setIsAlertVisible(true); }}>
+              <TouchableOpacity style={styles.sheetOption} onPress={() => { optionsModal.close(); alertModal.open(); }}>
                 <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.ms }} /><Text style={[styles.sheetText, { color: colors.danger }]}>{t.exercises.deleteTitle}</Text>
               </TouchableOpacity>
             )}
           </BottomSheet>
 
-          <CustomModal visible={isEditModalVisible} title={t.exercises.editTitle} onClose={() => setIsEditModalVisible(false)}
+          <CustomModal visible={editModal.isOpen} title={t.exercises.editTitle} onClose={editModal.close}
             buttons={
                 <>
-                <TouchableOpacity style={styles.cancelBtn} onPress={() => setIsEditModalVisible(false)}><Text style={styles.btnText}>{t.common.cancel}</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.cancelBtn} onPress={editModal.close}><Text style={styles.btnText}>{t.common.cancel}</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.confirmBtn} onPress={handleUpdateExercise}><Text style={styles.btnText}>{t.common.save}</Text></TouchableOpacity>
                 </>
             }
@@ -306,11 +306,11 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
           </CustomModal>
 
           <AlertDialog
-            visible={isAlertVisible}
+            visible={alertModal.isOpen}
             title={`${t.common.delete} ${selectedExercise?.name} ?`}
             message={t.exercises.deleteMessage}
             onConfirm={handleDeleteExercise}
-            onCancel={() => setIsAlertVisible(false)}
+            onCancel={alertModal.close}
             confirmText={t.common.delete}
             cancelText={t.common.cancel}
           />
