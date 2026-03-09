@@ -45,6 +45,8 @@
 | 2026-03-09 | 20 | 20 | 20 | 18 | 20 | **98/100** | ↑ +3 (1737 tests, 9 fixes: soft-delete filters, useDeferredMount DRY, i18n 3 composants, _muscles setter) |
 | 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | ↑ +2 (1737 tests, cov 82.23%, 39 fixes: useMemo useStyles 36 fichiers, i18n badges, deleteAllData reset) |
 | 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 3 /do validés: StatsCalendar refactor, race condition fix, useModalState 8 écrans) |
+| 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.59% stmts, verrif clean: 3 WARN fixés, 0 CRIT) |
+| 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.54% stmts, CoachMarks dismissed fix + 4 WARN corrigés) |
 
 ---
 
