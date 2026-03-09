@@ -1,6 +1,8 @@
 import React from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react-native'
 
+import { StatsDurationScreenBase } from '../StatsDurationScreen'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
   PortalProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -22,7 +24,7 @@ jest.mock('react-native-chart-kit', () => {
   const { View, Text, TouchableOpacity } = require('react-native')
   return {
     LineChart: ({ data, onDataPointClick }: {
-      data: { datasets: Array<{ data: number[] }> };
+      data: { datasets: { data: number[] }[] };
       onDataPointClick?: (point: { index: number; value: number; x: number; y: number }) => void
     }) => (
       <View testID="line-chart">
@@ -51,9 +53,6 @@ jest.mock('../../theme/chartConfig', () => ({
     style: { borderRadius: 14 },
   }),
 }))
-
-import { StatsDurationScreenBase } from '../StatsDurationScreen'
-import { database } from '../../model/index'
 
 const makeHistory = (id: string, startMs: number, endMs: number) =>
   ({

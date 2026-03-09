@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react'
 import { database } from '../model'
 import User from '../model/models/User'
 import { type Language, type Translations, translations } from '../i18n'
@@ -41,11 +41,11 @@ export function LanguageProvider({ children, initialLang = 'fr' }: LanguageProvi
     if (!success) setLang(previousLang)   // rollback si DB échoue
   }, [language, persistLanguage])
 
-  const value: LanguageContextValue = {
+  const value = useMemo<LanguageContextValue>(() => ({
     language,
     t: translations[language],
     setLanguage,
-  }
+  }), [language, setLanguage])
 
   return (
     <LanguageContext.Provider value={value}>

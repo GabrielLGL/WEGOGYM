@@ -1,6 +1,8 @@
 import React from 'react'
 import { render } from '@testing-library/react-native'
 
+import { StatsExercisesScreenBase } from '../StatsExercisesScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -11,8 +13,6 @@ jest.mock('expo-haptics', () => ({
 jest.mock('../../model/index', () => ({
   database: { write: jest.fn(), get: jest.fn() },
 }))
-
-import { StatsExercisesScreenBase } from '../StatsExercisesScreen'
 
 const makeHistory = (id: string, date: number) =>
   ({

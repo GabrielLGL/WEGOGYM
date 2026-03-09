@@ -10,6 +10,8 @@ import {
   updateReminders,
 } from '../notificationService'
 
+import * as Notifications from 'expo-notifications'
+
 jest.mock('expo-notifications', () => ({
   AndroidImportance: { HIGH: 5 },
   SchedulableTriggerInputTypes: { TIME_INTERVAL: 'timeInterval', WEEKLY: 'weekly' },
@@ -24,8 +26,6 @@ jest.mock('expo-notifications', () => ({
 jest.mock('react-native', () => ({
   Platform: { OS: 'android' },
 }))
-
-import * as Notifications from 'expo-notifications'
 
 describe('notificationService', () => {
   beforeEach(() => {

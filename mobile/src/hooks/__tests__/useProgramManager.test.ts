@@ -1,4 +1,11 @@
 // Mock the database BEFORE imports to avoid SQLiteAdapter JSI initialization
+import { renderHook, act } from '@testing-library/react-native'
+import { useProgramManager } from '../useProgramManager'
+import { database } from '../../model/index'
+import { getNextPosition } from '../../model/utils/databaseHelpers'
+import { isValidText } from '../../model/utils/validationHelpers'
+import { mockProgram as mockProgramFactory, mockSession as mockSessionFactory } from '../../model/utils/__tests__/testFactories'
+
 jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn(),
@@ -16,46 +23,37 @@ jest.mock('@nozbe/watermelondb', () => ({
   Q: { where: jest.fn().mockReturnValue({}), oneOf: jest.fn().mockReturnValue({}) },
 }))
 
-import { renderHook, act } from '@testing-library/react-native'
-import { useProgramManager } from '../useProgramManager'
-import { database } from '../../model/index'
-import { getNextPosition } from '../../model/utils/databaseHelpers'
-import { isValidText } from '../../model/utils/validationHelpers'
-
 const mockWrite = database.write as jest.Mock
 const mockGet = database.get as jest.Mock
 const mockGetNextPosition = getNextPosition as jest.Mock
 const mockIsValidText = isValidText as jest.Mock
 
-const createMockProgram = (id = 'prog-1', name = 'Program 1') => ({
-  id,
-  name,
-  update: jest.fn().mockImplementation(async (fn: (p: { name: string; position: number }) => void) => {
-    fn({ name: '', position: 0 })
-  }),
-  destroyPermanently: jest.fn().mockResolvedValue(undefined),
-  prepareDestroyPermanently: jest.fn().mockReturnValue({ type: 'destroy', id }),
-  duplicate: jest.fn().mockResolvedValue(undefined),
-  sessions: { fetch: jest.fn().mockResolvedValue([]) },
-})
-
-const createMockSession = (id = 'sess-1', name = 'Session 1', programId = 'prog-1') => {
-  const mockParentProgram = createMockProgram(programId)
-  return {
+const createMockProgram = (id = 'prog-1', name = 'Program 1') =>
+  mockProgramFactory({
     id,
     name,
+    update: jest.fn().mockImplementation(async (fn: (p: { name: string; position: number }) => void) => {
+      fn({ name: '', position: 0 })
+    }),
+    prepareDestroyPermanently: jest.fn().mockReturnValue({ type: 'destroy', id }),
+  })
+
+const createMockSession = (id = 'sess-1', name = 'Session 1', programId = 'prog-1') => {
+  const parentProgram = createMockProgram(programId)
+  return mockSessionFactory({
+    id,
+    name,
+    programId,
     program: {
       id: programId,
-      fetch: jest.fn().mockResolvedValue(mockParentProgram),
+      fetch: jest.fn().mockResolvedValue(parentProgram),
       set: jest.fn(),
     },
     update: jest.fn().mockImplementation(async (fn: (s: { name: string; position: number; program: { set: jest.Mock } }) => void) => {
       fn({ name: '', position: 0, program: { set: jest.fn() } })
     }),
-    destroyPermanently: jest.fn().mockResolvedValue(undefined),
     prepareDestroyPermanently: jest.fn().mockReturnValue({ type: 'destroy', id }),
-    sessionExercises: { fetch: jest.fn().mockResolvedValue([]) },
-  }
+  })
 }
 
 describe('useProgramManager', () => {
@@ -161,7 +159,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.prepareRenameProgram(mockProgram as any)
+        result.current.prepareRenameProgram(mockProgram)
         result.current.setProgramNameInput('Nouveau Nom')
       })
 
@@ -195,7 +193,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.prepareRenameProgram(mockProgram as any)
+        result.current.prepareRenameProgram(mockProgram)
         result.current.setProgramNameInput('Nouveau Nom')
       })
 
@@ -244,7 +242,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedProgram(mockProgram as any)
+        result.current.setSelectedProgram(mockProgram)
       })
 
       let success: boolean
@@ -262,7 +260,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager(onSuccess))
 
       await act(async () => {
-        result.current.setSelectedProgram(mockProgram as any)
+        result.current.setSelectedProgram(mockProgram)
       })
 
       await act(async () => {
@@ -275,11 +273,11 @@ describe('useProgramManager', () => {
 
     it('should return false on error', async () => {
       const mockProgram = createMockProgram()
-      mockProgram.duplicate.mockRejectedValue(new Error('Duplicate failed'))
+      ;(mockProgram.duplicate as jest.Mock).mockRejectedValue(new Error('Duplicate failed'))
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedProgram(mockProgram as any)
+        result.current.setSelectedProgram(mockProgram)
       })
 
       let success: boolean
@@ -310,7 +308,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedProgram(mockProgram as any)
+        result.current.setSelectedProgram(mockProgram)
       })
 
       let success: boolean
@@ -329,7 +327,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedProgram(mockProgram as any)
+        result.current.setSelectedProgram(mockProgram)
       })
 
       await act(async () => {
@@ -341,11 +339,11 @@ describe('useProgramManager', () => {
 
     it('should return false on error', async () => {
       const mockProgram = createMockProgram()
-      mockProgram.sessions.fetch.mockRejectedValue(new Error('Delete failed'))
+      ;(mockProgram.sessions.fetch as jest.Mock).mockRejectedValue(new Error('Delete failed'))
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedProgram(mockProgram as any)
+        result.current.setSelectedProgram(mockProgram)
       })
 
       let success: boolean
@@ -379,7 +377,7 @@ describe('useProgramManager', () => {
 
       await act(async () => {
         result.current.setSessionNameInput('Ma Séance')
-        result.current.setTargetProgram(mockProgram as any)
+        result.current.setTargetProgram(mockProgram)
       })
 
       let success: boolean
@@ -398,7 +396,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.prepareRenameSession(mockSession as any)
+        result.current.prepareRenameSession(mockSession)
         result.current.setSessionNameInput('Nouveau Nom')
       })
 
@@ -419,7 +417,7 @@ describe('useProgramManager', () => {
 
       await act(async () => {
         result.current.setSessionNameInput('Ma Séance')
-        result.current.setTargetProgram(mockProgram as any)
+        result.current.setTargetProgram(mockProgram)
       })
 
       await act(async () => {
@@ -440,7 +438,7 @@ describe('useProgramManager', () => {
 
       await act(async () => {
         result.current.setSessionNameInput('Ma Séance')
-        result.current.setTargetProgram(mockProgram as any)
+        result.current.setTargetProgram(mockProgram)
       })
 
       let success: boolean
@@ -471,7 +469,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       let success: boolean
@@ -501,7 +499,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager(onSuccess))
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       let success: boolean
@@ -521,7 +519,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       let success: boolean
@@ -552,7 +550,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       let success: boolean
@@ -569,11 +567,11 @@ describe('useProgramManager', () => {
 
     it('should return false on error', async () => {
       const mockSession = createMockSession()
-      mockSession.sessionExercises.fetch.mockRejectedValue(new Error('Delete failed'))
+      ;(mockSession.sessionExercises.fetch as jest.Mock).mockRejectedValue(new Error('Delete failed'))
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       let success: boolean
@@ -594,7 +592,7 @@ describe('useProgramManager', () => {
 
       let success: boolean
       await act(async () => {
-        success = await result.current.moveSession(targetProg as any)
+        success = await result.current.moveSession(targetProg)
       })
 
       expect(success!).toBe(false)
@@ -606,12 +604,12 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       let success: boolean
       await act(async () => {
-        success = await result.current.moveSession(targetProg as any)
+        success = await result.current.moveSession(targetProg)
       })
 
       expect(success!).toBe(true)
@@ -627,11 +625,11 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager(onSuccess))
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       await act(async () => {
-        await result.current.moveSession(targetProg as any)
+        await result.current.moveSession(targetProg)
       })
 
       expect(onSuccess).toHaveBeenCalled()
@@ -645,12 +643,12 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       await act(async () => {
-        result.current.setSelectedSession(mockSession as any)
+        result.current.setSelectedSession(mockSession)
       })
 
       let success: boolean
       await act(async () => {
-        success = await result.current.moveSession(targetProg as any)
+        success = await result.current.moveSession(targetProg)
       })
 
       expect(success!).toBe(false)
@@ -665,7 +663,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       act(() => {
-        result.current.prepareRenameProgram(mockProgram as any)
+        result.current.prepareRenameProgram(mockProgram)
       })
 
       expect(result.current.selectedProgram).toBe(mockProgram)
@@ -682,7 +680,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       act(() => {
-        result.current.prepareRenameSession(mockSession as any)
+        result.current.prepareRenameSession(mockSession)
       })
 
       expect(result.current.selectedSession).toBe(mockSession)
@@ -699,7 +697,7 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       act(() => {
-        result.current.prepareRenameProgram(mockProgram as any)
+        result.current.prepareRenameProgram(mockProgram)
       })
 
       act(() => {
@@ -721,8 +719,8 @@ describe('useProgramManager', () => {
       const { result } = renderHook(() => useProgramManager())
 
       act(() => {
-        result.current.prepareRenameSession(mockSession as any)
-        result.current.setTargetProgram(mockProgram as any)
+        result.current.prepareRenameSession(mockSession)
+        result.current.setTargetProgram(mockProgram)
       })
 
       act(() => {

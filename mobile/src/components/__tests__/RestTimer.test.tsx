@@ -2,6 +2,8 @@ import React from 'react'
 import { render, fireEvent, act } from '@testing-library/react-native'
 import RestTimer from '../RestTimer'
 
+import { scheduleRestEndNotification, cancelNotification } from '../../services/notificationService'
+
 // Mock expo-haptics
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
@@ -45,8 +47,6 @@ jest.mock('../../services/notificationService', () => ({
   scheduleRestEndNotification: jest.fn().mockResolvedValue('notif-id-123'),
   cancelNotification: jest.fn().mockResolvedValue(undefined),
 }))
-
-import { scheduleRestEndNotification, cancelNotification } from '../../services/notificationService'
 
 const mockSchedule = scheduleRestEndNotification as jest.Mock
 const mockCancel = cancelNotification as jest.Mock

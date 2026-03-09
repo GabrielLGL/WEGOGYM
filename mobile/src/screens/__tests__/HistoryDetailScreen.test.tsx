@@ -1,5 +1,13 @@
 // Mocks AVANT les imports
 
+import React from 'react'
+import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import type History from '../../model/models/History'
+import type WorkoutSet from '../../model/models/Set'
+import type Session from '../../model/models/Session'
+
+import HistoryDetailScreen from '../HistoryDetailScreen'
+
 const mockGoBack = jest.fn()
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
@@ -68,7 +76,7 @@ jest.mock('@gorhom/portal', () => ({
 
 // Mock withObservables to pass through props AND inject required data
 jest.mock('@nozbe/with-observables', () => (
-  (_keys: string[], mapFn: (props: Record<string, unknown>) => Record<string, unknown>) =>
+  (_keys: string[], _mapFn: (props: Record<string, unknown>) => Record<string, unknown>) =>
     (Component: React.ComponentType<Record<string, unknown>>) => {
       // Return a wrapper that injects mock data based on keys
       const Wrapper = (props: Record<string, unknown>) => {
@@ -114,12 +122,6 @@ jest.mock('../../components/Button', () => ({
     )
   },
 }))
-
-import React from 'react'
-import { render, fireEvent, waitFor } from '@testing-library/react-native'
-import type History from '../../model/models/History'
-import type WorkoutSet from '../../model/models/Set'
-import type Session from '../../model/models/Session'
 
 // Mock data
 const mockHistory = {
@@ -174,8 +176,6 @@ const mockSession = {
   name: 'Push Day',
   observe: jest.fn(),
 } as unknown as Session
-
-import HistoryDetailScreen from '../HistoryDetailScreen'
 
 describe('HistoryDetailScreen', () => {
   beforeEach(() => {

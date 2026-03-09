@@ -462,6 +462,7 @@ export const fr = {
     moveTo: 'Déplacer vers :',
     renameSessionTitle: 'Renommer la séance',
     sessionNamePlaceholder: 'ex : Push ou Pull',
+    noExercises: 'Aucun exercice',
   },
 
   assistant: {
@@ -831,6 +832,12 @@ export const fr = {
     deleteSetMessage: 'Cette action est irréversible.',
     noSets: 'Aucune série',
     bodyweight: 'PC',
+  },
+
+  heatmap: {
+    monthLabels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+    less: 'Moins',
+    more: 'Plus',
   },
 
   charts: {

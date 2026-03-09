@@ -1,4 +1,10 @@
 // Mock the database AVANT tous les imports pour éviter SQLiteAdapter JSI
+import { renderHook, act } from '@testing-library/react-native'
+import { useExerciseManager } from '../useExerciseManager'
+import { database } from '../../model/index'
+import { validateExerciseInput } from '../../model/utils/validationHelpers'
+import Exercise from '../../model/models/Exercise'
+
 jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn(),
@@ -8,12 +14,6 @@ jest.mock('../../model/index', () => ({
 jest.mock('../../model/utils/validationHelpers', () => ({
   validateExerciseInput: jest.fn(),
 }))
-
-import { renderHook, act } from '@testing-library/react-native'
-import { useExerciseManager } from '../useExerciseManager'
-import { database } from '../../model/index'
-import { validateExerciseInput } from '../../model/utils/validationHelpers'
-import Exercise from '../../model/models/Exercise'
 
 const mockWrite = database.write as jest.Mock
 const mockGet = database.get as jest.Mock

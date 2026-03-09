@@ -2,6 +2,16 @@
  * Tests for exerciseCatalog.ts — Supabase REST API service
  */
 
+import {
+  searchCatalogExercises,
+  getCatalogExercise,
+  mapCatalogToLocal,
+  BODY_PART_TO_MUSCLES,
+  TARGET_TO_MUSCLES,
+  EQUIPMENT_TO_LOCAL,
+  CatalogExercise,
+} from '../exerciseCatalog'
+
 jest.mock('expo-constants', () => ({
   expoConfig: {
     extra: {
@@ -14,16 +24,6 @@ jest.mock('expo-constants', () => ({
 // Mock global fetch
 const mockFetch = jest.fn()
 global.fetch = mockFetch
-
-import {
-  searchCatalogExercises,
-  getCatalogExercise,
-  mapCatalogToLocal,
-  BODY_PART_TO_MUSCLES,
-  TARGET_TO_MUSCLES,
-  EQUIPMENT_TO_LOCAL,
-  CatalogExercise,
-} from '../exerciseCatalog'
 
 beforeEach(() => {
   jest.clearAllMocks()

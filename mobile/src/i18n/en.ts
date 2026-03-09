@@ -461,6 +461,7 @@ export const en: typeof fr = {
     moveTo: 'Move to:',
     renameSessionTitle: 'Rename session',
     sessionNamePlaceholder: 'e.g. Push or Pull',
+    noExercises: 'No exercises',
   },
 
   assistant: {
@@ -830,6 +831,12 @@ export const en: typeof fr = {
     deleteSetMessage: 'This action is irreversible.',
     noSets: 'No sets',
     bodyweight: 'BW',
+  },
+
+  heatmap: {
+    monthLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    less: 'Less',
+    more: 'More',
   },
 
   charts: {

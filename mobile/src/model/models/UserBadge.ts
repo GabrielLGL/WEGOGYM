@@ -1,5 +1,5 @@
 import { Model } from '@nozbe/watermelondb'
-import { field, text, date, readonly } from '@nozbe/watermelondb/decorators'
+import { text, date, readonly } from '@nozbe/watermelondb/decorators'
 
 export default class UserBadge extends Model {
   static table = 'user_badges'

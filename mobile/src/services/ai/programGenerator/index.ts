@@ -1,5 +1,5 @@
 import type { Database } from '@nozbe/watermelondb'
-import type { UserProfile, MuscleGroup, PGGeneratedProgram, PGGeneratedSession } from './types'
+import type { UserProfile, PGGeneratedProgram, PGGeneratedSession } from './types'
 import type { GeneratedPlan, GeneratedSession, GeneratedExercise } from '../types'
 import { determineSplit, buildWeeklySchedule } from './splitStrategy'
 import { calcWeeklyVolumeByMuscle, distributeVolumeToSessions } from './volumeCalculator'

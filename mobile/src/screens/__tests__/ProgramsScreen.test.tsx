@@ -1,6 +1,8 @@
 import React from 'react'
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
 
+import { ProgramsContent } from '../ProgramsScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -118,8 +120,6 @@ jest.mock('../../model/utils/databaseHelpers', () => ({
   markOnboardingCompleted: (...args: unknown[]) => mockMarkOnboardingCompleted(...args),
 }))
 
-import { ProgramsContent } from '../ProgramsScreen'
-
 const mockNavigation = {
   navigate: jest.fn(),
   goBack: jest.fn(),
@@ -235,7 +235,7 @@ describe('ProgramsContent', () => {
   })
 
   it('Annuler dans la modale programme la ferme', () => {
-    const { getByText, queryByText } = render(
+    const { getByText } = render(
       <ProgramsContent programs={[]} user={mockUser()} navigation={mockNavigation} />
     )
     fireEvent.press(getByText(/Créer un Programme/))

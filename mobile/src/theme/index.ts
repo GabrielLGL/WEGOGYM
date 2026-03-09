@@ -1,3 +1,5 @@
+import { Platform } from 'react-native'
+
 /**
  * Couleurs centralisées de l'application (dark mode uniquement)
  */
@@ -100,14 +102,6 @@ export const fontSize = {
   title: 26,  // large question/section titles
   jumbo: 48,
 }
-
-/**
- * Couleurs d'intensité pour le calendrier heatmap (cyan neumorphique)
- * Index 0 = repos, 1 = 1 séance, 2 = 2 séances, 3 = 3+ séances
- */
-export const intensityColors = ['#252830', '#004d4a', '#007875', '#00cec9'] as const
-
-import { Platform } from 'react-native'
 
 /**
  * Ombres neumorphiques dark — Platform-aware
@@ -240,23 +234,6 @@ export const neuShadowLight = {
     }),
     borderWidth: 1,
     borderColor: '#c8d0da',
-  },
-}
-
-/**
- * Paramètres numériques pour react-native-shadow-2 (vrai neumorphisme double-ombre)
- * distance : taille du flou SVG, offset : décalage de l'ombre (bas-droite / haut-gauche)
- */
-export const neuShadowParams = {
-  dark: {
-    elevated:   { distance: 14, offset: 10, darkColor: '#060809', lightColor: '#3c4558' },
-    elevatedSm: { distance: 8,  offset: 6,  darkColor: '#060809', lightColor: '#3c4558' },
-    pressed:    { distance: 3,  offset: 2,  darkColor: '#060809', lightColor: '#2a3040' },
-  },
-  light: {
-    elevated:   { distance: 14, offset: 10, darkColor: '#8a9bb0', lightColor: '#ffffff' },
-    elevatedSm: { distance: 8,  offset: 6,  darkColor: '#8a9bb0', lightColor: '#ffffff' },
-    pressed:    { distance: 3,  offset: 2,  darkColor: '#a0aabb', lightColor: '#ffffff' },
   },
 }
 

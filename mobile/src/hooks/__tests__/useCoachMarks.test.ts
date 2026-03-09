@@ -1,15 +1,16 @@
 /**
  * Tests for useCoachMarks hook
  */
+import { renderHook, act } from '@testing-library/react-native'
+import { useCoachMarks } from '../useCoachMarks'
+import { database } from '../../model/index'
+import { mockUser } from '../../model/utils/__tests__/testFactories'
+
 jest.mock('../../model/index', () => ({
   database: {
     write: jest.fn(),
   },
 }))
-
-import { renderHook, act } from '@testing-library/react-native'
-import { useCoachMarks } from '../useCoachMarks'
-import { database } from '../../model/index'
 
 const mockWrite = (database as unknown as { write: jest.Mock }).write
 
@@ -25,19 +26,19 @@ describe('useCoachMarks', () => {
   })
 
   it('shouldShow = false when onboardingCompleted is false', () => {
-    const user = { onboardingCompleted: false, tutorialCompleted: false } as any
+    const user = mockUser({ onboardingCompleted: false, tutorialCompleted: false })
     const { result } = renderHook(() => useCoachMarks(user))
     expect(result.current.shouldShow).toBe(false)
   })
 
   it('shouldShow = false when tutorialCompleted is true', () => {
-    const user = { onboardingCompleted: true, tutorialCompleted: true } as any
+    const user = mockUser({ onboardingCompleted: true, tutorialCompleted: true })
     const { result } = renderHook(() => useCoachMarks(user))
     expect(result.current.shouldShow).toBe(false)
   })
 
   it('shouldShow = true when onboarding done but tutorial not', () => {
-    const user = { onboardingCompleted: true, tutorialCompleted: false } as any
+    const user = mockUser({ onboardingCompleted: true, tutorialCompleted: false })
     const { result } = renderHook(() => useCoachMarks(user))
     expect(result.current.shouldShow).toBe(true)
   })
@@ -54,13 +55,13 @@ describe('useCoachMarks', () => {
 
   it('markCompleted updates user.tutorialCompleted to true', async () => {
     const capturedUpdate: Record<string, unknown> = {}
-    const user = {
+    const user = mockUser({
       onboardingCompleted: true,
       tutorialCompleted: false,
       update: jest.fn().mockImplementation(async (fn: (u: Record<string, unknown>) => void) => {
         fn(capturedUpdate)
       }),
-    } as any
+    })
 
     const { result } = renderHook(() => useCoachMarks(user))
 

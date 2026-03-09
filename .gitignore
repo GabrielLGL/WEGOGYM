@@ -12,6 +12,7 @@ web-build/
 *.mobileprovision
 *.ipa
 *.apk
+*.aab
 
 # Metro
 .metro-health-check*
@@ -38,7 +39,6 @@ yarn-error.log
 
 # Environment
 .env
-.env.local
 .env.*.local
 
 # Testing

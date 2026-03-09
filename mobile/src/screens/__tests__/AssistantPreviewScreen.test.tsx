@@ -3,6 +3,10 @@
  * Plain default export component — no withObservables.
  * ThemeContext mocked globally via moduleNameMapper.
  */
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import AssistantPreviewScreen from '../AssistantPreviewScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -14,10 +18,6 @@ jest.mock('../../model/utils/databaseHelpers', () => ({
   importGeneratedPlan: jest.fn().mockResolvedValue(undefined),
   importGeneratedSession: jest.fn().mockResolvedValue(undefined),
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import AssistantPreviewScreen from '../AssistantPreviewScreen'
 
 const mockNavigate = jest.fn()
 const mockGoBack = jest.fn()

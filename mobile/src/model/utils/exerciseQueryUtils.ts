@@ -2,7 +2,6 @@
  * exerciseQueryUtils.ts — Filtrage/recherche exercices + position
  */
 
-import { Q } from '@nozbe/watermelondb'
 import type { Clause } from '@nozbe/watermelondb/QueryDescription'
 import { database } from '../index'
 import Exercise from '../models/Exercise'

@@ -1,6 +1,8 @@
 import React from 'react'
 import { render } from '@testing-library/react-native'
 
+import { StatsVolumeScreenBase } from '../StatsVolumeScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -15,8 +17,6 @@ jest.mock('../../model/index', () => ({
 jest.mock('react-native-chart-kit', () => ({
   LineChart: 'LineChart',
 }))
-
-import { StatsVolumeScreenBase } from '../StatsVolumeScreen'
 
 const makeHistory = (id: string, date: number) =>
   ({

@@ -1,4 +1,8 @@
 // Mocks AVANT les imports
+import * as FileSystem from 'expo-file-system'
+import { exportAllData, importAllData } from '../exportHelpers'
+import { database } from '../../index'
+
 jest.mock('expo-file-system', () => ({
   documentDirectory: 'file:///test-dir/',
   writeAsStringAsync: jest.fn().mockResolvedValue(undefined),
@@ -30,10 +34,6 @@ jest.mock('../../schema', () => ({
     },
   },
 }))
-
-import * as FileSystem from 'expo-file-system'
-import { exportAllData, importAllData } from '../exportHelpers'
-import { database } from '../../index'
 
 const mockWriteAsStringAsync = FileSystem.writeAsStringAsync as jest.Mock
 const mockReadAsStringAsync = (FileSystem as unknown as { readAsStringAsync: jest.Mock }).readAsStringAsync
@@ -74,7 +74,7 @@ describe('exportHelpers — exportAllData', () => {
 
   it('exporte les metadata avec exportDate, appVersion et schemaVersion', async () => {
     setupDb({})
-    const filePath = await exportAllData()
+    await exportAllData()
 
     const written = mockWriteAsStringAsync.mock.calls[0][1] as string
     const data = JSON.parse(written)
@@ -91,7 +91,7 @@ describe('exportHelpers — exportAllData', () => {
       exercises: [makeRecord('exercises', 'e1')],
     })
 
-    const filePath = await exportAllData()
+    await exportAllData()
     const written = mockWriteAsStringAsync.mock.calls[0][1] as string
     const data = JSON.parse(written)
 
@@ -104,7 +104,7 @@ describe('exportHelpers — exportAllData', () => {
       programs: [makeRecord('programs', 'prog-1', { name: 'PPL' })],
     })
 
-    const filePath = await exportAllData()
+    await exportAllData()
     const written = mockWriteAsStringAsync.mock.calls[0][1] as string
     const data = JSON.parse(written)
 
@@ -118,7 +118,7 @@ describe('exportHelpers — exportAllData', () => {
       users: [makeRecord('users', 'user-1', { ai_api_key: 'secret-key', name: 'Jean' })],
     })
 
-    const filePath = await exportAllData()
+    await exportAllData()
     const written = mockWriteAsStringAsync.mock.calls[0][1] as string
     const data = JSON.parse(written)
 
@@ -131,7 +131,7 @@ describe('exportHelpers — exportAllData', () => {
       exercises: [makeRecord('exercises', 'ex-1', { name: 'Squat', muscles: '["Quadriceps"]' })],
     })
 
-    const filePath = await exportAllData()
+    await exportAllData()
     const written = mockWriteAsStringAsync.mock.calls[0][1] as string
     const data = JSON.parse(written)
 

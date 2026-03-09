@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   View,
   Text,
@@ -33,7 +33,7 @@ import { parseNumericInput } from '../model/utils/databaseHelpers'
 
 type MetricKey = 'weight' | 'waist' | 'hips' | 'arms' | 'chest'
 
-const METRICS: Array<{ key: MetricKey; unit: string }> = [
+const METRICS: { key: MetricKey; unit: string }[] = [
   { key: 'weight', unit: 'kg' },
   { key: 'waist', unit: 'cm' },
   { key: 'hips', unit: 'cm' },

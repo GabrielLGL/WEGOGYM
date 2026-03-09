@@ -54,7 +54,7 @@ describe('HeatmapCalendar', () => {
   it('affiche les labels des deux mois sur données chevauchantes', () => {
     const { getByText } = render(<HeatmapCalendar data={twoMonths} />)
     expect(getByText('Jan')).toBeTruthy()
-    expect(getByText('Fev')).toBeTruthy()
+    expect(getByText('Fév')).toBeTruthy()
   })
 
   it('se rend sans crash avec données count=0 (jours de repos)', () => {

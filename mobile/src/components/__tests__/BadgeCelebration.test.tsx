@@ -2,6 +2,11 @@
  * Tests for BadgeCelebration.tsx — uses BottomSheet + Portal.
  * ThemeContext mocked globally via moduleNameMapper.
  */
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import { BadgeCelebration } from '../BadgeCelebration'
+import type { BadgeDefinition } from '../../model/utils/badgeConstants'
+
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
   PortalProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -14,11 +19,6 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
   NotificationFeedbackType: { Success: 'Success', Error: 'Error' },
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import { BadgeCelebration } from '../BadgeCelebration'
-import type { BadgeDefinition } from '../../model/utils/badgeConstants'
 
 const makeBadge = (overrides: Partial<BadgeDefinition> = {}): BadgeDefinition => ({
   id: 'first_badge',

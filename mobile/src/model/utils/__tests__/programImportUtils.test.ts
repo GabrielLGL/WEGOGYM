@@ -1,6 +1,10 @@
 /**
  * Tests for programImportUtils.ts — DB-dependent, mocked.
  */
+import { importPresetProgram, markOnboardingCompleted } from '../programImportUtils'
+import { database } from '../../index'
+import type { PresetProgram } from '../../onboardingPrograms'
+
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
@@ -8,10 +12,6 @@ jest.mock('../../index', () => ({
     batch: jest.fn(),
   },
 }))
-
-import { importPresetProgram, markOnboardingCompleted } from '../programImportUtils'
-import { database } from '../../index'
-import type { PresetProgram } from '../../onboardingPrograms'
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock
@@ -62,7 +62,6 @@ describe('importPresetProgram', () => {
     setupMocks([{ id: 'e1', name: 'Bench Press' }])
 
     // Need to make prepareCreate chainable
-    const mockBatchCall = jest.fn().mockResolvedValue(undefined)
     mockWrite.mockImplementation(async (cb: () => Promise<unknown>) => {
       await cb()
     })

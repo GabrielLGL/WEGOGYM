@@ -1,6 +1,8 @@
 import React from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react-native'
 
+import { StatsCalendarScreenBase } from '../StatsCalendarScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -37,8 +39,6 @@ jest.mock('../../model/index', () => {
     },
   }
 })
-
-import { StatsCalendarScreenBase } from '../StatsCalendarScreen'
 
 const makeHistory = (id: string, date: number, overrides = {}) =>
   ({

@@ -1,4 +1,12 @@
 // Mocks AVANT les imports
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import { WorkoutExerciseCard } from '../WorkoutExerciseCard'
+import { validateSetInput } from '../../model/utils/validationHelpers'
+import type SessionExercise from '../../model/models/SessionExercise'
+import type Exercise from '../../model/models/Exercise'
+import type { SetInputData, ValidatedSetData } from '../../types/workout'
+
 jest.mock('@nozbe/with-observables', () => (
   (_keys: string[], _fn: () => object) =>
     (Component: React.ComponentType<object>) => Component
@@ -48,14 +56,6 @@ jest.mock('../../components/LastPerformanceBadge', () => {
     LastPerformanceBadge: () => React.createElement(View, null),
   }
 })
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import { WorkoutExerciseCard } from '../WorkoutExerciseCard'
-import { validateSetInput } from '../../model/utils/validationHelpers'
-import type SessionExercise from '../../model/models/SessionExercise'
-import type Exercise from '../../model/models/Exercise'
-import type { SetInputData, ValidatedSetData } from '../../types/workout'
 
 const mockValidateSetInput = validateSetInput as jest.Mock
 

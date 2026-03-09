@@ -51,7 +51,9 @@ export default function AssistantPreviewScreen({ navigation, route }: Props) {
         await importGeneratedSession(plan.sessions[0], targetProgramId)
         navigation.navigate('ProgramDetail', { programId: targetProgramId })
       }
-    } catch {
+    } catch (e) {
+      if (__DEV__) console.error('[AssistantPreview] handleValidate:', e)
+    } finally {
       setIsSaving(false)
     }
   }, [haptics, plan, programName, mode, targetProgramId, navigation])

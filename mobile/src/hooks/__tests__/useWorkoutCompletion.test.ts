@@ -4,6 +4,13 @@
 
 // We need to test the module-level functions and the hook
 
+import { renderHook, act } from '@testing-library/react-native'
+import { useWorkoutCompletion } from '../useWorkoutCompletion'
+import { database } from '../../model/index'
+import { completeWorkoutHistory, buildRecapExercises, getLastSessionVolume } from '../../model/utils/databaseHelpers'
+import { calculateSessionXP, calculateSessionTonnage } from '../../model/utils/gamificationHelpers'
+import { mockUser as mockUserFactory } from '../../model/utils/__tests__/testFactories'
+
 jest.mock('../../model/index', () => ({
   database: {
     get: jest.fn(),
@@ -27,12 +34,6 @@ jest.mock('../../model/utils/gamificationHelpers', () => ({
 jest.mock('../../model/utils/badgeHelpers', () => ({
   checkBadges: jest.fn().mockReturnValue([]),
 }))
-
-import { renderHook, act } from '@testing-library/react-native'
-import { useWorkoutCompletion } from '../useWorkoutCompletion'
-import { database } from '../../model/index'
-import { completeWorkoutHistory, buildRecapExercises, getLastSessionVolume } from '../../model/utils/databaseHelpers'
-import { calculateSessionXP, calculateSessionTonnage } from '../../model/utils/gamificationHelpers'
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock
@@ -72,7 +73,7 @@ beforeEach(() => {
 describe('useWorkoutCompletion', () => {
   it('returns completeWorkout function', () => {
     const params = makeDefaultParams()
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
     expect(typeof result.current.completeWorkout).toBe('function')
   })
 
@@ -80,7 +81,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams({
       startTimestamp: Date.now() - 120000,
     })
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -96,7 +97,7 @@ describe('useWorkoutCompletion', () => {
 
   it('calls completeWorkoutHistory with historyId', async () => {
     const params = makeDefaultParams()
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     await act(async () => {
       await result.current.completeWorkout()
@@ -109,7 +110,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams({
       historyRef: { current: { id: 'h-ref' } },
     })
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     await act(async () => {
       await result.current.completeWorkout()
@@ -119,7 +120,7 @@ describe('useWorkoutCompletion', () => {
   })
 
   it('returns null when isMountedRef is false', async () => {
-    const mockUser = {
+    const testUser = mockUserFactory({
       totalXp: 100,
       totalTonnage: 5000,
       currentStreak: 1,
@@ -129,11 +130,11 @@ describe('useWorkoutCompletion', () => {
       totalPrs: 5,
       level: 2,
       update: jest.fn(),
-    }
+    })
 
     const isMountedRef = { current: true }
     const params = makeDefaultParams({
-      user: mockUser,
+      user: testUser,
       completedSets: 3,
       validatedSets: {
         s1: { reps: 10, weight: 80, isPr: false },
@@ -153,7 +154,7 @@ describe('useWorkoutCompletion', () => {
       }),
     })
 
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -165,7 +166,7 @@ describe('useWorkoutCompletion', () => {
 
   it('skips gamification when user is null', async () => {
     const params = makeDefaultParams({ user: null, completedSets: 5 })
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -177,9 +178,9 @@ describe('useWorkoutCompletion', () => {
   })
 
   it('skips gamification when completedSets is 0', async () => {
-    const mockUser = { totalXp: 0, totalTonnage: 0, level: 1 }
-    const params = makeDefaultParams({ user: mockUser, completedSets: 0 })
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const testUser = mockUserFactory({ totalXp: 0, totalTonnage: 0, level: 1 })
+    const params = makeDefaultParams({ user: testUser, completedSets: 0 })
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -191,7 +192,7 @@ describe('useWorkoutCompletion', () => {
   })
 
   it('runs full gamification path when user and completedSets > 0', async () => {
-    const mockUser = {
+    const testUser = mockUserFactory({
       totalXp: 100,
       totalTonnage: 5000,
       currentStreak: 1,
@@ -201,10 +202,9 @@ describe('useWorkoutCompletion', () => {
       totalPrs: 5,
       level: 2,
       update: jest.fn(),
-    }
+    })
 
     // Setup mock chain for weekSessionCount query + getTotalSessionCount + distinct exercises + badges
-    let callCount = 0
     mockGet.mockImplementation(() => ({
       query: jest.fn().mockReturnValue({
         fetchCount: jest.fn().mockResolvedValue(3),
@@ -216,7 +216,7 @@ describe('useWorkoutCompletion', () => {
     mockWrite.mockImplementation(async (fn: () => Promise<void>) => fn())
 
     const params = makeDefaultParams({
-      user: mockUser,
+      user: testUser,
       completedSets: 5,
       totalSetsTarget: 5,
       totalPrs: 2,
@@ -227,7 +227,7 @@ describe('useWorkoutCompletion', () => {
       totalVolume: 1500,
     })
 
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -240,11 +240,11 @@ describe('useWorkoutCompletion', () => {
     expect(output!.newStreak).toBe(1)
     expect(calculateSessionTonnage).toHaveBeenCalled()
     expect(calculateSessionXP).toHaveBeenCalledWith(2, true)
-    expect(mockUser.update).toHaveBeenCalled()
+    expect(testUser.update).toHaveBeenCalled()
   })
 
   it('handles gamification error gracefully', async () => {
-    const mockUser = {
+    const testUser = mockUserFactory({
       totalXp: 100,
       totalTonnage: 5000,
       currentStreak: 1,
@@ -253,19 +253,19 @@ describe('useWorkoutCompletion', () => {
       lastWorkoutWeek: '2026-W09',
       totalPrs: 5,
       level: 2,
-    }
+    })
 
     ;(calculateSessionTonnage as jest.Mock).mockImplementationOnce(() => {
       throw new Error('gamification error')
     })
 
     const params = makeDefaultParams({
-      user: mockUser,
+      user: testUser,
       completedSets: 3,
       validatedSets: { s1: { reps: 10, weight: 80, isPr: false } },
     })
 
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -281,7 +281,7 @@ describe('useWorkoutCompletion', () => {
     ;(completeWorkoutHistory as jest.Mock).mockRejectedValueOnce(new Error('DB error'))
 
     const params = makeDefaultParams()
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -297,7 +297,7 @@ describe('useWorkoutCompletion', () => {
     ;(buildRecapExercises as jest.Mock).mockRejectedValueOnce(new Error('Recap error'))
 
     const params = makeDefaultParams()
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -312,7 +312,7 @@ describe('useWorkoutCompletion', () => {
     ;(getLastSessionVolume as jest.Mock).mockResolvedValueOnce(800)
 
     const params = makeDefaultParams({ totalVolume: 1000 })
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {
@@ -328,7 +328,7 @@ describe('useWorkoutCompletion', () => {
     ;(getLastSessionVolume as jest.Mock).mockResolvedValueOnce(null)
 
     const params = makeDefaultParams({ totalVolume: 500 })
-    const { result } = renderHook(() => useWorkoutCompletion(params as any))
+    const { result } = renderHook(() => useWorkoutCompletion(params))
 
     let output: any
     await act(async () => {

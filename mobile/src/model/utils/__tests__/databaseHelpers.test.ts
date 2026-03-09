@@ -1,6 +1,4 @@
 // Mock the database to avoid SQLiteAdapter JSI initialization in test environment
-jest.mock('../../index', () => ({ database: { get: jest.fn() } }))
-
 import {
   parseNumericInput,
   parseIntegerInput,
@@ -25,8 +23,10 @@ import {
   getLastSetsForExercises,
 } from '../databaseHelpers'
 import { database } from '../../index'
-import Exercise from '../../models/Exercise'
 import type { PresetProgram } from '../../onboardingPrograms'
+import { mockExercise, mockSet, mockHistory, mockSession } from './testFactories'
+
+jest.mock('../../index', () => ({ database: { get: jest.fn() } }))
 
 const mockGet = database.get as jest.Mock
 
@@ -36,12 +36,7 @@ const createMockExercise = (
   name: string,
   muscles: string[],
   equipment: string
-): Partial<Exercise> => ({
-  id,
-  name,
-  muscles,
-  equipment,
-})
+) => mockExercise({ id, name, muscles, equipment })
 
 describe('databaseHelpers', () => {
   describe('parseNumericInput', () => {
@@ -99,7 +94,7 @@ describe('databaseHelpers', () => {
       createMockExercise('2', 'Curl biceps', ['Biceps'], 'Poids libre'),
       createMockExercise('3', 'Leg press', ['Quadriceps', 'Fessiers'], 'Machine'),
       createMockExercise('4', 'Pompes', ['Pectoraux', 'Triceps'], 'Poids du corps'),
-    ] as Exercise[]
+    ]
 
     it('should return all exercises when no filters applied', () => {
       const filtered = filterExercises(mockExercises)
@@ -141,7 +136,7 @@ describe('databaseHelpers', () => {
       createMockExercise('2', 'Développé militaire', ['Épaules'], 'Poids libre'),
       createMockExercise('3', 'Curl biceps', ['Biceps'], 'Poids libre'),
       createMockExercise('4', 'LEG PRESS', ['Quadriceps'], 'Machine'),
-    ] as Exercise[]
+    ]
 
     it('should return all exercises for empty query', () => {
       expect(searchExercises(mockExercises, '').length).toBe(4)
@@ -178,7 +173,7 @@ describe('databaseHelpers', () => {
       createMockExercise('2', 'Développé incliné', ['Pectoraux'], 'Poids libre'),
       createMockExercise('3', 'Curl biceps', ['Biceps'], 'Poids libre'),
       createMockExercise('4', 'Pompes', ['Pectoraux', 'Triceps'], 'Poids du corps'),
-    ] as Exercise[]
+    ]
 
     it('should return all exercises when no options provided', () => {
       const filtered = filterAndSearchExercises(mockExercises, {})
@@ -479,19 +474,12 @@ describe('databaseHelpers', () => {
   })
 
   describe('buildExerciseStatsFromData', () => {
-    const mkSet = (histId: string, w: number, r: number, order: number) => ({
-      id: `s-${histId}-${order}`,
-      history: { id: histId },
-      weight: w,
-      reps: r,
-      setOrder: order,
-    })
-    const mkHistory = (id: string, startTime: Date, sessId: string) => ({
-      id,
-      startTime,
-      session: { id: sessId },
-    })
-    const mkSession = (id: string, name: string) => ({ id, name })
+    const mkSet = (histId: string, w: number, r: number, order: number) =>
+      mockSet({ id: `s-${histId}-${order}`, historyId: histId, weight: w, reps: r, setOrder: order, history: { id: histId }, exercise: { id: 'exo-1' } })
+    const mkHistory = (id: string, startTime: Date, sessId: string) =>
+      mockHistory({ id, startTime, sessionId: sessId, session: { id: sessId } })
+    const mkSession = (id: string, name: string) =>
+      mockSession({ id, name })
 
     it('should return empty array when sets is empty', () => {
       expect(buildExerciseStatsFromData([], [], [])).toEqual([])
@@ -504,7 +492,7 @@ describe('databaseHelpers', () => {
       const sessions = [mkSession('sess1', 'Push A')]
 
       const stats = buildExerciseStatsFromData(
-        sets as any, histories as any, sessions as any
+        sets, histories, sessions
       )
 
       expect(stats).toHaveLength(1)
@@ -520,7 +508,7 @@ describe('databaseHelpers', () => {
       const histories = [mkHistory('h1', new Date(), 'sess1')]
       const sessions = [mkSession('sess1', 'Leg Day')]
 
-      const stats = buildExerciseStatsFromData(sets as any, histories as any, sessions as any)
+      const stats = buildExerciseStatsFromData(sets, histories, sessions)
 
       expect(stats[0].sets[0].setOrder).toBe(1)
       expect(stats[0].sets[1].setOrder).toBe(2)
@@ -534,7 +522,7 @@ describe('databaseHelpers', () => {
       const histories = [mkHistory('h2', date2, 'sess1'), mkHistory('h1', date1, 'sess1')]
       const sessions = [mkSession('sess1', 'Full Body')]
 
-      const stats = buildExerciseStatsFromData(sets as any, histories as any, sessions as any)
+      const stats = buildExerciseStatsFromData(sets, histories, sessions)
 
       expect(stats).toHaveLength(2)
       expect(stats[0].historyId).toBe('h1') // date1 comes first
@@ -546,7 +534,7 @@ describe('databaseHelpers', () => {
       const histories = [mkHistory('h1', new Date(), 'missing-sess')]
       const sessions: ReturnType<typeof mkSession>[] = []
 
-      const stats = buildExerciseStatsFromData(sets as any, histories as any, sessions as any)
+      const stats = buildExerciseStatsFromData(sets, histories, sessions)
 
       expect(stats[0].sessionName).toBe('')
     })
@@ -556,7 +544,7 @@ describe('databaseHelpers', () => {
       const histories = [mkHistory('h1', new Date(), 'sess1'), mkHistory('h2', new Date(), 'sess1')]
       const sessions = [mkSession('sess1', 'Test')]
 
-      const stats = buildExerciseStatsFromData(sets as any, histories as any, sessions as any)
+      const stats = buildExerciseStatsFromData(sets, histories, sessions)
 
       expect(stats).toHaveLength(1) // h2 has no sets, skipped
       expect(stats[0].historyId).toBe('h1')

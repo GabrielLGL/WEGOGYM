@@ -36,10 +36,11 @@ const SessionPreviewRowInner: React.FC<SessionPreviewRowInnerProps> = ({
   const rowStyles = useRowStyles(colors)
   const haptics = useHaptics()
 
+  const { t } = useLanguage()
   const exercisePreview =
     exercises.length > 0
       ? exercises.slice(0, 3).map(e => e.name).join(', ') + (exercises.length > 3 ? '...' : '')
-      : 'Aucun exercice'
+      : t.programDetail.noExercises
 
   return (
     <View style={rowStyles.container}>

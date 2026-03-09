@@ -35,7 +35,7 @@ export function createGeminiProvider(apiKey: string): AIProvider {
       }
 
       const data = await response.json() as {
-        candidates: Array<{ content: { parts: Array<{ text: string }> } }>
+        candidates: { content: { parts: { text: string }[] } }[]
       }
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
       return parseGeneratedPlan(text)

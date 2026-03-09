@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Animated, BackHandler, Platform } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Animated, BackHandler } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { database } from '../model/index'
 import withObservables from '@nozbe/with-observables'
@@ -144,15 +144,23 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   // --- LOGIQUE MÉTIER ---
 
   const handleSaveProgram = async () => {
-    const success = await saveProgram()
-    if (success) {
-      programModal.close()
+    try {
+      const success = await saveProgram()
+      if (success) {
+        programModal.close()
+      }
+    } catch (e) {
+      if (__DEV__) console.error('[ProgramsScreen] handleSaveProgram:', e)
     }
   }
 
   const handleDuplicateProgram = async () => {
-    optionsModal.close()
-    await duplicateProgram()
+    try {
+      optionsModal.close()
+      await duplicateProgram()
+    } catch (e) {
+      if (__DEV__) console.error('[ProgramsScreen] handleDuplicateProgram:', e)
+    }
   }
 
   const handleProgramPress = useCallback((program: Program) => {

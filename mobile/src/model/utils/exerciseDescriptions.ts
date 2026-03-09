@@ -1,4 +1,4 @@
-import { Database, Q } from '@nozbe/watermelondb'
+import { Database } from '@nozbe/watermelondb'
 import Exercise from '../models/Exercise'
 
 interface ExerciseDescriptionData {

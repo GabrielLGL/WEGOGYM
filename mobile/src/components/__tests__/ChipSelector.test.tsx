@@ -2,6 +2,8 @@ import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
 import { ChipSelector } from '../ChipSelector'
 
+import * as Haptics from 'expo-haptics'
+
 // Mock expo-haptics
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
@@ -16,8 +18,6 @@ jest.mock('expo-haptics', () => ({
     Error: 'Error',
   },
 }))
-
-import * as Haptics from 'expo-haptics'
 
 const ITEMS_FIXTURE = ['Pectoraux', 'Biceps', 'Quadriceps', 'Épaules']
 

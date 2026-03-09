@@ -176,7 +176,7 @@ export function StatsDurationScreenBase({ histories }: Props) {
     } catch {
       // sets inaccessibles
     }
-  }, [expandedIds, exerciseDetails, histories])
+  }, [expandedIds, exerciseDetails, histories, t])
 
   return (
     <ScrollView

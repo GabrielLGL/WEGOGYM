@@ -57,7 +57,7 @@ export function createOpenAIProvider(apiKey: string): AIProvider {
       }
 
       const data = await response.json() as {
-        choices: Array<{ message: { content: string } }>
+        choices: { message: { content: string } }[]
       }
       const text = data.choices?.[0]?.message?.content ?? ''
       return parseGeneratedPlan(text)

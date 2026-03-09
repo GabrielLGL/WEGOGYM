@@ -56,7 +56,7 @@ interface CatalogItemProps {
   colors: ThemeColors
 }
 
-const CatalogItem = memo<CatalogItemProps>(({ item, onPress, colors }) => {
+const CatalogItem = memo<CatalogItemProps>(function CatalogItem({ item, onPress, colors }) {
   const styles = useItemStyles(colors)
   return (
     <TouchableOpacity
@@ -198,7 +198,7 @@ const ExerciseDetail: React.FC<ExerciseDetailProps> = ({
 }
 
 function useDetailStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     container: {
       maxHeight: 500,
     },
@@ -268,7 +268,7 @@ function useDetailStyles(colors: ThemeColors) {
       marginTop: spacing.sm,
       marginBottom: spacing.md,
     },
-  })
+  }), [colors])
 }
 
 // ── Écran principal ───────────────────────────────────────────────────────────
@@ -284,7 +284,7 @@ const ExerciseCatalogScreen: React.FC = () => {
   const [exercises, setExercises] = useState<CatalogExercise[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
+  const [_hasMore, setHasMore] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null)
   const [isImporting, setIsImporting] = useState(false)

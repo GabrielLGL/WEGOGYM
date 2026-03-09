@@ -1,14 +1,14 @@
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import { OnboardingCard } from '../OnboardingCard'
+import * as Haptics from 'expo-haptics'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
   ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
   NotificationFeedbackType: { Success: 'Success', Error: 'Error' },
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import { OnboardingCard } from '../OnboardingCard'
-import * as Haptics from 'expo-haptics'
 
 describe('OnboardingCard', () => {
   beforeEach(() => {

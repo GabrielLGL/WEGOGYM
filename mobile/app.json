@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/kore_icon_512.png",
         "backgroundColor": "#181b21"
       },
       "package": "com.kore.app",

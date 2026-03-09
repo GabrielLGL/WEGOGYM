@@ -1,4 +1,11 @@
 // Mocks AVANT tous les imports
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import SessionItem from '../SessionItem'
+import { useHaptics } from '../../hooks/useHaptics'
+import type Session from '../../model/models/Session'
+import type Exercise from '../../model/models/Exercise'
+
 jest.mock('@nozbe/with-observables', () => (
   (_keys: string[], _fn: () => object) =>
     (Component: React.ComponentType<object>) => Component
@@ -31,13 +38,6 @@ jest.mock('../../hooks/useHaptics', () => ({
     onMajorSuccess: jest.fn(),
   }),
 }))
-
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import SessionItem from '../SessionItem'
-import { useHaptics } from '../../hooks/useHaptics'
-import type Session from '../../model/models/Session'
-import type Exercise from '../../model/models/Exercise'
 
 const mockUseHaptics = useHaptics as jest.Mock
 

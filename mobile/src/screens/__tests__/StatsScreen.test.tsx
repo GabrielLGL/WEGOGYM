@@ -1,6 +1,8 @@
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
 
+import { StatsScreenBase } from '../StatsScreen'
+
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
   notificationAsync: jest.fn(),
@@ -22,9 +24,7 @@ const mockNavigation = {
   setOptions: jest.fn(),
 }
 
-import { StatsScreenBase } from '../StatsScreen'
-
-const makeHistory = (id: string, date: number) =>
+const _makeHistory = (id: string, date: number) =>
   ({
     id,
     startTime: new Date(date),
@@ -32,7 +32,7 @@ const makeHistory = (id: string, date: number) =>
     deletedAt: null,
   }) as never
 
-const makeSet = (id: string, historyId: string, weight: number, reps: number) =>
+const _makeSet = (id: string, historyId: string, weight: number, reps: number) =>
   ({
     id,
     weight,

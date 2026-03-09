@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react'
 import { ThemeMode, ThemeColors, getThemeColors, getThemeNeuShadow } from '../theme'
 import { database } from '../model'
 import User from '../model/models/User'
@@ -52,14 +52,14 @@ export function ThemeProvider({ children, initialMode = 'dark' }: ThemeProviderP
     if (!success) setMode(previousMode)  // rollback si DB échoue
   }, [mode, persistTheme])
 
-  const value: ThemeContextValue = {
+  const value = useMemo<ThemeContextValue>(() => ({
     mode,
     colors: getThemeColors(mode),
     neuShadow: getThemeNeuShadow(mode),
     isDark: mode === 'dark',
     toggleTheme,
     setThemeMode,
-  }
+  }), [mode, toggleTheme, setThemeMode])
 
   return (
     <ThemeContext.Provider value={value}>

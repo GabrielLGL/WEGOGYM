@@ -2,15 +2,15 @@
  * Tests for exerciseQueryUtils.ts
  * getNextPosition requires DB mock; filter/search functions are pure.
  */
+import { filterExercises, searchExercises, filterAndSearchExercises, getNextPosition } from '../exerciseQueryUtils'
+import { database } from '../../index'
+import type Exercise from '../../models/Exercise'
+
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
   },
 }))
-
-import { filterExercises, searchExercises, filterAndSearchExercises, getNextPosition } from '../exerciseQueryUtils'
-import { database } from '../../index'
-import type Exercise from '../../models/Exercise'
 
 const mockGet = database.get as jest.Mock
 

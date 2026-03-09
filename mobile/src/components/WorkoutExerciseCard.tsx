@@ -58,7 +58,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
   repsTarget,
 }: WorkoutSetRowProps) {
   // Hooks AVANT tout return conditionnel (règle des hooks React)
-  const { colors, neuShadow } = useTheme()
+  const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const [localWeight, setLocalWeight] = React.useState(input.weight)
   const [localReps, setLocalReps] = React.useState(input.reps)

@@ -1,5 +1,5 @@
 import { buildPrompt, parseGeneratedPlan } from '../providerUtils'
-import type { AIFormData, DBContext, ExerciseInfo } from '../types'
+import type { AIFormData, DBContext } from '../types'
 
 const makeForm = (overrides: Partial<AIFormData> = {}): AIFormData => ({
   mode: 'program',

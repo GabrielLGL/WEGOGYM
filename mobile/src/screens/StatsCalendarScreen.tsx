@@ -142,7 +142,7 @@ interface MonthNavigatorProps {
 
 function MonthNavigator({
   viewYear, viewMonth, locale, isCurrentMonth,
-  onPrev, onNext, colors, styles, t,
+  onPrev, onNext, _colors, styles, t,
 }: MonthNavigatorProps) {
   return (
     <View style={styles.monthSelector}>

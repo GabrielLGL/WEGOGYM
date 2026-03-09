@@ -91,10 +91,14 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
     const durationSeconds = Math.floor((now - startTimestamp) / 1000)
     const activeHistoryId = historyRef.current?.id || historyId
 
+    let historyCompleted = false
     if (activeHistoryId) {
-      await completeWorkoutHistory(activeHistoryId, now).catch(e => {
+      try {
+        await completeWorkoutHistory(activeHistoryId, now)
+        historyCompleted = true
+      } catch (e) {
         if (__DEV__) console.error('[useWorkoutCompletion] completeWorkoutHistory:', e)
-      })
+      }
     }
 
     let sessionXPGained = 0
@@ -104,7 +108,7 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
     let newBadges: BadgeDefinition[] = []
 
     // ── Gamification ──
-    if (user && completedSets > 0) {
+    if (user && completedSets > 0 && historyCompleted) {
       try {
         const setsArray = Object.values(validatedSets).map(s => ({
           weight: s.weight,
@@ -153,7 +157,8 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
             'INNER JOIN histories h ON s.history_id = h.id WHERE h.deleted_at IS NULL'
           ))
           .unsafeFetchRaw()
-        const distinctExerciseCount = (distinctResult[0] as Record<string, number>)?.count ?? 0
+        const rawCount = (distinctResult[0] as Record<string, unknown> | undefined)
+        const distinctExerciseCount = typeof rawCount?.count === 'number' ? rawCount.count : 0
 
         const existingBadgeRecords = await database.get<UserBadge>('user_badges').query().fetch()
         if (!isMountedRef.current) return null

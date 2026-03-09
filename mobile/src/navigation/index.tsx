@@ -14,6 +14,16 @@ import type { Language } from '../i18n'
 import HomeScreen from '../screens/HomeScreen'
 import OnboardingScreen from '../screens/OnboardingScreen'
 
+import { ErrorBoundary } from '../components/ErrorBoundary'
+import ScreenLoader from '../components/ScreenLoader'
+import { database } from '../model'
+import User from '../model/models/User'
+import { CGU_VERSION } from '../model/constants'
+import { updateReminders } from '../services/notificationService'
+import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
+import type { BadgeDefinition } from '../model/utils/badgeConstants'
+import type { GeneratedPlan } from '../services/ai/types'
+
 // Lazy imports — secondary screens
 const ProgramsScreen = React.lazy(() => import('../screens/ProgramsScreen'))
 const SessionDetailScreen = React.lazy(() => import('../screens/SessionDetailScreen'))
@@ -37,21 +47,11 @@ const ExerciseCatalogScreen = React.lazy(() => import('../screens/ExerciseCatalo
 const HistoryDetailScreen = React.lazy(() => import('../screens/HistoryDetailScreen'))
 const LegalScreen = React.lazy(() => import('../screens/LegalScreen'))
 
-import { ErrorBoundary } from '../components/ErrorBoundary'
-import ScreenLoader from '../components/ScreenLoader'
-import { database } from '../model'
-import User from '../model/models/User'
-import { CGU_VERSION } from '../model/constants'
-
 function isVersionOlder(accepted: string, required: string): boolean {
   const [aMaj, aMin] = accepted.split('.').map(Number)
   const [rMaj, rMin] = required.split('.').map(Number)
   return aMaj < rMaj || (aMaj === rMaj && (aMin ?? 0) < (rMin ?? 0))
 }
-import { updateReminders } from '../services/notificationService'
-import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
-import type { BadgeDefinition } from '../model/utils/badgeConstants'
-import type { GeneratedPlan } from '../services/ai/types'
 
 export type RootStackParamList = {
   Onboarding: { disclaimerOnly?: boolean } | undefined;

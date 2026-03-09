@@ -1,15 +1,15 @@
 /**
  * Tests for workoutSetUtils.ts — DB-dependent functions, mocked.
  */
+import { getMaxWeightForExercise, saveWorkoutSet, deleteWorkoutSet } from '../workoutSetUtils'
+import { database } from '../../index'
+
 jest.mock('../../index', () => ({
   database: {
     get: jest.fn(),
     write: jest.fn(),
   },
 }))
-
-import { getMaxWeightForExercise, saveWorkoutSet, deleteWorkoutSet } from '../workoutSetUtils'
-import { database } from '../../index'
 
 const mockGet = database.get as jest.Mock
 const mockWrite = database.write as jest.Mock

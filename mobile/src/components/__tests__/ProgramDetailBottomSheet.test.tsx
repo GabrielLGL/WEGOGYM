@@ -1,4 +1,13 @@
 // Mocks AVANT tous les imports
+import React from 'react'
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import { render, fireEvent, act } from '@testing-library/react-native'
+import ProgramDetailBottomSheet from '../ProgramDetailBottomSheet'
+import { BottomSheet } from '../BottomSheet'
+import type Program from '../../model/models/Program'
+import type Session from '../../model/models/Session'
+import type Exercise from '../../model/models/Exercise'
+
 jest.mock('@nozbe/with-observables', () => (
   (keys: string[], _fn: () => object) =>
     (Component: React.ComponentType<object>) =>
@@ -32,15 +41,6 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
   NotificationFeedbackType: { Success: 'Success', Error: 'Error' },
 }))
-
-import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
-import { render, fireEvent, act } from '@testing-library/react-native'
-import ProgramDetailBottomSheet from '../ProgramDetailBottomSheet'
-import { BottomSheet } from '../BottomSheet'
-import type Program from '../../model/models/Program'
-import type Session from '../../model/models/Session'
-import type Exercise from '../../model/models/Exercise'
 
 // --- Helpers de fabrication ---
 
@@ -77,7 +77,7 @@ const makeExercise = (id: string, name: string): Exercise =>
 
 interface MockSessionRowProps {
   session: { id: string; name: string }
-  exercises: Array<{ id: string; name: string }>
+  exercises: { id: string; name: string }[]
   onPress: () => void
   onOptionsPress: () => void
 }
@@ -186,7 +186,6 @@ describe('ProgramDetailBottomSheet', () => {
 
   describe('rendu du BottomSheet', () => {
     it('affiche le nom du programme comme titre quand visible=true', () => {
-      const program = makeProgram('prog-1', 'Mon Programme')
       const { getByText } = render(
         <BottomSheet visible={true} onClose={jest.fn()} title="Mon Programme">
           <View />

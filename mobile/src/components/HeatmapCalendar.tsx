@@ -3,16 +3,12 @@ import { View, Text, ScrollView, StyleSheet, type LayoutChangeEvent } from 'reac
 import type { HeatmapDay } from '../model/utils/statsHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 const CELL_SIZE = 12
 const CELL_GAP = 2
 const COL_WIDTH = CELL_SIZE + CELL_GAP
-
-const MONTH_LABELS = [
-  'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun',
-  'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec',
-]
 
 interface HeatmapCalendarProps {
   data: HeatmapDay[]
@@ -41,22 +37,19 @@ function buildColumns(data: HeatmapDay[]): WeekColumn[] {
   return columns
 }
 
-function getMonthLabels(data: HeatmapDay[]): Array<{ label: string; colIndex: number }> {
-  const labels: Array<{ label: string; colIndex: number }> = []
+function getMonthLabels(data: HeatmapDay[], monthNames: string[]): { label: string; colIndex: number }[] {
+  const labels: { label: string; colIndex: number }[] = []
   let currentMonth = -1
   let colIndex = 0
-  let dayInCol = 0
 
   for (const day of data) {
     const month = parseInt(day.date.substring(5, 7), 10) - 1
     if (month !== currentMonth) {
       currentMonth = month
-      labels.push({ label: MONTH_LABELS[month], colIndex })
+      labels.push({ label: monthNames[month], colIndex })
     }
-    dayInCol++
     if (day.dayOfWeek === 6) {
       colIndex++
-      dayInCol = 0
     }
   }
 
@@ -65,11 +58,12 @@ function getMonthLabels(data: HeatmapDay[]): Array<{ label: string; colIndex: nu
 
 const HeatmapCalendarInner: React.FC<HeatmapCalendarProps> = ({ data }) => {
   const colors = useColors()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const scrollRef = useRef<ScrollView>(null)
 
   const columns = useMemo(() => buildColumns(data), [data])
-  const monthLabels = useMemo(() => getMonthLabels(data), [data])
+  const monthLabels = useMemo(() => getMonthLabels(data, t.heatmap.monthLabels), [data, t.heatmap.monthLabels])
 
   const handleLayout = useCallback((_e: LayoutChangeEvent) => {
     scrollRef.current?.scrollToEnd({ animated: false })
@@ -126,14 +120,14 @@ const HeatmapCalendarInner: React.FC<HeatmapCalendarProps> = ({ data }) => {
 
       {/* Legend */}
       <View style={styles.legend}>
-        <Text style={styles.legendText}>Moins</Text>
+        <Text style={styles.legendText}>{t.heatmap.less}</Text>
         {[0, 1, 2, 3].map(level => (
           <View
             key={level}
             style={[styles.legendCell, { backgroundColor: colors.intensityColors[level] }]}
           />
         ))}
-        <Text style={styles.legendText}>Plus</Text>
+        <Text style={styles.legendText}>{t.heatmap.more}</Text>
       </View>
     </View>
   )

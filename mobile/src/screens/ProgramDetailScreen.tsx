@@ -89,9 +89,13 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
   }, [haptics, navigation, program.id])
 
   const handleSaveSession = async () => {
-    const success = await saveSession()
-    if (success) {
-      sessionModal.close()
+    try {
+      const success = await saveSession()
+      if (success) {
+        sessionModal.close()
+      }
+    } catch (e) {
+      if (__DEV__) console.error('[ProgramDetail] handleSaveSession:', e)
     }
   }
 
@@ -102,13 +106,21 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
   }, [haptics, setSelectedSession])
 
   const handleDuplicateSession = async () => {
-    sessionOptionsModal.close()
-    await duplicateSession()
+    try {
+      sessionOptionsModal.close()
+      await duplicateSession()
+    } catch (e) {
+      if (__DEV__) console.error('[ProgramDetail] handleDuplicateSession:', e)
+    }
   }
 
   const handleMoveSession = async (targetProg: Program) => {
-    await moveSession(targetProg)
-    sessionOptionsModal.close()
+    try {
+      await moveSession(targetProg)
+      sessionOptionsModal.close()
+    } catch (e) {
+      if (__DEV__) console.error('[ProgramDetail] handleMoveSession:', e)
+    }
   }
 
   const renderSession = useCallback(({ item }: { item: Session }) => (

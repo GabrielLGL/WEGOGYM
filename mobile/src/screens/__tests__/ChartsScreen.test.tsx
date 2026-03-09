@@ -1,6 +1,9 @@
 import React from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react-native'
 
+import { ChartsContent } from '../ChartsScreen'
+import { buildExerciseStatsFromData } from '../../model/utils/databaseHelpers'
+
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn() }),
 }))
@@ -33,7 +36,7 @@ jest.mock('../../model/index', () => ({
 jest.mock('react-native-chart-kit', () => {
   const { View, Text } = require('react-native')
   return {
-    LineChart: ({ data }: { data: { datasets: Array<{ data: number[] }> } }) => (
+    LineChart: ({ data }: { data: { datasets: { data: number[] }[] } }) => (
       <View testID="line-chart">
         <Text>LineChart-{data.datasets[0].data.length}pts</Text>
       </View>
@@ -55,7 +58,7 @@ jest.mock('@nozbe/with-observables', () => (
 jest.mock('../../model/utils/databaseHelpers', () => ({
   buildExerciseStatsFromData: jest.fn().mockReturnValue([]),
   filterAndSearchExercises: jest.fn(
-    (exercises: Array<{ primaryMuscle: string; equipment: string }>, opts: { muscle?: string | null; equipment?: string | null }) => {
+    (exercises: { primaryMuscle: string; equipment: string }[], opts: { muscle?: string | null; equipment?: string | null }) => {
       let result = exercises
       if (opts.muscle) result = result.filter((e) => e.primaryMuscle === opts.muscle)
       if (opts.equipment) result = result.filter((e) => e.equipment === opts.equipment)
@@ -63,9 +66,6 @@ jest.mock('../../model/utils/databaseHelpers', () => ({
     }
   ),
 }))
-
-import { ChartsContent } from '../ChartsScreen'
-import { buildExerciseStatsFromData } from '../../model/utils/databaseHelpers'
 
 const makeExercise = (id: string, name: string, primaryMuscle: string, equipment: string) =>
   ({
