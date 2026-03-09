@@ -11,9 +11,9 @@ export default function FooterSection() {
           <a href="#pricing" className="py-2 px-1 text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--accent)] transition-colors">
             Tarifs
           </a>
-          <span className="py-2 px-1 text-[var(--text-muted)] text-sm font-medium cursor-default" title="Adresse email bientôt disponible">
-            Contact <span className="text-xs opacity-50">(bientôt)</span>
-          </span>
+          <a href="/contact" className="py-2 px-1 text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--accent)] transition-colors">
+            Contact
+          </a>
           <a href="/privacy" className="py-2 px-1 text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--accent)] transition-colors">
             Confidentialité
           </a>
