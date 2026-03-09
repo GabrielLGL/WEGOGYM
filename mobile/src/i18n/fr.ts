@@ -462,6 +462,7 @@ export const fr = {
     moveTo: 'Déplacer vers :',
     renameSessionTitle: 'Renommer la séance',
     sessionNamePlaceholder: 'ex : Push ou Pull',
+    noExercises: 'Aucun exercice',
   },
 
   assistant: {

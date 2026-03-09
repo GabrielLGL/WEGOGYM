@@ -8,7 +8,8 @@ import Animated, {
   withSpring,
   Easing,
 } from 'react-native-reanimated'
-import { colors, fontSize, spacing } from '../theme'
+import { fontSize, spacing } from '../theme'
+import { useColors } from '../contexts/ThemeContext'
 
 interface AnimatedSplashProps {
   appReady: boolean
@@ -16,6 +17,7 @@ interface AnimatedSplashProps {
 }
 
 export default function AnimatedSplash({ appReady, onFinish }: AnimatedSplashProps) {
+  const colors = useColors()
   const logoOpacity = useSharedValue(0)
   const logoScale = useSharedValue(0.8)
   const textOpacity = useSharedValue(0)

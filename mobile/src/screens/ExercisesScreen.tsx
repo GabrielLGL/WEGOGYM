@@ -143,18 +143,26 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   }, [])
 
   const handleUpdateExercise = async () => {
-    const success = await updateExercise()
-    if (success) {
-      editModal.close()
-      optionsModal.close()
+    try {
+      const success = await updateExercise()
+      if (success) {
+        editModal.close()
+        optionsModal.close()
+      }
+    } catch (e) {
+      if (__DEV__) console.error('[ExercisesScreen] handleUpdateExercise:', e)
     }
   }
 
   const handleDeleteExercise = async () => {
-    const success = await deleteExercise()
-    if (success) {
-      alertModal.close()
-      optionsModal.close()
+    try {
+      const success = await deleteExercise()
+      if (success) {
+        alertModal.close()
+        optionsModal.close()
+      }
+    } catch (e) {
+      if (__DEV__) console.error('[ExercisesScreen] handleDeleteExercise:', e)
     }
   }
 

@@ -144,15 +144,23 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   // --- LOGIQUE MÉTIER ---
 
   const handleSaveProgram = async () => {
-    const success = await saveProgram()
-    if (success) {
-      programModal.close()
+    try {
+      const success = await saveProgram()
+      if (success) {
+        programModal.close()
+      }
+    } catch (e) {
+      if (__DEV__) console.error('[ProgramsScreen] handleSaveProgram:', e)
     }
   }
 
   const handleDuplicateProgram = async () => {
-    optionsModal.close()
-    await duplicateProgram()
+    try {
+      optionsModal.close()
+      await duplicateProgram()
+    } catch (e) {
+      if (__DEV__) console.error('[ProgramsScreen] handleDuplicateProgram:', e)
+    }
   }
 
   const handleProgramPress = useCallback((program: Program) => {

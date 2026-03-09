@@ -48,12 +48,12 @@ export const CustomModal: React.FC<Props> = ({ visible, onClose, title, children
       textAlign: 'center',
     },
     body: {
-      marginBottom: 20,
+      marginBottom: spacing.lg,
     },
     buttonsRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      gap: 10,
+      gap: spacing.ms,
     },
   }), [colors])
 

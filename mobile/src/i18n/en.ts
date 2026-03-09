@@ -461,6 +461,7 @@ export const en: typeof fr = {
     moveTo: 'Move to:',
     renameSessionTitle: 'Rename session',
     sessionNamePlaceholder: 'e.g. Push or Pull',
+    noExercises: 'No exercises',
   },
 
   assistant: {
