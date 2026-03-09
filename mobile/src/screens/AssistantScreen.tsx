@@ -10,6 +10,7 @@ import { database } from '../model'
 import { AlertDialog } from '../components/AlertDialog'
 import { WizardStepContent } from '../components/WizardStepContent'
 import { useAssistantWizard } from '../hooks/useAssistantWizard'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, fontSize, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -155,8 +156,7 @@ const AssistantScreen = ({ navigation, route }: {
   route: RouteProp<RootStackParamList, 'Assistant'>
 }) => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableAssistantContent navigation={navigation} route={route} />}

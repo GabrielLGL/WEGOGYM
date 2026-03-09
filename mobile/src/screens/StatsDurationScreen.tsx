@@ -21,6 +21,7 @@ import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { useHaptics } from '../hooks/useHaptics'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { useLanguage } from '../contexts/LanguageContext'
 
 const PAGE_SIZE = 5
@@ -525,8 +526,7 @@ const ObservableStatsDurationContent = enhance(StatsDurationScreenBase)
 
 const StatsDurationScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableStatsDurationContent />}

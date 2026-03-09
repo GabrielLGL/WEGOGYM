@@ -21,6 +21,7 @@ export const en: typeof fr = {
     validate: 'Validate',
     exitToast: 'Press again to exit',
     removed: 'Removed',
+    notes: 'Notes',
   },
 
   disclaimer: {

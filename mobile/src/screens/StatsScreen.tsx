@@ -22,6 +22,7 @@ import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import type { RootStackParamList } from '../navigation'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
@@ -216,8 +217,7 @@ const ObservableStatsContent = enhance(StatsScreenBase)
 
 const StatsScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableStatsContent />}

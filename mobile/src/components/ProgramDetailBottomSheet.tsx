@@ -10,6 +10,7 @@ import Program from '../model/models/Program'
 import Session from '../model/models/Session'
 import Exercise from '../model/models/Exercise'
 import { useHaptics } from '../hooks/useHaptics'
+import { useLanguage } from '../contexts/LanguageContext'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
@@ -90,13 +91,14 @@ const ProgramDetailContentInner: React.FC<ProgramDetailContentInnerProps> = ({
 }) => {
   const colors = useColors()
   const contentStyles = useContentStyles(colors)
+  const { t } = useLanguage()
 
   return (
     <>
       <ScrollView style={{ maxHeight: screenHeight * 0.55 }} showsVerticalScrollIndicator={false}>
         {sessions.length === 0 ? (
           <Text style={contentStyles.emptyText}>
-            Aucune séance pour l'instant
+            {t.programDetail.noSessions}
           </Text>
         ) : (
           sessions.map(session => (
@@ -110,7 +112,7 @@ const ProgramDetailContentInner: React.FC<ProgramDetailContentInnerProps> = ({
         )}
       </ScrollView>
       <TouchableOpacity style={contentStyles.addButton} onPress={onAddSession}>
-        <Text style={contentStyles.addButtonText}>+ Ajouter une séance</Text>
+        <Text style={contentStyles.addButtonText}>{t.programDetail.addSession}</Text>
       </TouchableOpacity>
     </>
   )

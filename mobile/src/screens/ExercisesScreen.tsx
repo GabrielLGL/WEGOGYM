@@ -22,6 +22,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { useExerciseManager } from '../hooks/useExerciseManager'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { fontSize, spacing, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
@@ -394,11 +395,7 @@ const ExercisesScreen = () => {
   const colors = useColors()
   const navigation = useNavigation<ExercisesNavigation>()
   const haptics = useHaptics()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useDeferredMount()
 
   useLayoutEffect(() => {
     navigation.setOptions({

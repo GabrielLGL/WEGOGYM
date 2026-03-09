@@ -16,6 +16,7 @@ import { CustomModal } from '../components/CustomModal'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
 import { useSessionManager } from '../hooks/useSessionManager'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheet } from '../components/BottomSheet'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -542,8 +543,7 @@ const SessionDetailScreen = ({ route, navigation }: {
   navigation: NativeStackNavigationProp<RootStackParamList>
 }) => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableSessionDetailContent route={route} navigation={navigation} />}

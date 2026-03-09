@@ -29,6 +29,7 @@ import { DEFAULT_REPS, MINUTE_MS } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
 import { useHaptics } from '../hooks/useHaptics'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -557,8 +558,7 @@ export default function HistoryDetailScreen() {
   const route = useRoute<HistoryDetailRouteProp>()
   const { historyId } = route.params
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>

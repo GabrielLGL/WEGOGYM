@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { database } from '../model/index'
 import User from '../model/models/User'
 import { useHaptics } from '../hooks/useHaptics'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { useTheme, useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { Language } from '../i18n'
@@ -386,8 +387,7 @@ const ObservableContent = withObservables([], () => ({
 
 const SettingsScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableContent />}

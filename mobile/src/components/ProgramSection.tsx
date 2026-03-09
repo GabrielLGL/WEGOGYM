@@ -7,6 +7,7 @@ import Program from '../model/models/Program'
 import Session from '../model/models/Session'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 interface Props {
@@ -26,10 +27,11 @@ const ProgramSection: React.FC<Props> = ({
 }) => {
   const { colors, neuShadow } = useTheme()
   const styles = useStyles(colors)
+  const { t } = useLanguage()
   const sessionCount = sessions.length
   const sessionLabel = sessionCount === 0
-    ? 'Aucune séance'
-    : `${sessionCount} séance${sessionCount > 1 ? 's' : ''}`
+    ? t.home.noSessions
+    : `${sessionCount} ${sessionCount > 1 ? t.home.sessions : t.home.session}`
 
   return (
     <View style={[styles.container, neuShadow.elevated]}>

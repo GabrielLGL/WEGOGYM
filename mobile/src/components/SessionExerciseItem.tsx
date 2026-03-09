@@ -10,6 +10,7 @@ import { of } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 interface SessionExerciseItemProps {
@@ -35,6 +36,7 @@ const SessionExerciseItemComponent: React.FC<EnhancedProps> = ({
 }) => {
   const colors = useColors()
   const styles = useStyles(colors)
+  const { t } = useLanguage()
   const [infoVisible, setInfoVisible] = useState(false)
   const haptics = useHaptics()
 
@@ -121,16 +123,16 @@ const SessionExerciseItemComponent: React.FC<EnhancedProps> = ({
             </TouchableOpacity>
           </View>
           <Text style={styles.itemTags}>{exercise.muscles?.join(', ')} • {exercise.equipment}</Text>
-          {exercise.notes ? <Text style={styles.noteIndicator}>Notes</Text> : null}
+          {exercise.notes ? <Text style={styles.noteIndicator}>{t.common.notes}</Text> : null}
           <TouchableOpacity style={styles.targetRow} onPress={() => onEditTargets(item)}>
             <View style={styles.targetBox}>
               <Text style={styles.targetValue}>{item.setsTarget || 0}</Text>
-              <Text style={styles.targetLabel}>Séries</Text>
+              <Text style={styles.targetLabel}>{t.exerciseTargetInputs.sets}</Text>
             </View>
             <Text style={styles.targetSeparator}>×</Text>
             <View style={styles.targetBox}>
               <Text style={styles.targetValue}>{item.repsTarget || '0'}</Text>
-              <Text style={styles.targetLabel}>Reps</Text>
+              <Text style={styles.targetLabel}>{t.exerciseTargetInputs.reps}</Text>
             </View>
           </TouchableOpacity>
         </View>

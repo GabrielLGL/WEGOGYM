@@ -26,6 +26,7 @@ import { AlertDialog } from '../components/AlertDialog'
 import { ChipSelector } from '../components/ChipSelector'
 import { useHaptics } from '../hooks/useHaptics'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { fontSize, borderRadius, spacing } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -380,8 +381,7 @@ const ObservableContent = withObservables([], () => ({
 
 const ChartsScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableContent />}

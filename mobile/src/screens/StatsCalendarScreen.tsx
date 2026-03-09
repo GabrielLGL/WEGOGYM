@@ -14,6 +14,7 @@ import { Q } from '@nozbe/watermelondb'
 import { database } from '../model'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import History from '../model/models/History'
 import type Session from '../model/models/Session'
 import type Program from '../model/models/Program'
@@ -903,8 +904,7 @@ const ObservableStatsCalendarContent = enhance(StatsCalendarScreenBase)
 
 const StatsCalendarScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableStatsCalendarContent />}

@@ -19,6 +19,7 @@ export const fr = {
     validate: 'Valider',
     exitToast: 'Appuyez à nouveau pour quitter',
     removed: 'Retiré',
+    notes: 'Notes',
   },
 
   disclaimer: {

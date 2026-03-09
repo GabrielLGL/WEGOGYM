@@ -28,6 +28,7 @@ import { useWorkoutState } from '../hooks/useWorkoutState'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
 import { useWorkoutCompletion } from '../hooks/useWorkoutCompletion'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
 import { WorkoutSupersetBlock } from '../components/WorkoutSupersetBlock'
@@ -470,8 +471,7 @@ const WorkoutScreen = ({ route, navigation }: {
   navigation: NativeStackNavigationProp<RootStackParamList>
 }) => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableWorkoutContent route={route} navigation={navigation} />}

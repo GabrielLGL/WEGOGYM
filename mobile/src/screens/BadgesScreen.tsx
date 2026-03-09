@@ -15,6 +15,7 @@ import {
   type BadgeDefinition,
 } from '../model/utils/badgeConstants'
 import { BadgeCard } from '../components/BadgeCard'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, fontSize, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -164,8 +165,7 @@ const ObservableBadgesContent = withObservables([], () => ({
 
 const BadgesScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableBadgesContent />}

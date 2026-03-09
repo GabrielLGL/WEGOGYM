@@ -22,6 +22,7 @@ import History from '../model/models/History'
 import Session from '../model/models/Session'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
 import { useHaptics } from '../hooks/useHaptics'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -348,8 +349,7 @@ export default function ExerciseHistoryScreen() {
   const route = useRoute<ExerciseHistoryRouteProp>()
   const { exerciseId } = route.params
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>

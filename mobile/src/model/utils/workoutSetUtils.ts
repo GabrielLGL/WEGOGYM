@@ -20,11 +20,23 @@ export async function getMaxWeightForExercise(
   exerciseId: string,
   excludeHistoryId: string
 ): Promise<number> {
+  // Fetch only histories that are not soft-deleted
+  const activeHistories = await database
+    .get<History>('histories')
+    .query(
+      Q.where('deleted_at', null),
+      Q.where('id', Q.notEq(excludeHistoryId))
+    )
+    .fetch()
+
+  if (activeHistories.length === 0) return 0
+  const activeHistoryIds = activeHistories.map(h => h.id)
+
   const sets = await database
     .get<WorkoutSet>('sets')
     .query(
       Q.where('exercise_id', exerciseId),
-      Q.where('history_id', Q.notEq(excludeHistoryId))
+      Q.where('history_id', Q.oneOf(activeHistoryIds))
     )
     .fetch()
 

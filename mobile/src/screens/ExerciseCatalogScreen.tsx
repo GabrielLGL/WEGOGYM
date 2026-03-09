@@ -386,7 +386,7 @@ const ExerciseCatalogScreen: React.FC = () => {
       await database.write(async () => {
         await database.get<Exercise>('exercises').create((record) => {
           record.name = name
-          record._muscles = JSON.stringify(muscles)
+          record.muscles = muscles
           record.equipment = equipment
           record.description = description
           record.isCustom = false

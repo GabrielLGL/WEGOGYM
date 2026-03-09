@@ -24,6 +24,7 @@ import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { ChipSelector } from '../components/ChipSelector'
 import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 
@@ -294,8 +295,7 @@ const ObservableStatsExercisesContent = enhance(StatsExercisesScreenBase)
 
 const StatsExercisesScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableStatsExercisesContent />}

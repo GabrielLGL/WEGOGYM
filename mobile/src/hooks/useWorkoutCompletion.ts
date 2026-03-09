@@ -148,7 +148,10 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
         const newBestStreak = Math.max(streakResult.bestStreak, streakResult.currentStreak)
 
         const distinctResult = await database.get<SetModel>('sets')
-          .query(Q.unsafeSqlQuery('SELECT COUNT(DISTINCT exercise_id) as count FROM sets'))
+          .query(Q.unsafeSqlQuery(
+            'SELECT COUNT(DISTINCT s.exercise_id) as count FROM sets s ' +
+            'INNER JOIN histories h ON s.history_id = h.id WHERE h.deleted_at IS NULL'
+          ))
           .unsafeFetchRaw()
         const distinctExerciseCount = (distinctResult[0] as Record<string, number>)?.count ?? 0
 

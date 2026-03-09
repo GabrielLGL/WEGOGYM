@@ -21,6 +21,7 @@ import { ChipSelector } from '../components/ChipSelector'
 import { Button } from '../components/Button'
 import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -456,8 +457,7 @@ const ObservableStatsMeasurementsContent = enhance(StatsMeasurementsScreenBase)
 
 const StatsMeasurementsScreen = () => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableStatsMeasurementsContent />}

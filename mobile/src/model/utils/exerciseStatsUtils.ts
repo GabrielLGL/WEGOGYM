@@ -53,10 +53,13 @@ export async function getLastPerformanceForExercise(
   const historyIdSet = new Set(sets.map(s => s.history.id))
   const historyIds = Array.from(historyIdSet)
 
-  // Fetch toutes les Histories via query filtrée (évite RecordNotFound si history supprimée)
+  // Fetch toutes les Histories via query filtrée — exclure les soft-deleted
   const histories = await database
     .get<History>('histories')
-    .query(Q.where('id', Q.oneOf(historyIds)))
+    .query(
+      Q.where('id', Q.oneOf(historyIds)),
+      Q.where('deleted_at', null)
+    )
     .fetch()
 
   if (histories.length === 0) return null

@@ -20,6 +20,7 @@ import ProgramSection from '../components/ProgramSection'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
 import { useProgramManager } from '../hooks/useProgramManager'
+import { useDeferredMount } from '../hooks/useDeferredMount'
 import { importPresetProgram, markOnboardingCompleted } from '../model/utils/databaseHelpers'
 import type { PresetProgram } from '../model/onboardingPrograms'
 import { fontSize, spacing, borderRadius } from '../theme'
@@ -423,8 +424,7 @@ const ObservableProgramsContent = withObservables([], () => ({
 
 const ProgramsScreenWrapper = ({ navigation }: { navigation: NavigationProp }) => {
   const colors = useColors()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {mounted && <ObservableProgramsContent navigation={navigation} />}
