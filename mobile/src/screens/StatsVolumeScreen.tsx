@@ -112,7 +112,7 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
     const muscleSet = new Set<string>()
     exercises
       .filter(e => trainedExerciseIds.has(e.id))
-      .forEach(e => e.muscles?.forEach(m => { if (m.trim()) muscleSet.add(m.trim()) }))
+      .forEach(e => e.muscles.forEach(m => { if (m.trim()) muscleSet.add(m.trim()) }))
     return Array.from(muscleSet).sort()
   }, [sets, exercises])
 

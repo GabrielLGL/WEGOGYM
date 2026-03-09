@@ -156,7 +156,7 @@ export async function recalculateSetPrs(exerciseId: string): Promise<void> {
   const activeSets = allSets.filter(s => activeHistoryIds.has(s.history.id))
 
   // We need history start times for sorting
-  const historyMap = new Map(histories.map(h => [h.id, h.startTime?.getTime() ?? 0]))
+  const historyMap = new Map(histories.map(h => [h.id, h.startTime.getTime()]))
 
   activeSets.sort((a, b) => {
     const timeA = historyMap.get(a.history.id) ?? 0
