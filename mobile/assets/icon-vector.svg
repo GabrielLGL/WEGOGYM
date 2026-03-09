@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="grad" x1="0.7" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#0AC4CC"/>
+      <stop offset="25%" stop-color="#15B8CF"/>
+      <stop offset="50%" stop-color="#3595D8"/>
+      <stop offset="75%" stop-color="#4B7EDE"/>
+      <stop offset="100%" stop-color="#5673E1"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#grad)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Diagonal lines of K -->
+    <line x1="435.5" y1="511.5" x2="587.5" y2="397.5" stroke-width="41"/>
+    <line x1="435.5" y1="511.5" x2="587.5" y2="625.5" stroke-width="41"/>
+    <!-- Corner circles (mid_r=23, stroke=14) -->
+    <circle cx="435.5" cy="397.5" r="23" stroke-width="14"/>
+    <circle cx="587.5" cy="397.5" r="23" stroke-width="14"/>
+    <circle cx="435.5" cy="625.5" r="23" stroke-width="14"/>
+    <circle cx="587.5" cy="625.5" r="23" stroke-width="14"/>
+    <!-- Center circle (mid_r=29.5, stroke=11) -->
+    <circle cx="435.5" cy="511.5" r="29.5" stroke-width="11"/>
+  </g>
+  <!-- Fill circle holes with dark -->
+  <g fill="#121212">
+    <circle cx="435.5" cy="397.5" r="16"/>
+    <circle cx="587.5" cy="397.5" r="16"/>
+    <circle cx="435.5" cy="511.5" r="24"/>
+    <circle cx="435.5" cy="625.5" r="16"/>
+    <circle cx="587.5" cy="625.5" r="16"/>
+  </g>
+</svg>
