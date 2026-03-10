@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/kore_icon_512.png",
+        "foregroundImage": "./assets/kore_adaptive_fg.png",
         "backgroundColor": "#181b21"
       },
       "package": "net.koreapp.mobile",
