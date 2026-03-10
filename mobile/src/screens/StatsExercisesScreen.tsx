@@ -38,6 +38,7 @@ export function StatsExercisesScreenBase({ sets, exercises, histories }: Props) 
   const colors = useColors()
   const { t } = useLanguage()
   const styles = useStyles(colors)
+  const unit = t.statsMeasurements.weightUnit
   const {
     searchQuery,
     setSearchQuery,
@@ -139,9 +140,9 @@ export function StatsExercisesScreenBase({ sets, exercises, histories }: Props) 
                   </View>
                   <View style={styles.prRight}>
                     <Text style={styles.prValue}>
-                      {t.statsExercises.prValue.replace('{weight}', String(pr.weight)).replace('{reps}', String(pr.reps))}
+                      {t.statsExercises.prValue.replace('{weight}', String(pr.weight)).replace('{unit}', unit).replace('{reps}', String(pr.reps))}
                     </Text>
-                    <Text style={styles.prOrm}>{t.statsExercises.prOrm.replace('{orm}', String(pr.orm1))}</Text>
+                    <Text style={styles.prOrm}>{t.statsExercises.prOrm.replace('{orm}', String(pr.orm1)).replace('{unit}', unit)}</Text>
                   </View>
                 </View>
               ))}
@@ -287,10 +288,16 @@ function useStyles(colors: ThemeColors) {
 
 const enhance = withObservables([], () => ({
   sets: database.get<WorkoutSet>('sets').query(
-    Q.on('histories', Q.where('deleted_at', null)),
+    Q.on('histories', Q.and(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )),
   ).observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
-  histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
+  histories: database.get<History>('histories').query(
+    Q.where('deleted_at', null),
+    Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+  ).observe(),
 }))
 
 const ObservableStatsExercisesContent = enhance(StatsExercisesScreenBase)

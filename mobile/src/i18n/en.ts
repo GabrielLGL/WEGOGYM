@@ -743,6 +743,8 @@ export const en: typeof fr = {
     hipsAbbr: 'H',
     armsAbbr: 'A',
     chestAbbr: 'C',
+    weightUnit: 'kg',
+    lengthUnit: 'cm',
   },
 
   statsRepartition: {
@@ -841,7 +843,7 @@ export const en: typeof fr = {
   },
 
   charts: {
-    setDetail: 'Set {order}: {weight} kg × {reps} reps',
+    setDetail: 'Set {order}: {weight} {unit} × {reps} reps',
     emptySelectExercise: 'Select an exercise to get started.',
     emptyProgression: 'Log at least one more session to see your progress.',
     deleteSessionTitle: 'Delete this session?',
@@ -868,8 +870,8 @@ export const en: typeof fr = {
     noRecords: 'No records logged yet.',
     mostPracticed: 'Most practiced exercises',
     noSessions: 'No sessions logged yet.',
-    prValue: '{weight} kg × {reps}',
-    prOrm: '→ 1RM ~{orm} kg',
+    prValue: '{weight} {unit} × {reps}',
+    prOrm: '→ 1RM ~{orm} {unit}',
     freqCount: '{count} times',
   },
 

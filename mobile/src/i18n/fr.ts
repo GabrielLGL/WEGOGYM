@@ -744,6 +744,8 @@ export const fr = {
     hipsAbbr: 'H',
     armsAbbr: 'B',
     chestAbbr: 'P',
+    weightUnit: 'kg',
+    lengthUnit: 'cm',
   },
 
   statsRepartition: {
@@ -842,7 +844,7 @@ export const fr = {
   },
 
   charts: {
-    setDetail: 'Série {order} : {weight} kg × {reps} reps',
+    setDetail: 'Série {order} : {weight} {unit} × {reps} reps',
     emptySelectExercise: 'Sélectionnez un exercice pour commencer.',
     emptyProgression: 'Enregistrez au moins une autre session pour voir votre progression.',
     deleteSessionTitle: 'Supprimer cette séance ?',
@@ -869,8 +871,8 @@ export const fr = {
     noRecords: "Aucun record enregistré pour l'instant.",
     mostPracticed: 'Exercices les plus pratiqués',
     noSessions: "Aucune séance enregistrée pour l'instant.",
-    prValue: '{weight} kg × {reps}',
-    prOrm: '→ 1RM ~{orm} kg',
+    prValue: '{weight} {unit} × {reps}',
+    prOrm: '→ 1RM ~{orm} {unit}',
     freqCount: '{count} fois',
   },
 

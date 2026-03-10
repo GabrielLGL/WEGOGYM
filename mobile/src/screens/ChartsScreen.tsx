@@ -53,12 +53,14 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
   sessions,
 }) => {
   const colors = useColors()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { width: screenWidth } = useWindowDimensions()
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const alertModal = useModalState()
+  const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US'
+  const unit = t.statsMeasurements.weightUnit
   const [selectedStat, setSelectedStat] = useState<ExerciseSessionStat | null>(null)
 
   const chartConfig = createChartConfig({ decimalPlaces: 1, showDots: true, colors })
@@ -74,7 +76,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
     if (chartStats.length < 2) return null
     return {
       labels: chartStats.map(s =>
-        s.startTime.toLocaleDateString([], { day: '2-digit', month: '2-digit' })
+        s.startTime.toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' })
       ),
       datasets: [{ data: chartStats.map(s => s.maxWeight) }],
     }
@@ -111,10 +113,10 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
     <View style={styles.logRow}>
       <View style={styles.logInfo}>
         <Text style={styles.logMainText}>{item.sessionName}</Text>
-        <Text style={styles.logDate}>{item.startTime.toLocaleDateString()}</Text>
+        <Text style={styles.logDate}>{item.startTime.toLocaleDateString(dateLocale)}</Text>
         {item.sets.map((s, idx) => (
           <Text key={idx} style={styles.setDetailText}>
-            {t.charts.setDetail.replace('{order}', String(s.setOrder)).replace('{weight}', String(s.weight)).replace('{reps}', String(s.reps))}
+            {t.charts.setDetail.replace('{order}', String(s.setOrder)).replace('{weight}', String(s.weight)).replace('{unit}', unit).replace('{reps}', String(s.reps))}
           </Text>
         ))}
       </View>
@@ -142,7 +144,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         </TouchableOpacity>
       </View>
     </View>
-  ), [styles, colors, haptics, navigation, t, alertModal, setSelectedStat])
+  ), [styles, colors, haptics, navigation, t, alertModal, setSelectedStat, dateLocale, unit])
 
   return (
     <View style={styles.statsContainer}>
@@ -185,7 +187,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         title={t.charts.deleteSessionTitle}
         message={
           selectedStat
-            ? `${selectedStat.sessionName} — ${selectedStat.startTime.toLocaleDateString()}`
+            ? `${selectedStat.sessionName} — ${selectedStat.startTime.toLocaleDateString(dateLocale)}`
             : ''
         }
         onConfirm={handleDeleteStat}
