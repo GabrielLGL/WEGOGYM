@@ -72,7 +72,7 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
   const handleAddSession = useCallback(() => {
     haptics.onPress()
     addChoiceModal.open()
-  }, [haptics])
+  }, [haptics, addChoiceModal])
 
   const handleAddSessionManual = useCallback(() => {
     addChoiceModal.close()
@@ -80,15 +80,15 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
     setIsRenamingSession(false)
     setSessionNameInput('')
     sessionModal.open()
-  }, [program, setTargetProgram, setIsRenamingSession, setSessionNameInput])
+  }, [program, setTargetProgram, setIsRenamingSession, setSessionNameInput, addChoiceModal, sessionModal])
 
   const handleAddSessionAI = useCallback(() => {
     haptics.onPress()
     addChoiceModal.close()
     navigation.navigate('Assistant', { sessionMode: { targetProgramId: program.id } })
-  }, [haptics, navigation, program.id])
+  }, [haptics, navigation, program.id, addChoiceModal])
 
-  const handleSaveSession = async () => {
+  const handleSaveSession = useCallback(async () => {
     try {
       const success = await saveSession()
       if (success) {
@@ -97,31 +97,31 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
     } catch (e) {
       if (__DEV__) console.error('[ProgramDetail] handleSaveSession:', e)
     }
-  }
+  }, [saveSession, sessionModal])
 
   const handleSessionOptions = useCallback((session: Session) => {
     haptics.onSelect()
     setSelectedSession(session)
     sessionOptionsModal.open()
-  }, [haptics, setSelectedSession])
+  }, [haptics, setSelectedSession, sessionOptionsModal])
 
-  const handleDuplicateSession = async () => {
+  const handleDuplicateSession = useCallback(async () => {
     try {
       sessionOptionsModal.close()
       await duplicateSession()
     } catch (e) {
       if (__DEV__) console.error('[ProgramDetail] handleDuplicateSession:', e)
     }
-  }
+  }, [sessionOptionsModal, duplicateSession])
 
-  const handleMoveSession = async (targetProg: Program) => {
+  const handleMoveSession = useCallback(async (targetProg: Program) => {
     try {
       await moveSession(targetProg)
       sessionOptionsModal.close()
     } catch (e) {
       if (__DEV__) console.error('[ProgramDetail] handleMoveSession:', e)
     }
-  }
+  }, [moveSession, sessionOptionsModal])
 
   const renderSession = useCallback(({ item }: { item: Session }) => (
     <SessionPreviewRow

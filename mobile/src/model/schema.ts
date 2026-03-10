@@ -1,3 +1,23 @@
+/**
+ * schema.ts — Schéma de la base de données WatermelonDB (SQLite)
+ *
+ * Version actuelle : 33
+ *
+ * Tables et relations principales :
+ * - programs          : Programmes d'entraînement (nom, position, équipement)
+ * - sessions          : Séances appartenant à un programme (program_id)
+ * - session_exercises : Exercices d'une séance avec cibles (sets, reps, poids, repos, superset)
+ * - exercises         : Catalogue d'exercices (nom, muscles, équipement, isCustom)
+ * - histories         : Séances réalisées — soft-delete via deleted_at (start_time, end_time)
+ * - sets              : Séries réelles effectuées (poids, reps, PR détecté)
+ * - performance_logs  : Historique des cibles (pour calculer les charges via l'IA)
+ * - users             : Préférences + gamification (XP, niveau, streak, thème, langue)
+ * - user_badges       : Badges débloqués par l'utilisateur
+ * - body_measurements : Mensurations corporelles (poids, tour de taille, etc.)
+ *
+ * IMPORTANT : Chaque @field/@text/@date dans un modèle DOIT avoir sa colonne ici et vice versa.
+ */
+
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({

@@ -8,7 +8,14 @@ import { isValidText } from '../model/utils/validationHelpers'
 import { getNextPosition } from '../model/utils/databaseHelpers'
 
 /**
- * useProgramManager - Hook pour gérer les opérations CRUD sur les programmes et sessions
+ * useProgramManager — Hook pour gérer les opérations CRUD sur les programmes et sessions
+ *
+ * Encapsule : création, renommage, duplication, suppression de programmes et sessions.
+ * La duplication copie toutes les sessions, exercices et métadonnées (y compris les supersets
+ * avec de nouveaux IDs pour éviter les conflits).
+ * La suppression cascade : programme → sessions → session_exercises.
+ *
+ * Utilisé dans : ProgramsScreen, ProgramDetailScreen
  */
 export function useProgramManager(onSuccess?: () => void) {
   // --- PROGRAM STATES ---
@@ -66,6 +73,7 @@ export function useProgramManager(onSuccess?: () => void) {
     }
   }, [selectedProgram, onSuccess])
 
+  /** Suppression en cascade : programme + toutes ses sessions + tous ses session_exercises */
   const deleteProgram = useCallback(async (): Promise<boolean> => {
     if (!selectedProgram) return false
 
@@ -125,6 +133,7 @@ export function useProgramManager(onSuccess?: () => void) {
     }
   }, [sessionNameInput, isRenamingSession, selectedSession, targetProgram, onSuccess])
 
+  /** Duplique une session avec tous ses exercices (copie complète incluant supersets, notes, rest time) */
   const duplicateSession = useCallback(async (): Promise<boolean> => {
     if (!selectedSession) return false
 

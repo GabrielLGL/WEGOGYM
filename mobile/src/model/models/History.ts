@@ -1,3 +1,15 @@
+/**
+ * History — Enregistrement d'une séance réalisée
+ *
+ * Pattern soft-delete : deletedAt !== null → séance "supprimée" (masquée des stats
+ * et du calendrier, mais conservée en DB pour permettre une restauration future).
+ *
+ * Relation : History (N:1) → Session, History (1:N) → Set
+ * - startTime : début de la séance (set au mount de WorkoutScreen)
+ * - endTime   : fin de la séance (set par completeWorkoutHistory, null si en cours)
+ * - deletedAt : null = active, Date = soft-deleted
+ */
+
 import { Model, Query, Relation } from '@nozbe/watermelondb'
 import { field, date, text, relation, children, readonly } from '@nozbe/watermelondb/decorators'
 import type Session from './Session'

@@ -1,3 +1,21 @@
+/**
+ * navigation/index.tsx — Configuration de la navigation et providers racine
+ *
+ * Architecture :
+ * - PortalProvider (pour AlertDialog/BottomSheet sans Modal natif)
+ * - ThemeProvider (dark/light mode, persisté dans users.theme_mode)
+ * - LanguageProvider (FR/EN, persisté dans users.language_mode)
+ * - NavigationContainer + Native Stack Navigator
+ *
+ * Écrans chargés en lazy (React.lazy + Suspense) sauf HomeScreen et OnboardingScreen
+ * qui sont critiques au démarrage.
+ *
+ * Flow initial :
+ * 1. Lecture du User en DB (ou création si premier lancement)
+ * 2. Vérification acceptation CGU (version) → Onboarding si nécessaire
+ * 3. Navigation vers Home avec les providers initialisés
+ */
+
 import React, { Suspense, useEffect, useRef, useState } from 'react'
 import { NavigationContainer, DarkTheme, NavigationContainerRefWithCurrent } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'

@@ -1,3 +1,13 @@
+/**
+ * statsMuscle.ts — Agrégation de la répartition musculaire
+ *
+ * Calcule la distribution du volume (poids × reps) par groupe musculaire,
+ * le nombre de séries par muscle pour la semaine en cours, et les graphiques
+ * hebdomadaires/mensuels de séries (avec pagination et filtre par muscle).
+ *
+ * Toutes les fonctions excluent les séances soft-deleted (deletedAt !== null).
+ */
+
 // ─── Stats — Muscle Repartition & Sets per Muscle ─────────────────────────────
 
 import type History from '../models/History'
@@ -7,6 +17,7 @@ import type { StatsPeriod, StatsContext, MuscleRepartitionEntry, MuscleWeekEntry
 import { getPeriodStart } from './statsDateUtils'
 import { WEEK_MS, MUSCLE_TOP_N, MUSCLE_WEEK_CHART_LIMIT, MONTHLY_CHART_MAX_MONTHS } from '../constants'
 
+/** Retourne le timestamp (ms) du lundi 00:00:00 de la semaine en cours */
 export function getMondayOfCurrentWeek(): number {
   const now = new Date()
   const day = now.getDay() // 0=dim, 1=lun, ..., 6=sam
@@ -17,6 +28,12 @@ export function getMondayOfCurrentWeek(): number {
   return monday.getTime()
 }
 
+/**
+ * Calcule la répartition du volume (poids × reps) par muscle sur une période donnée.
+ * Retourne les top 7 muscles + un agrégat "Autres", avec le pourcentage de chacun.
+ * Le volume est réparti entre tous les muscles de chaque exercice (un set de bench press
+ * contribue au volume Pecs, Épaules et Triceps).
+ */
 export function computeMuscleRepartition(
   sets: WorkoutSet[],
   exercises: Exercise[],
@@ -62,6 +79,10 @@ export function computeMuscleRepartition(
   }))
 }
 
+/**
+ * Compte le nombre de séries par muscle pour la semaine en cours (lundi → dimanche).
+ * Retourne les muscles triés par nombre de séries décroissant, limité à MUSCLE_WEEK_CHART_LIMIT.
+ */
 export function computeSetsPerMuscleWeek(
   sets: WorkoutSet[],
   exercises: Exercise[],
