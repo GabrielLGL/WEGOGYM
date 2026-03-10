@@ -5,7 +5,7 @@
 // We need to test the module-level functions and the hook
 
 import { renderHook, act } from '@testing-library/react-native'
-import { useWorkoutCompletion } from '../useWorkoutCompletion'
+import { useWorkoutCompletion, WorkoutCompletionResult } from '../useWorkoutCompletion'
 import { database } from '../../model/index'
 import { completeWorkoutHistory, buildRecapExercises, getLastSessionVolume } from '../../model/utils/databaseHelpers'
 import { calculateSessionXP, calculateSessionTonnage } from '../../model/utils/gamificationHelpers'
@@ -83,7 +83,7 @@ describe('useWorkoutCompletion', () => {
     })
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -156,7 +156,7 @@ describe('useWorkoutCompletion', () => {
 
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -168,7 +168,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams({ user: null, completedSets: 5 })
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -182,7 +182,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams({ user: testUser, completedSets: 0 })
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -229,7 +229,7 @@ describe('useWorkoutCompletion', () => {
 
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -267,7 +267,7 @@ describe('useWorkoutCompletion', () => {
 
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -283,7 +283,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams()
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -299,7 +299,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams()
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -314,7 +314,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams({ totalVolume: 1000 })
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })
@@ -330,7 +330,7 @@ describe('useWorkoutCompletion', () => {
     const params = makeDefaultParams({ totalVolume: 500 })
     const { result } = renderHook(() => useWorkoutCompletion(params))
 
-    let output: any
+    let output: WorkoutCompletionResult | null | undefined
     await act(async () => {
       output = await result.current.completeWorkout()
     })

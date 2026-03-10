@@ -211,10 +211,8 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
         }
       })
 
-      // Recalculate PRs OUTSIDE of database.write()
-      for (const exId of affectedExerciseIds) {
-        await recalculateSetPrs(exId)
-      }
+      // Recalculate PRs OUTSIDE of database.write() — concurrent (each targets different exercise)
+      await Promise.all([...affectedExerciseIds].map(exId => recalculateSetPrs(exId)))
 
       haptics.onSuccess()
     } catch (e) {
