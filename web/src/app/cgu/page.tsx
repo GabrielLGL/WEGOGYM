@@ -7,6 +7,9 @@ import KoreLogo from "@/components/KoreLogo";
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation — Kore",
   description: "Conditions générales d'utilisation de l'application Kore — suivi de musculation.",
+  alternates: {
+    canonical: "/cgu",
+  },
 };
 
 export default function CGUPage() {

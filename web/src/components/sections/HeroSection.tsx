@@ -90,7 +90,8 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
 
         {/* Title */}
         <h1 className="hero-fade text-[clamp(2.5rem,8vw,5rem)] font-black leading-[1.1] tracking-tight mb-5">
-          <span className="shimmer-text block">FORGE TON</span>
+          <span className="sr-only">Kore — Application de musculation gratuite et tracker d&apos;entraînement offline pour Android</span>
+          <span className="shimmer-text block" aria-hidden="true">FORGE TON</span>
           <span className="block">
             <span
               className="shimmer-text"
@@ -119,8 +120,7 @@ export default function HeroSection({ subscriberCount }: HeroSectionProps) {
 
         {/* Subtitle */}
         <p className="hero-fade text-lg sm:text-xl text-[var(--text-muted)] max-w-[600px] mb-8 font-light">
-          Ton tracker de musculation 100% offline. Suis tes programmes, enregistre tes
-          performances et progresse séance après séance.
+          L&apos;application de musculation gratuite et 100% offline. Crée tes programmes, enregistre chaque série et progresse séance après séance — sans connexion.
         </p>
 
         {/* Stats row */}

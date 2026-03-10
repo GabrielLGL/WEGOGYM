@@ -19,19 +19,22 @@ const SITE_URL =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Kore — Ton coach muscu dans ta poche",
+  title: "Kore — Application de musculation gratuite | Tracker offline Android",
   description:
-    "Suis tes programmes, enregistre tes performances et progresse séance après séance. Application de musculation 100% offline, rapide et intuitive.",
+    "Kore — Application de musculation gratuite et 100% offline pour Android. Crée tes programmes, suis tes performances et progresse séance après séance. Tracker de musculation rapide et intuitif.",
   keywords: [
-    "musculation",
-    "fitness",
-    "programme musculation",
-    "suivi entraînement",
-    "gym tracker",
-    "workout tracker",
-    "carnet entraînement",
-    "appli musculation android",
-    "coach muscu",
+    "application musculation gratuite",
+    "tracker musculation android",
+    "suivi entraînement offline",
+    "programme musculation personnalisé",
+    "carnet entraînement musculation",
+    "appli muscu sans internet",
+    "gym tracker gratuit",
+    "workout tracker android",
+    "suivi performances musculation",
+    "application fitness offline",
+    "créer programme musculation",
+    "historique séances musculation",
     "Kore",
   ],
   icons: {
@@ -50,9 +53,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Kore — Ton coach muscu dans ta poche",
+    title: "Kore — Application de musculation gratuite | Tracker offline Android",
     description:
-      "Suis tes programmes, enregistre tes performances et progresse séance après séance.",
+      "Kore — Application de musculation gratuite et 100% offline pour Android. Crée tes programmes, suis tes performances et progresse séance après séance.",
     type: "website",
     locale: "fr_FR",
     siteName: "Kore",
@@ -61,15 +64,15 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Kore — Ton coach muscu dans ta poche",
+        alt: "Kore — Application de musculation gratuite",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kore — Ton coach muscu dans ta poche",
+    title: "Kore — Application de musculation gratuite | Tracker offline Android",
     description:
-      "App de musculation 100% offline. Suis tes programmes et progresse séance après séance.",
+      "Kore — Application de musculation gratuite et 100% offline pour Android. Crée tes programmes, suis tes performances et progresse séance après séance.",
     images: ["/og.png"],
   },
 };
@@ -112,6 +115,20 @@ export default function RootLayout({
                 } catch(e) {}
               })();
             `,
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Kore",
+              url: "https://kore-app.net",
+              description:
+                "Application de musculation gratuite et offline pour Android",
+              inLanguage: "fr-FR",
+            }),
           }}
         />
         <script

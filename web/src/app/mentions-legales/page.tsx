@@ -7,6 +7,9 @@ import KoreLogo from "@/components/KoreLogo";
 export const metadata: Metadata = {
   title: "Mentions légales — Kore",
   description: "Mentions légales du site kore-app.net — éditeur, hébergeur, contact.",
+  alternates: {
+    canonical: "/mentions-legales",
+  },
 };
 
 export default function MentionsLegalesPage() {

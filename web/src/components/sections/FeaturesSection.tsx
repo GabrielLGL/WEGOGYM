@@ -5,10 +5,10 @@ export default function FeaturesSection() {
     <section id="features" className="relative z-[2] py-10 sm:py-16 px-6">
       <div className="max-w-[1100px] mx-auto">
         <h2 className="reveal text-center text-3xl sm:text-4xl font-black tracking-tight mb-4">
-          Tout ce qu&apos;il te faut
+          Ton tracker de musculation complet
         </h2>
         <p className="reveal text-center text-[var(--text-muted)] text-lg mb-14 font-light">
-          Et rien de plus.
+          Tout pour suivre ta progression, sans connexion.
         </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">

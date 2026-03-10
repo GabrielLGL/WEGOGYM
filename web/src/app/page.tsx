@@ -4,6 +4,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import HeroSection from "@/components/sections/HeroSection";
 import FeaturesSection from "@/components/sections/FeaturesSection";
 import PricingSection from "@/components/sections/PricingSection";
+import FAQSection from "@/components/sections/FAQSection";
 import SubscribeSection from "@/components/sections/SubscribeSection";
 import FooterSection from "@/components/sections/FooterSection";
 import { getSupabase } from "@/lib/supabase";
@@ -39,6 +40,7 @@ export default async function Home() {
         <HeroSection subscriberCount={subscriberCount} />
         <FeaturesSection />
         <PricingSection />
+        <FAQSection />
         <SubscribeSection />
       </main>
       <FooterSection />

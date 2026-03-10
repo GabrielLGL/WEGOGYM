@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Politique de confidentialité — Kore",
   description:
     "Comment Kore protège tes données personnelles. Conformité RGPD complète.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 function Section({

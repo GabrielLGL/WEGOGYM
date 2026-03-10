@@ -4,6 +4,10 @@ export default function FooterSection() {
   return (
     <footer className="relative z-[2] py-16 px-6 text-center">
       <div className="max-w-[1100px] mx-auto">
+        <p className="text-[var(--text-muted)] text-sm max-w-[600px] mx-auto mb-8 leading-relaxed">
+          Kore est une application de musculation gratuite pour Android. Tracker d&apos;entraînement 100% offline, elle te permet de créer des programmes personnalisés, suivre tes performances et progresser à chaque séance.
+        </p>
+
         <nav aria-label="Navigation pied de page" className="flex justify-center gap-6 mb-6 flex-wrap">
           <a href="#features" className="py-2 px-1 text-[var(--text-muted)] text-sm font-medium no-underline hover:text-[var(--accent)] transition-colors">
             Fonctionnalités
