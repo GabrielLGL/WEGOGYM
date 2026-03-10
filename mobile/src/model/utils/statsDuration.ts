@@ -8,7 +8,7 @@ export const MIN_VALID_DURATION_MIN = 10
 
 export function computeDurationStats(histories: History[]): DurationStats {
   const withDuration = histories
-    .filter(h => h.deletedAt == null)
+    .filter(h => h.deletedAt === null && !h.isAbandoned)
     .filter(h => h.endTime != null)
     .map(h => ({
       id: h.id,

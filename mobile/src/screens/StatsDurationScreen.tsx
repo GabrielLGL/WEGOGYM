@@ -322,7 +322,7 @@ export function StatsDurationScreenBase({ histories }: Props) {
               </TouchableOpacity>
 
               <Text style={styles.paginationLabel}>
-                Page {safePage + 1} / {totalPages}
+                {t.statsDuration.pageLabel} {safePage + 1} / {totalPages}
               </Text>
 
               <TouchableOpacity
@@ -517,6 +517,7 @@ const enhance = withObservables([], () => ({
     .get<History>('histories')
     .query(
       Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
       Q.where('end_time', Q.notEq(null)),
     )
     .observe(),

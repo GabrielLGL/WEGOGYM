@@ -376,7 +376,7 @@ function SessionDetailCard({ detail, expandedBlocks, onToggle, onDelete, colors,
                             <Text
                               style={[styles.detailSetText, s.isPr && styles.detailSetPr]}
                             >
-                              {s.weight > 0 ? `${s.weight} kg` : 'PC'} × {s.reps}
+                              {s.weight > 0 ? `${s.weight} kg` : t.historyDetail.bodyweight} × {s.reps}
                             </Text>
                             {s.isPr && <Ionicons name="ribbon" size={12} color={colors.primary} />}
                           </View>
@@ -783,7 +783,10 @@ function useStyles(colors: ThemeColors) {
 const enhance = withObservables([], () => ({
   histories: database
     .get<History>('histories')
-    .query(Q.where('deleted_at', null))
+    .query(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )
     .observe(),
 }))
 

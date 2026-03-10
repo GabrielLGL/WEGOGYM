@@ -639,6 +639,7 @@ export const fr = {
     nextPageA11y: 'Page suivante',
     sessionFallback: 'Séance',
     unknownExercise: 'Exercice inconnu',
+    pageLabel: 'Page',
   },
 
   exerciseHistory: {
@@ -871,6 +872,12 @@ export const fr = {
     prValue: '{weight} kg × {reps}',
     prOrm: '→ 1RM ~{orm} kg',
     freqCount: '{count} fois',
+  },
+
+  errorBoundary: {
+    title: 'Une erreur est survenue',
+    message: 'L\'application a rencontré un problème inattendu.',
+    retry: 'Réessayer',
   },
 
   exerciseInfoSheet: {

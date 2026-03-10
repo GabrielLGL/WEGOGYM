@@ -638,6 +638,7 @@ export const en: typeof fr = {
     nextPageA11y: 'Next page',
     sessionFallback: 'Session',
     unknownExercise: 'Unknown exercise',
+    pageLabel: 'Page',
   },
 
   exerciseHistory: {
@@ -870,6 +871,12 @@ export const en: typeof fr = {
     prValue: '{weight} kg × {reps}',
     prOrm: '→ 1RM ~{orm} kg',
     freqCount: '{count} times',
+  },
+
+  errorBoundary: {
+    title: 'An error occurred',
+    message: 'The application encountered an unexpected problem.',
+    retry: 'Retry',
   },
 
   exerciseInfoSheet: {
