@@ -156,7 +156,17 @@ const RestTimer: React.FC<Props> = ({
     closeTimerRef.current = setTimeout(closeTimer, AUTO_CLOSE_DELAY)
   }
 
+  const isClosingRef = useRef(false)
+
   const closeTimer = () => {
+    if (isClosingRef.current) return
+    isClosingRef.current = true
+
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+
     if (notificationIdRef.current) {
       cancelNotification(notificationIdRef.current)
       notificationIdRef.current = null

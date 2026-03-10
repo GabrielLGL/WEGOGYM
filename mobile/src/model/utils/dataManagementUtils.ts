@@ -44,7 +44,7 @@ export async function deleteAllData(user: User | null): Promise<void> {
       ...customExercises,
     ]
 
-    await database.batch(
+    const batchOps = [
       ...allRecords.map(record => record.prepareDestroyPermanently()),
       ...(user ? [user.prepareUpdate(u => {
         u.name = null
@@ -70,19 +70,24 @@ export async function deleteAllData(user: User | null): Promise<void> {
         u.vibrationEnabled = true
         u.timerSoundEnabled = true
         u.restDuration = 90
+        u.disclaimerAccepted = false
+        u.cguVersionAccepted = null
       })] : []),
-    )
+    ]
+    await database.batch(...batchOps)
   })
 
-  await cancelAllReminders()
-  await deleteApiKey()
+  try { await cancelAllReminders() } catch (e) { if (__DEV__) console.warn('[deleteAllData] cancelAllReminders failed:', e) }
+  try { await deleteApiKey() } catch (e) { if (__DEV__) console.warn('[deleteAllData] deleteApiKey failed:', e) }
 
   // Delete export files from documentDirectory
-  if (FileSystem.documentDirectory) {
-    const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory)
-    const exportFiles = files.filter(f => f.startsWith('kore-export-') && f.endsWith('.json'))
-    for (const file of exportFiles) {
-      await FileSystem.deleteAsync(`${FileSystem.documentDirectory}${file}`, { idempotent: true })
+  try {
+    if (FileSystem.documentDirectory) {
+      const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory)
+      const exportFiles = files.filter(f => f.startsWith('kore-export-') && f.endsWith('.json'))
+      for (const file of exportFiles) {
+        await FileSystem.deleteAsync(`${FileSystem.documentDirectory}${file}`, { idempotent: true })
+      }
     }
-  }
+  } catch (e) { if (__DEV__) console.warn('[deleteAllData] file cleanup failed:', e) }
 }
