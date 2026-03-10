@@ -53,6 +53,10 @@ export function useWorkoutState(
   setInputsRef.current = setInputs
 
   const [validatedSets, setValidatedSets] = useState<Record<string, ValidatedSetData>>({})
+  // Ref synchronisé : permet à unvalidateSet de lire la valeur courante même quand
+  // plusieurs appels rapides se chevauchent (stale closure prevention).
+  const validatedSetsRef = useRef<Record<string, ValidatedSetData>>({})
+  validatedSetsRef.current = validatedSets
   const [totalVolume, setTotalVolume] = useState(0)
 
   useEffect(() => {
@@ -132,7 +136,7 @@ export function useWorkoutState(
     if (!historyId) return false
 
     const key = `${sessionExercise.id}_${setOrder}`
-    const validated = validatedSets[key]
+    const validated = validatedSetsRef.current[key]
     if (!validated) return false
 
     try {
@@ -152,7 +156,7 @@ export function useWorkoutState(
       if (__DEV__) console.error('Failed to delete workout set:', error)
       return false
     }
-  }, [historyId, validatedSets])
+  }, [historyId])
 
   return {
     setInputs,

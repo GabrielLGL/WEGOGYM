@@ -297,7 +297,12 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
           activeOpacity={0.7}
           onPress={() => {
             haptics.onPress()
-            navigation.navigate('Workout', { sessionId: lastCompletedHistory.session.id })
+            // Guard: verify session still exists before navigating (could have been deleted)
+            const sessionId = lastCompletedHistory.session.id
+            const sessionExists = sessions.find(s => s.id === sessionId)
+            if (sessionExists) {
+              navigation.navigate('Workout', { sessionId })
+            }
           }}
         >
           <Ionicons name="play-circle-outline" size={32} color={colors.primary} />

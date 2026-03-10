@@ -156,10 +156,21 @@ export function useProgramManager(onSuccess?: () => void) {
           if (parent) s.program.set(parent)
         })
 
+        // Remap superset IDs to avoid cross-session conflicts (same pattern as Program.duplicate)
+        const supersetIdMap = new Map<string, string>()
+
         for (let i = 0; i < originalExos.length; i++) {
           const se = originalExos[i]
           const exoRecord = exoRecords[i]
           if (exoRecord) {
+            let newSupersetId: string | null = null
+            if (se.supersetId) {
+              if (!supersetIdMap.has(se.supersetId)) {
+                supersetIdMap.set(se.supersetId, `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`)
+              }
+              newSupersetId = supersetIdMap.get(se.supersetId)!
+            }
+
             await database.get<SessionExercise>('session_exercises').create((newSE) => {
               newSE.session.set(newS)
               newSE.exercise.set(exoRecord)
@@ -170,7 +181,7 @@ export function useProgramManager(onSuccess?: () => void) {
               newSE.weightTarget = se.weightTarget
               newSE.restTime = se.restTime
               newSE.notes = se.notes
-              newSE.supersetId = se.supersetId
+              newSE.supersetId = newSupersetId
               newSE.supersetType = se.supersetType
               newSE.supersetPosition = se.supersetPosition
             })
