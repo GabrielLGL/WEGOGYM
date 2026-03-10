@@ -91,7 +91,7 @@ function KpiItem({ label, value, colors }: { label: string; value: string; color
   const styles = useStyles(colors)
   return (
     <View style={styles.kpiItem}>
-      <Text style={styles.kpiValue}>{value}</Text>
+      <Text style={styles.kpiValue} numberOfLines={1}>{value}</Text>
       <Text style={styles.kpiLabel}>{label}</Text>
     </View>
   )
@@ -141,7 +141,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
     },
   ], [t])
 
-  const [_celebrationQueue, setCelebrationQueue] = useState<CelebrationItem[]>([])
+  const celebrationQueueRef = useRef<CelebrationItem[]>([])
   const [currentCelebration, setCurrentCelebration] = useState<CelebrationItem | null>(null)
 
   useEffect(() => {
@@ -153,19 +153,18 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
     ]
     if (queue.length === 0) return
     setCurrentCelebration(queue[0])
-    setCelebrationQueue(queue.slice(1))
+    celebrationQueueRef.current = queue.slice(1)
     navigation.setParams({ celebrations: undefined })
   }, [route.params?.celebrations, navigation])
 
   const handleCloseCelebration = useCallback(() => {
-    setCelebrationQueue(prev => {
-      if (prev.length > 0) {
-        setCurrentCelebration(prev[0])
-        return prev.slice(1)
-      }
+    const queue = celebrationQueueRef.current
+    if (queue.length > 0) {
+      setCurrentCelebration(queue[0])
+      celebrationQueueRef.current = queue.slice(1)
+    } else {
       setCurrentCelebration(null)
-      return prev
-    })
+    }
   }, [])
 
   const user = users[0] ?? null

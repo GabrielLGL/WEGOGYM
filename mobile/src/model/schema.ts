@@ -1,7 +1,7 @@
 /**
  * schema.ts — Schéma de la base de données WatermelonDB (SQLite)
  *
- * Version actuelle : 33
+ * Version actuelle : 34
  *
  * Tables et relations principales :
  * - programs          : Programmes d'entraînement (nom, position, équipement)
@@ -21,7 +21,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 33, // v33 : add disclaimer_accepted + cgu_version_accepted to users
+  version: 34, // v34 : index sets.created_at for HomeScreen 30-day filter
   tables: [
     tableSchema({
       name: 'programs',
@@ -166,7 +166,7 @@ export const mySchema = appSchema({
         { name: 'reps', type: 'number' },
         { name: 'set_order', type: 'number' },
         { name: 'is_pr', type: 'boolean' },
-        { name: 'created_at', type: 'number' },
+        { name: 'created_at', type: 'number', isIndexed: true },
         { name: 'updated_at', type: 'number' },
       ]
     }),

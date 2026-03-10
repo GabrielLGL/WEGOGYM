@@ -61,11 +61,13 @@ jest.mock('../../model/index', () => {
 const mockSoftDeleteHistory = jest.fn().mockResolvedValue(undefined)
 const mockAddRetroactiveSet = jest.fn().mockResolvedValue(undefined)
 const mockRecalculateSetPrs = jest.fn().mockResolvedValue(undefined)
+const mockRecalculateSetPrsBatch = jest.fn().mockResolvedValue(undefined)
 
 jest.mock('../../model/utils/databaseHelpers', () => ({
   softDeleteHistory: (...args: unknown[]) => mockSoftDeleteHistory(...args),
   addRetroactiveSet: (...args: unknown[]) => mockAddRetroactiveSet(...args),
   recalculateSetPrs: (...args: unknown[]) => mockRecalculateSetPrs(...args),
+  recalculateSetPrsBatch: (...args: unknown[]) => mockRecalculateSetPrsBatch(...args),
 }))
 
 jest.mock('@gorhom/portal', () => ({
@@ -87,6 +89,10 @@ jest.mock('@nozbe/with-observables', () => (
         // If history is passed, inject sets and session
         if ('history' in props) {
           return <Component {...props} history={mockHistory} sets={mockSets} session={mockSession} />
+        }
+        // If exerciseId is passed, inject mock exercise
+        if ('exerciseId' in props) {
+          return <Component {...props} exercise={mockExercise} />
         }
         return <Component {...props} />
       }
@@ -176,6 +182,14 @@ const mockSession = {
   name: 'Push Day',
   observe: jest.fn(),
 } as unknown as Session
+
+const mockExercise = {
+  id: 'ex-1',
+  name: 'Développé couché',
+  muscles: ['Pecs'],
+  equipment: 'Poids libre',
+  observe: jest.fn(),
+}
 
 describe('HistoryDetailScreen', () => {
   beforeEach(() => {

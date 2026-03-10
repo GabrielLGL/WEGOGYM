@@ -1,4 +1,4 @@
-import { schemaMigrations, addColumns } from '@nozbe/watermelondb/Schema/migrations'
+import { schemaMigrations, addColumns, unsafeExecuteSql } from '@nozbe/watermelondb/Schema/migrations'
 
 export const migrations = schemaMigrations({
   migrations: [
@@ -78,6 +78,12 @@ export const migrations = schemaMigrations({
             { name: 'cgu_version_accepted', type: 'string', isOptional: true },
           ],
         }),
+      ],
+    },
+    {
+      toVersion: 34,
+      steps: [
+        unsafeExecuteSql('CREATE INDEX IF NOT EXISTS sets_created_at ON sets (created_at)'),
       ],
     },
   ],

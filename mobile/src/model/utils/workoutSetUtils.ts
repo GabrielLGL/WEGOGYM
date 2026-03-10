@@ -41,7 +41,7 @@ export async function getMaxWeightForExercise(
     .fetch()
 
   if (sets.length === 0) return 0
-  return Math.max(...sets.map(s => s.weight))
+  return sets.reduce((max, s) => Math.max(max, s.weight), 0)
 }
 
 /**
@@ -139,13 +139,16 @@ export async function addRetroactiveSet(params: {
  *
  * @param exerciseId - ID de l'exercice à recalculer
  */
-export async function recalculateSetPrs(exerciseId: string): Promise<void> {
+export async function recalculateSetPrs(
+  exerciseId: string,
+  activeHistories?: History[],
+): Promise<void> {
   const allSets = await database
     .get<WorkoutSet>('sets')
     .query(Q.where('exercise_id', exerciseId))
     .fetch()
 
-  const histories = await database
+  const histories = activeHistories ?? await database
     .get<History>('histories')
     .query(Q.where('deleted_at', null))
     .fetch()
@@ -185,4 +188,22 @@ export async function recalculateSetPrs(exerciseId: string): Promise<void> {
       )
     )
   })
+}
+
+/**
+ * Recalcule les PRs pour plusieurs exercices en une seule lecture DB.
+ * Fetche les histories actives UNE fois puis les passe à chaque appel.
+ */
+export async function recalculateSetPrsBatch(exerciseIds: string[]): Promise<void> {
+  if (exerciseIds.length === 0) return
+  const histories = await database
+    .get<History>('histories')
+    .query(Q.where('deleted_at', null))
+    .fetch()
+  const results = await Promise.allSettled(exerciseIds.map(id => recalculateSetPrs(id, histories)))
+  if (__DEV__) {
+    for (const r of results) {
+      if (r.status === 'rejected') console.error('[recalculateSetPrsBatch]', r.reason)
+    }
+  }
 }

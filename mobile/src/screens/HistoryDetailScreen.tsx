@@ -24,6 +24,7 @@ import {
   softDeleteHistory,
   addRetroactiveSet,
   recalculateSetPrs,
+  recalculateSetPrsBatch,
 } from '../model/utils/databaseHelpers'
 import { DEFAULT_REPS, MINUTE_MS } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
@@ -54,8 +55,6 @@ interface SetEdit {
 
 interface GroupedSets {
   exerciseId: string
-  exerciseName: string
-  exerciseInfo: string
   sets: WorkoutSet[]
 }
 
@@ -78,7 +77,6 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
   // Local edit buffer: setId → { weight, reps }
   const [edits, setEdits] = useState<Record<string, SetEdit>>({})
   const [noteText, setNoteText] = useState(history.note ?? '')
-  const [exercises, setExercises] = useState<Record<string, Exercise>>({})
   const [deleteSetTarget, setDeleteSetTarget] = useState<WorkoutSet | null>(null)
   const deleteWorkoutModal = useModalState()
 
@@ -101,28 +99,6 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
     setNoteText(history.note ?? '')
   }, [history.note])
 
-  // Fetch Exercise objects for display
-  useEffect(() => {
-    let cancelled = false
-    const exerciseIds = [...new Set(sets.map(s => getExerciseId(s)))]
-
-    if (exerciseIds.length === 0) return
-
-    database
-      .get<Exercise>('exercises')
-      .query(Q.where('id', Q.oneOf(exerciseIds)))
-      .fetch()
-      .then(exos => {
-        if (cancelled) return
-        const map: Record<string, Exercise> = {}
-        for (const e of exos) map[e.id] = e
-        setExercises(map)
-      })
-      .catch((e) => { if (__DEV__) console.error('[HistoryDetailScreen] fetchExercises:', e) })
-
-    return () => { cancelled = true }
-  }, [sets])
-
   // Group sets by exercise
   const grouped = useMemo<GroupedSets[]>(() => {
     const map = new Map<string, WorkoutSet[]>()
@@ -133,16 +109,13 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
     }
     const result: GroupedSets[] = []
     for (const [exId, exSets] of map) {
-      const exo = exercises[exId]
       result.push({
         exerciseId: exId,
-        exerciseName: exo?.name ?? '—',
-        exerciseInfo: exo ? [exo.muscles?.join(', '), exo.equipment].filter(Boolean).join(' · ') : '',
         sets: exSets.sort((a, b) => a.setOrder - b.setOrder),
       })
     }
     return result
-  }, [sets, exercises])
+  }, [sets])
 
   // Check if anything was modified
   const hasChanges = useMemo(() => {
@@ -214,7 +187,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
       })
 
       // Recalculate PRs OUTSIDE of database.write() — concurrent (each targets different exercise)
-      await Promise.all([...affectedExerciseIds].map(exId => recalculateSetPrs(exId)))
+      await recalculateSetPrsBatch([...affectedExerciseIds])
 
       haptics.onSuccess()
     } catch (e) {
@@ -312,57 +285,19 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
 
       {/* Exercises & Sets */}
       {grouped.map(group => (
-        <View key={group.exerciseId} style={styles.exerciseCard}>
-          <Text style={styles.exerciseName}>{group.exerciseName}</Text>
-          {group.exerciseInfo !== '' && (
-            <Text style={styles.exerciseInfo}>{group.exerciseInfo}</Text>
-          )}
-
-          {/* Set rows */}
-          {group.sets.map(s => {
-            const edit = edits[s.id]
-            return (
-              <View key={s.id} style={styles.setRow}>
-                <Text style={styles.setLabel}>
-                  {t.historyDetail.set} {s.setOrder}
-                </Text>
-                <TextInput
-                  style={styles.setInput}
-                  value={edit?.weight ?? String(s.weight)}
-                  onChangeText={v => updateEdit(s.id, 'weight', v)}
-                  keyboardType="numeric"
-                  selectTextOnFocus
-                />
-                <Text style={styles.setUnit}>kg</Text>
-                <TextInput
-                  style={styles.setInput}
-                  value={edit?.reps ?? String(s.reps)}
-                  onChangeText={v => updateEdit(s.id, 'reps', v)}
-                  keyboardType="numeric"
-                  selectTextOnFocus
-                />
-                <Text style={styles.setUnit}>{t.historyDetail.reps.toLowerCase()}</Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    haptics.onPress()
-                    setDeleteSetTarget(s)
-                  }}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                </TouchableOpacity>
-              </View>
-            )
-          })}
-
-          {/* Add set button */}
-          <TouchableOpacity
-            style={styles.addSetBtn}
-            onPress={() => handleAddSet(group.exerciseId, group.sets)}
-          >
-            <Text style={styles.addSetText}>{t.historyDetail.addSet}</Text>
-          </TouchableOpacity>
-        </View>
+        <ExerciseCard
+          key={group.exerciseId}
+          exerciseId={group.exerciseId}
+          sets={group.sets}
+          edits={edits}
+          updateEdit={updateEdit}
+          handleAddSet={handleAddSet}
+          haptics={haptics}
+          setDeleteSetTarget={setDeleteSetTarget}
+          colors={colors}
+          styles={styles}
+          t={t}
+        />
       ))}
 
       {/* Save button */}
@@ -415,6 +350,99 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
     </ScrollView>
   )
 }
+
+// ─── ExerciseCard (reactive exercise name via withObservables) ───────────────
+
+interface ExerciseCardInnerProps {
+  exercise: Exercise
+  sets: WorkoutSet[]
+  edits: Record<string, SetEdit>
+  updateEdit: (setId: string, field: 'weight' | 'reps', value: string) => void
+  handleAddSet: (exerciseId: string, existingSets: WorkoutSet[]) => void
+  haptics: ReturnType<typeof useHaptics>
+  setDeleteSetTarget: (s: WorkoutSet) => void
+  colors: ThemeColors
+  styles: ReturnType<typeof useStyles>
+  t: ReturnType<typeof useLanguage>['t']
+}
+
+function ExerciseCardInner({
+  exercise,
+  sets,
+  edits,
+  updateEdit,
+  handleAddSet,
+  haptics,
+  setDeleteSetTarget,
+  colors,
+  styles,
+  t,
+}: ExerciseCardInnerProps) {
+  const exerciseInfo = [exercise.muscles?.join(', '), exercise.equipment].filter(Boolean).join(' · ')
+
+  return (
+    <View style={styles.exerciseCard}>
+      <Text style={styles.exerciseName}>{exercise.name}</Text>
+      {exerciseInfo !== '' && (
+        <Text style={styles.exerciseInfo}>{exerciseInfo}</Text>
+      )}
+
+      {/* Set rows */}
+      {sets.map(s => {
+        const edit = edits[s.id]
+        return (
+          <View key={s.id} style={styles.setRow}>
+            <Text style={styles.setLabel}>
+              {t.historyDetail.set} {s.setOrder}
+            </Text>
+            <TextInput
+              style={styles.setInput}
+              value={edit?.weight ?? String(s.weight)}
+              onChangeText={v => updateEdit(s.id, 'weight', v)}
+              keyboardType="numeric"
+              selectTextOnFocus
+            />
+            <Text style={styles.setUnit}>kg</Text>
+            <TextInput
+              style={styles.setInput}
+              value={edit?.reps ?? String(s.reps)}
+              onChangeText={v => updateEdit(s.id, 'reps', v)}
+              keyboardType="numeric"
+              selectTextOnFocus
+            />
+            <Text style={styles.setUnit}>{t.historyDetail.reps.toLowerCase()}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                haptics.onPress()
+                setDeleteSetTarget(s)
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.danger} />
+            </TouchableOpacity>
+          </View>
+        )
+      })}
+
+      {/* Add set button */}
+      <TouchableOpacity
+        style={styles.addSetBtn}
+        onPress={() => handleAddSet(exercise.id, sets)}
+      >
+        <Text style={styles.addSetText}>{t.historyDetail.addSet}</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
+
+const enhanceExerciseCard = withObservables(
+  ['exerciseId'],
+  ({ exerciseId }: { exerciseId: string }) => ({
+    exercise: database.get<Exercise>('exercises').findAndObserve(exerciseId),
+  }),
+)
+
+const ExerciseCard = enhanceExerciseCard(ExerciseCardInner)
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
