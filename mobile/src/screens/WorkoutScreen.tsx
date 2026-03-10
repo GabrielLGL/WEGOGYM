@@ -31,14 +31,14 @@ import {
 import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
 import { Q } from '@nozbe/watermelondb'
-import { map } from 'rxjs/operators'
+import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import Session from '../model/models/Session'
 import SessionExercise from '../model/models/SessionExercise'
 import User from '../model/models/User'
 import History from '../model/models/History'
 import {
   createWorkoutHistory,
-  completeWorkoutHistory,
+  abandonWorkoutHistory,
 } from '../model/utils/databaseHelpers'
 import { type MilestoneEvent } from '../model/utils/gamificationHelpers'
 import { type BadgeDefinition } from '../model/utils/badgeConstants'
@@ -272,7 +272,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const handleConfirmAbandon = useCallback(async () => {
     const activeHistoryId = historyRef.current?.id || historyId
     if (activeHistoryId) {
-      await completeWorkoutHistory(activeHistoryId, Date.now()).catch(e => { if (__DEV__) console.error('[WorkoutScreen] completeWorkoutHistory (abandon):', e) })
+      await abandonWorkoutHistory(activeHistoryId, Date.now()).catch(e => { if (__DEV__) console.error('[WorkoutScreen] abandonWorkoutHistory:', e) })
     }
     abandonModal.close()
     navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
@@ -483,7 +483,7 @@ const ObservableWorkoutContent = withObservables(['route'], ({ route }: { route:
     .get<SessionExercise>('session_exercises')
     .query(Q.where('session_id', route.params.sessionId), Q.sortBy('position', Q.asc))
     .observe(),
-  user: database.get<User>('users').query().observe().pipe(map(list => list[0] || null)),
+  user: observeCurrentUser(),
 }))(WorkoutContent)
 
 const WorkoutScreen = ({ route, navigation }: {

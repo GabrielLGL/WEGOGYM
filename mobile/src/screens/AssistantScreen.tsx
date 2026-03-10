@@ -5,8 +5,8 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
-import { map } from 'rxjs/operators'
 import { database } from '../model'
+import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { AlertDialog } from '../components/AlertDialog'
 import { WizardStepContent } from '../components/WizardStepContent'
 import { useAssistantWizard } from '../hooks/useAssistantWizard'
@@ -148,7 +148,7 @@ export function AssistantScreenInner({ programs: _programs, user, navigation, ro
 
 const ObservableAssistantContent = withObservables([], () => ({
   programs: database.get<Program>('programs').query().observe(),
-  user: database.get<User>('users').query().observe().pipe(map(list => list[0] || null)),
+  user: observeCurrentUser(),
 }))(AssistantScreenInner)
 
 const AssistantScreen = ({ navigation, route }: {

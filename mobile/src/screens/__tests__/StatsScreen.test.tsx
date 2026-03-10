@@ -58,21 +58,21 @@ describe('StatsScreenBase', () => {
 
   it('rend sans données (tableaux vides) sans crash', () => {
     const { getByText } = render(
-      <StatsScreenBase users={[]} histories={[]} sets={[]} />
+      <StatsScreenBase user={null} histories={[]} sets={[]} />
     )
     expect(getByText('Toi')).toBeTruthy()
   })
 
   it('affiche le nom de l\'utilisateur', () => {
     const { getByText } = render(
-      <StatsScreenBase users={[makeUser('Gabriel')]} histories={[]} sets={[]} />
+      <StatsScreenBase user={makeUser('Gabriel')} histories={[]} sets={[]} />
     )
     expect(getByText('Gabriel')).toBeTruthy()
   })
 
   it('affiche les KPIs (Séances, Volume, Records)', () => {
     const { getByText, getAllByText } = render(
-      <StatsScreenBase users={[makeUser()]} histories={[]} sets={[]} />
+      <StatsScreenBase user={makeUser()} histories={[]} sets={[]} />
     )
     expect(getByText('Séances')).toBeTruthy()
     // "Volume" apparaît à la fois comme KPI et comme bouton grille
@@ -82,7 +82,7 @@ describe('StatsScreenBase', () => {
 
   it('affiche les 6 boutons de navigation', () => {
     const { getByText, queryByText } = render(
-      <StatsScreenBase users={[makeUser()]} histories={[]} sets={[]} />
+      <StatsScreenBase user={makeUser()} histories={[]} sets={[]} />
     )
     expect(getByText('Durée')).toBeTruthy()
     expect(getByText('Agenda')).toBeTruthy()
@@ -94,7 +94,7 @@ describe('StatsScreenBase', () => {
 
   it('navigue au tap sur un bouton', () => {
     const { getByText } = render(
-      <StatsScreenBase users={[makeUser()]} histories={[]} sets={[]} />
+      <StatsScreenBase user={makeUser()} histories={[]} sets={[]} />
     )
     fireEvent.press(getByText('Durée'))
     expect(mockNavigation.navigate).toHaveBeenCalledWith('StatsDuration')

@@ -7,7 +7,7 @@
  * Sous-modules :
  * - parseUtils.ts          : parseNumericInput, parseIntegerInput, formatRelativeDate
  * - exerciseQueryUtils.ts  : getNextPosition, filterExercises, searchExercises, filterAndSearchExercises
- * - workoutSessionUtils.ts : createWorkoutHistory, completeWorkoutHistory, updateHistoryNote, getLastSessionVolume, softDeleteHistory
+ * - workoutSessionUtils.ts : createWorkoutHistory, completeWorkoutHistory, abandonWorkoutHistory, updateHistoryNote, getLastSessionVolume, softDeleteHistory
  * - workoutSetUtils.ts     : saveWorkoutSet, deleteWorkoutSet, getMaxWeightForExercise, addRetroactiveSet, recalculateSetPrs, recalculateSetPrsBatch
  * - exerciseStatsUtils.ts  : ExerciseSessionStat, getLastPerformanceForExercise, buildExerciseStatsFromData,
  *                            getExerciseStatsFromSets, buildRecapExercises, getLastSetsForExercises
@@ -23,3 +23,4 @@ export * from './exerciseStatsUtils'
 export * from './programImportUtils'
 export * from './aiPlanUtils'
 export * from './dataManagementUtils'
+export * from './userObservable'

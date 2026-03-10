@@ -33,13 +33,7 @@ import { parseNumericInput } from '../model/utils/databaseHelpers'
 
 type MetricKey = 'weight' | 'waist' | 'hips' | 'arms' | 'chest'
 
-const METRICS: { key: MetricKey; unit: string }[] = [
-  { key: 'weight', unit: 'kg' },
-  { key: 'waist', unit: 'cm' },
-  { key: 'hips', unit: 'cm' },
-  { key: 'arms', unit: 'cm' },
-  { key: 'chest', unit: 'cm' },
-]
+const METRIC_KEYS: MetricKey[] = ['weight', 'waist', 'hips', 'arms', 'chest']
 
 // ─── Formulaire ───────────────────────────────────────────────────────────────
 
@@ -92,7 +86,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
 
   // Graphique pour la métrique sélectée
   const metricKey = selectedMetric as MetricKey
-  const metricUnit = METRICS.find(m => m.key === selectedMetric)?.unit ?? 'kg'
+  const getUnit = (key: MetricKey) => key === 'weight' ? t.statsMeasurements.weightUnit : t.statsMeasurements.lengthUnit
 
   const chartData = useMemo(() => {
     const points = measurements
@@ -173,11 +167,11 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
               {t.statsMeasurements.latestTitle} — {new Date(latest.date).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
             </Text>
             <View style={styles.latestGrid}>
-              {METRICS.map(m => (
-                latest[m.key] != null ? (
-                  <View key={m.key} style={styles.latestCard}>
-                    <Text style={styles.latestValue}>{latest[m.key]}{m.unit}</Text>
-                    <Text style={styles.latestLabel}>{metricsLabelMap[m.key]}</Text>
+              {METRIC_KEYS.map(key => (
+                latest[key] != null ? (
+                  <View key={key} style={styles.latestCard}>
+                    <Text style={styles.latestValue}>{latest[key]}{getUnit(key)}</Text>
+                    <Text style={styles.latestLabel}>{metricsLabelMap[key]}</Text>
                   </View>
                 ) : null
               ))}
@@ -187,7 +181,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
 
         {/* Graphique */}
         <ChipSelector
-          items={METRICS.map(m => m.key)}
+          items={METRIC_KEYS}
           selectedValue={selectedMetric}
           onChange={v => { if (v) setSelectedMetric(v) }}
           allowNone={false}
@@ -204,7 +198,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
               chartConfig={chartConfig}
               style={styles.chart}
               fromZero={false}
-              formatYLabel={val => `${val}${metricUnit}`}
+              formatYLabel={val => `${val}${getUnit(metricKey)}`}
               formatXLabel={val => val}
             />
           </View>
@@ -232,11 +226,11 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
                     </Text>
                     <Text style={styles.historyValues} numberOfLines={1}>
                       {[
-                        m.weight ? `${m.weight}kg` : null,
-                        m.waist ? `${t.statsMeasurements.waistAbbr}:${m.waist}cm` : null,
-                        m.hips ? `${t.statsMeasurements.hipsAbbr}:${m.hips}cm` : null,
-                        m.arms ? `${t.statsMeasurements.armsAbbr}:${m.arms}cm` : null,
-                        m.chest ? `${t.statsMeasurements.chestAbbr}:${m.chest}cm` : null,
+                        m.weight ? `${m.weight}${t.statsMeasurements.weightUnit}` : null,
+                        m.waist ? `${t.statsMeasurements.waistAbbr}:${m.waist}${t.statsMeasurements.lengthUnit}` : null,
+                        m.hips ? `${t.statsMeasurements.hipsAbbr}:${m.hips}${t.statsMeasurements.lengthUnit}` : null,
+                        m.arms ? `${t.statsMeasurements.armsAbbr}:${m.arms}${t.statsMeasurements.lengthUnit}` : null,
+                        m.chest ? `${t.statsMeasurements.chestAbbr}:${m.chest}${t.statsMeasurements.lengthUnit}` : null,
                       ].filter(Boolean).join(' · ')}
                     </Text>
                   </View>
@@ -274,13 +268,13 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
           style={{ maxHeight: screenHeight * 0.6 }}
         >
           <View style={styles.formContent}>
-            {METRICS.map(m => (
-              <View key={m.key} style={styles.inputRow}>
-                <Text style={styles.inputLabel}>{metricsLabelMap[m.key]} ({m.unit})</Text>
+            {METRIC_KEYS.map(key => (
+              <View key={key} style={styles.inputRow}>
+                <Text style={styles.inputLabel}>{metricsLabelMap[key]} ({getUnit(key)})</Text>
                 <TextInput
                   style={styles.input}
-                  value={form[m.key]}
-                  onChangeText={val => setForm(prev => ({ ...prev, [m.key]: val }))}
+                  value={form[key]}
+                  onChangeText={val => setForm(prev => ({ ...prev, [key]: val }))}
                   keyboardType="decimal-pad"
                   placeholder="—"
                   placeholderTextColor={colors.placeholder}

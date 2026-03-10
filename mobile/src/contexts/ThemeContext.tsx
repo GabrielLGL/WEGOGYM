@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 import { ThemeMode, ThemeColors, getThemeColors, getThemeNeuShadow } from '../theme'
 import { database } from '../model'
 import User from '../model/models/User'
+import { fetchCurrentUser } from '../model/utils/databaseHelpers'
 
 interface ThemeContextValue {
   mode: ThemeMode
@@ -24,8 +25,7 @@ export function ThemeProvider({ children, initialMode = 'dark' }: ThemeProviderP
 
   const persistTheme = useCallback(async (newMode: ThemeMode): Promise<boolean> => {
     try {
-      const users = await database.get<User>('users').query().fetch()
-      const user = users[0]
+      const user = await fetchCurrentUser()
       if (!user) return true  // pas encore d'utilisateur — skip persist, toggle OK
       await database.write(async () => {
         await user.update(u => { u.themeMode = newMode })

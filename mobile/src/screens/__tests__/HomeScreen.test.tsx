@@ -83,8 +83,9 @@ describe('HomeScreen Dashboard', () => {
     expect(() =>
       render(
         <HomeContent
-          users={[]}
+          user={null}
           histories={[] as unknown as History[]}
+          historiesCount={0}
           sets={[] as unknown as WorkoutSet[]}
           sessions={[] as unknown as Session[]}
           userBadges={[]}
@@ -96,8 +97,9 @@ describe('HomeScreen Dashboard', () => {
   it('affiche le greeting avec le prénom', () => {
     const { getByText } = render(
       <HomeContent
-        users={[makeUser()]}
+        user={makeUser()}
         histories={[] as unknown as History[]}
+        historiesCount={0}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
@@ -109,8 +111,9 @@ describe('HomeScreen Dashboard', () => {
   it('affiche "Toi" quand pas d\'utilisateur', () => {
     const { getByText } = render(
       <HomeContent
-        users={[]}
+        user={null}
         histories={[] as unknown as History[]}
+        historiesCount={0}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
@@ -123,8 +126,9 @@ describe('HomeScreen Dashboard', () => {
     const fakeHistories = Array.from({ length: 5 }, (_, i) => ({ id: `h-${i}` })) as unknown as History[]
     const { getByText } = render(
       <HomeContent
-        users={[makeUser({ totalTonnage: 25000, totalPrs: 7 } as Partial<User>)]}
+        user={makeUser({ totalTonnage: 25000, totalPrs: 7 } as Partial<User>)}
         histories={fakeHistories}
+        historiesCount={5}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
@@ -138,8 +142,9 @@ describe('HomeScreen Dashboard', () => {
   it('affiche les 2 sections', () => {
     const { getByText, queryByText } = render(
       <HomeContent
-        users={[]}
+        user={null}
         histories={[] as unknown as History[]}
+        historiesCount={0}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
@@ -153,8 +158,9 @@ describe('HomeScreen Dashboard', () => {
   it('affiche toutes les tuiles', () => {
     const { getByText, queryByText } = render(
       <HomeContent
-        users={[]}
+        user={null}
         histories={[] as unknown as History[]}
+        historiesCount={0}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
@@ -174,8 +180,9 @@ describe('HomeScreen Dashboard', () => {
   it('navigue vers un écran stack au press', () => {
     const { getByText } = render(
       <HomeContent
-        users={[]}
+        user={null}
         histories={[] as unknown as History[]}
+        historiesCount={0}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
@@ -188,8 +195,9 @@ describe('HomeScreen Dashboard', () => {
   it('navigue vers Programmes au press', () => {
     const { getByText } = render(
       <HomeContent
-        users={[]}
+        user={null}
         histories={[] as unknown as History[]}
+        historiesCount={0}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
@@ -202,8 +210,9 @@ describe('HomeScreen Dashboard', () => {
   it('affiche la phrase de motivation', () => {
     const { getByText } = render(
       <HomeContent
-        users={[makeUser()]}
+        user={makeUser()}
         histories={[] as unknown as History[]}
+        historiesCount={0}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}

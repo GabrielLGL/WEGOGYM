@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react'
 import { database } from '../model'
 import User from '../model/models/User'
+import { fetchCurrentUser } from '../model/utils/databaseHelpers'
 import { type Language, type Translations, translations } from '../i18n'
 
 interface LanguageContextValue {
@@ -21,8 +22,7 @@ export function LanguageProvider({ children, initialLang = 'fr' }: LanguageProvi
 
   const persistLanguage = useCallback(async (lang: Language): Promise<boolean> => {
     try {
-      const users = await database.get<User>('users').query().fetch()
-      const user = users[0]
+      const user = await fetchCurrentUser()
       if (!user) return true  // pas encore d'utilisateur — skip persist, toggle OK
       await database.write(async () => {
         await user.update(u => { u.languageMode = lang })

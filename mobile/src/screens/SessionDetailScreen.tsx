@@ -76,11 +76,8 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   const addModal = useModalState()
   const editModal = useModalState()
   const alertModal = useModalState()
-  const [alertConfig, setAlertConfig] = useState<{
-    title: string
-    message: string
-    onConfirm: () => void | Promise<void>
-  }>({ title: '', message: '', onConfirm: async () => {} })
+  const [alertConfig, setAlertConfig] = useState<{ title: string; message: string }>({ title: '', message: '' })
+  const alertConfirmRef = useRef<() => void | Promise<unknown>>(() => {})
 
   // --- SUPERSET SELECTION MODE ---
   const [selectionMode, setSelectionMode] = useState(false)
@@ -195,15 +192,13 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   }, [updateTargets, editModal])
 
   const showRemoveAlert = useCallback((se: SessionExercise, exoName: string) => {
+    alertConfirmRef.current = () => removeExercise(se)
     setAlertConfig({
       title: `${t.sessionDetail.delete} ${exoName} ?`,
       message: t.sessionDetail.removeConfirmMessage,
-      onConfirm: async () => {
-        await removeExercise(se)
-      }
     })
     alertModal.open()
-  }, [t, removeExercise])
+  }, [t, removeExercise, alertModal])
 
   const handleEditTargets = useCallback((se: SessionExercise) => {
     haptics.onPress()
@@ -332,7 +327,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
         message={alertConfig.message}
         onConfirm={async () => {
           try {
-            await alertConfig.onConfirm()
+            await alertConfirmRef.current()
           } finally {
             alertModal.close()
           }

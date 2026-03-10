@@ -36,6 +36,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
 import ScreenLoader from '../components/ScreenLoader'
 import { database } from '../model'
 import User from '../model/models/User'
+import { fetchCurrentUser } from '../model/utils/databaseHelpers'
 import { CGU_VERSION } from '../model/constants'
 import { updateReminders } from '../services/notificationService'
 import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
@@ -173,8 +174,7 @@ function AppContent() {
   }
 
   useEffect(() => {
-    database.get<User>('users').query().fetch().then(users => {
-      const user = users[0]
+    fetchCurrentUser().then(user => {
       if (!user || !user.onboardingCompleted) {
         setInitialRoute('Onboarding')
       } else if (isVersionOlder(user.cguVersionAccepted ?? '0', CGU_VERSION)) {
@@ -259,8 +259,7 @@ export default function AppNavigator() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    database.get<User>('users').query().fetch().then(users => {
-      const user = users[0]
+    fetchCurrentUser().then(user => {
       const savedMode = user?.themeMode
       if (savedMode === 'light' || savedMode === 'dark') {
         setInitialMode(savedMode)

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { View, Text, TextInput, SafeAreaView, ScrollView, Switch, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
-import { map } from 'rxjs/operators'
 import { LinearGradient } from 'expo-linear-gradient'
 import { database } from '../model/index'
 import User from '../model/models/User'
+import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { useTheme, useColors } from '../contexts/ThemeContext'
@@ -380,9 +380,7 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
 export { SettingsContent }
 
 const ObservableContent = withObservables([], () => ({
-  user: database.get<User>('users').query().observe().pipe(
-    map((list: User[]) => list[0] || null)
-  ),
+  user: observeCurrentUser(),
 }))(SettingsContent)
 
 const SettingsScreen = () => {

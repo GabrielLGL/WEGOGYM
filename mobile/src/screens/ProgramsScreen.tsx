@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { database } from '../model/index'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
-import { map } from 'rxjs/operators'
+import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -428,7 +428,7 @@ export { ProgramsScreen as ProgramsContent }
 
 const ObservableProgramsContent = withObservables([], () => ({
   programs: database.get<Program>('programs').query(Q.sortBy('position', Q.asc)).observe(),
-  user: database.get<User>('users').query().observe().pipe(map(list => list[0] || null)),
+  user: observeCurrentUser(),
 }))(ProgramsScreen)
 
 const ProgramsScreenWrapper = ({ navigation }: { navigation: NavigationProp }) => {

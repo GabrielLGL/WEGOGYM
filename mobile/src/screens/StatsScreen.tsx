@@ -16,6 +16,7 @@ import { database } from '../model'
 import History from '../model/models/History'
 import WorkoutSet from '../model/models/Set'
 import User from '../model/models/User'
+import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume } from '../model/utils/statsHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -55,12 +56,12 @@ function KpiItem({ label, value, colors }: { label: string; value: string; color
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 interface Props {
-  users: User[]
+  user: User | null
   histories: History[]
   sets: WorkoutSet[]
 }
 
-export function StatsScreenBase({ users, histories, sets }: Props) {
+export function StatsScreenBase({ user, histories, sets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<StatsNavigation>()
@@ -76,7 +77,6 @@ export function StatsScreenBase({ users, histories, sets }: Props) {
     { icon: 'list-outline',        label: t.stats.history,   route: 'StatsHistory' },
   ], [t])
 
-  const user = users[0] ?? null
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
   const motivationalPhrase = useMemo(() => computeMotivationalPhrase(histories, sets, language), [histories, sets, language])
 
@@ -208,10 +208,16 @@ function useStyles(colors: ThemeColors) {
 // ─── withObservables ──────────────────────────────────────────────────────────
 
 const enhance = withObservables([], () => ({
-  users: database.get<User>('users').query().observe(),
-  histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
+  user: observeCurrentUser(),
+  histories: database.get<History>('histories').query(
+    Q.where('deleted_at', null),
+    Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+  ).observe(),
   sets: database.get<WorkoutSet>('sets').query(
-    Q.on('histories', Q.where('deleted_at', null)),
+    Q.on('histories', Q.and(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )),
   ).observe(),
 }))
 
