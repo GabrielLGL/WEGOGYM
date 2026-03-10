@@ -35,3 +35,4 @@ Aucune
 ✅ Résolu — 20260311-1230
 
 ## Commit
+9cfad4d refactor(i18n): replace hardcoded kg with {unit} placeholder + add dateLocale to ChartsScreen

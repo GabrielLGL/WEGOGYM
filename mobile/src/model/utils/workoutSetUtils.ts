@@ -25,13 +25,37 @@ export async function getMaxWeightForExercise(
     .query(Q.unsafeSqlQuery(
       'SELECT MAX(s.weight) as max_weight FROM sets s ' +
       'INNER JOIN histories h ON s.history_id = h.id ' +
-      'WHERE s.exercise_id = ? AND h.id != ? AND h.deleted_at IS NULL',
+      'WHERE s.exercise_id = ? AND h.id != ? AND h.deleted_at IS NULL AND (h.is_abandoned IS NULL OR h.is_abandoned = 0)',
       [exerciseId, excludeHistoryId]
     ))
     .unsafeFetchRaw()
 
   const raw = result[0] as Record<string, unknown> | undefined
   return typeof raw?.max_weight === 'number' ? raw.max_weight : 0
+}
+
+/**
+ * Internal helper — creates a Set record inside an existing database.write() context.
+ * MUST be called from within database.write().
+ */
+async function createSetRecord(params: {
+  historyId: string
+  exerciseId: string
+  weight: number
+  reps: number
+  setOrder: number
+  isPr: boolean
+}): Promise<WorkoutSet> {
+  const history = await database.get<History>('histories').find(params.historyId)
+  const exercise = await database.get<Exercise>('exercises').find(params.exerciseId)
+  return await database.get<WorkoutSet>('sets').create(record => {
+    record.history.set(history)
+    record.exercise.set(exercise)
+    record.weight = params.weight
+    record.reps = params.reps
+    record.setOrder = params.setOrder
+    record.isPr = params.isPr
+  })
 }
 
 /**
@@ -48,18 +72,7 @@ export async function saveWorkoutSet(params: {
   setOrder: number
   isPr: boolean
 }): Promise<WorkoutSet> {
-  return await database.write(async () => {
-    const history = await database.get<History>('histories').find(params.historyId)
-    const exercise = await database.get<Exercise>('exercises').find(params.exerciseId)
-    return await database.get<WorkoutSet>('sets').create(record => {
-      record.history.set(history)
-      record.exercise.set(exercise)
-      record.weight = params.weight
-      record.reps = params.reps
-      record.setOrder = params.setOrder
-      record.isPr = params.isPr
-    })
-  })
+  return await database.write(() => createSetRecord(params))
 }
 
 /**
@@ -105,51 +118,31 @@ export async function addRetroactiveSet(params: {
   reps: number
   setOrder: number
 }): Promise<WorkoutSet> {
-  return await database.write(async () => {
-    const history = await database.get<History>('histories').find(params.historyId)
-    const exercise = await database.get<Exercise>('exercises').find(params.exerciseId)
-    return await database.get<WorkoutSet>('sets').create(record => {
-      record.history.set(history)
-      record.exercise.set(exercise)
-      record.weight = params.weight
-      record.reps = params.reps
-      record.setOrder = params.setOrder
-      record.isPr = false
-    })
-  })
+  return await database.write(() => createSetRecord({ ...params, isPr: false }))
 }
 
 /**
- * Recalcule les flags isPr sur TOUS les sets d'un exercice donné.
- * Pour chaque set (trié chronologiquement), isPr = true si c'est le poids max
- * jamais atteint jusqu'à cette date.
+ * Pure computation: fetches sets for an exercise and computes PR flag changes.
+ * Does NOT write to the database.
  *
- * IMPORTANT : Contient son propre database.write() — NE JAMAIS appeler
- * depuis un autre database.write() (nested write = crash WatermelonDB).
- *
- * @param exerciseId - ID de l'exercice à recalculer
+ * @returns Array of sets that need their isPr flag toggled
  */
-export async function recalculateSetPrs(
+async function computeSetPrUpdates(
   exerciseId: string,
-  activeHistories?: History[],
-): Promise<void> {
+  activeHistories: History[],
+): Promise<{ set: WorkoutSet; shouldBePr: boolean }[]> {
   const allSets = await database
     .get<WorkoutSet>('sets')
     .query(Q.where('exercise_id', exerciseId))
     .fetch()
 
-  const histories = activeHistories ?? await database
-    .get<History>('histories')
-    .query(Q.where('deleted_at', null))
-    .fetch()
-
-  const activeHistoryIds = new Set(histories.map(h => h.id))
+  const activeHistoryIds = new Set(activeHistories.map(h => h.id))
 
   // Filter to sets belonging to non-deleted histories, then sort chronologically
   const activeSets = allSets.filter(s => activeHistoryIds.has(s.history.id))
 
   // We need history start times for sorting
-  const historyMap = new Map(histories.map(h => [h.id, h.startTime.getTime()]))
+  const historyMap = new Map(activeHistories.map(h => [h.id, h.startTime.getTime()]))
 
   activeSets.sort((a, b) => {
     const timeA = historyMap.get(a.history.id) ?? 0
@@ -169,6 +162,32 @@ export async function recalculateSetPrs(
     }
   }
 
+  return updates
+}
+
+/**
+ * Recalcule les flags isPr sur TOUS les sets d'un exercice donné.
+ * Pour chaque set (trié chronologiquement), isPr = true si c'est le poids max
+ * jamais atteint jusqu'à cette date.
+ *
+ * IMPORTANT : Contient son propre database.write() — NE JAMAIS appeler
+ * depuis un autre database.write() (nested write = crash WatermelonDB).
+ *
+ * @param exerciseId - ID de l'exercice à recalculer
+ */
+export async function recalculateSetPrs(
+  exerciseId: string,
+  activeHistories?: History[],
+): Promise<void> {
+  const histories = activeHistories ?? await database
+    .get<History>('histories')
+    .query(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )
+    .fetch()
+
+  const updates = await computeSetPrUpdates(exerciseId, histories)
   if (updates.length === 0) return
 
   await database.write(async () => {
@@ -181,20 +200,33 @@ export async function recalculateSetPrs(
 }
 
 /**
- * Recalcule les PRs pour plusieurs exercices en une seule lecture DB.
- * Fetche les histories actives UNE fois puis les passe à chaque appel.
+ * Recalcule les PRs pour plusieurs exercices en un seul write DB.
+ * Fetche les histories actives UNE fois, calcule tous les updates en parallèle,
+ * puis flush en un seul database.write() + database.batch().
  */
 export async function recalculateSetPrsBatch(exerciseIds: string[]): Promise<void> {
   const uniqueIds = [...new Set(exerciseIds)]
   if (uniqueIds.length === 0) return
+
   const histories = await database
     .get<History>('histories')
-    .query(Q.where('deleted_at', null))
+    .query(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )
     .fetch()
-  const results = await Promise.allSettled(uniqueIds.map(id => recalculateSetPrs(id, histories)))
-  if (__DEV__) {
-    for (const r of results) {
-      if (r.status === 'rejected') console.error('[recalculateSetPrsBatch]', r.reason)
-    }
-  }
+
+  const allUpdates = (await Promise.all(
+    uniqueIds.map(id => computeSetPrUpdates(id, histories))
+  )).flat()
+
+  if (allUpdates.length === 0) return
+
+  await database.write(async () => {
+    await database.batch(
+      allUpdates.map(({ set, shouldBePr }) =>
+        set.prepareUpdate(s => { s.isPr = shouldBePr })
+      )
+    )
+  })
 }
