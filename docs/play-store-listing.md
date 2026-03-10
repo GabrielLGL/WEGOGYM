@@ -186,7 +186,7 @@ https://kore-app.net/privacy
 
 | Champ | Valeur |
 |-------|--------|
-| Package | `com.kore.app` |
+| Package | `net.koreapp.mobile` |
 | Version | 1.0.0 |
 | SDK cible | Android 15 (API 35) |
 | SDK minimum | Android 6.0 (API 23) |

@@ -241,7 +241,8 @@ describe('Program', () => {
   describe('duplicate', () => {
     const buildMockDB = ({
       programCount = 2,
-      _sessions = [] as { id: string; name: string; position: number }[],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      sessions = [] as { id: string; name: string; position: number }[],
       sessionExercises = [] as {
         position: number
         setsTarget: number
