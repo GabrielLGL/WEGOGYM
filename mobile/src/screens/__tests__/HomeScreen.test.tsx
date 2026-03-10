@@ -54,13 +54,7 @@ jest.mock('@react-navigation/native', () => ({
 }))
 
 jest.mock('../../model/utils/statsHelpers', () => ({
-  computeGlobalKPIs: jest.fn().mockReturnValue({
-    totalSessions: 42,
-    totalVolumeKg: 12500,
-    totalPRs: 7,
-  }),
   computeMotivationalPhrase: jest.fn().mockReturnValue('Continue comme ça !'),
-  formatVolume: jest.fn((v: number) => `${v} kg`),
   buildWeeklyActivity: jest.fn().mockReturnValue(
     Array.from({ length: 7 }, (_, i) => ({
       dateKey: `2026-02-${String(i + 24).padStart(2, '0')}`,
@@ -126,17 +120,18 @@ describe('HomeScreen Dashboard', () => {
   })
 
   it('affiche les KPIs', () => {
+    const fakeHistories = Array.from({ length: 5 }, (_, i) => ({ id: `h-${i}` })) as unknown as History[]
     const { getByText } = render(
       <HomeContent
-        users={[makeUser()]}
-        histories={[] as unknown as History[]}
+        users={[makeUser({ totalTonnage: 25000, totalPrs: 7 } as Partial<User>)]}
+        histories={fakeHistories}
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
       />
     )
-    expect(getByText('42')).toBeTruthy()
-    expect(getByText('12500 kg')).toBeTruthy()
+    expect(getByText('5')).toBeTruthy()
+    expect(getByText('25.0 t')).toBeTruthy()
     expect(getByText('7')).toBeTruthy()
   })
 
@@ -156,7 +151,7 @@ describe('HomeScreen Dashboard', () => {
   })
 
   it('affiche toutes les tuiles', () => {
-    const { getByText, getAllByText, queryByText } = render(
+    const { getByText, queryByText } = render(
       <HomeContent
         users={[]}
         histories={[] as unknown as History[]}
@@ -168,7 +163,7 @@ describe('HomeScreen Dashboard', () => {
     expect(getByText('Programmes')).toBeTruthy()
     expect(getByText("Biblioth\u00e8que d'exercices")).toBeTruthy()
     expect(getByText('Dur\u00e9e')).toBeTruthy()
-    expect(getAllByText('Volume').length).toBeGreaterThanOrEqual(2)
+    expect(getByText('Volume')).toBeTruthy()
     expect(getByText('Agenda')).toBeTruthy()
     expect(queryByText('Muscles')).toBeNull()
     expect(queryByText('Exercices & Records')).toBeNull()

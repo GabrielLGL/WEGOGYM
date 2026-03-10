@@ -12,6 +12,7 @@
 
 import { Model, Q, Query } from '@nozbe/watermelondb'
 import { text, field, date, readonly, children } from '@nozbe/watermelondb/decorators'
+import type Exercise from './Exercise'
 import type Session from './Session'
 import type SessionExercise from './SessionExercise'
 
@@ -32,59 +33,89 @@ export default class Program extends Model {
   async duplicate() {
     const db = this.database
 
-    await db.write(async () => {
-      const count = await db.get<Program>('programs').query().fetchCount()
+    // Reads outside write transaction
+    const count = await db.get<Program>('programs').query().fetchCount()
+    const originalSessions = await this.sessions.fetch()
+    const sessionIds = originalSessions.map(s => s.id)
 
-      const newProgram = await db.get<Program>('programs').create(p => {
-        p.name = `${this.name} (Copie)`
-        p.position = count
-        p.equipment = this.equipment
-        p.frequency = this.frequency
-      })
-
-      const originalSessions = await this.sessions.fetch()
-
-      for (const session of originalSessions) {
-        const newSession = await db.get<Session>('sessions').create(s => {
-          s.name = session.name
-          s.position = session.position
-          s.program.set(newProgram)
-        })
-
-        const sessionExos = await db
-          .get<SessionExercise>('session_exercises')
-          .query(Q.where('session_id', session.id))
+    const allSessionExos = sessionIds.length > 0
+      ? await db.get<SessionExercise>('session_exercises')
+          .query(Q.where('session_id', Q.oneOf(sessionIds)))
           .fetch()
+      : []
 
-        // Map old superset IDs to new ones so grouped exercises stay together
-        const supersetIdMap = new Map<string, string>()
-        for (const se of sessionExos) {
-          const exercise = await se.exercise.fetch()
-          if (exercise) {
-            let newSupersetId: string | null = null
-            if (se.supersetId) {
-              if (!supersetIdMap.has(se.supersetId)) {
-                supersetIdMap.set(se.supersetId, `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`)
-              }
-              newSupersetId = supersetIdMap.get(se.supersetId)!
-            }
-            await db.get<SessionExercise>('session_exercises').create(newSE => {
-              newSE.session.set(newSession)
-              newSE.exercise.set(exercise)
-              newSE.position = se.position
-              newSE.setsTarget = se.setsTarget
-              newSE.setsTargetMax = se.setsTargetMax
-              newSE.repsTarget = se.repsTarget
-              newSE.weightTarget = se.weightTarget
-              newSE.supersetId = newSupersetId
-              newSE.supersetType = se.supersetType ?? null
-              newSE.supersetPosition = se.supersetPosition ?? null
-              newSE.notes = se.notes
-              newSE.restTime = se.restTime ?? null
-            })
+    // Batch-fetch all referenced exercises
+    const exerciseIds = [...new Set(allSessionExos.map(se => se.exercise.id))]
+    const exercises = exerciseIds.length > 0
+      ? await db.get<Exercise>('exercises')
+          .query(Q.where('id', Q.oneOf(exerciseIds)))
+          .fetch()
+      : []
+    const exerciseMap = new Map(exercises.map(e => [e.id, e]))
+
+    // Group session exercises by session ID
+    const exosBySession = new Map<string, SessionExercise[]>()
+    for (const se of allSessionExos) {
+      const list = exosBySession.get(se.session.id) ?? []
+      list.push(se)
+      exosBySession.set(se.session.id, list)
+    }
+
+    // Build all records with prepareCreate
+    const batch: Model[] = []
+
+    const newProgram = db.get<Program>('programs').prepareCreate(p => {
+      p.name = `${this.name} (Copie)`
+      p.position = count
+      p.equipment = this.equipment
+      p.frequency = this.frequency
+    })
+    batch.push(newProgram)
+
+    for (const session of originalSessions) {
+      const newSession = db.get<Session>('sessions').prepareCreate(s => {
+        s.name = session.name
+        s.position = session.position
+        s.program.set(newProgram)
+      })
+      batch.push(newSession)
+
+      const sessionExos = exosBySession.get(session.id) ?? []
+      const supersetIdMap = new Map<string, string>()
+
+      for (const se of sessionExos) {
+        const exercise = exerciseMap.get(se.exercise.id)
+        if (!exercise) continue
+
+        let newSupersetId: string | null = null
+        if (se.supersetId) {
+          if (!supersetIdMap.has(se.supersetId)) {
+            supersetIdMap.set(se.supersetId, `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`)
           }
+          newSupersetId = supersetIdMap.get(se.supersetId)!
         }
+
+        batch.push(
+          db.get<SessionExercise>('session_exercises').prepareCreate(newSE => {
+            newSE.session.set(newSession)
+            newSE.exercise.set(exercise)
+            newSE.position = se.position
+            newSE.setsTarget = se.setsTarget
+            newSE.setsTargetMax = se.setsTargetMax
+            newSE.repsTarget = se.repsTarget
+            newSE.weightTarget = se.weightTarget
+            newSE.supersetId = newSupersetId
+            newSE.supersetType = se.supersetType ?? null
+            newSE.supersetPosition = se.supersetPosition ?? null
+            newSE.notes = se.notes
+            newSE.restTime = se.restTime ?? null
+          })
+        )
       }
+    }
+
+    await db.write(async () => {
+      await db.batch(...batch)
     })
   }
 }

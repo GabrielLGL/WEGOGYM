@@ -3,7 +3,7 @@
  *
  * Affiche en un coup d'œil :
  * - Profil utilisateur (niveau, XP, streak, badges récents)
- * - KPIs globaux (séances totales, tonnage, volume, PRs)
+ * - KPIs globaux (séances totales, tonnage, PRs)
  * - Activité de la semaine (jours d'entraînement)
  * - Phrase motivationnelle dynamique
  * - CoachMarks (tutoriel premier lancement)
@@ -37,7 +37,7 @@ import Session from '../model/models/Session'
 import User from '../model/models/User'
 import UserBadge from '../model/models/UserBadge'
 import { BADGES_LIST } from '../model/utils/badgeConstants'
-import { computeGlobalKPIs, computeMotivationalPhrase, formatVolume, buildWeeklyActivity } from '../model/utils/statsHelpers'
+import { computeMotivationalPhrase, buildWeeklyActivity } from '../model/utils/statsHelpers'
 import { xpToNextLevel, formatTonnage } from '../model/utils/gamificationHelpers'
 import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
@@ -182,7 +182,6 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
     { key: 'settings', targetRef: settingsBtnRef, text: t.coachMarks.steps.settings, position: 'bottom' },
   ], [t])
 
-  const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
   const xpProgress = useMemo(
     () => xpToNextLevel(user?.totalXp ?? 0, user?.level ?? 1),
     [user?.totalXp, user?.level],
@@ -253,13 +252,11 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
         </View>
         <View style={styles.separator} />
         <View style={styles.kpisRow}>
-          <KpiItem label={t.home.tiles.sessions} value={String(kpis.totalSessions)} colors={colors} />
-          <View style={styles.kpiSeparator} />
-          <KpiItem label={t.home.tiles.volume} value={formatVolume(kpis.totalVolumeKg, language === 'fr' ? 'fr-FR' : 'en-US')} colors={colors} />
+          <KpiItem label={t.home.tiles.sessions} value={String(histories.length)} colors={colors} />
           <View style={styles.kpiSeparator} />
           <KpiItem label={t.home.tiles.tonnage} value={formatTonnage(user?.totalTonnage ?? 0)} colors={colors} />
           <View style={styles.kpiSeparator} />
-          <KpiItem label={t.home.tiles.records} value={String(kpis.totalPRs)} colors={colors} />
+          <KpiItem label={t.home.tiles.records} value={String(user?.totalPrs ?? 0)} colors={colors} />
         </View>
       </View>
 
@@ -668,10 +665,15 @@ export { HomeScreenBase as HomeContent }
 
 // ─── withObservables ──────────────────────────────────────────────────────────
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+
 const enhance = withObservables([], () => ({
   users: database.get<User>('users').query().observe(),
   histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
-  sets: database.get<WorkoutSet>('sets').query().observe(),
+  sets: database.get<WorkoutSet>('sets').query(
+    Q.on('histories', Q.where('deleted_at', null)),
+    Q.where('created_at', Q.gte(Date.now() - THIRTY_DAYS_MS)),
+  ).observe(),
   sessions: database.get<Session>('sessions').query().observe(),
   userBadges: database.get<UserBadge>('user_badges').query().observe(),
 }))
