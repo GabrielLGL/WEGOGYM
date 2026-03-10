@@ -1,3 +1,13 @@
+/**
+ * aiService.ts — Point d'entrée pour la génération de programmes/séances par IA
+ *
+ * Responsabilités :
+ * 1. Sélection du provider (offline, OpenAI, Gemini, Claude) selon les préférences user
+ * 2. Construction du contexte DB (exercices filtrés, muscles récents, PRs)
+ * 3. Génération avec fallback automatique : si le provider cloud échoue → offline
+ * 4. Test de connexion provider pour la configuration dans Settings
+ */
+
 import { Q } from '@nozbe/watermelondb'
 import { database } from '../../model'
 import type Exercise from '../../model/models/Exercise'
@@ -14,6 +24,7 @@ import { generateProgram, toDatabasePlan } from './programGenerator'
 import type { UserProfile } from './programGenerator'
 import { getApiKey } from '../secureKeyStore'
 
+/** Sélectionne le provider IA selon la config user. Sans clé API → toujours offline. */
 function selectProvider(aiProvider: string | null, apiKey: string | null): AIProvider {
   if (!apiKey || !aiProvider || aiProvider === 'offline') return offlineEngine
   switch (aiProvider) {
@@ -24,6 +35,13 @@ function selectProvider(aiProvider: string | null, apiKey: string | null): AIPro
   }
 }
 
+/**
+ * Construit le contexte DB nécessaire à la génération.
+ * Récupère :
+ * - Les exercices filtrés par équipement sélectionné et groupes musculaires
+ * - Les muscles travaillés dans les 7 derniers jours (pour favoriser la variété)
+ * - Les PRs des 30 derniers jours via performance_logs (pour calculer les charges)
+ */
 async function buildDBContext(form: AIFormData): Promise<DBContext> {
   // 1. Noms des exercices filtrés par équipement si possible
   const allExercises = await database.get<Exercise>('exercises').query().fetch()
@@ -113,6 +131,11 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
   }
 }
 
+/**
+ * Génère un plan (programme ou séance) via le provider configuré.
+ * En cas d'échec du provider cloud, bascule automatiquement sur le moteur offline
+ * et signale le fallback dans le résultat (usedFallback: true).
+ */
 export async function generatePlan(form: AIFormData, user: User | null): Promise<GeneratePlanResult> {
   const context = await buildDBContext(form)
   const apiKey = await getApiKey()
@@ -133,6 +156,7 @@ export async function generatePlan(form: AIFormData, user: User | null): Promise
   }
 }
 
+/** Teste la connexion à un provider cloud (utilisé dans SettingsScreen pour valider la clé API) */
 export async function testProviderConnection(
   providerName: string,
   apiKey: string

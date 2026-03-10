@@ -1,3 +1,22 @@
+/**
+ * WorkoutScreen — Écran de séance d'entraînement en direct
+ *
+ * Flux principal :
+ * 1. Création d'un History au mount (createWorkoutHistory)
+ * 2. Timer global + timer de repos entre séries
+ * 3. Validation de chaque série → saveWorkoutSet + détection PR
+ * 4. Gestion des supersets/circuits (WorkoutSupersetBlock)
+ * 5. Fin de séance → useWorkoutCompletion (XP, badges, streak, récap)
+ * 6. Affichage du récapitulatif (WorkoutSummarySheet)
+ *
+ * State management :
+ * - useWorkoutState : état local des séries (poids, reps, validation)
+ * - useWorkoutTimer : chrono global et timer de repos
+ * - useWorkoutCompletion : orchestration fin de séance + gamification
+ *
+ * Données : Session + SessionExercises via withObservables, User pour la gamification
+ */
+
 import React, { useEffect, useRef, useLayoutEffect, useState, useMemo, useCallback } from 'react'
 import {
   View,

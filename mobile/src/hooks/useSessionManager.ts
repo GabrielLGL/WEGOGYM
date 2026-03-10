@@ -210,6 +210,11 @@ export function useSessionManager(
     }
   }, [])
 
+  /**
+   * Groupe plusieurs exercices en superset ou circuit.
+   * Génère un supersetId unique partagé par tous les membres du groupe.
+   * Chaque exercice reçoit une supersetPosition (ordre dans le groupe).
+   */
   const groupExercises = useCallback(async (
     items: SessionExercise[],
     type: 'superset' | 'circuit'
@@ -239,6 +244,11 @@ export function useSessionManager(
     }
   }, [onSuccess])
 
+  /**
+   * Retire un exercice de son superset/circuit.
+   * Si le groupe ne contiendrait plus qu'1 membre → dissout le groupe entier.
+   * Sinon, recalcule les positions des membres restants.
+   */
   const ungroupExercise = useCallback(async (
     sessionExercise: SessionExercise,
     allSessionExercises: SessionExercise[]

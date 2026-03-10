@@ -1,3 +1,20 @@
+/**
+ * useAssistantWizard.ts — Hook principal du wizard de génération IA
+ *
+ * Gère un formulaire multi-étapes (wizard) pour configurer un programme/séance :
+ *
+ * Flow programme (9 étapes) : objectif → équipement → durée → split → phase →
+ *   récupération → blessures → jours/semaine → focus musculaire → génération
+ *
+ * Flow séance (4 étapes) : objectif → équipement → durée → groupes musculaires → génération
+ *
+ * Le wizard adapte dynamiquement les étapes (ex: les jours disponibles dépendent du split choisi).
+ * Toutes les options sont traduites via le système i18n, mais les values restent en clé DB.
+ *
+ * Animations : barre de progression (Animated) + fade-in entre les étapes.
+ * À la dernière étape, triggerGenerate() appelle aiService.generatePlan() et navigue vers AssistantPreview.
+ */
+
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { Animated } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'

@@ -1,3 +1,18 @@
+/**
+ * HomeScreen — Dashboard principal / hub de navigation
+ *
+ * Affiche en un coup d'œil :
+ * - Profil utilisateur (niveau, XP, streak, badges récents)
+ * - KPIs globaux (séances totales, tonnage, volume, PRs)
+ * - Activité de la semaine (jours d'entraînement)
+ * - Phrase motivationnelle dynamique
+ * - CoachMarks (tutoriel premier lancement)
+ *
+ * Toutes les données sont observées via withObservables → mise à jour automatique.
+ * Les célébrations (milestones, badges) sont transmises depuis WorkoutScreen
+ * via les params de navigation et affichées en overlay au retour sur Home.
+ */
+
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import {
   View,

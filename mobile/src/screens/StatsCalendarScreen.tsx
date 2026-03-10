@@ -1,3 +1,16 @@
+/**
+ * StatsCalendarScreen — Écran calendrier des statistiques d'entraînement
+ *
+ * Affiche un calendrier mensuel avec :
+ * - Les jours d'entraînement colorés (avec nombre de séances)
+ * - Les streaks (série actuelle + record)
+ * - Le détail d'une journée au clic (exercices, séries, PRs)
+ * - Navigation mois par mois avec swipe
+ * - Suppression soft-delete d'un historique
+ *
+ * Données : History[] observés via withObservables (réactif, soft-delete filtré)
+ */
+
 import React, { useMemo, useState, useCallback } from 'react'
 import {
   View,
@@ -38,6 +51,13 @@ const DAY_GAP = 6
 
 // ─── Génération de la grille mensuelle ────────────────────────────────────────
 
+/**
+ * Génère la grille du calendrier pour un mois donné.
+ * Produit un tableau de semaines (lundi → dimanche), chaque jour contenant :
+ * - Le nombre de séances ce jour-là (via calendarData)
+ * - Si c'est le mois courant, un jour futur, etc.
+ * Remplit les jours hors-mois en début/fin pour compléter les semaines.
+ */
 function generateMonthGrid(
   year: number,
   month: number,
@@ -142,7 +162,7 @@ interface MonthNavigatorProps {
 
 function MonthNavigator({
   viewYear, viewMonth, locale, isCurrentMonth,
-  onPrev, onNext, _colors, styles, t,
+  onPrev, onNext, colors: _colors, styles, t,
 }: MonthNavigatorProps) {
   return (
     <View style={styles.monthSelector}>

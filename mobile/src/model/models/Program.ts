@@ -1,3 +1,15 @@
+/**
+ * Program — Modèle WatermelonDB pour un programme d'entraînement
+ *
+ * Relation : Program (1:N) → Session (1:N) → SessionExercise
+ *
+ * La méthode duplicate() crée une copie profonde :
+ * - Nouveau programme avec " (Copie)" suffixé au nom
+ * - Toutes les sessions dupliquées avec leurs exercices
+ * - Les groupes superset/circuit reçoivent de nouveaux IDs
+ *   (via supersetIdMap) pour rester liés entre eux sans conflits
+ */
+
 import { Model, Q, Query } from '@nozbe/watermelondb'
 import { text, field, date, readonly, children } from '@nozbe/watermelondb/decorators'
 import type Session from './Session'

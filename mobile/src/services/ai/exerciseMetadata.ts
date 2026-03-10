@@ -1,3 +1,23 @@
+/**
+ * exerciseMetadata.ts — Base de données des métadonnées d'exercices
+ *
+ * Chaque exercice est décrit par :
+ * - `type`           : classification mécanique (compound_heavy | compound | accessory | isolation)
+ *                      → détermine l'ordre dans la séance et les paramètres de séries/reps
+ * - `minLevel`       : niveau minimum requis ('débutant' | 'intermédiaire' | 'avancé')
+ * - `isUnilateral`   : true si l'exercice travaille un côté à la fois
+ * - `primaryMuscle`  : muscle principal ciblé (utilisé pour le tri et l'allocation)
+ * - `secondaryMuscles`: muscles secondaires recrutés
+ * - `sfr`            : Stimulus-to-Fatigue Ratio ('low' | 'medium' | 'high')
+ *                      → high = bon rapport stimulus/fatigue, low = très fatiguant
+ * - `stretchFocus`   : true si l'exercice travaille le muscle en position étirée
+ *                      → l'algorithme garantit min 30% de stretchFocus par séance
+ * - `injuryRisk`     : zones à risque — l'algo exclut l'exercice si l'utilisateur a une blessure dans cette zone
+ * - `progressionType`: stratégie de progression ('linear' | 'wave' | 'auto')
+ *
+ * Utilisé par offlineEngine.ts pour la sélection et le paramétrage des exercices.
+ */
+
 import type { ExerciseMetadataMap, ExerciseMetadata } from './types'
 
 export const EXERCISE_METADATA: ExerciseMetadataMap = {
@@ -600,6 +620,7 @@ export const EXERCISE_METADATA: ExerciseMetadataMap = {
   },
 }
 
+/** Récupère les métadonnées d'un exercice par son nom exact (sensible à la casse) */
 export function getExerciseMetadata(name: string): ExerciseMetadata | undefined {
   return EXERCISE_METADATA[name]
 }

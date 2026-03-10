@@ -1,9 +1,27 @@
+/**
+ * offlineEngine.ts — Moteur de génération de programmes d'entraînement hors ligne
+ *
+ * Génère des programmes et séances sans appel réseau, en utilisant :
+ * - Les métadonnées d'exercices (type, niveau, SFR, blessures)
+ * - Le profil utilisateur (objectif, niveau, durée, récupération, blessures)
+ * - Les PRs existants pour calculer les charges cibles
+ *
+ * Pipeline de génération :
+ * 1. Choix du split (fullbody, PPL, upper/lower…) selon le nombre de jours
+ * 2. Allocation du nombre d'exercices par muscle pour chaque séance
+ * 3. Sélection intelligente des exercices (évite les doublons, priorise la variété)
+ * 4. Calcul des séries/reps/charges/repos selon l'objectif et la phase
+ * 5. Équilibrage stretchFocus (min 30% d'exercices en étirement)
+ * 6. Tri final : compound_heavy → compound → accessory → isolation
+ */
+
 import type {
   AIProvider, AIFormData, DBContext, GeneratedPlan, GeneratedExercise,
   GeneratedSession, ExerciseInfo, AISplit, AIGoal, AILevel, ExerciseType, ExerciseMetadata,
 } from './types'
 import { getExerciseMetadata, EXERCISE_METADATA } from './exerciseMetadata'
 
+/** Mélange aléatoire d'un tableau (Fisher-Yates) */
 function shuffleArray<T>(arr: T[]): T[] {
   const result = [...arr]
   for (let i = result.length - 1; i > 0; i--) {
@@ -13,6 +31,13 @@ function shuffleArray<T>(arr: T[]): T[] {
   return result
 }
 
+/**
+ * Calcule la charge cible pour un exercice à partir du PR de l'utilisateur.
+ * Applique un pourcentage selon l'objectif (power > bodybuilding > renfo > cardio)
+ * et le niveau (avancé utilise un % plus élevé du PR).
+ * Arrondi au 0.5 kg près.
+ * @returns 0 si aucun PR trouvé (= poids du corps)
+ */
 function getWeightTarget(exerciseName: string, prs: Record<string, number>, goal: string, level: string): number {
   const pr = prs[exerciseName] ?? prs[exerciseName.toLowerCase()]
   if (!pr || pr === 0) return 0
@@ -26,6 +51,7 @@ function getWeightTarget(exerciseName: string, prs: Record<string, number>, goal
   return Math.round(pr * pct * 2) / 2
 }
 
+/** Nombre d'exercices par séance en fonction de la durée (45min → 5, 60min → 6, 90min → 8, 120min+ → 10) */
 function exercisesCount(durationMin: number): number {
   if (durationMin <= 45) return 5
   if (durationMin <= 60) return 6
@@ -34,6 +60,8 @@ function exercisesCount(durationMin: number): number {
 }
 
 // ─── Splits & noms de séances ─────────────────────────────────────────────────
+// Chaque split définit les groupes musculaires travaillés par séance.
+// Ex: PPL = [Push(Pecs,Épaules,Triceps), Pull(Dos,Biceps,Trapèzes), Legs(Quads,Ischios,Mollets,Abdos)]
 
 const SPLITS: Record<string, string[][]> = {
   fullbody:   [['Pecs', 'Dos', 'Quadriceps', 'Epaules', 'Abdos']],
@@ -78,6 +106,7 @@ const SPLITS: Record<string, string[][]> = {
   fullbodyhi: [['Pecs', 'Dos', 'Quadriceps', 'Epaules', 'Ischios', 'Abdos']],
 }
 
+/** Sélection automatique du split selon le nombre de jours (≤3 → fullbody, 4 → upper/lower, 5+ → PPL) */
 function getSplit(days: number): string[][] {
   if (days <= 3) return SPLITS.fullbody
   if (days <= 4) return SPLITS.upperlower
@@ -116,6 +145,8 @@ const SPLIT_LABELS: Record<string, string> = {
 }
 
 // ─── Algorithme intelligent ───────────────────────────────────────────────────
+// Tables de référence pour calculer séries et reps selon le type d'exercice et l'objectif.
+// Les valeurs sont des bases ajustées ensuite par le volume multiplier, la phase, et le focus.
 
 const SETS_BY_TYPE_GOAL: Record<ExerciseType, Record<AIGoal, number>> = {
   compound_heavy: { bodybuilding: 4, power: 5, renfo: 4, cardio: 3 },
@@ -163,6 +194,11 @@ function toCandidate(ex: ExerciseInfo, userLevel: AILevel): CandidateExercise | 
 
 // ─── Volume & Phase helpers ────────────────────────────────────────────────────
 
+/**
+ * Multiplicateur de volume global basé sur le profil utilisateur.
+ * Ajuste le nombre de séries selon la récupération et l'âge.
+ * Borné entre 0.6 et 1.4 pour éviter les extrêmes.
+ */
 function getVolumeMultiplier(form: AIFormData): number {
   let multiplier = 1.0
   if (form.recovery === 'rapide') multiplier += 0.15
@@ -173,6 +209,11 @@ function getVolumeMultiplier(form: AIFormData): number {
   return Math.max(0.6, Math.min(1.4, multiplier))
 }
 
+/**
+ * Ajuste les plages de reps selon la phase nutritionnelle.
+ * Sèche → reps plus hautes (+2 à +4) pour maximiser les calories brûlées.
+ * Prise de masse → légère augmentation (+1) pour plus de volume.
+ */
 function getPhaseAdjustment(phase: AIFormData['phase'], baseReps: string): { reps: string } {
   if (!phase || phase === 'recomposition' || phase === 'maintien') {
     return { reps: baseReps }
@@ -189,6 +230,11 @@ function getPhaseAdjustment(phase: AIFormData['phase'], baseReps: string): { rep
   }
 }
 
+/**
+ * Détermine le temps de repos (secondes) et le RPE cible selon le type d'exercice,
+ * l'objectif et la phase. Les compound_heavy ont plus de repos (210s) que les isolation (75s).
+ * En sèche, le repos est réduit de 20%. En prise de masse, augmenté de 15%.
+ */
 function getRestAndRPE(
   type: ExerciseType,
   goal: AIGoal,
@@ -219,6 +265,12 @@ function getRestAndRPE(
   return { restSeconds, rpe }
 }
 
+/**
+ * Calcule le nombre final de séries pour un exercice donné.
+ * Prend en compte : type d'exercice, objectif, focus musculaire (+1 série),
+ * phase prise de masse (+1 pour compounds), volume multiplier, et phase maintien (×0.8).
+ * Résultat borné entre SETS_MIN et SETS_MAX selon le type.
+ */
 function computeSets(
   type: ExerciseType,
   goal: AIGoal,
@@ -237,6 +289,12 @@ function computeSets(
 
 // ─── Allocation d'exercices par muscle ────────────────────────────────────────
 
+/**
+ * Répartit le nombre total d'exercices entre les muscles d'une séance.
+ * 1. Chaque muscle reçoit au moins 1 exercice (si le budget le permet)
+ * 2. Les muscles en focus reçoivent un exercice supplémentaire
+ * 3. Le reste est distribué en round-robin
+ */
 function allocateExercises(
   muscles: string[],
   total: number,
@@ -265,7 +323,14 @@ function allocateExercises(
   return alloc
 }
 
-// Sélection : non-utilisés en premier, muscles non-récents avant récents, puis par type
+/**
+ * Sélectionne les meilleurs exercices parmi les candidats.
+ * Tri par priorité :
+ * 1. Exercices non encore utilisés dans le programme (variété inter-séances)
+ * 2. Muscles non travaillés récemment (variété inter-programmes)
+ * 3. Composés avant isolations (compound_heavy → compound → accessory → isolation)
+ * Un shuffle préalable introduit de l'aléatoire à priorité égale.
+ */
 function selectExercises(
   candidates: CandidateExercise[],
   count: number,
@@ -291,6 +356,12 @@ function selectExercises(
 
 // ─── Stretch balance ──────────────────────────────────────────────────────────
 
+/**
+ * Garantit qu'au moins 30% des exercices de la séance ont stretchFocus=true.
+ * Si ce ratio n'est pas atteint, remplace les exercices avec le SFR le plus bas
+ * (moins de stimulus par fatigue) par des exercices stretchFocus disponibles.
+ * Cela améliore l'hypertrophie en position d'étirement.
+ */
 function ensureStretchBalance(
   exercises: GeneratedExercise[],
   allCandidates: CandidateExercise[],
@@ -344,6 +415,10 @@ function ensureStretchBalance(
 
 // ─── Construction de séance ───────────────────────────────────────────────────
 
+/**
+ * Construit une séance complète pour un groupe de muscles donné.
+ * Pipeline : allocation → filtrage blessures → sélection → calcul params → tri → stretch balance → cardio optionnel
+ */
 function buildSession(
   name: string,
   muscles: string[],
@@ -442,6 +517,12 @@ function buildSession(
 
 // ─── Génération programme ─────────────────────────────────────────────────────
 
+/**
+ * Génère un programme complet multi-séances.
+ * Distribue les jours selon le split choisi (ou auto-détecté),
+ * priorise les séances contenant les muscles focus,
+ * et ajoute une semaine de décharge si les conditions sont remplies (≥4j, récup non rapide, 36+).
+ */
 function generateProgram(form: AIFormData, context: DBContext): GeneratedPlan {
   const { daysPerWeek = 3, musclesFocus = [], split } = form
   const splitName = getSplitName(daysPerWeek, split)
@@ -496,6 +577,7 @@ function generateProgram(form: AIFormData, context: DBContext): GeneratedPlan {
 
 // ─── Génération séance unique ─────────────────────────────────────────────────
 
+/** Génère une séance unique (mode "session") — utilise les groupes musculaires sélectionnés ou Full Body par défaut */
 function generateSession(form: AIFormData, context: DBContext): GeneratedPlan {
   const muscles = (form.muscleGroups && form.muscleGroups.length > 0)
     ? form.muscleGroups
