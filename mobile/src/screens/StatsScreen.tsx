@@ -210,7 +210,9 @@ function useStyles(colors: ThemeColors) {
 const enhance = withObservables([], () => ({
   users: database.get<User>('users').query().observe(),
   histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
-  sets: database.get<WorkoutSet>('sets').query().observe(),
+  sets: database.get<WorkoutSet>('sets').query(
+    Q.on('histories', Q.where('deleted_at', null)),
+  ).observe(),
 }))
 
 const ObservableStatsContent = enhance(StatsScreenBase)

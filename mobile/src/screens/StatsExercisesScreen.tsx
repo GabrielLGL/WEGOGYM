@@ -286,7 +286,9 @@ function useStyles(colors: ThemeColors) {
 }
 
 const enhance = withObservables([], () => ({
-  sets: database.get<WorkoutSet>('sets').query().observe(),
+  sets: database.get<WorkoutSet>('sets').query(
+    Q.on('histories', Q.where('deleted_at', null)),
+  ).observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
   histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
 }))

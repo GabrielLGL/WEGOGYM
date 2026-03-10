@@ -109,7 +109,7 @@ export function useWorkoutState(
       if (!exercise) return false
 
       const maxWeight = await getMaxWeightForExercise(exercise.id, historyId)
-      const isPr = maxWeight > 0 && weight > maxWeight
+      const isPr = weight > 0 && weight > maxWeight
 
       await saveWorkoutSet({
         historyId,

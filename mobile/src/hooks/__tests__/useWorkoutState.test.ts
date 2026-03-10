@@ -265,9 +265,9 @@ describe('useWorkoutState', () => {
         weight: 60,
         reps: 10,
         setOrder: 1,
-        isPr: false,
+        isPr: true,
       })
-      expect(result.current.validatedSets['se-1_1']).toEqual({ weight: 60, reps: 10, isPr: false })
+      expect(result.current.validatedSets['se-1_1']).toEqual({ weight: 60, reps: 10, isPr: true })
       expect(result.current.totalVolume).toBe(600) // 60 * 10
     })
 
@@ -308,7 +308,7 @@ describe('useWorkoutState', () => {
       expect(result.current.validatedSets['se-1_1'].isPr).toBe(false)
     })
 
-    it('should not mark as PR when maxWeight is 0 (no history)', async () => {
+    it('should mark as PR when maxWeight is 0 (first set ever for exercise)', async () => {
       mockGetMaxWeightForExercise.mockResolvedValue(0)
       const se1 = createMockSE('se-1', 1)
       const { result } = renderHook(() => useWorkoutState([se1], 'history-1'))
@@ -322,7 +322,7 @@ describe('useWorkoutState', () => {
         await result.current.validateSet(se1, 1)
       })
 
-      expect(result.current.validatedSets['se-1_1'].isPr).toBe(false)
+      expect(result.current.validatedSets['se-1_1'].isPr).toBe(true)
     })
 
     it('should accumulate totalVolume across multiple validated sets', async () => {
@@ -370,8 +370,8 @@ describe('useWorkoutState', () => {
         await result.current.validateSet(se2, 1)
       })
 
-      expect(result.current.validatedSets['se-1_1']).toEqual({ weight: 60, reps: 10, isPr: false })
-      expect(result.current.validatedSets['se-2_1']).toEqual({ weight: 100, reps: 5, isPr: false })
+      expect(result.current.validatedSets['se-1_1']).toEqual({ weight: 60, reps: 10, isPr: true })
+      expect(result.current.validatedSets['se-2_1']).toEqual({ weight: 100, reps: 5, isPr: true })
       expect(result.current.totalVolume).toBe(1100) // 60*10 + 100*5
     })
 
