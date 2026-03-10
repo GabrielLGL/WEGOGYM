@@ -107,7 +107,7 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
         </View>
         {pr ? (
           <>
-            <Text style={styles.prValue}>{pr.weight} kg × {pr.reps} reps</Text>
+            <Text style={styles.prValue}>{pr.weight} {t.statsMeasurements.weightUnit} × {pr.reps} {t.workout.reps}</Text>
             <Text style={styles.prOneRM}>{t.exerciseHistory.prOneRM}{oneRM} {t.exerciseHistory.prOneRMUnit}</Text>
           </>
         ) : (
@@ -126,7 +126,7 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
             chartConfig={chartConfig}
             style={styles.chart}
             fromZero
-            formatYLabel={val => `${val}kg`}
+            formatYLabel={val => `${val}${t.statsMeasurements.weightUnit}`}
             formatXLabel={val => (chartData.labels.length > 6 ? '' : val)}
           />
         </View>
@@ -166,7 +166,7 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
                 <View style={styles.historySets}>
                   {stat.sets.map((s, si) => (
                     <Text key={si} style={styles.setChip}>
-                      {s.weight > 0 ? `${s.weight} kg` : t.exerciseHistory.bodyweight} × {s.reps}
+                      {s.weight > 0 ? `${s.weight} ${t.statsMeasurements.weightUnit}` : t.exerciseHistory.bodyweight} × {s.reps}
                     </Text>
                   ))}
                 </View>
@@ -337,6 +337,7 @@ const enhance = withObservables(
       .get<History>('histories')
       .query(
         Q.where('deleted_at', null),
+        Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
         Q.on('sets', Q.where('exercise_id', exerciseId)),
       )
       .observe(),
@@ -345,6 +346,7 @@ const enhance = withObservables(
       .query(
         Q.on('histories', [
           Q.where('deleted_at', null),
+          Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
           Q.on('sets', Q.where('exercise_id', exerciseId)),
         ]),
       )

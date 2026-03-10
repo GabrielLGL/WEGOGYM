@@ -376,7 +376,7 @@ function SessionDetailCard({ detail, expandedBlocks, onToggle, onDelete, colors,
                             <Text
                               style={[styles.detailSetText, s.isPr && styles.detailSetPr]}
                             >
-                              {s.weight > 0 ? `${s.weight} kg` : t.historyDetail.bodyweight} × {s.reps}
+                              {s.weight > 0 ? `${s.weight} ${t.statsMeasurements.weightUnit}` : t.historyDetail.bodyweight} × {s.reps}
                             </Text>
                             {s.isPr && <Ionicons name="ribbon" size={12} color={colors.primary} />}
                           </View>

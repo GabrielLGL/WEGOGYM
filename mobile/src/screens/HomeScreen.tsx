@@ -36,6 +36,7 @@ import WorkoutSet from '../model/models/Set'
 import Session from '../model/models/Session'
 import User from '../model/models/User'
 import UserBadge from '../model/models/UserBadge'
+import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { BADGES_LIST } from '../model/utils/badgeConstants'
 import { computeMotivationalPhrase, buildWeeklyActivity } from '../model/utils/statsHelpers'
 import { xpToNextLevel, formatTonnage } from '../model/utils/gamificationHelpers'
@@ -100,14 +101,15 @@ function KpiItem({ label, value, colors }: { label: string; value: string; color
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 interface Props {
-  users: User[]
+  user: User | null
   histories: History[]
+  historiesCount: number
   sets: WorkoutSet[]
   sessions: Session[]
   userBadges: UserBadge[]
 }
 
-function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props) {
+function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<HomeNavigation>()
@@ -166,8 +168,6 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
       setCurrentCelebration(null)
     }
   }, [])
-
-  const user = users[0] ?? null
 
   // Coach marks
   const { shouldShow: shouldShowCoachMarks, markCompleted: markTutorialCompleted } = useCoachMarks(user)
@@ -251,7 +251,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
         </View>
         <View style={styles.separator} />
         <View style={styles.kpisRow}>
-          <KpiItem label={t.home.tiles.sessions} value={String(histories.length)} colors={colors} />
+          <KpiItem label={t.home.tiles.sessions} value={String(historiesCount)} colors={colors} />
           <View style={styles.kpiSeparator} />
           <KpiItem label={t.home.tiles.tonnage} value={formatTonnage(user?.totalTonnage ?? 0)} colors={colors} />
           <View style={styles.kpiSeparator} />
@@ -327,7 +327,7 @@ function HomeScreenBase({ users, histories, sets, sessions, userBadges }: Props)
               const totalVolume = weeklyActivity.reduce(
                 (acc, d) => acc + d.sessions.reduce((a, s) => a + s.volumeKg, 0), 0
               )
-              return `${totalSessions} ${totalSessions > 1 ? t.home.sessions : t.home.session} · ${Math.round(totalVolume)} kg`
+              return `${totalSessions} ${totalSessions > 1 ? t.home.sessions : t.home.session} · ${Math.round(totalVolume)} ${t.statsMeasurements.weightUnit}`
             })()}
           </Text>
         </View>
@@ -670,12 +670,24 @@ export { HomeScreenBase as HomeContent }
 // ─── withObservables ──────────────────────────────────────────────────────────
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000
 
 const enhance = withObservables([], () => ({
-  users: database.get<User>('users').query().observe(),
-  histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
+  user: observeCurrentUser(),
+  histories: database.get<History>('histories').query(
+    Q.where('deleted_at', null),
+    Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    Q.where('created_at', Q.gte(Date.now() - NINETY_DAYS_MS)),
+  ).observe(),
+  historiesCount: database.get<History>('histories').query(
+    Q.where('deleted_at', null),
+    Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+  ).observeCount(),
   sets: database.get<WorkoutSet>('sets').query(
-    Q.on('histories', Q.where('deleted_at', null)),
+    Q.on('histories', Q.and(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )),
     Q.where('created_at', Q.gte(Date.now() - THIRTY_DAYS_MS)),
   ).observe(),
   sessions: database.get<Session>('sessions').query().observe(),

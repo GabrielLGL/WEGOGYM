@@ -26,7 +26,9 @@ import {
   recalculateSetPrs,
   recalculateSetPrsBatch,
 } from '../model/utils/databaseHelpers'
-import { DEFAULT_REPS, MINUTE_MS } from '../model/constants'
+import { formatDuration } from '../model/utils/statsDuration'
+import { validateSetInput } from '../model/utils/validationHelpers'
+import { DEFAULT_REPS } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
 import { useHaptics } from '../hooks/useHaptics'
@@ -131,12 +133,8 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
   // Duration display
   const durationText = useMemo(() => {
     if (!history.endTime) return null
-    const ms = history.endTime.getTime() - history.startTime.getTime()
-    const mins = Math.round(ms / MINUTE_MS)
-    if (mins < 60) return `${mins} min`
-    const h = Math.floor(mins / 60)
-    const m = mins % 60
-    return `${h}h${m > 0 ? String(m).padStart(2, '0') : ''}`
+    const mins = Math.round((history.endTime.getTime() - history.startTime.getTime()) / 60_000)
+    return formatDuration(mins)
   }, [history.startTime, history.endTime])
 
   const updateEdit = useCallback((setId: string, field: 'weight' | 'reps', value: string) => {
@@ -150,6 +148,17 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
 
   const handleSave = useCallback(async () => {
     try {
+      // Validate all edits first
+      for (const s of sets) {
+        const edit = edits[s.id]
+        if (!edit) continue
+        const { valid } = validateSetInput(edit.weight, edit.reps)
+        if (!valid) {
+          haptics.onError()
+          return
+        }
+      }
+
       const affectedExerciseIds = new Set<string>()
 
       await database.write(async () => {
@@ -402,7 +411,7 @@ function ExerciseCardInner({
               keyboardType="numeric"
               selectTextOnFocus
             />
-            <Text style={styles.setUnit}>kg</Text>
+            <Text style={styles.setUnit}>{t.statsMeasurements.weightUnit}</Text>
             <TextInput
               style={styles.setInput}
               value={edit?.reps ?? String(s.reps)}

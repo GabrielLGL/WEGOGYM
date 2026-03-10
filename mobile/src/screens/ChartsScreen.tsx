@@ -142,7 +142,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         </TouchableOpacity>
       </View>
     </View>
-  ), [styles, colors, haptics, navigation])
+  ), [styles, colors, haptics, navigation, t, alertModal, setSelectedStat])
 
   return (
     <View style={styles.statsContainer}>
@@ -213,6 +213,7 @@ const ObservableExerciseStats = withObservables(
       .query(
         Q.experimentalJoinTables(['sets']),
         Q.where('deleted_at', null),
+        Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
         Q.on('sets', Q.where('exercise_id', exerciseId))
       )
       .observe(),
@@ -223,6 +224,7 @@ const ObservableExerciseStats = withObservables(
         Q.experimentalNestedJoin('histories', 'sets'),
         Q.on('histories', [
           Q.where('deleted_at', null),
+          Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
           Q.on('sets', Q.where('exercise_id', exerciseId)),
         ])
       )

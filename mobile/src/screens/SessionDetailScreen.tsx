@@ -11,7 +11,6 @@ import User from '../model/models/User'
 import { SessionExerciseItem } from '../components/SessionExerciseItem'
 import { ExerciseTargetInputs } from '../components/ExerciseTargetInputs'
 import { ExercisePickerModal } from '../components/ExercisePickerModal'
-import { map } from 'rxjs/operators'
 import { CustomModal } from '../components/CustomModal'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
@@ -23,6 +22,7 @@ import { BottomSheet } from '../components/BottomSheet'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RouteProp } from '@react-navigation/native'
 import { RootStackParamList } from '../navigation'
+import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { fontSize, spacing, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
@@ -183,7 +183,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     }
   }, [exercises, addExercise, addModal])
 
-  const handleUpdateTargets = async () => {
+  const handleUpdateTargets = useCallback(async () => {
     try {
       const success = await updateTargets()
       if (success) {
@@ -192,7 +192,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     } catch (e) {
       if (__DEV__) console.error('handleUpdateTargets error:', e)
     }
-  }
+  }, [updateTargets, editModal])
 
   const showRemoveAlert = useCallback((se: SessionExercise, exoName: string) => {
     setAlertConfig({
@@ -533,7 +533,7 @@ const ObservableSessionDetailContent = withObservables(['route'], ({ route }: { 
   session: database.get<Session>('sessions').findAndObserve(route.params.sessionId),
   sessionExercises: database.get<SessionExercise>('session_exercises').query(Q.where('session_id', route.params.sessionId), Q.sortBy('position', Q.asc)).observe(),
   exercises: database.get<Exercise>('exercises').query(Q.sortBy('name', Q.asc)).observe(),
-  user: database.get<User>('users').query().observe().pipe(map(list => list[0] || null))
+  user: observeCurrentUser()
 }))(SessionDetailContent)
 
 const SessionDetailScreen = ({ route, navigation }: {
