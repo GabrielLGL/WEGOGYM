@@ -62,6 +62,7 @@
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1691 tests, 108 suites, 2 CRIT fixés: test mocks unsafeFetchRaw, recalculateSetPrsBatch dedup) |
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1691 tests, 108 suites, 2 CRIT + 1 WARN fixés: soft-delete filter stats, PR detection premier set, dead styles)
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1691 tests, 108 suites, 1 WARN fixé: ExerciseHistoryScreen hardcoded locale → dateLocale) |
+| 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1691 tests, 108 suites, 3 WARN fixés: RestTimer double close, deleteAllData try/catch, batch spread) |
 
 ---
 
