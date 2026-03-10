@@ -64,11 +64,11 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
     if (chartStats.length < 2) return null
     return {
       labels: chartStats.map(s =>
-        s.startTime.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+        s.startTime.toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' })
       ),
       datasets: [{ data: chartStats.map(s => s.maxWeight) }],
     }
-  }, [chartStats])
+  }, [chartStats, dateLocale])
 
   const reversedStats = useMemo(() => [...statsForExercise].reverse(), [statsForExercise])
 
@@ -335,9 +335,20 @@ const enhance = withObservables(
       .observe(),
     histories: database
       .get<History>('histories')
-      .query(Q.where('deleted_at', null))
+      .query(
+        Q.where('deleted_at', null),
+        Q.on('sets', Q.where('exercise_id', exerciseId)),
+      )
       .observe(),
-    sessions: database.get<Session>('sessions').query().observe(),
+    sessions: database
+      .get<Session>('sessions')
+      .query(
+        Q.on('histories', [
+          Q.where('deleted_at', null),
+          Q.on('sets', Q.where('exercise_id', exerciseId)),
+        ]),
+      )
+      .observe(),
   }),
 )
 
