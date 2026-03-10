@@ -56,7 +56,8 @@
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 1 WARN fixé: useDetailStyles useMemo) |
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 0 CRIT, fichiers .ignore complétés) |
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 7 WARN fixés: ProgramDetailScreen useCallback deps + handlers memoizés)
-| 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 1 CRIT + 1 WARN fixés: Promise.all recalcSetPrs, any→type tests) |
+| 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 1 CRIT + 1 WARN fixés: Promise.all recalcSetPrs, any→type tests)
+| 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1690 tests, 108 suites, 1 CRIT + 6 WARN fixés: edits merge, try/catch, 4 dead components supprimés, -1588 LOC) |
 
 ---
 
