@@ -2,6 +2,7 @@ import type { AIProvider, AIFormData, DBContext, GeneratedPlan } from './types'
 import { buildPrompt, parseGeneratedPlan, withTimeout } from './providerUtils'
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
+const OPENAI_MODEL = 'gpt-4.1-mini'
 
 export function createOpenAIProvider(apiKey: string): AIProvider {
   return {
@@ -16,7 +17,7 @@ export function createOpenAIProvider(apiKey: string): AIProvider {
             'Authorization': `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: 'gpt-4.1-mini',
+            model: OPENAI_MODEL,
             max_tokens: 2048,
             messages: [
               { role: 'user', content: buildPrompt(form, context) },
@@ -39,7 +40,7 @@ export function createOpenAIProvider(apiKey: string): AIProvider {
               'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-              model: 'gpt-4.1-mini',
+              model: OPENAI_MODEL,
               max_tokens: 2048,
               messages: [
                 { role: 'user', content: buildPrompt(form, context) },
@@ -76,7 +77,7 @@ export async function testOpenAIConnection(apiKey: string): Promise<void> {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
+        model: OPENAI_MODEL,
         max_tokens: 10,
         temperature: 0,
         messages: [

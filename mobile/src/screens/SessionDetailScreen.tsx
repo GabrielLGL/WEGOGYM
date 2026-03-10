@@ -120,13 +120,13 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     })
   }, [selectionMode])
 
-  const cancelSelection = () => {
+  const cancelSelection = useCallback(() => {
     haptics.onPress()
     setSelectionMode(false)
     setSelectedItems(new Set())
-  }
+  }, [haptics])
 
-  const handleCreateGroup = async (type: 'superset' | 'circuit') => {
+  const handleCreateGroup = useCallback(async (type: 'superset' | 'circuit') => {
     try {
       const items = sessionExercises.filter(se => selectedItems.has(se.id))
       if (items.length < 2) return
@@ -139,9 +139,9 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       if (__DEV__) console.warn('handleCreateGroup error:', e)
       setToastMessage(t.common.error)
     }
-  }
+  }, [sessionExercises, selectedItems, groupExercises, groupTypeModal, cancelSelection, t])
 
-  const handleUngroup = async (se: SessionExercise) => {
+  const handleUngroup = useCallback(async (se: SessionExercise) => {
     try {
       haptics.onPress()
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
@@ -151,7 +151,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       if (__DEV__) console.warn('handleUngroup error:', e)
       setToastMessage(t.common.error)
     }
-  }
+  }, [haptics, ungroupExercise, sessionExercises, t])
 
   const getGroupInfo = useCallback((se: SessionExercise): { type: string; isFirst: boolean; isLast: boolean } | undefined => {
     if (!se.supersetId) return undefined
@@ -169,7 +169,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   useLayoutEffect(() => { navigation.setOptions({ title: session.name, headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text }) }, [navigation, session.name, colors])
 
   // --- HANDLERS ---
-  const handleAddExercise = async (exerciseId: string, sets: string, reps: string, weight: string) => {
+  const handleAddExercise = useCallback(async (exerciseId: string, sets: string, reps: string, weight: string) => {
     const exo = exercises.find(e => e.id === exerciseId)
     if (!exo) return
 
@@ -181,7 +181,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
     } catch (e) {
       if (__DEV__) console.error('handleAddExercise error:', e)
     }
-  }
+  }, [exercises, addExercise, addModal])
 
   const handleUpdateTargets = async () => {
     try {

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 import { of } from 'rxjs'
@@ -14,8 +14,6 @@ import { useLanguage } from '../contexts/LanguageContext'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
-
-const { height: screenHeight } = Dimensions.get('window')
 
 // --- SessionPreviewRow ---
 
@@ -93,6 +91,7 @@ const ProgramDetailContentInner: React.FC<ProgramDetailContentInnerProps> = ({
   const colors = useColors()
   const contentStyles = useContentStyles(colors)
   const { t } = useLanguage()
+  const { height: screenHeight } = useWindowDimensions()
 
   return (
     <>
