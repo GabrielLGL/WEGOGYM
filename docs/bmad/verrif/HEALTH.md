@@ -60,6 +60,7 @@
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1690 tests, 108 suites, 1 CRIT + 6 WARN fixés: edits merge, try/catch, 4 dead components supprimés, -1588 LOC) |
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1690 tests, 108 suites, 2 CRIT + 1 WARN fixés: unvalidateSet stale closure, duplicateSession superset remap, quick-start guard) |
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1691 tests, 108 suites, 2 CRIT fixés: test mocks unsafeFetchRaw, recalculateSetPrsBatch dedup) |
+| 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1691 tests, 108 suites, 2 CRIT + 1 WARN fixés: soft-delete filter stats, PR detection premier set, dead styles) |
 
 ---
 
