@@ -74,7 +74,11 @@ export default function OnboardingScreen() {
 
   const handleSelectLanguage = async (lang: Language) => {
     haptics.onSelect()
-    await setLanguage(lang)
+    try {
+      await setLanguage(lang)
+    } catch (e) {
+      if (__DEV__) console.error('[Onboarding] setLanguage failed:', e)
+    }
   }
 
   const handleNextFromLanguage = () => {

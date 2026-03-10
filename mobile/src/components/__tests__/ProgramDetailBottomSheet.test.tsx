@@ -73,7 +73,7 @@ const makeExercise = (id: string, name: string): Exercise =>
   } as unknown as Exercise)
 
 // --- Composant interne SessionPreviewRowInner (reproduit la logique du vrai composant) ---
-// Ce pattern suit exactement SessionItem.test.tsx pour tester la logique pure sans withObservables
+// Ce pattern teste la logique pure sans withObservables
 
 interface MockSessionRowProps {
   session: { id: string; name: string }

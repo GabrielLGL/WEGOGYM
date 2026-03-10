@@ -82,16 +82,18 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
   const [deleteSetTarget, setDeleteSetTarget] = useState<WorkoutSet | null>(null)
   const deleteWorkoutModal = useModalState()
 
-  // Initialize edits from sets
+  // Initialize edits from sets — merge with existing edits to preserve unsaved changes
   useEffect(() => {
-    const newEdits: Record<string, SetEdit> = {}
-    for (const s of sets) {
-      newEdits[s.id] = {
-        weight: String(s.weight),
-        reps: String(s.reps),
+    setEdits(prev => {
+      const newEdits: Record<string, SetEdit> = {}
+      for (const s of sets) {
+        newEdits[s.id] = prev[s.id] ?? {
+          weight: String(s.weight),
+          reps: String(s.reps),
+        }
       }
-    }
-    setEdits(newEdits)
+      return newEdits
+    })
   }, [sets])
 
   // Sync note when history changes

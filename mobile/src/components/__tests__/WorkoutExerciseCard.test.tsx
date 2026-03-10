@@ -49,13 +49,6 @@ jest.mock('../../hooks/useHaptics', () => ({
   }),
 }))
 
-jest.mock('../../components/LastPerformanceBadge', () => {
-  const React = require('react')
-  const { View } = require('react-native')
-  return {
-    LastPerformanceBadge: () => React.createElement(View, null),
-  }
-})
 
 const mockValidateSetInput = validateSetInput as jest.Mock
 
