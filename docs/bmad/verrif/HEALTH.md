@@ -55,6 +55,7 @@
 | 2026-03-09 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, cov 80.24% stmts, 0 CRIT/WARN, 3 SUGG edge cases) |
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 1 WARN fixé: useDetailStyles useMemo) |
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 0 CRIT, fichiers .ignore complétés) |
+| 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1737 tests, 112 suites, 7 WARN fixés: ProgramDetailScreen useCallback deps + handlers memoizés) |
 
 ---
 
