@@ -34,10 +34,10 @@ function makeSE(id: string, setsTarget: number) {
 
 describe('buildRecapExercises', () => {
   beforeEach(() => {
-    // Mock getMaxWeightForExercise (called internally via database.get('sets').query)
+    // Mock getMaxWeightForExercise (uses unsafeSqlQuery + unsafeFetchRaw internally)
     mockGet.mockReturnValue({
       query: jest.fn().mockReturnValue({
-        fetch: jest.fn().mockResolvedValue([]),
+        unsafeFetchRaw: jest.fn().mockResolvedValue([{ max_weight: null }]),
       }),
     })
   })
@@ -104,10 +104,10 @@ describe('buildRecapExercises', () => {
   })
 
   it('gets prevMaxWeight from getMaxWeightForExercise', async () => {
-    // Mock to return sets with a max weight of 100
+    // Mock unsafeFetchRaw to return SQL aggregation result with max_weight 100
     mockGet.mockReturnValue({
       query: jest.fn().mockReturnValue({
-        fetch: jest.fn().mockResolvedValue([{ weight: 100 }, { weight: 80 }]),
+        unsafeFetchRaw: jest.fn().mockResolvedValue([{ max_weight: 100 }]),
       }),
     })
 

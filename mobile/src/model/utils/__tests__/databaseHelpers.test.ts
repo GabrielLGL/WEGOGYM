@@ -558,7 +558,7 @@ describe('databaseHelpers', () => {
 
     it('should return 0 when no sets exist', async () => {
       mockGet.mockReturnValue({
-        query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }),
+        query: jest.fn().mockReturnValue({ unsafeFetchRaw: jest.fn().mockResolvedValue([{ max_weight: null }]) }),
       })
 
       const result = await getMaxWeightForExercise('exo-1', 'hist-exclude')
@@ -566,9 +566,8 @@ describe('databaseHelpers', () => {
     })
 
     it('should return the maximum weight across all sets', async () => {
-      const mockSets = [{ weight: 60 }, { weight: 80 }, { weight: 70 }]
       mockGet.mockReturnValue({
-        query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(mockSets) }),
+        query: jest.fn().mockReturnValue({ unsafeFetchRaw: jest.fn().mockResolvedValue([{ max_weight: 80 }]) }),
       })
 
       const result = await getMaxWeightForExercise('exo-1', 'hist-exclude')
@@ -577,7 +576,7 @@ describe('databaseHelpers', () => {
 
     it('should return the single set weight when only one set exists', async () => {
       mockGet.mockReturnValue({
-        query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([{ weight: 55 }]) }),
+        query: jest.fn().mockReturnValue({ unsafeFetchRaw: jest.fn().mockResolvedValue([{ max_weight: 55 }]) }),
       })
 
       const result = await getMaxWeightForExercise('exo-1', 'hist-exclude')

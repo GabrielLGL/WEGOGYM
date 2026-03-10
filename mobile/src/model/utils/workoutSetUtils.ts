@@ -20,28 +20,18 @@ export async function getMaxWeightForExercise(
   exerciseId: string,
   excludeHistoryId: string
 ): Promise<number> {
-  // Fetch only histories that are not soft-deleted
-  const activeHistories = await database
-    .get<History>('histories')
-    .query(
-      Q.where('deleted_at', null),
-      Q.where('id', Q.notEq(excludeHistoryId))
-    )
-    .fetch()
-
-  if (activeHistories.length === 0) return 0
-  const activeHistoryIds = activeHistories.map(h => h.id)
-
-  const sets = await database
+  const result = await database
     .get<WorkoutSet>('sets')
-    .query(
-      Q.where('exercise_id', exerciseId),
-      Q.where('history_id', Q.oneOf(activeHistoryIds))
-    )
-    .fetch()
+    .query(Q.unsafeSqlQuery(
+      'SELECT MAX(s.weight) as max_weight FROM sets s ' +
+      'INNER JOIN histories h ON s.history_id = h.id ' +
+      'WHERE s.exercise_id = ? AND h.id != ? AND h.deleted_at IS NULL',
+      [exerciseId, excludeHistoryId]
+    ))
+    .unsafeFetchRaw()
 
-  if (sets.length === 0) return 0
-  return sets.reduce((max, s) => Math.max(max, s.weight), 0)
+  const raw = result[0] as Record<string, unknown> | undefined
+  return typeof raw?.max_weight === 'number' ? raw.max_weight : 0
 }
 
 /**
@@ -195,12 +185,13 @@ export async function recalculateSetPrs(
  * Fetche les histories actives UNE fois puis les passe à chaque appel.
  */
 export async function recalculateSetPrsBatch(exerciseIds: string[]): Promise<void> {
-  if (exerciseIds.length === 0) return
+  const uniqueIds = [...new Set(exerciseIds)]
+  if (uniqueIds.length === 0) return
   const histories = await database
     .get<History>('histories')
     .query(Q.where('deleted_at', null))
     .fetch()
-  const results = await Promise.allSettled(exerciseIds.map(id => recalculateSetPrs(id, histories)))
+  const results = await Promise.allSettled(uniqueIds.map(id => recalculateSetPrs(id, histories)))
   if (__DEV__) {
     for (const r of results) {
       if (r.status === 'rejected') console.error('[recalculateSetPrsBatch]', r.reason)
