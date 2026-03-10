@@ -9,7 +9,6 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated'
 import { fontSize, spacing } from '../theme'
-import { useColors } from '../contexts/ThemeContext'
 
 interface AnimatedSplashProps {
   appReady: boolean
@@ -17,7 +16,9 @@ interface AnimatedSplashProps {
 }
 
 export default function AnimatedSplash({ appReady, onFinish }: AnimatedSplashProps) {
-  const colors = useColors()
+  // Splash is rendered outside ThemeProvider, use hardcoded dark theme colors
+  const SPLASH_BG = '#181b21'
+  const SPLASH_PRIMARY = '#00cec9'
   const logoOpacity = useSharedValue(0)
   const logoScale = useSharedValue(0.8)
   const textOpacity = useSharedValue(0)
@@ -67,7 +68,7 @@ export default function AnimatedSplash({ appReady, onFinish }: AnimatedSplashPro
   }))
 
   return (
-    <Animated.View style={[styles.container, { backgroundColor: colors.background }, containerStyle]}>
+    <Animated.View style={[styles.container, { backgroundColor: SPLASH_BG }, containerStyle]}>
       <Animated.View style={logoStyle}>
         <Image
           source={require('../../assets/icon.png')}
@@ -76,7 +77,7 @@ export default function AnimatedSplash({ appReady, onFinish }: AnimatedSplashPro
         />
       </Animated.View>
       <Animated.View style={textStyle}>
-        <Animated.Text style={[styles.title, { color: colors.primary }]}>
+        <Animated.Text style={[styles.title, { color: SPLASH_PRIMARY }]}>
           KORE
         </Animated.Text>
       </Animated.View>

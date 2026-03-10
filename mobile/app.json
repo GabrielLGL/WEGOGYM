@@ -15,14 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kore.app"
+      "bundleIdentifier": "net.koreapp.mobile"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/kore_icon_512.png",
+        "foregroundImage": "./assets/kore_adaptive_fg.png",
         "backgroundColor": "#181b21"
       },
-      "package": "com.kore.app",
+      "package": "net.koreapp.mobile",
       "softwareKeyboardLayoutMode": "pan"
     },
     "plugins": [
