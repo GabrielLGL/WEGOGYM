@@ -5,8 +5,10 @@ import {
   getMaxWeightForExercise,
   deleteWorkoutSet,
   getLastSetsForExercises,
+  getLastPerformanceForExercise,
 } from '../model/utils/databaseHelpers'
 import { validateSetInput } from '../model/utils/validationHelpers'
+import { suggestProgression } from '../model/utils/progressionHelpers'
 import type { SetInputData, ValidatedSetData } from '../types/workout'
 
 function buildInitialInputs(
@@ -47,6 +49,9 @@ export function useWorkoutState(
   const [setInputs, setSetInputs] = useState<Record<string, SetInputData>>(
     () => buildInitialInputs(sessionExercises, {})
   )
+  const [suggestedExerciseIds, setSuggestedExerciseIds] = useState<Set<string>>(
+    () => new Set()
+  )
   // Ref synchronisé : permet à validateSet de lire la valeur courante même quand
   // le debounce est flushé synchroniquement juste avant l'appel (race condition).
   const setInputsRef = useRef<Record<string, SetInputData>>({})
@@ -67,12 +72,46 @@ export function useWorkoutState(
 
     let cancelled = false
 
-    getLastSetsForExercises(exerciseIds).then(lastWeights => {
+    async function loadInputs() {
+      const lastWeights = await getLastSetsForExercises(exerciseIds)
       if (cancelled) return
+
+      const suggested = new Set<string>()
+
+      // Pour chaque exercice avec repsTarget, tenter une suggestion de progression
+      const progressionPromises = sessionExercises
+        .filter(se => se.repsTarget != null)
+        .map(async se => {
+          const exerciseId = se.exercise.id
+          try {
+            const lastPerf = await getLastPerformanceForExercise(exerciseId, historyId)
+            if (!lastPerf) return
+
+            const suggestion = suggestProgression(lastPerf.avgWeight, lastPerf.avgReps, se.repsTarget)
+            if (!suggestion) return
+
+            // Overwrite tous les sets de cet exercice avec les valeurs suggérées
+            const setsCount = se.setsTarget ?? 0
+            const setData: Record<number, { weight: number; reps: number }> = {}
+            for (let i = 1; i <= setsCount; i++) {
+              setData[i] = { weight: suggestion.suggestedWeight, reps: suggestion.suggestedReps }
+            }
+            lastWeights[exerciseId] = setData
+            suggested.add(exerciseId)
+          } catch (e) {
+            if (__DEV__) console.warn('[useWorkoutState] progression suggestion failed:', e)
+          }
+        })
+
+      await Promise.all(progressionPromises)
+      if (cancelled) return
+
       setSetInputs(buildInitialInputs(sessionExercises, lastWeights))
-    }).catch(e => {
-      if (__DEV__) console.warn('[useWorkoutState] getLastSetsForExercises failed:', e)
-      // inputs restent vides si erreur
+      setSuggestedExerciseIds(suggested)
+    }
+
+    loadInputs().catch(e => {
+      if (__DEV__) console.warn('[useWorkoutState] loadInputs failed:', e)
     })
 
     return () => { cancelled = true }
@@ -177,5 +216,6 @@ export function useWorkoutState(
     updateSetInput,
     validateSet,
     unvalidateSet,
+    suggestedExerciseIds,
   }
 }

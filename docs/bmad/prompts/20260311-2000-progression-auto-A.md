@@ -88,4 +88,7 @@ le return de `useWorkoutState`, pour permettre à l'UI (Groupe B) d'afficher un 
 Aucune dépendance externe. Groupe B dépend de ce groupe (il consomme `suggestedExerciseIds`).
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260311-2025
+
+## Résolution
+Rapport do : docs/bmad/do/20260311-2025-feat-workout-progression-prefill.md
