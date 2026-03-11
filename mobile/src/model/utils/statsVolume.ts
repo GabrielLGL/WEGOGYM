@@ -148,6 +148,14 @@ export function buildWeeklyActivity(
 
   const sessionNames = new Map(sessions.map(s => [s.id, s.name]))
 
+  const setsMap = new Map<string, WorkoutSet[]>()
+  for (const st of sets) {
+    const hid = st.history.id
+    const arr = setsMap.get(hid)
+    if (arr) arr.push(st)
+    else setsMap.set(hid, [st])
+  }
+
   return Array.from({ length: 7 }, (_, i): WeekDayActivity => {
     const dayDate = new Date(mondayTs + i * DAY_MS)
     const dateKey = toDateKey(dayDate)
@@ -157,7 +165,7 @@ export function buildWeeklyActivity(
     const dayHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned && toDateKey(h.startTime) === dateKey)
 
     const daySessions = dayHistories.map(h => {
-      const historySets = sets.filter(s => s.history.id === h.id)
+      const historySets = setsMap.get(h.id) ?? []
       const setCount = historySets.length
       const volumeKg = Math.round(historySets.reduce((acc, s) => acc + s.weight * s.reps, 0) * 10) / 10
       const durationMin = h.endTime != null

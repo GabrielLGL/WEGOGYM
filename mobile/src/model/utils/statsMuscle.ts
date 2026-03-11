@@ -190,13 +190,12 @@ export function computeMonthlySetsChart(
   histories: History[],
   muscleFilter: string | null,
   ctx?: StatsContext,
-  monthLabels?: string[]
+  monthLabels: string[] = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
 ): MonthlySetsChartResult {
-  const MONTH_LABELS_DEFAULT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   const historyDates = ctx?.historyDates ?? new Map(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => [h.id, h.startTime.getTime()]))
   const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => h.id))
   const exerciseMuscles = ctx?.exerciseMuscles ?? new Map<string, string[]>(exercises.map(e => [e.id, e.muscles] as [string, string[]]))
-  const labels_ = monthLabels ?? MONTH_LABELS_DEFAULT
+  const labels_ = monthLabels
 
   // Single pass: bucket by "YYYY-M" key, track oldest active set for month range
   const buckets = new Map<string, number>()
