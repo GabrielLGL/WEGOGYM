@@ -69,3 +69,34 @@
 95/100
 
 ### Espace libéré : ~530 Ko (89 fichiers + 3 dossiers verrif)
+
+---
+
+## Run 20260311-1200
+
+**Contexte :** MVP shippé (v0.1.0-mvp-20260311), score santé 100/100.
+
+### Supprimés
+- morning/     : 3 fichiers résolus
+- do/          : 15 fichiers résolus
+- reviews/     : 6 fichiers
+- git-history/ : 28 fichiers (tout février 2026)
+- prompts/     : 6 fichiers
+- verrif/      : 32 runs + 20 rapports racine obsolètes
+
+### En attente (non supprimés)
+- morning/     : 1 rapport ⏳ — 20260307-0930-coverage-100.md
+
+### Conservés
+- morning/     : 7 fichiers (dont 1 ⏳ en attente)
+- do/          : 30 fichiers
+- reviews/     : 10 fichiers
+- git-history/ : 34 fichiers
+- prompts/     : 20 fichiers
+- verrif/      : 5 runs (20260310-2357, 20260311-0024, 20260311-0046, 20260311-1117, 20260311-1130)
+- verrif/      : 2 fichiers racine (HEALTH.md, coverage-report.md)
+
+### Score santé
+100/100
+
+### Espace libéré : ~110 fichiers + 32 dossiers verrif

@@ -29,3 +29,4 @@ aucune
 ✅ Résolu — 20260311-1200
 
 ## Commit
+bcbe051 refactor(workoutSetUtils, WorkoutSummarySheet): extract createSetRecord DRY helper + rename formatDuration
