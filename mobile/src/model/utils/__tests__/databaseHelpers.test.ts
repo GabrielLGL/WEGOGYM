@@ -1234,7 +1234,7 @@ describe('databaseHelpers', () => {
 
       await deleteWorkoutSet('hist-1', 'ex-1', 99)
 
-      expect(mockWrite).toHaveBeenCalledTimes(1)
+      expect(mockWrite).not.toHaveBeenCalled()
       expect(mockFetch).toHaveBeenCalledTimes(1)
     })
   })

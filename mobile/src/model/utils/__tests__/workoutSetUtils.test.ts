@@ -99,7 +99,7 @@ describe('deleteWorkoutSet', () => {
     mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) })
 
     await deleteWorkoutSet('h1', 'e1', 1)
-    expect(mockWrite).toHaveBeenCalled()
+    expect(mockWrite).not.toHaveBeenCalled()
     // No error thrown
   })
 })

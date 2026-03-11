@@ -35,4 +35,7 @@ await database.write(async () => {
 - Aucun `fetch()` / `find()` / `query().fetch()` à l'intérieur d'un `database.write()` dans ces 3 fichiers
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260311-1930
+
+## Résolution
+Rapport do : docs/bmad/do/20260311-1930-fix-fetch-outside-write.md

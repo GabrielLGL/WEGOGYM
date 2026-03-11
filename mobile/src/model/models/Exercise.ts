@@ -64,27 +64,24 @@ export default class Exercise extends Model {
   // --- LOGIQUE DE SUPPRESSION EN CASCADE AMÉLIORÉE ---
   // Cette méthode permet de supprimer un exercice ET toutes les données qui y sont liées
   async deleteAllAssociatedData() {
-    // Exécution d'une transaction d'écriture groupée (batch) pour garantir l'intégrité
-    // Toutes les fetches sont dans le write() pour éviter les race conditions
+    // Lectures AVANT le write() pour éviter les deadlocks WatermelonDB
+    const sessionExos = await this.collections
+      .get('session_exercises')
+      .query(Q.where('exercise_id', this.id))
+      .fetch();
+
+    const logs = await this.collections
+      .get('performance_logs')
+      .query(Q.where('exercise_id', this.id))
+      .fetch();
+
+    const exerciseSets = await this.collections
+      .get('sets')
+      .query(Q.where('exercise_id', this.id))
+      .fetch();
+
+    // Mutations groupées dans le write()
     await this.database.write(async () => {
-      // 1. Récupération de tous les liens entre cet exercice et les séances programmées
-      const sessionExos = await this.collections
-        .get('session_exercises')
-        .query(Q.where('exercise_id', this.id))
-        .fetch();
-
-      // 2. Récupération de tout l'historique de progression lié à cet exercice
-      const logs = await this.collections
-        .get('performance_logs')
-        .query(Q.where('exercise_id', this.id))
-        .fetch();
-
-      // 3. Récupération de toutes les séries liées à cet exercice
-      const exerciseSets = await this.collections
-        .get('sets')
-        .query(Q.where('exercise_id', this.id))
-        .fetch();
-
       const batch = [
         ...sessionExos.map(se => se.prepareDestroyPermanently()),
         ...logs.map(l => l.prepareDestroyPermanently()),

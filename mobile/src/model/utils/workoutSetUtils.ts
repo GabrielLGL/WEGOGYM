@@ -37,20 +37,19 @@ export async function getMaxWeightForExercise(
 /**
  * Internal helper — creates a Set record inside an existing database.write() context.
  * MUST be called from within database.write().
+ * History and Exercise must be fetched BEFORE the write() call.
  */
 async function createSetRecord(params: {
-  historyId: string
-  exerciseId: string
+  history: History
+  exercise: Exercise
   weight: number
   reps: number
   setOrder: number
   isPr: boolean
 }): Promise<WorkoutSet> {
-  const history = await database.get<History>('histories').find(params.historyId)
-  const exercise = await database.get<Exercise>('exercises').find(params.exerciseId)
   return await database.get<WorkoutSet>('sets').create(record => {
-    record.history.set(history)
-    record.exercise.set(exercise)
+    record.history.set(params.history)
+    record.exercise.set(params.exercise)
     record.weight = params.weight
     record.reps = params.reps
     record.setOrder = params.setOrder
@@ -72,7 +71,16 @@ export async function saveWorkoutSet(params: {
   setOrder: number
   isPr: boolean
 }): Promise<WorkoutSet> {
-  return await database.write(() => createSetRecord(params))
+  const history = await database.get<History>('histories').find(params.historyId)
+  const exercise = await database.get<Exercise>('exercises').find(params.exerciseId)
+  return await database.write(() => createSetRecord({
+    history,
+    exercise,
+    weight: params.weight,
+    reps: params.reps,
+    setOrder: params.setOrder,
+    isPr: params.isPr,
+  }))
 }
 
 /**
@@ -89,18 +97,18 @@ export async function deleteWorkoutSet(
   exerciseId: string,
   setOrder: number
 ): Promise<void> {
+  const sets = await database
+    .get<WorkoutSet>('sets')
+    .query(
+      Q.where('history_id', historyId),
+      Q.where('exercise_id', exerciseId),
+      Q.where('set_order', setOrder)
+    )
+    .fetch()
+
+  if (sets.length === 0) return
+
   await database.write(async () => {
-    const sets = await database
-      .get<WorkoutSet>('sets')
-      .query(
-        Q.where('history_id', historyId),
-        Q.where('exercise_id', exerciseId),
-        Q.where('set_order', setOrder)
-      )
-      .fetch()
-
-    if (sets.length === 0) return
-
     await sets[0].destroyPermanently()
   })
 }
@@ -118,7 +126,16 @@ export async function addRetroactiveSet(params: {
   reps: number
   setOrder: number
 }): Promise<WorkoutSet> {
-  return await database.write(() => createSetRecord({ ...params, isPr: false }))
+  const history = await database.get<History>('histories').find(params.historyId)
+  const exercise = await database.get<Exercise>('exercises').find(params.exerciseId)
+  return await database.write(() => createSetRecord({
+    history,
+    exercise,
+    weight: params.weight,
+    reps: params.reps,
+    setOrder: params.setOrder,
+    isPr: false,
+  }))
 }
 
 /**

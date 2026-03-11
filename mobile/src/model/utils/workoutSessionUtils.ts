@@ -25,8 +25,8 @@ export async function createWorkoutHistory(
   sessionId: string,
   startTime: number = Date.now()
 ): Promise<History> {
+  const session = await database.get<Session>('sessions').find(sessionId)
   return await database.write(async () => {
-    const session = await database.get<Session>('sessions').find(sessionId)
     return await database.get<History>('histories').create(record => {
       record.session.set(session)
       record.startTime = new Date(startTime)
@@ -44,8 +44,8 @@ export async function completeWorkoutHistory(
   historyId: string,
   endTime: number
 ): Promise<void> {
+  const history = await database.get<History>('histories').find(historyId)
   await database.write(async () => {
-    const history = await database.get<History>('histories').find(historyId)
     await history.update(h => {
       h.endTime = new Date(endTime)
     })
@@ -63,8 +63,8 @@ export async function abandonWorkoutHistory(
   historyId: string,
   endTime: number,
 ): Promise<void> {
+  const history = await database.get<History>('histories').find(historyId)
   await database.write(async () => {
-    const history = await database.get<History>('histories').find(historyId)
     await history.update(h => {
       h.endTime = new Date(endTime)
       h.isAbandoned = true
@@ -96,8 +96,8 @@ export async function updateHistoryNote(
   historyId: string,
   note: string
 ): Promise<void> {
+  const history = await database.get<History>('histories').find(historyId)
   await database.write(async () => {
-    const history = await database.get<History>('histories').find(historyId)
     await history.update(h => {
       h.note = note
     })
@@ -148,8 +148,8 @@ export async function getLastSessionVolume(
  * @param historyId - ID de la History à soft-delete
  */
 export async function softDeleteHistory(historyId: string): Promise<void> {
+  const history = await database.get<History>('histories').find(historyId)
   await database.write(async () => {
-    const history = await database.get<History>('histories').find(historyId)
     await history.update(h => {
       h.deletedAt = new Date()
     })
