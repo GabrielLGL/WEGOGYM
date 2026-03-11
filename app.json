@@ -1,3 +1,12 @@
 {
-  "expo": {}
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "a08a2d95-8862-4ddc-ac32-c3b1312b453d"
+      }
+    },
+    "android": {
+      "package": "com.gabriellgl.koreapp"
+    }
+  }
 }
