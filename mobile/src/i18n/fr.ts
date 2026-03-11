@@ -254,8 +254,6 @@ export const fr = {
     topExercises: 'Top exercices',
     personalRecords: 'Records personnels',
     previous: 'Précédent',
-    next: 'Suivant',
-    sessions: 'séances',
     avgDuration: 'durée moy.',
     totalDuration: 'durée totale',
     noDataForPeriod: 'Pas de données pour cette période',

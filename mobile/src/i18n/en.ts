@@ -254,8 +254,6 @@ export const en: typeof fr = {
     topExercises: 'Top exercises',
     personalRecords: 'Personal Records',
     previous: 'Previous',
-    next: 'Next',
-    sessions: 'sessions',
     avgDuration: 'avg duration',
     totalDuration: 'total duration',
     noDataForPeriod: 'No data for this period',

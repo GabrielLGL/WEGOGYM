@@ -64,6 +64,7 @@ const AssistantPreviewScreen = React.lazy(() => import('../screens/AssistantPrev
 const CreateExerciseScreen = React.lazy(() => import('../screens/CreateExerciseScreen'))
 const ExerciseCatalogScreen = React.lazy(() => import('../screens/ExerciseCatalogScreen'))
 const HistoryDetailScreen = React.lazy(() => import('../screens/HistoryDetailScreen'))
+const ReportDetailScreen = React.lazy(() => import('../screens/ReportDetailScreen'))
 const LegalScreen = React.lazy(() => import('../screens/LegalScreen'))
 
 function isVersionOlder(accepted: string, required: string): boolean {
@@ -95,6 +96,7 @@ export type RootStackParamList = {
   CreateExercise: undefined;
   ExerciseCatalog: undefined;
   HistoryDetail: { historyId: string };
+  ReportDetail: { type?: 'weekly' | 'monthly'; offset?: number } | undefined;
   Legal: undefined;
 };
 
@@ -241,6 +243,7 @@ function AppContent() {
           <Stack.Screen name="CreateExercise" component={CreateExerciseScreen} options={{ title: t.exercises.newTitle }} />
           <Stack.Screen name="ExerciseCatalog" component={ExerciseCatalogScreen} options={{ title: t.navigation.catalogueGlobal }} />
           <Stack.Screen name="HistoryDetail" component={HistoryDetailScreen} options={{ title: '' }} />
+          <Stack.Screen name="ReportDetail" component={ReportDetailScreen} options={{ title: t.navigation.reportDetail }} />
           <Stack.Screen name="Legal" component={LegalScreen} options={{ title: t.navigation.legal }} />
         </Stack.Navigator>
       </Suspense>
