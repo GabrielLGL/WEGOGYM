@@ -81,3 +81,21 @@ export const STREAK_LOOKUP_DAYS = 365
 export const MIN_MOTIVATIONAL_STREAK = 3
 export const RETURNING_GAP_DAYS = 4
 export const REGULARITY_WINDOW_DAYS = 28
+
+// ─── Deload / Periodization ────────────────────────────────────────────────
+
+export const DELOAD_CONSECUTIVE_DAYS_THRESHOLD = 6
+export const DELOAD_VOLUME_SPIKE_RATIO = 1.3
+export const DELOAD_VOLUME_WEEKS_WINDOW = 4
+export const DELOAD_MIN_HISTORY_WEEKS = 3
+export const DELOAD_TRAINING_BLOCK_WEEKS = 6
+export const DELOAD_REST_GAP_DAYS = 2
+
+// MRV (Maximum Recoverable Volume) — sets/semaine par muscle
+// Source : Renaissance Periodization guidelines, adapté par niveau
+// Ces seuils sont des suggestions, pas des valeurs absolues
+export const MRV_THRESHOLDS: Record<string, Record<string, number>> = {
+  beginner:     { chest: 14, back: 16, shoulders: 14, biceps: 12, triceps: 12, legs: 16, abs: 16 },
+  intermediate: { chest: 18, back: 20, shoulders: 18, biceps: 16, triceps: 16, legs: 20, abs: 20 },
+  advanced:     { chest: 22, back: 24, shoulders: 22, biceps: 20, triceps: 20, legs: 24, abs: 24 },
+}
