@@ -57,7 +57,11 @@ import { CoachMarks } from '../components/CoachMarks'
 import type { CoachMarkStep } from '../components/CoachMarks'
 import { useCoachMarks } from '../hooks/useCoachMarks'
 import { WeeklyReportCard } from '../components/WeeklyReportCard'
+import DeloadRecommendationCard from '../components/DeloadRecommendationCard'
+import { computeDeloadRecommendation } from '../model/utils/deloadHelpers'
+import { WEEK_MS } from '../model/constants'
 import type { RootStackParamList } from '../navigation'
+import { buildWidgetData, saveWidgetData } from '../services/widgetDataService'
 
 const DEFAULT_STATUS_BAR_HEIGHT = 44
 const DAY_CHIP_MIN_HEIGHT = 84
@@ -172,6 +176,14 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
     }
   }, [])
 
+  // Mise à jour du widget Android (non-bloquant, silencieux)
+  useEffect(() => {
+    if (!user) return
+    buildWidgetData(database)
+      .then(saveWidgetData)
+      .catch(() => undefined)
+  }, [user?.currentStreak, user?.level, histories?.length])
+
   // Coach marks
   const { shouldShow: shouldShowCoachMarks, markCompleted: markTutorialCompleted } = useCoachMarks(user)
   const showCoachMarks = shouldShowCoachMarks && currentCelebration === null
@@ -264,6 +276,47 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
 
     return { sessionsCount, totalVolumeKg, prsCount, comparedToPrevious, topMuscles }
   }, [histories, sets, exercises])
+
+  // ── Deload recommendation ──
+  const [dismissedDeload, setDismissedDeload] = useState(false)
+  const deloadRecommendation = useMemo(() => {
+    if (!histories.length) return null
+
+    // Compute weekly volumes from sets (index 0 = most recent week)
+    const now = Date.now()
+    const weeklyVolumes: number[] = []
+    const historyDates = new Map(
+      histories
+        .filter(h => h.deletedAt === null && !h.isAbandoned)
+        .map(h => [h.id, h.startTime.getTime()])
+    )
+    const activeHistoryIds = new Set(historyDates.keys())
+
+    for (let w = 0; w < 5; w++) {
+      const weekEnd = now - w * WEEK_MS
+      const weekStart = weekEnd - WEEK_MS
+      let volume = 0
+      for (const s of sets) {
+        if (!activeHistoryIds.has(s.history.id)) continue
+        const d = historyDates.get(s.history.id) ?? 0
+        if (d >= weekStart && d < weekEnd) {
+          volume += s.weight * s.reps
+        }
+      }
+      weeklyVolumes.push(volume)
+    }
+
+    const historyData = histories
+      .filter(h => h.deletedAt === null && !h.isAbandoned)
+      .map(h => ({ startTime: h.startTime.getTime(), endTime: h.endTime?.getTime() }))
+
+    return computeDeloadRecommendation({
+      histories: historyData,
+      weeklyVolumes,
+      userLevel: user?.userLevel ?? 'intermediate',
+      currentStreak: user?.currentStreak ?? 0,
+    })
+  }, [histories, sets, user?.userLevel, user?.currentStreak])
 
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
@@ -439,6 +492,14 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           }
         }}
       />
+
+      {/* ── Deload Recommendation ── */}
+      {deloadRecommendation && !dismissedDeload && (
+        <DeloadRecommendationCard
+          recommendation={deloadRecommendation}
+          onDismiss={() => setDismissedDeload(true)}
+        />
+      )}
 
       {/* ── Sections de tuiles ── */}
       {SECTIONS.map((section, sectionIndex) => (

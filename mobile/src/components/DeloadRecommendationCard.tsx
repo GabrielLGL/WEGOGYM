@@ -10,18 +10,10 @@ import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import { spacing, borderRadius, fontSize } from '../theme'
+import type { DeloadRecommendation, DeloadType } from '../model/utils/deloadHelpers'
 
-// Types defined locally — will be reconciled with deloadHelpers in Groupe C
-export type DeloadType = 'rest_day' | 'deload_week' | 'reduce_volume' | 'muscle_overload'
-export type DeloadSeverity = 'warning' | 'suggestion'
-
-export interface DeloadRecommendation {
-  type: DeloadType
-  severity: DeloadSeverity
-  reasonKey: string
-  reasonParams?: Record<string, string | number>
-  affectedMuscles?: string[]
-}
+export type { DeloadRecommendation, DeloadType }
+export type { DeloadSeverity } from '../model/utils/deloadHelpers'
 
 interface DeloadRecommendationCardProps {
   recommendation: DeloadRecommendation
