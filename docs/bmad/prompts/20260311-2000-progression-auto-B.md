@@ -88,4 +88,7 @@ Ce groupe dépend du Groupe A (qui expose `suggestedExerciseIds` depuis `useWork
 Lancer APRÈS le Groupe A.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260311-2100
+
+## Résolution
+Rapport do : docs/bmad/do/20260311-2100-feat-progression-badge-ui.md

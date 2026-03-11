@@ -28,6 +28,7 @@ interface SupersetExerciseInfoContentProps {
   lastPerformance: LastPerformance | null
   letter: string
   letterColor: string
+  isProgressionApplied?: boolean
 }
 
 interface WorkoutSupersetBlockProps {
@@ -39,6 +40,7 @@ interface WorkoutSupersetBlockProps {
   onUpdateInput: (key: string, field: 'weight' | 'reps', value: string) => void
   onValidateSet: (sessionExercise: SessionExercise, setOrder: number) => Promise<void>
   onUnvalidateSet: (sessionExercise: SessionExercise, setOrder: number) => Promise<boolean>
+  suggestedExerciseIds?: Set<string>
 }
 
 // --- SupersetExerciseInfo (compact header per exercise) ---
@@ -49,6 +51,7 @@ const SupersetExerciseInfoContent: React.FC<SupersetExerciseInfoContentProps> = 
   lastPerformance,
   letter,
   letterColor,
+  isProgressionApplied,
 }) => {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -82,9 +85,17 @@ const SupersetExerciseInfoContent: React.FC<SupersetExerciseInfoContentProps> = 
           )}
         </View>
         {suggestion && (
-          <Text style={styles.exerciseInfoSuggestion}>
-            {t.workout.suggestionLabel}: {suggestion.label}
-          </Text>
+          isProgressionApplied ? (
+            <View style={styles.progressionBadge}>
+              <Text style={styles.progressionBadgeText}>
+                {t.workout.progressionApplied} ({suggestion.label})
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.exerciseInfoSuggestion}>
+              {t.workout.suggestionLabel}: {suggestion.label}
+            </Text>
+          )
         )}
       </View>
     </View>
@@ -101,6 +112,7 @@ const SupersetExerciseInfo = withObservables(
     historyId: string
     letter: string
     letterColor: string
+    isProgressionApplied?: boolean
   }) => {
     const exercise$ = sessionExercise.exercise.observe()
     return {
@@ -201,6 +213,7 @@ export const WorkoutSupersetBlock: React.FC<WorkoutSupersetBlockProps> = ({
   onUpdateInput,
   onValidateSet,
   onUnvalidateSet,
+  suggestedExerciseIds,
 }) => {
   const { colors, neuShadow } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -239,6 +252,7 @@ export const WorkoutSupersetBlock: React.FC<WorkoutSupersetBlockProps> = ({
           historyId={historyId}
           letter={EXERCISE_LETTERS[i] ?? String(i + 1)}
           letterColor={exerciseColors[i]}
+          isProgressionApplied={suggestedExerciseIds?.has(se.exercise.id)}
         />
       ))}
 
@@ -349,6 +363,19 @@ function createStyles(colors: ThemeColors) {
       color: colors.warning,
       fontSize: fontSize.xs,
       fontWeight: '600',
+    },
+    progressionBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primary + '26',
+      borderRadius: borderRadius.xs,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      marginTop: 2,
+    },
+    progressionBadgeText: {
+      color: colors.primary,
+      fontSize: fontSize.caption,
+      fontWeight: '700',
     },
 
     // Round header

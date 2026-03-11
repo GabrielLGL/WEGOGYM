@@ -245,6 +245,10 @@ export const en: typeof fr = {
       consistency: '⚡ {n} sessions/week — serious level.',
       volume: '🚀 This month: {volume} lifted.',
     },
+    weeklyReport: 'Weekly Report',
+    vsLastWeek: 'vs last week',
+    topMuscles: 'Top muscles',
+    viewReport: 'View',
   },
 
   navigation: {
@@ -441,6 +445,7 @@ export const en: typeof fr = {
     lastPerfSet: 'set',
     lastPerfSets: 'sets',
     suggestionLabel: 'Suggestion',
+    progressionApplied: '↑ Progression applied',
     noSetsMessage: 'No sets defined.',
     setsLabel: 'sets',
     restInProgress: 'REST IN PROGRESS',

@@ -245,6 +245,10 @@ export const fr = {
       consistency: '⚡ {n} séances/semaine — niveau sérieux.',
       volume: '🚀 Ce mois : {volume} soulevés.',
     },
+    weeklyReport: 'Rapport de la semaine',
+    vsLastWeek: 'vs sem. dernière',
+    topMuscles: 'Top muscles',
+    viewReport: 'Voir',
   },
 
   navigation: {
@@ -442,6 +446,7 @@ export const fr = {
     lastPerfSet: 'série',
     lastPerfSets: 'séries',
     suggestionLabel: 'Suggestion',
+    progressionApplied: '↑ Progression appliquée',
     noSetsMessage: 'Aucune série définie.',
     setsLabel: 'séries',
     restInProgress: 'REPOS EN COURS',

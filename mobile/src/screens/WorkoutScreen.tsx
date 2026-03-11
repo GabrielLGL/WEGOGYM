@@ -149,7 +149,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const haptics = useHaptics()
   const footerSlide = useKeyboardAnimation(KEYBOARD_OFFSET)
   const { formattedTime } = useWorkoutTimer(startTimestampRef.current)
-  const { setInputs, validatedSets, totalVolume, updateSetInput, validateSet, unvalidateSet } =
+  const { setInputs, validatedSets, totalVolume, suggestedExerciseIds, updateSetInput, validateSet, unvalidateSet } =
     useWorkoutState(sessionExercises, historyId)
 
   const completedSets = useMemo(() => Object.keys(validatedSets).length, [validatedSets])
@@ -321,6 +321,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
           onUpdateInput={updateSetInput}
           onValidateSet={handleValidateSet}
           onUnvalidateSet={unvalidateSet}
+          suggestedExerciseIds={suggestedExerciseIds}
         />
       )
     }
@@ -333,9 +334,10 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         onUpdateInput={updateSetInput}
         onValidateSet={handleValidateSet}
         onUnvalidateSet={unvalidateSet}
+        isProgressionApplied={suggestedExerciseIds.has(listItem.data.exercise.id)}
       />
     )
-  }, [historyId, setInputs, validatedSets, updateSetInput, handleValidateSet, unvalidateSet])
+  }, [historyId, setInputs, validatedSets, updateSetInput, handleValidateSet, unvalidateSet, suggestedExerciseIds])
 
   return (
     <SafeAreaView style={styles.container}>

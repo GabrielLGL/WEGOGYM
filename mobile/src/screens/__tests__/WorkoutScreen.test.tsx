@@ -192,6 +192,7 @@ describe('WorkoutContent', () => {
       setInputs: {},
       validatedSets: {},
       totalVolume: 0,
+      suggestedExerciseIds: new Set(),
       updateSetInput: jest.fn(),
       validateSet: mockValidateSet,
       unvalidateSet: mockUnvalidateSet,

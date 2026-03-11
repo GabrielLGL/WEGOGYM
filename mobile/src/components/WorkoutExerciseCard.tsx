@@ -43,6 +43,7 @@ interface WorkoutExerciseCardContentProps {
   onUpdateInput: (key: string, field: 'weight' | 'reps', value: string) => void
   onValidateSet: (sessionExercise: SessionExercise, setOrder: number) => Promise<void>
   onUnvalidateSet: (sessionExercise: SessionExercise, setOrder: number) => Promise<void>
+  isProgressionApplied?: boolean
 }
 
 // --- WorkoutSetRow ---
@@ -201,6 +202,7 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
   onUpdateInput,
   onValidateSet,
   onUnvalidateSet,
+  isProgressionApplied,
 }) => {
   const { colors, neuShadow } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -308,9 +310,17 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
         </Text>
       )}
       {suggestion && (
-        <Text style={styles.suggestionText}>
-          {t.workout.suggestionLabel} : {suggestion.label}
-        </Text>
+        isProgressionApplied ? (
+          <View style={styles.progressionBadge}>
+            <Text style={styles.progressionBadgeText}>
+              {t.workout.progressionApplied} ({suggestion.label})
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.suggestionText}>
+            {t.workout.suggestionLabel} : {suggestion.label}
+          </Text>
+        )
       )}
       {setsCount === 0 ? (
         <Text style={styles.noSetsText}>{t.workout.noSetsMessage}</Text>
@@ -398,6 +408,19 @@ function createStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
       fontWeight: '600',
       marginBottom: spacing.sm,
+    },
+    progressionBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primary + '26',
+      borderRadius: borderRadius.xs,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    progressionBadgeText: {
+      color: colors.primary,
+      fontSize: fontSize.caption,
+      fontWeight: '700',
     },
     exerciseNoteText: {
       color: colors.placeholder,
