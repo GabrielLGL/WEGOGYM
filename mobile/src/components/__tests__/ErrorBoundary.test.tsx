@@ -2,6 +2,7 @@ import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
 import { Text } from 'react-native'
 import { ErrorBoundary } from '../ErrorBoundary'
+import { fr } from '../../i18n/fr'
 
 import { captureError } from '../../services/sentry'
 
@@ -66,7 +67,7 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      expect(getByText('Une erreur est survenue')).toBeTruthy()
+      expect(getByText(fr.errorBoundary.title)).toBeTruthy()
     })
 
     it('should afficher le message explicatif', () => {
@@ -76,7 +77,7 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      expect(getByText('L\'application a rencontré un problème inattendu.')).toBeTruthy()
+      expect(getByText(fr.errorBoundary.message)).toBeTruthy()
     })
 
     it('should afficher le bouton "Réessayer"', () => {
@@ -86,7 +87,7 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      expect(getByText('Réessayer')).toBeTruthy()
+      expect(getByText(fr.errorBoundary.retry)).toBeTruthy()
     })
 
     it('should appeler captureError lors d\'une erreur', () => {
@@ -125,10 +126,10 @@ describe('ErrorBoundary', () => {
       )
 
       // L'interface d'erreur est affichée
-      expect(getByText('Une erreur est survenue')).toBeTruthy()
+      expect(getByText(fr.errorBoundary.title)).toBeTruthy()
 
       // Appuyer sur "Réessayer"
-      fireEvent.press(getByText('Réessayer'))
+      fireEvent.press(getByText(fr.errorBoundary.retry))
 
       // Après le reset, le message d'erreur disparaît
       // (ThrowingComponent va à nouveau lancer une erreur, ce qui est attendu)

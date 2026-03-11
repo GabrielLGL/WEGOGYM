@@ -6,7 +6,8 @@
 import React from 'react'
 import { render } from '@testing-library/react-native'
 import { BadgesScreenBase as BadgesScreen } from '../BadgesScreen'
-import { BADGES_LIST, BADGE_CATEGORY_LABELS } from '../../model/utils/badgeConstants'
+import { BADGES_LIST } from '../../model/utils/badgeConstants'
+import { translations } from '../../i18n'
 import type UserBadge from '../../model/models/UserBadge'
 
 jest.mock('expo-haptics', () => ({
@@ -46,6 +47,8 @@ jest.mock('../../contexts/LanguageContext', () => {
 // With withObservables mocked as identity, the default export IS BadgesScreenBase,
 // which accepts { userBadges: UserBadge[] } directly.
 
+const frBadges = translations['fr'].badges
+
 describe('BadgesScreen', () => {
   it('renders without crashing with empty userBadges', () => {
     expect(() =>
@@ -65,14 +68,14 @@ describe('BadgesScreen', () => {
     const { getByText } = render(
       <BadgesScreen userBadges={[] as unknown as UserBadge[]} />
     )
-    expect(getByText(BADGE_CATEGORY_LABELS['sessions'])).toBeTruthy()
+    expect(getByText(frBadges.categories['sessions'])).toBeTruthy()
   })
 
   it('shows all 7 category labels', () => {
     const { getByText } = render(
       <BadgesScreen userBadges={[] as unknown as UserBadge[]} />
     )
-    for (const label of Object.values(BADGE_CATEGORY_LABELS)) {
+    for (const label of Object.values(frBadges.categories)) {
       expect(getByText(label)).toBeTruthy()
     }
   })
@@ -93,7 +96,7 @@ describe('BadgesScreen', () => {
     const { getByText } = render(
       <BadgesScreen userBadges={[] as unknown as UserBadge[]} />
     )
-    // Just verify that a known badge title is present
+    // Just verify that a known badge title is present (from i18n)
     expect(getByText('Premier pas')).toBeTruthy()
   })
 })

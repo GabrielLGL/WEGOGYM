@@ -23,24 +23,31 @@ beforeEach(() => {
 // ─── getMaxWeightForExercise ──────────────────────────────────────────────────
 
 describe('getMaxWeightForExercise', () => {
-  it('returns 0 when no sets found', async () => {
-    mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }) })
+  const mockUnsafeFetchRaw = (rawRows: Record<string, unknown>[]) => {
+    mockGet.mockReturnValue({
+      query: jest.fn().mockReturnValue({
+        unsafeFetchRaw: jest.fn().mockResolvedValue(rawRows),
+      }),
+    })
+  }
+
+  it('returns 0 when no sets found (null max_weight)', async () => {
+    mockUnsafeFetchRaw([{ max_weight: null }])
     expect(await getMaxWeightForExercise('e1', 'h-current')).toBe(0)
   })
 
-  it('returns the max weight from previous sets', async () => {
-    const sets = [
-      { weight: 100 },
-      { weight: 120 },
-      { weight: 80 },
-    ]
-    mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(sets) }) })
+  it('returns 0 when result is empty', async () => {
+    mockUnsafeFetchRaw([])
+    expect(await getMaxWeightForExercise('e1', 'h-current')).toBe(0)
+  })
+
+  it('returns the max weight from SQL aggregation', async () => {
+    mockUnsafeFetchRaw([{ max_weight: 120 }])
     expect(await getMaxWeightForExercise('e1', 'h-current')).toBe(120)
   })
 
   it('returns a single set weight when only one set exists', async () => {
-    const sets = [{ weight: 75 }]
-    mockGet.mockReturnValue({ query: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(sets) }) })
+    mockUnsafeFetchRaw([{ max_weight: 75 }])
     expect(await getMaxWeightForExercise('e1', 'h-current')).toBe(75)
   })
 })

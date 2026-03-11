@@ -75,6 +75,8 @@ describe('deleteAllData', () => {
         expect(u.totalXp).toBe(0)
         expect(u.level).toBe(1)
         expect(u.onboardingCompleted).toBe(false)
+        expect(u.disclaimerAccepted).toBe(false)
+        expect(u.cguVersionAccepted).toBeNull()
         return 'user-update-op'
       }),
     })

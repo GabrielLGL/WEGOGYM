@@ -86,5 +86,16 @@ export const migrations = schemaMigrations({
         unsafeExecuteSql('CREATE INDEX IF NOT EXISTS sets_created_at ON sets (created_at)'),
       ],
     },
+    {
+      toVersion: 35,
+      steps: [
+        addColumns({
+          table: 'histories',
+          columns: [
+            { name: 'is_abandoned', type: 'boolean', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })

@@ -27,8 +27,8 @@ export function BadgeCelebration({ visible, badge, onClose }: BadgeCelebrationPr
       <View style={styles.content}>
         <Ionicons name={badge.icon as ComponentProps<typeof Ionicons>['name']} size={fontSize.jumbo} color={colors.primary} style={{ marginBottom: spacing.md }} />
         <Text style={styles.headline}>{t.badges.newBadge}</Text>
-        <Text style={styles.title}>{t.badges.list[badge.id as keyof typeof t.badges.list]?.title ?? badge.title}</Text>
-        <Text style={styles.description}>{t.badges.list[badge.id as keyof typeof t.badges.list]?.description ?? badge.description}</Text>
+        <Text style={styles.title}>{t.badges.list[badge.id as keyof typeof t.badges.list]?.title ?? badge.id}</Text>
+        <Text style={styles.description}>{t.badges.list[badge.id as keyof typeof t.badges.list]?.description ?? badge.id}</Text>
         <Button variant="primary" size="md" onPress={onClose} enableHaptics={false}>
           {t.badges.great}
         </Button>

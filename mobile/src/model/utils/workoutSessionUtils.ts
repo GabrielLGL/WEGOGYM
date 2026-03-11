@@ -53,6 +53,26 @@ export async function completeWorkoutHistory(
 }
 
 /**
+ * Abandonne une séance en cours : marque end_time + is_abandoned = true.
+ * Contrairement à completeWorkoutHistory, les séances abandonnées ne donnent pas de XP/streak.
+ *
+ * @param historyId - ID de la History à abandonner
+ * @param endTime - Timestamp de fin (Date.now())
+ */
+export async function abandonWorkoutHistory(
+  historyId: string,
+  endTime: number,
+): Promise<void> {
+  await database.write(async () => {
+    const history = await database.get<History>('histories').find(historyId)
+    await history.update(h => {
+      h.endTime = new Date(endTime)
+      h.isAbandoned = true
+    })
+  })
+}
+
+/**
  * Met a jour la note libre d'une seance.
  *
  * @param historyId - ID de la History
@@ -101,6 +121,7 @@ export async function getLastSessionVolume(
     .query(
       Q.where('session_id', sessionId),
       Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
       Q.where('id', Q.notEq(excludeHistoryId))
     )
     .fetch()

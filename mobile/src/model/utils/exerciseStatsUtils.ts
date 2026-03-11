@@ -57,7 +57,8 @@ export async function getLastPerformanceForExercise(
     .get<History>('histories')
     .query(
       Q.where('id', Q.oneOf(historyIds)),
-      Q.where('deleted_at', null)
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
     )
     .fetch()
 
@@ -166,7 +167,11 @@ export async function getExerciseStatsFromSets(
   // 3. Fetch les histories (exclut soft-deleted)
   const histories = await database
     .get<History>('histories')
-    .query(Q.where('id', Q.oneOf(historyIds)), Q.where('deleted_at', null))
+    .query(
+      Q.where('id', Q.oneOf(historyIds)),
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )
     .fetch()
 
   if (histories.length === 0) return []
@@ -258,7 +263,11 @@ export async function getLastSetsForExercises(
 
   const histories = await database
     .get<History>('histories')
-    .query(Q.where('id', Q.oneOf(historyIds)), Q.where('deleted_at', null))
+    .query(
+      Q.where('id', Q.oneOf(historyIds)),
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )
     .fetch()
 
   if (histories.length === 0) return {}

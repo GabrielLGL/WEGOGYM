@@ -16,7 +16,7 @@ import type PerformanceLog from '../../model/models/PerformanceLog'
 import type WorkoutSet from '../../model/models/Set'
 import type User from '../../model/models/User'
 import { offlineEngine } from './offlineEngine'
-import { createClaudeProvider } from './claudeProvider'
+import { createClaudeProvider, testClaudeConnection } from './claudeProvider'
 import { createOpenAIProvider, testOpenAIConnection } from './openaiProvider'
 import { createGeminiProvider, testGeminiConnection } from './geminiProvider'
 import type { AIFormData, AIProvider, DBContext, GeneratedPlan, GeneratePlanResult } from './types'
@@ -77,7 +77,8 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
     .get<History>('histories')
     .query(
       Q.where('start_time', Q.gte(sevenDaysAgo)),
-      Q.where('deleted_at', null)
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false))
     )
     .fetch()
 
@@ -173,18 +174,10 @@ export async function testProviderConnection(
     return
   }
 
-  const provider = selectProvider(providerName, apiKey)
-  if (provider === offlineEngine) return
-
-  const testForm: AIFormData = {
-    mode: 'session',
-    goal: 'bodybuilding',
-    level: 'débutant',
-    equipment: [],
-    durationMin: 45,
-    muscleGroups: ['Pecs'],
+  if (providerName === 'claude') {
+    await testClaudeConnection(apiKey)
+    return
   }
-  await provider.generate(testForm, { exercises: [{ name: 'Développé couché', muscles: ['Pecs'] }], recentMuscles: [], prs: {} })
 }
 
 /**

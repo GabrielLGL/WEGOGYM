@@ -1,6 +1,7 @@
 /**
  * Tests for BadgeCelebration.tsx — uses BottomSheet + Portal.
  * ThemeContext mocked globally via moduleNameMapper.
+ * LanguageContext is globally mocked to return fr translations.
  */
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
@@ -21,10 +22,8 @@ jest.mock('expo-haptics', () => ({
 }))
 
 const makeBadge = (overrides: Partial<BadgeDefinition> = {}): BadgeDefinition => ({
-  id: 'first_badge',
-  title: 'Premier pas',
+  id: 'sessions_1',
   icon: 'barbell-outline',
-  description: 'La première, la plus importante.',
   category: 'sessions',
   threshold: 1,
   ...overrides,
@@ -55,20 +54,29 @@ describe('BadgeCelebration', () => {
     expect(getByText('Nouveau badge !')).toBeTruthy()
   })
 
-  it('renders badge title', () => {
-    const badge = makeBadge({ title: 'Centurion' })
+  it('renders i18n title for known badge id', () => {
+    const badge = makeBadge({ id: 'sessions_100' })
     const { getByText } = render(
       <BadgeCelebration visible={true} badge={badge} onClose={jest.fn()} />
     )
     expect(getByText('Centurion')).toBeTruthy()
   })
 
-  it('renders badge description', () => {
-    const badge = makeBadge({ description: 'Un grand accomplissement.' })
+  it('renders i18n description for known badge id', () => {
+    const badge = makeBadge({ id: 'sessions_1' })
     const { getByText } = render(
       <BadgeCelebration visible={true} badge={badge} onClose={jest.fn()} />
     )
-    expect(getByText('Un grand accomplissement.')).toBeTruthy()
+    expect(getByText('La première, la plus importante.')).toBeTruthy()
+  })
+
+  it('falls back to badge.id for unknown badge id', () => {
+    const badge = makeBadge({ id: 'unknown_badge' })
+    const { getAllByText } = render(
+      <BadgeCelebration visible={true} badge={badge} onClose={jest.fn()} />
+    )
+    // Both title and description fall back to badge.id
+    expect(getAllByText('unknown_badge').length).toBe(2)
   })
 
   it('renders without crashing with icon', () => {
@@ -89,7 +97,7 @@ describe('BadgeCelebration', () => {
   })
 
   it('does not render badge content when visible=false (BottomSheet hides children)', () => {
-    const badge = makeBadge({ title: 'Élite' })
+    const badge = makeBadge({ id: 'sessions_250' })
     const { queryByText } = render(
       <BadgeCelebration visible={false} badge={badge} onClose={jest.fn()} />
     )

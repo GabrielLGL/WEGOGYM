@@ -3,7 +3,7 @@ import React from 'react'
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
 import { BackHandler } from 'react-native'
 import { WorkoutContent } from '../WorkoutScreen'
-import { createWorkoutHistory, completeWorkoutHistory } from '../../model/utils/databaseHelpers'
+import { createWorkoutHistory, abandonWorkoutHistory } from '../../model/utils/databaseHelpers'
 
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
@@ -40,7 +40,7 @@ jest.mock('@nozbe/with-observables', () => (
 
 jest.mock('../../model/utils/databaseHelpers', () => ({
   createWorkoutHistory: jest.fn().mockResolvedValue({ id: 'history-123' }),
-  completeWorkoutHistory: jest.fn().mockResolvedValue(undefined),
+  abandonWorkoutHistory: jest.fn().mockResolvedValue(undefined),
   getLastPerformanceForExercise: jest.fn().mockResolvedValue(null),
 }))
 
@@ -139,7 +139,7 @@ jest.mock('../../components/RestTimer', () => {
 })
 
 const mockCreateWorkoutHistory = createWorkoutHistory as jest.Mock
-const mockCompleteWorkoutHistory = completeWorkoutHistory as jest.Mock
+const mockAbandonWorkoutHistory = abandonWorkoutHistory as jest.Mock
 
 type Session = { id: string; name: string; position: number; observe: jest.Mock }
 type SessionExercise = { id: string; setsTarget: number; repsTarget: string; weightTarget: number; position: number; exercise: { observe: jest.Mock; fetch: jest.Mock; id: string }; observe: jest.Mock }
@@ -185,7 +185,7 @@ describe('WorkoutContent', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockCreateWorkoutHistory.mockResolvedValue({ id: 'history-123' })
-    mockCompleteWorkoutHistory.mockResolvedValue(undefined)
+    mockAbandonWorkoutHistory.mockResolvedValue(undefined)
     mockValidateSet.mockResolvedValue(true)
     mockUnvalidateSet.mockResolvedValue(true)
     mockUseWorkoutState.mockReturnValue({

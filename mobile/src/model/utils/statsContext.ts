@@ -13,7 +13,7 @@ export function prepareStatsContext(
   histories: History[],
   exercises: Exercise[]
 ): StatsContext {
-  const activeHistories = histories.filter(h => h.deletedAt === null)
+  const activeHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned)
 
   const historyDates = new Map<string, number>()
   const historyIds = new Set<string>()

@@ -14,7 +14,7 @@ export function computePRsByExercise(
 ): ExercisePR[] {
   const exerciseNames = new Map(exercises.map(e => [e.id, e.name]))
   const activeHistoryIds = ctx?.historyIds ?? new Set(
-    histories.filter(h => h.deletedAt === null).map(h => h.id)
+    histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => h.id)
   )
 
   const bestByExercise = new Map<string, { weight: number; reps: number; date: number }>()
@@ -53,7 +53,7 @@ export function computeTopExercisesByFrequency(
 ): ExerciseFrequency[] {
   const exerciseNames = new Map(exercises.map(e => [e.id, e.name]))
   const activeHistoryIds = ctx?.historyIds ?? new Set(
-    histories.filter(h => h.deletedAt === null).map(h => h.id)
+    histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => h.id)
   )
 
   // Compter les séances uniques par exercice (1 séance = 1 historique)

@@ -32,4 +32,5 @@ export default class History extends Model {
   @readonly @date('created_at') createdAt!: Date
   @readonly @date('updated_at') updatedAt!: Date
   @date('deleted_at') deletedAt!: Date | null
+  @field('is_abandoned') isAbandoned!: boolean
 }

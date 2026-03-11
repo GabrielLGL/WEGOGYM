@@ -16,7 +16,7 @@ import {
 function getActiveDayStrings(histories: History[]): Set<string> {
   const days = new Set<string>()
   histories
-    .filter(h => h.deletedAt === null)
+    .filter(h => h.deletedAt === null && !h.isAbandoned)
     .forEach(h => days.add(toDateKey(h.startTime)))
   return days
 }
@@ -26,7 +26,7 @@ export function computeGlobalKPIs(
   sets: WorkoutSet[],
   ctx?: Pick<StatsContext, 'historyIds'>
 ): GlobalKPIs {
-  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null).map(h => h.id))
+  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => h.id))
   const activeHistories = histories.filter(h => activeHistoryIds.has(h.id))
   const activeSets = sets.filter(s => activeHistoryIds.has(s.history.id))
 
@@ -92,7 +92,7 @@ export function computeMotivationalPhrase(
   language: Language = 'fr',
 ): string {
   const m = translations[language].home.motivational
-  const activeHistories = histories.filter(h => h.deletedAt === null)
+  const activeHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned)
   const activeHistoryIds = new Set(activeHistories.map(h => h.id))
 
   // 1. Streak ≥ 3

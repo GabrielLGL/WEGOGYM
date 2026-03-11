@@ -1,6 +1,6 @@
 // Mocks AVANT les imports (hoistés par Jest)
 import { generatePlan, testProviderConnection } from '../aiService'
-import { createClaudeProvider } from '../claudeProvider'
+import { createClaudeProvider, testClaudeConnection } from '../claudeProvider'
 import { createOpenAIProvider, testOpenAIConnection } from '../openaiProvider'
 import { createGeminiProvider, testGeminiConnection } from '../geminiProvider'
 import { offlineEngine } from '../offlineEngine'
@@ -16,6 +16,7 @@ jest.mock('@nozbe/watermelondb', () => ({
     oneOf: jest.fn().mockReturnValue({}),
     sortBy: jest.fn().mockReturnValue({}),
     take:  jest.fn().mockReturnValue({}),
+    or:    jest.fn().mockReturnValue({}),
     desc:  'desc',
   },
 }))
@@ -40,6 +41,7 @@ jest.mock('../claudeProvider', () => ({
   createClaudeProvider: jest.fn().mockReturnValue({
     generate: jest.fn().mockResolvedValue({ name: 'Plan Claude', sessions: [] }),
   }),
+  testClaudeConnection: jest.fn().mockResolvedValue(undefined),
 }))
 
 jest.mock('../openaiProvider', () => ({
@@ -148,12 +150,11 @@ describe('aiService', () => {
       expect(createGeminiProvider).not.toHaveBeenCalled()
     })
 
-    it("appelle provider.generate si provider='claude'", async () => {
+    it("appelle testClaudeConnection si provider='claude'", async () => {
       await testProviderConnection('claude', 'sk-ant-test-key')
 
-      expect(createClaudeProvider).toHaveBeenCalledWith('sk-ant-test-key')
-      const provider = (createClaudeProvider as jest.Mock).mock.results[0].value as { generate: jest.Mock }
-      expect(provider.generate).toHaveBeenCalled()
+      expect(testClaudeConnection as jest.Mock).toHaveBeenCalledWith('sk-ant-test-key')
+      expect(createClaudeProvider).not.toHaveBeenCalled()
     })
 
     it("appelle testGeminiConnection si provider='gemini'", async () => {

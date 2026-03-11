@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { captureError } from '../services/sentry'
 import { colors, spacing, borderRadius, fontSize } from '../theme'
+import { fr } from '../i18n/fr'
 
 interface Props {
   children: ReactNode
@@ -20,8 +21,10 @@ interface State {
  *
  * NOTE: Class component required — React error boundaries MUST use componentDidCatch
  * which cannot be implemented with hooks. Static theme colors are unavoidable here
- * (StyleSheet.create outside render cannot call useColors). This is an intentional
- * exception to the functional-only and no-hardcoded-colors rules.
+ * (StyleSheet.create outside render cannot call useColors). i18n strings are imported
+ * directly from fr.ts (not via useLanguage hook) since ErrorBoundary sits above
+ * LanguageProvider in the component tree. This is an intentional exception to the
+ * functional-only and no-hardcoded-colors rules.
  *
  * @usage
  * Envelopper l'app dans AppNavigator:
@@ -59,9 +62,9 @@ export class ErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <View style={styles.card}>
             <Ionicons name="warning-outline" size={fontSize.jumbo} color={colors.warning} style={{ marginBottom: spacing.md }} />
-            <Text style={styles.title}>Une erreur est survenue</Text>
+            <Text style={styles.title}>{fr.errorBoundary.title}</Text>
             <Text style={styles.message}>
-              L'application a rencontré un problème inattendu.
+              {fr.errorBoundary.message}
             </Text>
 
             {__DEV__ && this.state.error && (
@@ -73,7 +76,7 @@ export class ErrorBoundary extends Component<Props, State> {
             )}
 
             <TouchableOpacity style={styles.button} onPress={this.handleReset}>
-              <Text style={styles.buttonText}>Réessayer</Text>
+              <Text style={styles.buttonText}>{fr.errorBoundary.retry}</Text>
             </TouchableOpacity>
           </View>
         </View>
