@@ -65,6 +65,7 @@ jest.mock('../../model/utils/statsHelpers', () => ({
       sessions: [],
     }))
   ),
+  getMondayOfCurrentWeek: jest.fn().mockReturnValue(Date.now() - 3 * 24 * 60 * 60 * 1000),
 }))
 
 const makeUser = (overrides: Partial<User> = {}): User => ({
@@ -89,6 +90,7 @@ describe('HomeScreen Dashboard', () => {
           sets={[] as unknown as WorkoutSet[]}
           sessions={[] as unknown as Session[]}
           userBadges={[]}
+          exercises={[]}
         />
       )
     ).not.toThrow()
@@ -103,6 +105,7 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     expect(getByText('Salut, Gabriel !')).toBeTruthy()
@@ -117,6 +120,7 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     expect(getByText('Salut, Toi !')).toBeTruthy()
@@ -132,6 +136,7 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     expect(getByText('5')).toBeTruthy()
@@ -148,6 +153,7 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     expect(getByText('Entra\u00eenement')).toBeTruthy()
@@ -156,7 +162,7 @@ describe('HomeScreen Dashboard', () => {
   })
 
   it('affiche toutes les tuiles', () => {
-    const { getByText, queryByText } = render(
+    const { getByText, getAllByText, queryByText } = render(
       <HomeContent
         user={null}
         histories={[] as unknown as History[]}
@@ -164,12 +170,13 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     expect(getByText('Programmes')).toBeTruthy()
     expect(getByText("Biblioth\u00e8que d'exercices")).toBeTruthy()
     expect(getByText('Dur\u00e9e')).toBeTruthy()
-    expect(getByText('Volume')).toBeTruthy()
+    expect(getAllByText('Volume').length).toBeGreaterThanOrEqual(1)
     expect(getByText('Agenda')).toBeTruthy()
     expect(queryByText('Muscles')).toBeNull()
     expect(queryByText('Exercices & Records')).toBeNull()
@@ -186,6 +193,7 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     fireEvent.press(getByText('Dur\u00e9e'))
@@ -201,6 +209,7 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     fireEvent.press(getByText('Programmes'))
@@ -216,6 +225,7 @@ describe('HomeScreen Dashboard', () => {
         sets={[] as unknown as WorkoutSet[]}
         sessions={[] as unknown as Session[]}
         userBadges={[]}
+        exercises={[]}
       />
     )
     expect(getByText('Continue comme ça !')).toBeTruthy()

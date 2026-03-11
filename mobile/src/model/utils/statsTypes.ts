@@ -106,3 +106,24 @@ export interface StatsContext {
   historyIds: Set<string>                 // IDs actifs (deletedAt === null)
   exerciseMuscles: Map<string, string[]>  // exerciseId -> muscles[]
 }
+
+export interface ReportPeriod {
+  type: 'weekly' | 'monthly'
+  startDate: number  // timestamp ms
+  endDate: number    // timestamp ms
+  label: string      // ex: "Sem. 10 — Mars 2026" ou "Mars 2026"
+}
+
+export interface ReportSummary {
+  period: ReportPeriod
+  sessionsCount: number
+  totalVolumeKg: number
+  totalDurationMin: number
+  avgDurationMin: number
+  prsCount: number
+  currentStreak: number
+  comparedToPrevious: number  // % volume vs période précédente
+  topMuscles: MuscleRepartitionEntry[]  // top 3
+  topExercises: VolumeTopExercise[]     // top 3
+  prs: ExercisePR[]                     // PRs de la période
+}

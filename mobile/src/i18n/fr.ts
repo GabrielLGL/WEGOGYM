@@ -895,4 +895,21 @@ export const fr = {
     noNotes: 'Aucune note',
     viewHistory: "Voir l'historique",
   },
+
+  deload: {
+    title: 'Recommandation',
+    restDayTitle: 'Jour de repos conseillé',
+    deloadWeekTitle: 'Semaine de décharge suggérée',
+    reduceVolumeTitle: 'Volume élevé détecté',
+    muscleOverloadTitle: 'Surcharge musculaire',
+    consecutiveDays: "Tu t'entraînes depuis {days} jours consécutifs. Un jour de repos améliorerait ta récupération.",
+    volumeSpike: 'Ton volume cette semaine est {percent}% au-dessus de ta moyenne. Pense à alléger.',
+    longBlock: "Ça fait {weeks} semaines que tu t'entraînes sans pause. Une semaine de décharge (50-60% du volume) optimiserait tes gains.",
+    muscleOverload: '{muscles} : tu dépasses le volume maximal récupérable. Réduis les séries sur ces groupes.',
+    fewRestDays: 'Seulement {restDays} jour(s) de repos cette semaine. Ton corps a besoin de récupérer.',
+    dismiss: 'Compris',
+    learnMore: 'En savoir plus',
+    tooltipTitle: 'Pourquoi cette recommandation ?',
+    tooltipDeload: 'La périodisation (alterner phases intenses et récupération) est prouvée scientifiquement pour maximiser les gains à long terme et prévenir les blessures.',
+  },
 }

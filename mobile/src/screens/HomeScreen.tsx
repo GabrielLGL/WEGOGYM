@@ -36,9 +36,10 @@ import WorkoutSet from '../model/models/Set'
 import Session from '../model/models/Session'
 import User from '../model/models/User'
 import UserBadge from '../model/models/UserBadge'
+import Exercise from '../model/models/Exercise'
 import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { BADGES_LIST } from '../model/utils/badgeConstants'
-import { computeMotivationalPhrase, buildWeeklyActivity } from '../model/utils/statsHelpers'
+import { computeMotivationalPhrase, buildWeeklyActivity, getMondayOfCurrentWeek } from '../model/utils/statsHelpers'
 import { xpToNextLevel, formatTonnage } from '../model/utils/gamificationHelpers'
 import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
@@ -55,6 +56,7 @@ import { StreakIndicator } from '../components/StreakIndicator'
 import { CoachMarks } from '../components/CoachMarks'
 import type { CoachMarkStep } from '../components/CoachMarks'
 import { useCoachMarks } from '../hooks/useCoachMarks'
+import { WeeklyReportCard } from '../components/WeeklyReportCard'
 import type { RootStackParamList } from '../navigation'
 
 const DEFAULT_STATUS_BAR_HEIGHT = 44
@@ -107,9 +109,10 @@ interface Props {
   sets: WorkoutSet[]
   sessions: Session[]
   userBadges: UserBadge[]
+  exercises: Exercise[]
 }
 
-function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges }: Props) {
+function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<HomeNavigation>()
@@ -206,6 +209,61 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
     () => buildWeeklyActivity(histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback),
     [histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback],
   )
+
+  // ── Weekly Report Card data ──
+  const weeklyReportData = useMemo(() => {
+    const mondayTs = getMondayOfCurrentWeek()
+    const prevMondayTs = mondayTs - 7 * 24 * 60 * 60 * 1000
+
+    const activeHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned)
+    const activeHistoryIds = new Set(activeHistories.map(h => h.id))
+
+    // Current week histories
+    const currentWeekHistoryIds = new Set(
+      activeHistories.filter(h => h.startTime.getTime() >= mondayTs).map(h => h.id)
+    )
+    // Previous week histories
+    const prevWeekHistoryIds = new Set(
+      activeHistories.filter(h => {
+        const ts = h.startTime.getTime()
+        return ts >= prevMondayTs && ts < mondayTs
+      }).map(h => h.id)
+    )
+
+    // Current week sets
+    const currentWeekSets = sets.filter(s => currentWeekHistoryIds.has(s.history.id))
+    const prevWeekSets = sets.filter(s => prevWeekHistoryIds.has(s.history.id))
+
+    const sessionsCount = currentWeekHistoryIds.size
+    const totalVolumeKg = currentWeekSets.reduce((sum, s) => sum + s.weight * s.reps, 0)
+    const prsCount = currentWeekSets.filter(s => s.isPr).length
+
+    // Compared to previous
+    const prevVolume = prevWeekSets.reduce((sum, s) => sum + s.weight * s.reps, 0)
+    const comparedToPrevious = prevVolume > 0
+      ? Math.round(((totalVolumeKg - prevVolume) / prevVolume) * 100)
+      : 0
+
+    // Top muscles from muscle repartition (use current week data)
+    const muscleVolume = new Map<string, number>()
+    const exerciseMuscles = new Map(exercises.map(e => [e.id, e.muscles]))
+    for (const s of currentWeekSets) {
+      const muscles = exerciseMuscles.get(s.exercise.id) ?? []
+      const vol = s.weight * s.reps
+      for (const muscle of muscles) {
+        const trimmed = muscle.trim()
+        if (trimmed) {
+          muscleVolume.set(trimmed, (muscleVolume.get(trimmed) ?? 0) + vol)
+        }
+      }
+    }
+    const topMuscles = Array.from(muscleVolume.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([muscle]) => muscle)
+
+    return { sessionsCount, totalVolumeKg, prsCount, comparedToPrevious, topMuscles }
+  }, [histories, sets, exercises])
 
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
@@ -365,6 +423,22 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           ))}
         </View>
       </View>
+
+      {/* ── Weekly Report Card ── */}
+      <WeeklyReportCard
+        sessionsCount={weeklyReportData.sessionsCount}
+        totalVolumeKg={weeklyReportData.totalVolumeKg}
+        prsCount={weeklyReportData.prsCount}
+        comparedToPrevious={weeklyReportData.comparedToPrevious}
+        topMuscles={weeklyReportData.topMuscles}
+        onPress={() => {
+          try {
+            navigation.navigate('ReportDetail' as never)
+          } catch {
+            if (__DEV__) console.warn('[HomeScreen] Route "ReportDetail" non disponible')
+          }
+        }}
+      />
 
       {/* ── Sections de tuiles ── */}
       {SECTIONS.map((section, sectionIndex) => (
@@ -692,6 +766,7 @@ const enhance = withObservables([], () => ({
   ).observe(),
   sessions: database.get<Session>('sessions').query().observe(),
   userBadges: database.get<UserBadge>('user_badges').query().observe(),
+  exercises: database.get<Exercise>('exercises').query().observe(),
 }))
 
 export default enhance(HomeScreenBase)

@@ -894,4 +894,21 @@ export const en: typeof fr = {
     noNotes: 'No notes',
     viewHistory: 'View history',
   },
+
+  deload: {
+    title: 'Recommendation',
+    restDayTitle: 'Rest day recommended',
+    deloadWeekTitle: 'Deload week suggested',
+    reduceVolumeTitle: 'High volume detected',
+    muscleOverloadTitle: 'Muscle overload',
+    consecutiveDays: "You've been training for {days} consecutive days. A rest day would improve your recovery.",
+    volumeSpike: 'Your volume this week is {percent}% above your average. Consider lightening the load.',
+    longBlock: "You've been training for {weeks} weeks without a break. A deload week (50-60% volume) would optimize your gains.",
+    muscleOverload: '{muscles}: you exceed the maximum recoverable volume. Reduce sets on these groups.',
+    fewRestDays: 'Only {restDays} rest day(s) this week. Your body needs recovery.',
+    dismiss: 'Got it',
+    learnMore: 'Learn more',
+    tooltipTitle: 'Why this recommendation?',
+    tooltipDeload: 'Periodization (alternating intense and recovery phases) is scientifically proven to maximize long-term gains and prevent injuries.',
+  },
 } as const
