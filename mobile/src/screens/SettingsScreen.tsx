@@ -28,6 +28,7 @@ import {
   SettingsAISection,
   SettingsDataSection,
   SettingsAboutSection,
+  SettingsWearableSection,
   createSettingsStyles,
 } from '../components/settings'
 
@@ -362,6 +363,9 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
 
         {/* AI */}
         <SettingsAISection styles={styles} />
+
+        {/* Wearables */}
+        <SettingsWearableSection user={user} styles={styles} />
 
         {/* Group: SYSTÈME */}
         <Text style={styles.groupLabel}>{t.settings.groups.system}</Text>

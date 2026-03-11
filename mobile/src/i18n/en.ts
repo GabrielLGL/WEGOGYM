@@ -284,6 +284,7 @@ export const en: typeof fr = {
     reportDetail: 'Report',
     progressPhotos: 'Progress Photos',
     legal: 'Terms of Use',
+    leaderboard: 'Leaderboard',
   },
 
   programs: {
@@ -378,6 +379,18 @@ export const en: typeof fr = {
       pr: 'Personal records',
       session_volume: 'Volume per session',
       exercises: 'Exercises',
+    },
+    conditions: {
+      sessions: '{n} sessions completed',
+      tonnage_kg: '{n} kg lifted in total',
+      tonnage_t: '{n} tonnes lifted in total',
+      streak: '{n} week streak',
+      level: 'Level {n} reached',
+      pr: '{n} personal records',
+      session_volume: '{n} kg in one session',
+      exercises: '{n} different exercises practiced',
+      obtained: 'Obtained',
+      locked: 'Not yet unlocked',
     },
     list: {
       sessions_1: { title: 'First Step', description: 'The first one, the most important.' },
@@ -992,6 +1005,43 @@ export const en: typeof fr = {
     myStats: 'My shared stats',
   },
 
+  wearable: {
+    title: 'Wearables',
+    connect: 'Connect',
+    disconnect: 'Disconnect',
+    connected: 'Connected',
+    notConnected: 'Not connected',
+    lastSync: 'Last sync',
+    syncNow: 'Sync now',
+    syncHistory: 'Sync history',
+    autoSyncWeight: 'Auto sync weight',
+    autoSyncWeightDescription: 'Automatically import weight from wearable',
+    provider: {
+      health_connect: 'Health Connect',
+      healthkit: 'Apple Health',
+    },
+    status: {
+      success: 'Success',
+      error: 'Error',
+      partial: 'Partial',
+    },
+    syncSuccess: 'Sync successful',
+    syncError: 'Sync error',
+    disconnectConfirmTitle: 'Disconnect wearable?',
+    disconnectConfirmMessage: 'Automatic sync will be disabled.',
+    permissionDenied: 'Permissions denied. Allow access in system settings.',
+    notAvailable: 'Not available on this device',
+    syncing: 'Syncing...',
+    weightsImported: 'weight(s) imported',
+    noNewData: 'No new data',
+    timeAgo: {
+      justNow: 'just now',
+      minutesAgo: '{n} min ago',
+      hoursAgo: '{n}h ago',
+      daysAgo: '{n}d ago',
+    },
+  },
+
   share: {
     appName: 'KORE',
     branding: 'kore-app.net',
@@ -1020,4 +1070,5 @@ export const en: typeof fr = {
     shareAsImage: 'Share as image',
     shareAsText: 'Share as text',
   },
+
 } as const

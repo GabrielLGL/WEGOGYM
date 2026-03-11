@@ -284,6 +284,7 @@ export const fr = {
     reportDetail: 'Rapport',
     progressPhotos: 'Photos de progression',
     legal: 'Conditions d\'utilisation',
+    leaderboard: 'Classement',
   },
 
   programs: {
@@ -379,6 +380,18 @@ export const fr = {
       pr: 'Records personnels',
       session_volume: 'Volume par séance',
       exercises: 'Exercices',
+    },
+    conditions: {
+      sessions: '{n} séances complétées',
+      tonnage_kg: '{n} kg soulevés au total',
+      tonnage_t: '{n} tonnes soulevées au total',
+      streak: '{n} semaines de streak',
+      level: 'Niveau {n} atteint',
+      pr: '{n} records personnels',
+      session_volume: '{n} kg en une séance',
+      exercises: '{n} exercices différents pratiqués',
+      obtained: 'Obtenu',
+      locked: 'À débloquer',
     },
     list: {
       sessions_1: { title: 'Premier pas', description: 'La première, la plus importante.' },
@@ -993,6 +1006,43 @@ export const fr = {
     myStats: 'Mes stats partagées',
   },
 
+  wearable: {
+    title: 'Wearables',
+    connect: 'Connecter',
+    disconnect: 'Déconnecter',
+    connected: 'Connecté',
+    notConnected: 'Non connecté',
+    lastSync: 'Dernière synchro',
+    syncNow: 'Synchroniser maintenant',
+    syncHistory: 'Historique des synchros',
+    autoSyncWeight: 'Synchro auto du poids',
+    autoSyncWeightDescription: 'Importer automatiquement le poids depuis le wearable',
+    provider: {
+      health_connect: 'Health Connect',
+      healthkit: 'Apple Health',
+    },
+    status: {
+      success: 'Succès',
+      error: 'Erreur',
+      partial: 'Partiel',
+    },
+    syncSuccess: 'Synchronisation réussie',
+    syncError: 'Erreur de synchronisation',
+    disconnectConfirmTitle: 'Déconnecter le wearable ?',
+    disconnectConfirmMessage: 'La synchronisation automatique sera désactivée.',
+    permissionDenied: 'Permissions refusées. Autorisez l\'accès dans les paramètres système.',
+    notAvailable: 'Non disponible sur cet appareil',
+    syncing: 'Synchronisation...',
+    weightsImported: 'poids importé(s)',
+    noNewData: 'Aucune nouvelle donnée',
+    timeAgo: {
+      justNow: 'à l\'instant',
+      minutesAgo: 'il y a {n} min',
+      hoursAgo: 'il y a {n}h',
+      daysAgo: 'il y a {n}j',
+    },
+  },
+
   share: {
     appName: 'KORE',
     branding: 'kore-app.net',
@@ -1021,4 +1071,5 @@ export const fr = {
     shareAsImage: 'Partager en image',
     shareAsText: 'Partager en texte',
   },
+
 }
