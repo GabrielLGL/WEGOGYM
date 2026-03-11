@@ -90,13 +90,20 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
 
   useEffect(() => {
     if (!toastMessage) return
-    Animated.timing(toastOpacity, { toValue: 1, duration: TOAST_FADE_IN, useNativeDriver: true }).start()
+    const fadeIn = Animated.timing(toastOpacity, { toValue: 1, duration: TOAST_FADE_IN, useNativeDriver: true })
+    let fadeOut: Animated.CompositeAnimation | null = null
+    fadeIn.start()
     const timer = setTimeout(() => {
-      Animated.timing(toastOpacity, { toValue: 0, duration: TOAST_FADE_OUT, useNativeDriver: true }).start(() => {
+      fadeOut = Animated.timing(toastOpacity, { toValue: 0, duration: TOAST_FADE_OUT, useNativeDriver: true })
+      fadeOut.start(() => {
         setToastMessage(null)
       })
     }, TOAST_DURATION)
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      fadeIn.stop()
+      fadeOut?.stop()
+    }
   }, [toastMessage, toastOpacity])
 
   const toggleSelection = useCallback((se: SessionExercise) => {

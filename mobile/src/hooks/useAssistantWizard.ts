@@ -352,11 +352,13 @@ export function useAssistantWizard({
 
   useEffect(() => {
     const progress = totalSteps > 1 ? currentStep / (totalSteps - 1) : 0
-    Animated.timing(progressAnim, {
+    const anim = Animated.timing(progressAnim, {
       toValue: progress,
       duration: PROGRESS_ANIM_DURATION,
       useNativeDriver: false,
-    }).start()
+    })
+    anim.start()
+    return () => anim.stop()
   }, [currentStep, totalSteps, progressAnim])
 
   // ── Reset on tab focus ────────────────────────────────────────────────────
@@ -381,11 +383,13 @@ export function useAssistantWizard({
   useEffect(() => {
     if (!pendingFadeIn.current) return
     pendingFadeIn.current = false
-    Animated.timing(contentAnim, {
+    const anim = Animated.timing(contentAnim, {
       toValue: 1,
       duration: STEP_FADEIN_DURATION,
       useNativeDriver: false,
-    }).start()
+    })
+    anim.start()
+    return () => anim.stop()
   }, [currentStep, contentAnim])
 
   // ── Generation ────────────────────────────────────────────────────────────

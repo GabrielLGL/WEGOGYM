@@ -32,4 +32,7 @@ useEffect(() => {
 - Chaque `Animated.timing().start()` a un `.stop()` correspondant dans un cleanup
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260311-1900
+
+## Résolution
+Rapport do : docs/bmad/do/20260311-1900-fix-animation-cleanup.md
