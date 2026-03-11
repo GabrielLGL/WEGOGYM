@@ -146,6 +146,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         { icon: 'time-outline',    label: t.home.tiles.duration, route: 'StatsDuration' },
         { icon: 'barbell-outline', label: t.home.tiles.volume,   route: 'StatsVolume' },
         { icon: 'resize-outline',  label: t.home.tiles.measures, route: 'StatsMeasurements' },
+        { icon: 'camera-outline',  label: t.home.tiles.photos,   route: 'ProgressPhotos' },
       ],
     },
   ], [t])

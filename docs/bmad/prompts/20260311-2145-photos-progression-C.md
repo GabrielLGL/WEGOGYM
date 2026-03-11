@@ -149,4 +149,7 @@ Dans `fr.ts` et `en.ts`, ajouter les clés nécessaires (titres, boutons, labels
 Lancer uniquement APRÈS validation des groupes A et B.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260311-1909
+
+## Résolution
+Rapport do : docs/bmad/do/20260311-1909-feat-progress-photos-screen.md
