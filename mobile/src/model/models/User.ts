@@ -54,6 +54,14 @@ export default class User extends Model {
   @field('disclaimer_accepted') disclaimerAccepted!: boolean
   @text('cgu_version_accepted') cguVersionAccepted!: string | null
 
+  // Leaderboard amis — version 37
+  @text('friend_code') friendCode!: string
+
+  // Wearables — version 38
+  @text('wearable_provider') wearableProvider!: string | null
+  @field('wearable_sync_weight') wearableSyncWeight!: boolean
+  @field('wearable_last_sync_at') wearableLastSyncAt!: number | null
+
   // Rappels d'entraînement — version 31
   @field('reminders_enabled') remindersEnabled!: boolean
   @text('reminder_days') reminderDays!: string | null  // JSON: "[1,3,5]" (ISO weekday)

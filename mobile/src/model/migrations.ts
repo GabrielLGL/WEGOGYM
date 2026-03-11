@@ -1,4 +1,4 @@
-import { schemaMigrations, addColumns, unsafeExecuteSql } from '@nozbe/watermelondb/Schema/migrations'
+import { schemaMigrations, addColumns, unsafeExecuteSql, createTable } from '@nozbe/watermelondb/Schema/migrations'
 
 export const migrations = schemaMigrations({
   migrations: [
@@ -93,6 +93,73 @@ export const migrations = schemaMigrations({
           table: 'histories',
           columns: [
             { name: 'is_abandoned', type: 'boolean', isOptional: true },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 36,
+      steps: [
+        createTable({
+          name: 'progress_photos',
+          columns: [
+            { name: 'date', type: 'number' },
+            { name: 'photo_uri', type: 'string' },
+            { name: 'category', type: 'string', isOptional: true },
+            { name: 'note', type: 'string', isOptional: true },
+            { name: 'body_measurement_id', type: 'string', isOptional: true },
+            { name: 'created_at', type: 'number' },
+            { name: 'updated_at', type: 'number' },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 37,
+      steps: [
+        addColumns({
+          table: 'users',
+          columns: [{ name: 'friend_code', type: 'string', isOptional: true }],
+        }),
+        createTable({
+          name: 'friend_snapshots',
+          columns: [
+            { name: 'friend_code', type: 'string' },
+            { name: 'display_name', type: 'string' },
+            { name: 'total_xp', type: 'number' },
+            { name: 'level', type: 'number' },
+            { name: 'current_streak', type: 'number' },
+            { name: 'total_tonnage', type: 'number' },
+            { name: 'total_prs', type: 'number' },
+            { name: 'total_sessions', type: 'number' },
+            { name: 'imported_at', type: 'number' },
+            { name: 'created_at', type: 'number' },
+            { name: 'updated_at', type: 'number' },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 38,
+      steps: [
+        addColumns({
+          table: 'users',
+          columns: [
+            { name: 'wearable_provider', type: 'string', isOptional: true },
+            { name: 'wearable_sync_weight', type: 'boolean' },
+            { name: 'wearable_last_sync_at', type: 'number', isOptional: true },
+          ],
+        }),
+        createTable({
+          name: 'wearable_sync_logs',
+          columns: [
+            { name: 'sync_at', type: 'number' },
+            { name: 'provider', type: 'string' },
+            { name: 'status', type: 'string' },
+            { name: 'records_synced', type: 'number', isOptional: true },
+            { name: 'error_message', type: 'string', isOptional: true },
+            { name: 'created_at', type: 'number' },
+            { name: 'updated_at', type: 'number' },
           ],
         }),
       ],

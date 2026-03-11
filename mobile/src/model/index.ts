@@ -13,6 +13,9 @@ import SessionExercise from './models/SessionExercise'
 import PerformanceLog from './models/PerformanceLog'
 import BodyMeasurement from './models/BodyMeasurement'
 import UserBadge from './models/UserBadge'
+import ProgressPhoto from './models/ProgressPhoto'
+import FriendSnapshot from './models/FriendSnapshot'
+import WearableSyncLog from './models/WearableSyncLog'
 
 const adapter = new SQLiteAdapter({
   schema: mySchema,
@@ -40,5 +43,8 @@ export const database = new Database({
     PerformanceLog,
     BodyMeasurement,
     UserBadge,
+    ProgressPhoto,
+    FriendSnapshot,
+    WearableSyncLog,
   ],
 })

@@ -14,6 +14,7 @@
  * - users             : Préférences + gamification (XP, niveau, streak, thème, langue)
  * - user_badges       : Badges débloqués par l'utilisateur
  * - body_measurements : Mensurations corporelles (poids, tour de taille, etc.)
+ * - progress_photos   : Photos de progression (front, side, back)
  *
  * IMPORTANT : Chaque @field/@text/@date dans un modèle DOIT avoir sa colonne ici et vice versa.
  */
@@ -21,7 +22,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 35, // v35 : is_abandoned flag on histories
+  version: 38, // v38 : wearable fields in users + wearable_sync_logs table
   tables: [
     tableSchema({
       name: 'programs',
@@ -119,6 +120,10 @@ export const mySchema = appSchema({
             {name: 'reminder_minute', type: 'number'},
             {name: 'disclaimer_accepted', type: 'boolean'},
             {name: 'cgu_version_accepted', type: 'string', isOptional: true},
+            {name: 'friend_code', type: 'string', isOptional: true},
+            {name: 'wearable_provider', type: 'string', isOptional: true},
+            {name: 'wearable_sync_weight', type: 'boolean', isOptional: false},
+            {name: 'wearable_last_sync_at', type: 'number', isOptional: true},
             {name: 'created_at', type: 'number'},
             {name: 'updated_at', type: 'number'}
         ]
@@ -146,6 +151,18 @@ export const mySchema = appSchema({
         ]
     }),
     tableSchema({
+        name: 'progress_photos',
+        columns: [
+            {name: 'date', type: 'number'},
+            {name: 'photo_uri', type: 'string'},
+            {name: 'category', type: 'string', isOptional: true},
+            {name: 'note', type: 'string', isOptional: true},
+            {name: 'body_measurement_id', type: 'string', isOptional: true},
+            {name: 'created_at', type: 'number'},
+            {name: 'updated_at', type: 'number'},
+        ]
+    }),
+    tableSchema({
       name: 'histories',
       columns: [
         { name: 'session_id', type: 'string', isIndexed: true },
@@ -168,6 +185,34 @@ export const mySchema = appSchema({
         { name: 'set_order', type: 'number' },
         { name: 'is_pr', type: 'boolean' },
         { name: 'created_at', type: 'number', isIndexed: true },
+        { name: 'updated_at', type: 'number' },
+      ]
+    }),
+    tableSchema({
+      name: 'friend_snapshots',
+      columns: [
+        { name: 'friend_code', type: 'string' },
+        { name: 'display_name', type: 'string' },
+        { name: 'total_xp', type: 'number' },
+        { name: 'level', type: 'number' },
+        { name: 'current_streak', type: 'number' },
+        { name: 'total_tonnage', type: 'number' },
+        { name: 'total_prs', type: 'number' },
+        { name: 'total_sessions', type: 'number' },
+        { name: 'imported_at', type: 'number' },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+      ]
+    }),
+    tableSchema({
+      name: 'wearable_sync_logs',
+      columns: [
+        { name: 'sync_at', type: 'number' },
+        { name: 'provider', type: 'string' },
+        { name: 'status', type: 'string' },
+        { name: 'records_synced', type: 'number', isOptional: true },
+        { name: 'error_message', type: 'string', isOptional: true },
+        { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' },
       ]
     }),
