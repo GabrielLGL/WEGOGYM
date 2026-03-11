@@ -136,4 +136,7 @@ Ce groupe dépend de :
 **Lancer APRÈS Groupe A et Groupe B.**
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260311-1905
+
+## Résolution
+Rapport do : docs/bmad/do/20260311-1905-feat-widget-android-ui.md
