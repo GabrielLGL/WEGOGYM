@@ -208,31 +208,31 @@ describe('buildHeatmapData', () => {
 
 describe('buildWeeklyActivity', () => {
   it('returns exactly 7 entries (Mon–Sun)', () => {
-    const result = buildWeeklyActivity([], [], [])
+    const result = buildWeeklyActivity([], [], [], undefined, 'Session')
     expect(result).toHaveLength(7)
   })
 
   it('entries have correct dayLabel in order (Mon→Sun default)', () => {
-    const result = buildWeeklyActivity([], [], [])
+    const result = buildWeeklyActivity([], [], [], undefined, 'Session')
     const labels = result.map(d => d.dayLabel)
     expect(labels).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
   })
 
   it('each entry has dateKey as YYYY-MM-DD', () => {
-    const result = buildWeeklyActivity([], [], [])
+    const result = buildWeeklyActivity([], [], [], undefined, 'Session')
     result.forEach(d => {
       expect(d.dateKey).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     })
   })
 
   it('today entry has isToday=true', () => {
-    const result = buildWeeklyActivity([], [], [])
+    const result = buildWeeklyActivity([], [], [], undefined, 'Session')
     const todayEntries = result.filter(d => d.isToday)
     expect(todayEntries).toHaveLength(1)
   })
 
   it('sessions array is empty when no histories match day', () => {
-    const result = buildWeeklyActivity([], [], [])
+    const result = buildWeeklyActivity([], [], [], undefined, 'Session')
     result.forEach(d => {
       expect(d.sessions).toEqual([])
     })
@@ -247,7 +247,7 @@ describe('buildWeeklyActivity', () => {
     const history = h('h1', today, 'sess1')
     const set = s('s1', 'h1', 'e1', 100, 10)
 
-    const result = buildWeeklyActivity([history], [set], [session])
+    const result = buildWeeklyActivity([history], [set], [session], undefined, 'Session')
     const todayEntry = result.find(d => d.dateKey === todayKey)
     expect(todayEntry?.sessions).toHaveLength(1)
     expect(todayEntry?.sessions[0].sessionName).toBe('Full Body')
@@ -260,7 +260,7 @@ describe('buildWeeklyActivity', () => {
     const endTime = new Date(today.getTime() + 60 * 60000) // +60 min
     const session = sess('sess1', 'Full Body')
     const history = h('h1', today, 'sess1', { endTime })
-    const result = buildWeeklyActivity([history], [], [session])
+    const result = buildWeeklyActivity([history], [], [session], undefined, 'Session')
     const todayEntry = result.find(d => d.isToday)
     expect(todayEntry?.sessions[0].durationMin).toBe(60)
   })
@@ -269,7 +269,7 @@ describe('buildWeeklyActivity', () => {
     const today = new Date()
     const session = sess('sess1', 'Full Body')
     const history = h('h1', today, 'sess1') // no endTime
-    const result = buildWeeklyActivity([history], [], [session])
+    const result = buildWeeklyActivity([history], [], [session], undefined, 'Session')
     const todayEntry = result.find(d => d.isToday)
     expect(todayEntry?.sessions[0].durationMin).toBeNull()
   })

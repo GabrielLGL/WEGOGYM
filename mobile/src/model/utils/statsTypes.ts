@@ -64,12 +64,6 @@ export interface MuscleWeekEntry {
   sets: number
 }
 
-export interface MuscleWeekHistoryEntry {
-  weekLabel: string  // ex: "03/02"
-  weekStart: number  // timestamp ms pour tri
-  sets: number
-}
-
 export interface HeatmapDay {
   date: string       // 'YYYY-MM-DD'
   count: number      // 0 = repos, 1+ = nombre de seances

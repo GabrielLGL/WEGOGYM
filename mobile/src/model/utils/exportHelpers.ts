@@ -110,13 +110,15 @@ export async function importAllData(fileUri: string): Promise<void> {
 
   const allowedColumns = getAllowedColumns()
 
-  await database.write(async () => {
-    const ops: Model[] = []
+  // Fetch existing records OUTSIDE write() to avoid WatermelonDB deadlock
+  const existingRecords: Model[] = []
+  for (const tableName of TABLE_NAMES) {
+    const records = await database.get(tableName).query().fetch()
+    existingRecords.push(...records)
+  }
 
-    for (const tableName of TABLE_NAMES) {
-      const records = await database.get(tableName).query().fetch()
-      ops.push(...records.map(r => r.prepareDestroyPermanently()))
-    }
+  await database.write(async () => {
+    const ops: Model[] = existingRecords.map(r => r.prepareDestroyPermanently())
 
     for (const tableName of TABLE_NAMES) {
       const rows = (data[tableName] ?? []) as Record<string, unknown>[]

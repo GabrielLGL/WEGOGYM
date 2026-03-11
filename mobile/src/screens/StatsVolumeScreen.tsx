@@ -13,6 +13,7 @@ import { LineChart } from 'react-native-chart-kit'
 import { Ionicons } from '@expo/vector-icons'
 
 import { database } from '../model'
+import { WEEK_MS } from '../model/constants'
 import History from '../model/models/History'
 import WorkoutSet from '../model/models/Set'
 import Exercise from '../model/models/Exercise'
@@ -49,7 +50,6 @@ function computeBarWindow(
   windowLabel: string
   showNav: boolean
 } {
-  const WEEK_MS = 7 * 24 * 60 * 60 * 1000
   const now = new Date()
 
   if (barPeriod === 'all') {
@@ -105,7 +105,8 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
   const [periodKey, setPeriodKey] = useState<PeriodKey>(PERIOD_KEYS[0])
   const period: StatsPeriod = periodKey
 
-  const [muscleLabel, setMuscleLabel] = useState<string>(t.statsVolume.total)
+  const NO_FILTER = '__all__'
+  const [muscleKey, setMuscleKey] = useState<string>(NO_FILTER)
 
   const availableMuscles = useMemo(() => {
     const trainedExerciseIds = new Set(sets.map(s => s.exercise.id))
@@ -116,9 +117,9 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
     return Array.from(muscleSet).sort()
   }, [sets, exercises])
 
-  const muscleItems = useMemo(() => [t.statsVolume.total, ...availableMuscles], [availableMuscles, t.statsVolume.total])
-  const muscleFilter = muscleLabel === t.statsVolume.total ? null : muscleLabel
-  const muscleLabelMap = useMemo(() => ({ [t.statsVolume.total]: t.statsVolume.total, ...t.muscleNames }), [t])
+  const muscleItems = useMemo(() => [NO_FILTER, ...availableMuscles], [availableMuscles])
+  const muscleFilter = muscleKey === NO_FILTER ? null : muscleKey
+  const muscleLabelMap = useMemo(() => ({ [NO_FILTER]: t.statsVolume.total, ...t.muscleNames }), [t])
 
   const periodLabelMap = useMemo<Record<PeriodKey, string>>(() => ({
     '1m': t.statsVolume.periodMonth,
@@ -221,8 +222,8 @@ export function StatsVolumeScreenBase({ sets, exercises, histories }: Props) {
       />
       <ChipSelector
         items={muscleItems}
-        selectedValue={muscleLabel}
-        onChange={label => { if (label) setMuscleLabel(label) }}
+        selectedValue={muscleKey}
+        onChange={key => { if (key) setMuscleKey(key) }}
         allowNone={false}
         noneLabel=""
         labelMap={muscleLabelMap}
@@ -401,9 +402,17 @@ function useStyles(colors: ThemeColors) {
 }
 
 const enhance = withObservables([], () => ({
-  sets: database.get<WorkoutSet>('sets').query().observe(),
+  sets: database.get<WorkoutSet>('sets').query(
+    Q.on('histories', Q.and(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    ))
+  ).observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
-  histories: database.get<History>('histories').query(Q.where('deleted_at', null)).observe(),
+  histories: database.get<History>('histories').query(
+    Q.where('deleted_at', null),
+    Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+  ).observe(),
 }))
 
 const ObservableStatsVolumeContent = enhance(StatsVolumeScreenBase)

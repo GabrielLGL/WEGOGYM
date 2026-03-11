@@ -39,10 +39,10 @@ export function computeMuscleRepartition(
   exercises: Exercise[],
   histories: History[],
   period: StatsPeriod,
-  othersLabel = 'Autres'
+  othersLabel: string
 ): MuscleRepartitionEntry[] {
   const periodStart = getPeriodStart(period)
-  const activeHistories = histories.filter(h => h.deletedAt === null)
+  const activeHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned)
   const historyDates = new Map(activeHistories.map(h => [h.id, h.startTime.getTime()]))
   const activeHistoryIds = new Set(activeHistories.map(h => h.id))
   const exerciseMuscles = new Map(exercises.map(e => [e.id, e.muscles]))
@@ -89,7 +89,7 @@ export function computeSetsPerMuscleWeek(
   histories: History[]
 ): MuscleWeekEntry[] {
   const mondayStart = getMondayOfCurrentWeek()
-  const activeHistories = histories.filter(h => h.deletedAt === null)
+  const activeHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned)
   const historyDates = new Map(activeHistories.map(h => [h.id, h.startTime.getTime()]))
   const activeHistoryIds = new Set(
     activeHistories
@@ -141,8 +141,8 @@ export function computeWeeklySetsChart(
   const windowEnd = windowStartMonday + weeksToShow * WEEK_MS
 
   // Use shared context or build locally
-  const historyDates = ctx?.historyDates ?? new Map(histories.filter(h => h.deletedAt === null).map(h => [h.id, h.startTime.getTime()]))
-  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null).map(h => h.id))
+  const historyDates = ctx?.historyDates ?? new Map(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => [h.id, h.startTime.getTime()]))
+  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => h.id))
   const exerciseMuscles = ctx?.exerciseMuscles ?? new Map<string, string[]>(exercises.map(e => [e.id, e.muscles] as [string, string[]]))
 
   // Single pass: bucket each set into the right week
@@ -193,8 +193,8 @@ export function computeMonthlySetsChart(
   monthLabels?: string[]
 ): MonthlySetsChartResult {
   const MONTH_LABELS_DEFAULT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const historyDates = ctx?.historyDates ?? new Map(histories.filter(h => h.deletedAt === null).map(h => [h.id, h.startTime.getTime()]))
-  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null).map(h => h.id))
+  const historyDates = ctx?.historyDates ?? new Map(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => [h.id, h.startTime.getTime()]))
+  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => h.id))
   const exerciseMuscles = ctx?.exerciseMuscles ?? new Map<string, string[]>(exercises.map(e => [e.id, e.muscles] as [string, string[]]))
   const labels_ = monthLabels ?? MONTH_LABELS_DEFAULT
 

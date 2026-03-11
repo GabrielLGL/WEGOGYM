@@ -59,6 +59,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
 }: WorkoutSetRowProps) {
   // Hooks AVANT tout return conditionnel (règle des hooks React)
   const { colors } = useTheme()
+  const { t } = useLanguage()
   const styles = useMemo(() => createStyles(colors), [colors])
   const [localWeight, setLocalWeight] = React.useState(input.weight)
   const [localReps, setLocalReps] = React.useState(input.reps)
@@ -121,10 +122,10 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           <Ionicons name="checkmark" size={16} color={colors.background} />
         </View>
         <Text style={styles.validatedWeight}>{validated.weight}</Text>
-        <Text style={styles.validatedUnit}>kg</Text>
+        <Text style={styles.validatedUnit}>{t.statsMeasurements.weightUnit}</Text>
         <Text style={styles.validatedMultiply}>×</Text>
         <Text style={styles.validatedWeight}>{validated.reps}</Text>
-        <Text style={styles.validatedUnit}>reps</Text>
+        <Text style={styles.validatedUnit}>{t.workout.reps}</Text>
         {validated.isPr && (
           <View style={styles.prChip}>
             <Text style={styles.prBadge}>PR !</Text>
@@ -160,7 +161,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           keyboardType="numeric"
           textAlign="center"
         />
-        <Text style={styles.inputSuffix}>kg</Text>
+        <Text style={styles.inputSuffix}>{t.statsMeasurements.weightUnit}</Text>
       </View>
       <View style={[styles.inputBlock, styles.inputBlockReps, repsError && styles.inputBlockError]}>
         <TextInput
@@ -172,7 +173,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           keyboardType="numeric"
           textAlign="center"
         />
-        <Text style={styles.inputSuffix}>reps</Text>
+        <Text style={styles.inputSuffix}>{t.workout.reps}</Text>
       </View>
       <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
         <TouchableOpacity

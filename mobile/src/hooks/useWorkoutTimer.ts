@@ -1,14 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import { formatSecondsToMMSS } from '../model/utils/parseUtils'
 
 interface WorkoutTimerResult {
   elapsedSeconds: number
   formattedTime: string
-}
-
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 }
 
 /**
@@ -43,6 +38,6 @@ export function useWorkoutTimer(startTimestamp: number): WorkoutTimerResult {
 
   return {
     elapsedSeconds,
-    formattedTime: formatTime(elapsedSeconds),
+    formattedTime: formatSecondsToMMSS(elapsedSeconds),
   }
 }

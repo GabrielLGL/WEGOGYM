@@ -72,7 +72,10 @@ function getWeekStartTimestamp(isoWeek: string): number {
 async function getTotalSessionCount(): Promise<number> {
   return database
     .get<History>('histories')
-    .query(Q.where('deleted_at', null))
+    .query(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )
     .fetchCount()
 }
 
@@ -127,6 +130,7 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
           .get<History>('histories')
           .query(
             Q.where('deleted_at', null),
+            Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
             Q.where('start_time', Q.gte(weekStart)),
           )
           .fetchCount()
@@ -142,6 +146,9 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
         )
 
         const totalSessionCount = await getTotalSessionCount()
+        if (!isMountedRef.current) return null
+
+        // totalSessionCount inclut la session courante (déjà complétée)
         const before = {
           totalSessions: totalSessionCount - 1,
           totalTonnage: user.totalTonnage || 0,
@@ -154,9 +161,10 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
         const distinctResult = await database.get<SetModel>('sets')
           .query(Q.unsafeSqlQuery(
             'SELECT COUNT(DISTINCT s.exercise_id) as count FROM sets s ' +
-            'INNER JOIN histories h ON s.history_id = h.id WHERE h.deleted_at IS NULL'
+            'INNER JOIN histories h ON s.history_id = h.id WHERE h.deleted_at IS NULL AND (h.is_abandoned IS NULL OR h.is_abandoned = 0)'
           ))
           .unsafeFetchRaw()
+        if (!isMountedRef.current) return null
         const rawCount = (distinctResult[0] as Record<string, unknown> | undefined)
         const distinctExerciseCount = typeof rawCount?.count === 'number' ? rawCount.count : 0
 

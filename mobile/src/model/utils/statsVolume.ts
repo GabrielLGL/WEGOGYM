@@ -20,8 +20,8 @@ export function computeVolumeStats(
   ctx?: StatsContext
 ): VolumeStats {
   // Use shared context or build locally
-  const historyDates = ctx?.historyDates ?? new Map(histories.filter(h => h.deletedAt === null).map(h => [h.id, h.startTime.getTime()]))
-  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null).map(h => h.id))
+  const historyDates = ctx?.historyDates ?? new Map(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => [h.id, h.startTime.getTime()]))
+  const activeHistoryIds = ctx?.historyIds ?? new Set(histories.filter(h => h.deletedAt === null && !h.isAbandoned).map(h => h.id))
 
   const periodStart = getPeriodStart(period)
   const periodLengthMs =
@@ -99,7 +99,7 @@ export function computeVolumeStats(
 export function computeCalendarData(histories: History[]): Map<string, number> {
   const result = new Map<string, number>()
   histories
-    .filter(h => h.deletedAt === null)
+    .filter(h => h.deletedAt === null && !h.isAbandoned)
     .forEach(h => {
       const key = toDateKey(h.startTime)
       result.set(key, (result.get(key) ?? 0) + 1)
@@ -137,8 +137,8 @@ export function buildWeeklyActivity(
   histories: History[],
   sets: WorkoutSet[],
   sessions: Session[],
-  dayLabels?: string[],
-  sessionFallback = 'Séance',
+  dayLabels: string[] | undefined,
+  sessionFallback: string,
 ): WeeklyActivityData {
   const mondayTs = getMondayOfCurrentWeek()
 
@@ -154,7 +154,7 @@ export function buildWeeklyActivity(
     const isToday = dateKey === todayKey
     const isPast = dayDate < today
 
-    const dayHistories = histories.filter(h => h.deletedAt === null && toDateKey(h.startTime) === dateKey)
+    const dayHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned && toDateKey(h.startTime) === dateKey)
 
     const daySessions = dayHistories.map(h => {
       const historySets = sets.filter(s => s.history.id === h.id)

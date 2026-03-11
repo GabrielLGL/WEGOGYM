@@ -89,9 +89,12 @@ const RestTimer: React.FC<Props> = ({
     }
   }, [])
 
+  const entryAnimRef = useRef<Animated.CompositeAnimation | null>(null)
+
   useEffect(() => {
     // Animation d'entrée
-    Animated.spring(animValue, { toValue: 0, useNativeDriver: true }).start()
+    entryAnimRef.current = Animated.spring(animValue, { toValue: 0, useNativeDriver: true })
+    entryAnimRef.current.start()
 
     // Barre de progression
     progressAnimRef.current = Animated.timing(progressAnim, { toValue: 0, duration: duration * 1000, useNativeDriver: false })
@@ -121,6 +124,7 @@ const RestTimer: React.FC<Props> = ({
       if (hapticTimer1Ref.current) clearTimeout(hapticTimer1Ref.current)
       if (hapticTimer2Ref.current) clearTimeout(hapticTimer2Ref.current)
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      if (entryAnimRef.current) entryAnimRef.current.stop()
       if (progressAnimRef.current) progressAnimRef.current.stop()
     }
   }, [])

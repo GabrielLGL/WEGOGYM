@@ -66,14 +66,14 @@ describe('getMondayOfCurrentWeek', () => {
 
 describe('computeMuscleRepartition', () => {
   it('returns empty for no sets', () => {
-    expect(computeMuscleRepartition([], [], [], 'all')).toEqual([])
+    expect(computeMuscleRepartition([], [], [], 'all', 'Autres')).toEqual([])
   })
 
   it('returns empty for only deleted histories', () => {
     const exercise = ex('e1', 'Bench', ['Pecs'])
     const history = h('h1', new Date(), { deletedAt: new Date() })
     const set = s('s1', 'h1', 'e1')
-    expect(computeMuscleRepartition([set], [exercise], [history], 'all')).toEqual([])
+    expect(computeMuscleRepartition([set], [exercise], [history], 'all', 'Autres')).toEqual([])
   })
 
   it('calculates correct percentages for 2 equal muscles', () => {
@@ -81,7 +81,7 @@ describe('computeMuscleRepartition', () => {
     const e2 = ex('e2', 'Squat', ['Quads'])
     const history = h('h1', new Date())
     const sets = [s('s1', 'h1', 'e1'), s('s2', 'h1', 'e2')]
-    const result = computeMuscleRepartition(sets, [e1, e2], [history], 'all')
+    const result = computeMuscleRepartition(sets, [e1, e2], [history], 'all', 'Autres')
     expect(result).toHaveLength(2)
     expect(result[0].pct).toBe(50)
     expect(result[1].pct).toBe(50)
@@ -92,7 +92,7 @@ describe('computeMuscleRepartition', () => {
     const exercises = muscles.map((m, i) => ex(`e${i}`, `Ex${i}`, [m]))
     const history = h('h1', new Date())
     const sets = muscles.map((_, i) => s(`s${i}`, 'h1', `e${i}`))
-    const result = computeMuscleRepartition(sets, exercises, [history], 'all')
+    const result = computeMuscleRepartition(sets, exercises, [history], 'all', 'Autres')
     expect(result).toHaveLength(8) // 7 top + 1 Autres
     expect(result[result.length - 1].muscle).toBe('Autres')
   })
@@ -101,7 +101,7 @@ describe('computeMuscleRepartition', () => {
     const exercise = ex('e1', 'Test', ['Pecs', '', '  '])
     const history = h('h1', new Date())
     const set = s('s1', 'h1', 'e1')
-    const result = computeMuscleRepartition([set], [exercise], [history], 'all')
+    const result = computeMuscleRepartition([set], [exercise], [history], 'all', 'Autres')
     expect(result).toHaveLength(1)
     expect(result[0].muscle).toBe('Pecs')
   })

@@ -10,7 +10,6 @@ import { database } from '../model'
 import UserBadge from '../model/models/UserBadge'
 import {
   BADGES_LIST,
-  BADGE_CATEGORY_LABELS,
   type BadgeCategory,
   type BadgeDefinition,
 } from '../model/utils/badgeConstants'
@@ -49,14 +48,6 @@ function BadgesScreenBase({ userBadges }: Props) {
     [userBadges],
   )
 
-  const unlockedAt = useMemo(() => {
-    const map: Record<string, Date> = {}
-    for (const ub of userBadges) {
-      map[ub.badgeId] = ub.unlockedAt
-    }
-    return map
-  }, [userBadges])
-
   const badgesByCategory = useMemo(() => {
     const map: Record<BadgeCategory, BadgeDefinition[]> = {
       sessions: [],
@@ -90,7 +81,7 @@ function BadgesScreenBase({ userBadges }: Props) {
       {CATEGORY_ORDER.map(category => (
         <View key={category} style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {t.badges.categories[category] ?? BADGE_CATEGORY_LABELS[category]}
+            {t.badges.categories[category]}
           </Text>
           <View style={styles.grid}>
             {badgesByCategory[category].map(badge => (
@@ -98,7 +89,6 @@ function BadgesScreenBase({ userBadges }: Props) {
                 <BadgeCard
                   badge={badge}
                   unlocked={unlockedIds.has(badge.id)}
-                  unlockedAt={unlockedAt[badge.id]}
                 />
               </View>
             ))}

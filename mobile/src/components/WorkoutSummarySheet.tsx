@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { BottomSheet } from './BottomSheet'
 import { Button } from './Button'
 import { updateHistoryNote } from '../model/utils/databaseHelpers'
+import { formatSecondsToMMSS } from '../model/utils/parseUtils'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -25,12 +26,6 @@ interface WorkoutSummarySheetProps {
   currentStreak: number
   recapExercises: RecapExerciseData[]
   recapComparison: RecapComparisonData
-}
-
-function formatElapsedTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 }
 
 interface StatBlockProps {
@@ -146,7 +141,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 
         {/* Stats grid 2×2 */}
         <View style={styles.statsGrid}>
-          <StatBlock label={t.workoutSummary.duration} value={formatElapsedTime(durationSeconds)} icon="timer-outline" colors={colors} />
+          <StatBlock label={t.workoutSummary.duration} value={formatSecondsToMMSS(durationSeconds)} icon="timer-outline" colors={colors} />
           <StatBlock label={t.workoutSummary.volume} value={`${totalVolume.toFixed(1)} kg`} icon="barbell-outline" colors={colors} />
           <StatBlock label={t.workoutSummary.sets} value={`${totalSets} ${t.workoutSummary.setsValidated}`} icon="checkmark-circle-outline" colors={colors} />
           <StatBlock label={t.workoutSummary.records} value={`${totalPrs} PR`} icon="trophy-outline" colors={colors} />

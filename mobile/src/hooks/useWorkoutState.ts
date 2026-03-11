@@ -58,6 +58,8 @@ export function useWorkoutState(
   const validatedSetsRef = useRef<Record<string, ValidatedSetData>>({})
   validatedSetsRef.current = validatedSets
   const [totalVolume, setTotalVolume] = useState(0)
+  // Guard contre double-tap rapide (validateSet/unvalidateSet)
+  const pendingOpsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     const exerciseIds = sessionExercises.map(se => se.exercise.id)
@@ -95,16 +97,19 @@ export function useWorkoutState(
     if (!historyId) return false
 
     const key = `${sessionExercise.id}_${setOrder}`
-    const input = setInputsRef.current[key]
-    if (!input) return false
-
-    const { valid } = validateSetInput(input.weight, input.reps)
-    if (!valid) return false
-
-    const weight = Number(input.weight)
-    const reps = Number(input.reps)
+    if (pendingOpsRef.current.has(key)) return false
+    pendingOpsRef.current.add(key)
 
     try {
+      const input = setInputsRef.current[key]
+      if (!input) return false
+
+      const { valid } = validateSetInput(input.weight, input.reps)
+      if (!valid) return false
+
+      const weight = Number(input.weight)
+      const reps = Number(input.reps)
+
       const exercise = await sessionExercise.exercise.fetch()
       if (!exercise) return false
 
@@ -126,6 +131,8 @@ export function useWorkoutState(
     } catch (error) {
       if (__DEV__) console.error('Failed to save workout set:', error)
       return false
+    } finally {
+      pendingOpsRef.current.delete(key)
     }
   }, [historyId])
 
@@ -136,10 +143,13 @@ export function useWorkoutState(
     if (!historyId) return false
 
     const key = `${sessionExercise.id}_${setOrder}`
-    const validated = validatedSetsRef.current[key]
-    if (!validated) return false
+    if (pendingOpsRef.current.has(key)) return false
+    pendingOpsRef.current.add(key)
 
     try {
+      const validated = validatedSetsRef.current[key]
+      if (!validated) return false
+
       const exercise = await sessionExercise.exercise.fetch()
       if (!exercise) return false
 
@@ -155,6 +165,8 @@ export function useWorkoutState(
     } catch (error) {
       if (__DEV__) console.error('Failed to delete workout set:', error)
       return false
+    } finally {
+      pendingOpsRef.current.delete(key)
     }
   }, [historyId])
 

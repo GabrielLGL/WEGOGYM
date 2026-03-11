@@ -10,7 +10,6 @@ import type { BadgeDefinition } from '../model/utils/badgeConstants'
 interface BadgeCardProps {
   badge: BadgeDefinition
   unlocked: boolean
-  unlockedAt?: Date
 }
 
 export function BadgeCard({ badge, unlocked }: BadgeCardProps) {
@@ -27,7 +26,7 @@ export function BadgeCard({ badge, unlocked }: BadgeCardProps) {
         style={[styles.title, !unlocked && styles.titleLocked]}
         numberOfLines={2}
       >
-        {badgeI18n?.title ?? badge.title}
+        {badgeI18n?.title ?? badge.id}
       </Text>
     </View>
   )
