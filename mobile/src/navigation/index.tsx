@@ -73,6 +73,8 @@ const SkillTreeScreen = React.lazy(() => import('../screens/SkillTreeScreen'))
 const StatsHexagonScreen = React.lazy(() => import('../screens/StatsHexagonScreen'))
 const ActivityFeedScreen = React.lazy(() => import('../screens/ActivityFeedScreen'))
 const StatsHallOfFameScreen = React.lazy(() => import('../screens/StatsHallOfFameScreen'))
+const StatsBalanceScreen = React.lazy(() => import('../screens/StatsBalanceScreen'))
+const TitlesScreen = React.lazy(() => import('../screens/TitlesScreen'))
 
 function isVersionOlder(accepted: string, required: string): boolean {
   const [aMaj, aMin] = accepted.split('.').map(Number)
@@ -112,6 +114,8 @@ export type RootStackParamList = {
   StatsHexagon: undefined;
   ActivityFeed: undefined;
   StatsHallOfFame: undefined;
+  StatsBalance: undefined;
+  Titles: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -266,6 +270,8 @@ function AppContent() {
           <Stack.Screen name="StatsHexagon" component={StatsHexagonScreen} options={{ title: t.navigation.statsHexagon }} />
           <Stack.Screen name="ActivityFeed" component={ActivityFeedScreen} options={{ title: t.navigation.activityFeed }} />
           <Stack.Screen name="StatsHallOfFame" component={StatsHallOfFameScreen} options={{ title: t.navigation.hallOfFame }} />
+          <Stack.Screen name="StatsBalance" component={StatsBalanceScreen} options={{ title: t.navigation.statsBalance }} />
+          <Stack.Screen name="Titles" component={TitlesScreen} options={{ title: t.navigation.titles }} />
         </Stack.Navigator>
       </Suspense>
     </NavigationContainer>

@@ -77,6 +77,8 @@ export function StatsScreenBase({ user, histories, sets }: Props) {
     { icon: 'list-outline',        label: t.stats.history,      route: 'StatsHistory' },
     { icon: 'trophy-outline',      label: t.stats.selfLeagues,  route: 'SelfLeagues' },
     { icon: 'medal-outline',       label: t.stats.hallOfFame,   route: 'StatsHallOfFame' },
+    { icon: 'ribbon-outline',      label: t.stats.titles,       route: 'Titles' },
+    { icon: 'scale-outline',       label: t.stats.balance,      route: 'StatsBalance' },
   ], [t])
 
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
