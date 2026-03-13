@@ -6,6 +6,7 @@ import type User from '../../model/models/User'
 import type History from '../../model/models/History'
 import type WorkoutSet from '../../model/models/Set'
 import type Session from '../../model/models/Session'
+import type FriendSnapshot from '../../model/models/FriendSnapshot'
 
 jest.mock('@gorhom/portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children,
@@ -91,6 +92,7 @@ describe('HomeScreen Dashboard', () => {
           sessions={[] as unknown as Session[]}
           userBadges={[]}
           exercises={[]}
+          friends={[] as unknown as FriendSnapshot[]}
         />
       )
     ).not.toThrow()
@@ -106,6 +108,7 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     expect(getByText('Salut, Gabriel !')).toBeTruthy()
@@ -121,6 +124,7 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     expect(getByText('Salut, Toi !')).toBeTruthy()
@@ -137,6 +141,7 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     expect(getByText('5')).toBeTruthy()
@@ -144,8 +149,8 @@ describe('HomeScreen Dashboard', () => {
     expect(getByText('7')).toBeTruthy()
   })
 
-  it('affiche les 2 sections', () => {
-    const { getByText, queryByText } = render(
+  it('affiche les sections', () => {
+    const { getByText } = render(
       <HomeContent
         user={null}
         histories={[] as unknown as History[]}
@@ -154,11 +159,12 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     expect(getByText('Entra\u00eenement')).toBeTruthy()
     expect(getByText('Statistiques')).toBeTruthy()
-    expect(queryByText('Outils')).toBeNull()
+    expect(getByText('Outils')).toBeTruthy()
   })
 
   it('affiche toutes les tuiles', () => {
@@ -171,6 +177,7 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     expect(getByText('Programmes')).toBeTruthy()
@@ -182,6 +189,7 @@ describe('HomeScreen Dashboard', () => {
     expect(queryByText('Exercices & Records')).toBeNull()
     expect(getByText('Mesures')).toBeTruthy()
     expect(queryByText('Historique')).toBeNull()
+    expect(getByText('Classement')).toBeTruthy()
   })
 
   it('navigue vers un écran stack au press', () => {
@@ -194,6 +202,7 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     fireEvent.press(getByText('Dur\u00e9e'))
@@ -210,6 +219,7 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     fireEvent.press(getByText('Programmes'))
@@ -226,6 +236,7 @@ describe('HomeScreen Dashboard', () => {
         sessions={[] as unknown as Session[]}
         userBadges={[]}
         exercises={[]}
+        friends={[] as unknown as FriendSnapshot[]}
       />
     )
     expect(getByText('Continue comme ça !')).toBeTruthy()

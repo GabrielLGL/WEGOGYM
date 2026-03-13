@@ -67,6 +67,7 @@ const HistoryDetailScreen = React.lazy(() => import('../screens/HistoryDetailScr
 const ReportDetailScreen = React.lazy(() => import('../screens/ReportDetailScreen'))
 const ProgressPhotosScreen = React.lazy(() => import('../screens/ProgressPhotosScreen'))
 const LegalScreen = React.lazy(() => import('../screens/LegalScreen'))
+const LeaderboardScreen = React.lazy(() => import('../screens/LeaderboardScreen'))
 
 function isVersionOlder(accepted: string, required: string): boolean {
   const [aMaj, aMin] = accepted.split('.').map(Number)
@@ -100,6 +101,7 @@ export type RootStackParamList = {
   ReportDetail: { type?: 'weekly' | 'monthly'; offset?: number } | undefined;
   ProgressPhotos: undefined;
   Legal: undefined;
+  Leaderboard: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -248,6 +250,7 @@ function AppContent() {
           <Stack.Screen name="ReportDetail" component={ReportDetailScreen} options={{ title: t.navigation.reportDetail }} />
           <Stack.Screen name="ProgressPhotos" component={ProgressPhotosScreen} options={{ title: t.navigation.progressPhotos }} />
           <Stack.Screen name="Legal" component={LegalScreen} options={{ title: t.navigation.legal }} />
+          <Stack.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: t.navigation.leaderboard }} />
         </Stack.Navigator>
       </Suspense>
     </NavigationContainer>

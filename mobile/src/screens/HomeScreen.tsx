@@ -37,6 +37,7 @@ import Session from '../model/models/Session'
 import User from '../model/models/User'
 import UserBadge from '../model/models/UserBadge'
 import Exercise from '../model/models/Exercise'
+import FriendSnapshot from '../model/models/FriendSnapshot'
 import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import { BADGES_LIST } from '../model/utils/badgeConstants'
 import { computeMotivationalPhrase, buildWeeklyActivity, getMondayOfCurrentWeek } from '../model/utils/statsHelpers'
@@ -114,9 +115,10 @@ interface Props {
   sessions: Session[]
   userBadges: UserBadge[]
   exercises: Exercise[]
+  friends: FriendSnapshot[]
 }
 
-function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises }: Props) {
+function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises, friends }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<HomeNavigation>()
@@ -521,6 +523,26 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           </View>
         </View>
       ))}
+
+      {/* ── Tuile Classement ── */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t.home.sections.tools}</Text>
+        <View style={styles.grid}>
+          <TouchableOpacity
+            style={styles.gridBtn}
+            onPress={() => { haptics.onPress(); navigation.navigate('Leaderboard') }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="trophy-outline" size={28} color={colors.primary} />
+            <Text style={styles.btnLabel}>{t.leaderboard.title}</Text>
+            {friends.length > 0 && (
+              <Text style={[styles.btnLabel, { color: colors.textSecondary, marginTop: 0 }]}>
+                {friends.length} ami{friends.length > 1 ? 's' : ''}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
     </ScrollView>
 
     <MilestoneCelebration
@@ -829,6 +851,7 @@ const enhance = withObservables([], () => ({
   sessions: database.get<Session>('sessions').query().observe(),
   userBadges: database.get<UserBadge>('user_badges').query().observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
+  friends: database.get<FriendSnapshot>('friend_snapshots').query().observe(),
 }))
 
 export default enhance(HomeScreenBase)

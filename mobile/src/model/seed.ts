@@ -2,6 +2,7 @@ import { database } from './index'
 import Exercise from './models/Exercise'
 import User from './models/User'
 import { Q } from '@nozbe/watermelondb'
+import { generateFriendCode } from './utils/leaderboardHelpers'
 
 export const BASIC_EXERCISES = [
   { name: 'Développé Couché Barre', muscles: ['Pecs', 'Epaules', 'Triceps'], equipment: 'Poids libre' },
@@ -155,6 +156,7 @@ export const seedExercises = async () => {
         await usersCollection.create(u => {
           u.email = "me@gymtracker.app"
           u.timerEnabled = true
+          u.friendCode = generateFriendCode()
         })
       }
 
