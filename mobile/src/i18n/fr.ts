@@ -293,6 +293,7 @@ export const fr = {
     statsHexagon: 'Profil Athlète',
     activityFeed: 'Journal d\'activité',
     hallOfFame: 'Hall of Fame',
+    statsBalance: 'Équilibre Push/Pull',
   },
 
   programs: {
@@ -376,6 +377,7 @@ export const fr = {
     history: 'Historique',
     selfLeagues: 'Ma progression',
     hallOfFame: 'Hall of Fame',
+    balance: 'Équilibre',
   },
 
   badges: {
@@ -1156,6 +1158,22 @@ export const fr = {
     thisWeek: 'Cette semaine',
     sessions: 'séances',
     noData: 'Pas de données pour cette période',
+  },
+
+  athleteClass: {
+    title: 'Classe athlète',
+    powerlifter: '⚡ Powerlifter',
+    bodybuilder: '💪 Bodybuilder',
+    complete: '🏆 Athlète Complet',
+    polyvalent: '🎯 Polyvalent',
+  },
+
+  exerciseOfWeek: {
+    title: 'Exercice de la semaine',
+    neverDone: 'Jamais essayé',
+    daysAgo: 'Il y a {n} jours',
+    tryItNever: 'Tu n\'as jamais essayé cet exercice — c\'est le moment !',
+    tryItAgain: 'Tu ne l\'as pas fait depuis {n} jours — ressaie !',
   },
 
   share: {

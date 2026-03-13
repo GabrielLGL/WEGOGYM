@@ -1157,6 +1157,22 @@ export const en: typeof fr = {
     achievedOn: 'On',
   },
 
+  athleteClass: {
+    title: 'Athlete Class',
+    powerlifter: '⚡ Powerlifter',
+    bodybuilder: '💪 Bodybuilder',
+    complete: '🏆 Complete Athlete',
+    polyvalent: '🎯 All-rounder',
+  },
+
+  exerciseOfWeek: {
+    title: 'Exercise of the week',
+    neverDone: 'Never tried',
+    daysAgo: '{n} days ago',
+    tryItNever: 'You\'ve never tried this exercise — now is the time!',
+    tryItAgain: 'You haven\'t done it in {n} days — try again!',
+  },
+
   share: {
     appName: 'KORE',
     branding: 'kore-app.net',

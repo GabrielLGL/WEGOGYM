@@ -65,6 +65,10 @@ import type { FlashbackData } from '../model/utils/flashbackHelpers'
 import { WEEK_MS } from '../model/constants'
 import type { RootStackParamList } from '../navigation'
 import { buildWidgetData, saveWidgetData } from '../services/widgetDataService'
+import { computeAthleteClass } from '../model/utils/athleteClassHelpers'
+import { computeExerciseOfWeek } from '../model/utils/exerciseOfWeekHelpers'
+import { useModalState } from '../hooks/useModalState'
+import { BottomSheet } from '../components/BottomSheet'
 
 const DEFAULT_STATUS_BAR_HEIGHT = 44
 const DAY_CHIP_MIN_HEIGHT = 84
@@ -426,6 +430,12 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
     })
   }, [histories, sets, user?.userLevel, user?.currentStreak])
 
+  // ── Athlete class ──
+  const athleteClass = useMemo(
+    () => computeAthleteClass(sets, exercises),
+    [sets, exercises],
+  )
+
   // ── Flashback data ──
   const flashback1m = useMemo(
     () => computeFlashback(histories, sets, 1),
@@ -435,6 +445,13 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
     () => computeFlashback(histories, sets, 3),
     [histories, sets],
   )
+
+  // ── Exercise of the Week ──
+  const exerciseOfWeek = useMemo(
+    () => computeExerciseOfWeek(exercises, sets),
+    [exercises, sets],
+  )
+  const exerciseModal = useModalState()
 
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
@@ -500,6 +517,13 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           currentStreak={user?.currentStreak ?? 0}
           streakTarget={user?.streakTarget ?? 3}
         />
+        {athleteClass && (
+          <View style={styles.athleteClassRow}>
+            <Text style={styles.athleteClassLabel}>
+              {t.athleteClass[athleteClass.class]}
+            </Text>
+          </View>
+        )}
         <View style={styles.badgesSeparator} />
         <TouchableOpacity
           style={styles.badgesRow}
@@ -676,7 +700,56 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* ── Exercice de la Semaine ── */}
+      {exerciseOfWeek && (
+        <TouchableOpacity
+          style={styles.exerciseOfWeekCard}
+          onPress={() => { haptics.onPress(); exerciseModal.open() }}
+          activeOpacity={0.8}
+        >
+          <View style={styles.exerciseOfWeekHeader}>
+            <Ionicons name="sparkles-outline" size={18} color={colors.primary} />
+            <Text style={styles.exerciseOfWeekTitle}>{t.exerciseOfWeek.title}</Text>
+          </View>
+          <Text style={styles.exerciseOfWeekName}>{exerciseOfWeek.exercise.name}</Text>
+          <Text style={styles.exerciseOfWeekSub}>
+            {exerciseOfWeek.isNew
+              ? t.exerciseOfWeek.neverDone
+              : t.exerciseOfWeek.daysAgo.replace('{n}', String(exerciseOfWeek.daysSinceLastDone))}
+          </Text>
+          {exerciseOfWeek.exercise.muscles.length > 0 && (
+            <View style={styles.exerciseOfWeekMuscles}>
+              {exerciseOfWeek.exercise.muscles.slice(0, 3).map(m => (
+                <View key={m} style={styles.muscleChip}>
+                  <Text style={styles.muscleChipText}>{m}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </TouchableOpacity>
+      )}
     </ScrollView>
+
+    {/* Modal detail exercice */}
+    <BottomSheet
+      visible={exerciseModal.isOpen}
+      onClose={exerciseModal.close}
+      title={exerciseOfWeek?.exercise.name ?? ''}
+    >
+      {exerciseOfWeek && (
+        <View style={styles.exerciseModalContent}>
+          <Text style={styles.exerciseModalMuscles}>
+            {exerciseOfWeek.exercise.muscles.join(' · ')}
+          </Text>
+          <Text style={styles.exerciseModalHint}>
+            {exerciseOfWeek.isNew
+              ? t.exerciseOfWeek.tryItNever
+              : t.exerciseOfWeek.tryItAgain.replace('{n}', String(exerciseOfWeek.daysSinceLastDone))}
+          </Text>
+        </View>
+      )}
+    </BottomSheet>
 
     <MilestoneCelebration
       visible={currentCelebration?.type === 'milestone'}
@@ -780,6 +853,17 @@ function useStyles(colors: ThemeColors) {
       padding: spacing.md,
       marginBottom: spacing.md,
       gap: spacing.sm,
+    },
+    athleteClassRow: {
+      alignItems: 'center',
+      marginTop: spacing.xs,
+    },
+    athleteClassLabel: {
+      fontSize: fontSize.xs,
+      color: colors.primary,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
     },
     badgesSeparator: {
       height: 1,
@@ -950,6 +1034,67 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       marginTop: spacing.xs,
       textAlign: 'center',
+    },
+    // Exercise of the Week
+    exerciseOfWeekCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.separator,
+    },
+    exerciseOfWeekHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginBottom: spacing.xs,
+    },
+    exerciseOfWeekTitle: {
+      fontSize: fontSize.xs,
+      color: colors.primary,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    exerciseOfWeekName: {
+      fontSize: fontSize.md,
+      color: colors.text,
+      fontWeight: '700',
+      marginBottom: spacing.xs,
+    },
+    exerciseOfWeekSub: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginBottom: spacing.sm,
+    },
+    exerciseOfWeekMuscles: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
+    },
+    muscleChip: {
+      backgroundColor: colors.primaryBg,
+      borderRadius: borderRadius.xs,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
+    muscleChipText: {
+      fontSize: fontSize.xs,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    exerciseModalContent: {
+      padding: spacing.md,
+    },
+    exerciseModalMuscles: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: spacing.sm,
+    },
+    exerciseModalHint: {
+      fontSize: fontSize.sm,
+      color: colors.text,
     },
   }), [colors])
 }
