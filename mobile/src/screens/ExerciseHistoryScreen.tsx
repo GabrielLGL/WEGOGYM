@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import WorkoutSet from '../model/models/Set'
 import History from '../model/models/History'
 import Session from '../model/models/Session'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
+import { EPLEY_FORMULA_DIVISOR } from '../model/constants'
 import { computePRPrediction } from '../model/utils/prPredictionHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
@@ -34,6 +35,8 @@ import type { RootStackParamList } from '../navigation'
 type ExerciseHistoryRouteProp = RouteProp<RootStackParamList, 'ExerciseHistory'>
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+type ChartMetric = 'weight' | 'reps' | 'orm' | 'volume'
 
 interface Props {
   exercise: Exercise
@@ -53,6 +56,7 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
   const haptics = useHaptics()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US'
+  const [chartMetric, setChartMetric] = useState<ChartMetric>('weight')
 
   const statsForExercise = useMemo(
     () => buildExerciseStatsFromData(setsForExercise, histories, sessions),
@@ -63,13 +67,26 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
 
   const chartData = useMemo(() => {
     if (chartStats.length < 2) return null
+
+    const getData = (stat: (typeof chartStats)[number]): number => {
+      switch (chartMetric) {
+        case 'weight': return stat.maxWeight
+        case 'reps':   return stat.sets.length > 0 ? Math.max(...stat.sets.map(s => s.reps)) : 0
+        case 'orm': {
+          const maxReps = stat.sets.length > 0 ? Math.max(...stat.sets.map(s => s.reps)) : 0
+          return Math.round(stat.maxWeight * (1 + maxReps / EPLEY_FORMULA_DIVISOR))
+        }
+        case 'volume': return Math.round(stat.sets.reduce((acc, s) => acc + s.weight * s.reps, 0))
+      }
+    }
+
     return {
       labels: chartStats.map(s =>
         s.startTime.toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' })
       ),
-      datasets: [{ data: chartStats.map(s => s.maxWeight) }],
+      datasets: [{ data: chartStats.map(getData) }],
     }
-  }, [chartStats, dateLocale])
+  }, [chartStats, chartMetric, dateLocale])
 
   const reversedStats = useMemo(() => [...statsForExercise].reverse(), [statsForExercise])
 
@@ -122,7 +139,21 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
       </View>
 
       {/* Chart */}
-      <Text style={styles.sectionTitle}>{t.exerciseHistory.weightEvolution}</Text>
+      {/* ── Metric toggle ── */}
+      <View style={styles.metricToggle}>
+        {(['weight', 'reps', 'orm', 'volume'] as ChartMetric[]).map(metric => (
+          <TouchableOpacity
+            key={metric}
+            style={[styles.metricChip, chartMetric === metric && styles.metricChipActive]}
+            onPress={() => setChartMetric(metric)}
+          >
+            <Text style={[styles.metricChipText, chartMetric === metric && styles.metricChipTextActive]}>
+              {t.exerciseHistory.chartMetric[metric]}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text style={styles.sectionTitle}>{t.exerciseHistory.chartMetric[chartMetric]}</Text>
       {chartData ? (
         <View style={styles.chartWrapper}>
           <LineChart
@@ -132,7 +163,7 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
             chartConfig={chartConfig}
             style={styles.chart}
             fromZero
-            formatYLabel={val => `${val}${t.statsMeasurements.weightUnit}`}
+            formatYLabel={val => (chartMetric === 'weight' || chartMetric === 'orm') ? `${val}${t.statsMeasurements.weightUnit}` : val}
             formatXLabel={val => (chartData.labels.length > 6 ? '' : val)}
           />
         </View>
@@ -438,6 +469,30 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
       color: colors.textSecondary,
       marginLeft: spacing.xs,
+    },
+    metricToggle: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+      flexWrap: 'wrap' as const,
+    },
+    metricChip: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.sm,
+      backgroundColor: colors.cardSecondary,
+    },
+    metricChipActive: {
+      backgroundColor: colors.primary,
+    },
+    metricChipText: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      fontWeight: '500' as const,
+    },
+    metricChipTextActive: {
+      color: colors.background,
+      fontWeight: '700' as const,
     },
   }), [colors])
 }
