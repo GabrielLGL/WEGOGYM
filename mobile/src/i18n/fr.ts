@@ -1298,6 +1298,32 @@ export const fr = {
     noData: 'Aucune séance sur cette période',
   },
 
+  bulletin: {
+    title: 'Bulletin Mensuel',
+    overallGrade: 'Note globale',
+    categories: {
+      regularite: 'Régularité',
+      force: 'Force',
+      volume: 'Volume',
+      equilibre: 'Équilibre',
+    },
+    average: 'moy.',
+    sessions: 'séances',
+    prs: 'PRs',
+    muscleGroups: 'groupes',
+    comments: {
+      aplus: 'Mois exceptionnel ! Tu repousses tes limites.',
+      a: 'Excellent mois ! Continue sur cette lancée.',
+      bplus: 'Très bon mois. Tu progresses régulièrement.',
+      b: 'Bon mois. Quelques efforts supplémentaires et tu peux faire mieux !',
+      cplus: 'Mois correct. Fixe-toi un objectif pour le mois prochain.',
+      c: 'Mois en dessous de ta moyenne. On repart fort le mois prochain ?',
+      d: 'Mois difficile. Commence par une petite séance pour reprendre le rythme.',
+    },
+    emptyTitle: 'Pas encore de bulletin',
+    emptyMessage: 'Entraîne-toi pendant au moins 2 mois pour voir ton bulletin.',
+  },
+
   share: {
     appName: 'KORE',
     branding: 'kore-app.net',

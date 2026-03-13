@@ -53,12 +53,15 @@ import { WorkoutHeader } from '../components/WorkoutHeader'
 import { WorkoutExerciseCard } from '../components/WorkoutExerciseCard'
 import { WorkoutSupersetBlock } from '../components/WorkoutSupersetBlock'
 import { WorkoutSummarySheet } from '../components/WorkoutSummarySheet'
+import { WarmupChecklistSheet } from '../components/WarmupChecklistSheet'
 import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
 import RestTimer from '../components/RestTimer'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RouteProp } from '@react-navigation/native'
 import { RootStackParamList } from '../navigation'
+import { TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { spacing, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -124,6 +127,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const summaryWasOpenRef = useRef(false)
 
   const [historyId, setHistoryId] = useState<string>('')
+  const warmupModal = useModalState()
   const restTimerModal = useModalState()
   const [currentRestDuration, setCurrentRestDuration] = useState(user?.restDuration ?? 90)
   const confirmEndModal = useModalState()
@@ -171,6 +175,28 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     isMountedRef,
   })
 
+  const [sessionMuscles, setSessionMuscles] = useState<string[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    const fetchMuscles = async () => {
+      const allMuscles = new Set<string>()
+      for (const se of sessionExercises) {
+        try {
+          const exercise = await se.exercise.fetch()
+          if (exercise) {
+            exercise.muscles.forEach((m: string) => allMuscles.add(m))
+          }
+        } catch {
+          // Skip if exercise can't be fetched
+        }
+      }
+      if (!cancelled) setSessionMuscles(Array.from(allMuscles))
+    }
+    fetchMuscles()
+    return () => { cancelled = true }
+  }, [sessionExercises])
+
   const workoutList = useMemo(() => buildWorkoutList(sessionExercises), [sessionExercises])
 
   // Quand le résumé se ferme : naviguer vers Home avec les célébrations en params
@@ -197,8 +223,16 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       title: session.name,
       headerStyle: { backgroundColor: colors.background },
       headerTintColor: colors.text,
+      headerRight: () => (
+        <TouchableOpacity
+          style={{ marginRight: spacing.sm }}
+          onPress={() => { haptics.onPress(); warmupModal.open() }}
+        >
+          <Ionicons name="body-outline" size={22} color={colors.primary} />
+        </TouchableOpacity>
+      ),
     })
-  }, [navigation, session.name, colors])
+  }, [navigation, session.name, colors, haptics, warmupModal])
 
   useEffect(() => {
     let cancelled = false
@@ -426,6 +460,13 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         onConfirm={() => { startErrorModal.close(); navigation.goBack() }}
         onCancel={() => { startErrorModal.close(); navigation.goBack() }}
         hideCancel
+      />
+
+      {/* Checklist échauffement */}
+      <WarmupChecklistSheet
+        visible={warmupModal.isOpen}
+        onClose={warmupModal.close}
+        muscles={sessionMuscles}
       />
 
       {/* Resume de fin de seance */}

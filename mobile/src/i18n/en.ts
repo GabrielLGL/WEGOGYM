@@ -296,6 +296,7 @@ export const en: typeof fr = {
     statsBalance: 'Push/Pull Balance',
     titles: 'My Titles',
     statsCompare: 'Comparator',
+    monthlyBulletin: 'Monthly Report',
   },
 
   programs: {
