@@ -21,6 +21,7 @@ import WorkoutSet from '../model/models/Set'
 import History from '../model/models/History'
 import Session from '../model/models/Session'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
+import { computePRPrediction } from '../model/utils/prPredictionHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -86,6 +87,11 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
   }, [statsForExercise])
 
   const oneRM = pr ? Math.round(pr.weight * (1 + pr.reps / 30)) : null
+
+  const prediction = useMemo(
+    () => computePRPrediction(setsForExercise),
+    [setsForExercise],
+  )
 
   return (
     <ScrollView
@@ -184,6 +190,66 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
             </View>
           ))}
         </View>
+      )}
+
+      {/* Prediction Section */}
+      {prediction !== null && (
+        <>
+          <View style={styles.separator} />
+          <Text style={[styles.sectionTitle, styles.historySectionTitle]}>
+            {t.exerciseHistory.prediction.title}
+          </Text>
+          <View style={styles.predictionCard}>
+            <View style={styles.predictionRow}>
+              <Text style={styles.predictionLabel}>
+                📈 {t.exerciseHistory.prediction.currentOrm}
+              </Text>
+              <Text style={styles.predictionValue}>
+                ~{prediction.currentBest1RM.toFixed(1)} {t.statsMeasurements.weightUnit}
+              </Text>
+            </View>
+            <View style={styles.predictionRow}>
+              <Text style={styles.predictionLabel}>
+                🎯 {t.exerciseHistory.prediction.nextTarget}
+              </Text>
+              <Text style={[styles.predictionValue, styles.predictionTarget]}>
+                ~{prediction.targetWeight.toFixed(1)} {t.statsMeasurements.weightUnit}
+              </Text>
+            </View>
+            {prediction.weeksToTarget > 52 ? (
+              <Text style={styles.predictionTooFar}>
+                {t.exerciseHistory.prediction.tooFar}
+              </Text>
+            ) : (
+              <>
+                <Text style={styles.predictionWeeks}>
+                  ⏱  {t.exerciseHistory.prediction.weeksAway.replace('{n}', String(prediction.weeksToTarget))}
+                </Text>
+                <Text style={styles.predictionGain}>
+                  {t.exerciseHistory.prediction.weeklyGain.replace('{n}', prediction.weeklyGainRate.toFixed(1))}
+                </Text>
+              </>
+            )}
+            <View style={styles.predictionConfidenceRow}>
+              <Text style={styles.predictionLabel}>
+                {t.exerciseHistory.prediction.confidence} :
+              </Text>
+              <Text style={styles.predictionDots}>
+                {prediction.confidence === 'low' && '●○○'}
+                {prediction.confidence === 'medium' && '●●○'}
+                {prediction.confidence === 'high' && '●●●'}
+              </Text>
+              <Text style={styles.predictionLabel}>
+                {prediction.confidence === 'low' && t.exerciseHistory.prediction.confidenceLow}
+                {prediction.confidence === 'medium' && t.exerciseHistory.prediction.confidenceMedium}
+                {prediction.confidence === 'high' && t.exerciseHistory.prediction.confidenceHigh}
+              </Text>
+              <Text style={styles.predictionBasedOn}>
+                ({t.exerciseHistory.prediction.basedOn.replace('{n}', String(prediction.dataPoints))})
+              </Text>
+            </View>
+          </View>
+        </>
       )}
     </ScrollView>
   )
@@ -319,6 +385,59 @@ function useStyles(colors: ThemeColors) {
       height: 1,
       backgroundColor: colors.separator,
       marginHorizontal: spacing.md,
+    },
+    predictionCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      gap: spacing.xs,
+    },
+    predictionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    predictionLabel: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+    },
+    predictionValue: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    predictionTarget: {
+      color: colors.warning,
+    },
+    predictionWeeks: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+      marginTop: spacing.xs,
+    },
+    predictionGain: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+    },
+    predictionTooFar: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      fontStyle: 'italic',
+      marginTop: spacing.xs,
+    },
+    predictionConfidenceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginTop: spacing.sm,
+    },
+    predictionDots: {
+      fontSize: fontSize.sm,
+      color: colors.primary,
+    },
+    predictionBasedOn: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginLeft: spacing.xs,
     },
   }), [colors])
 }
