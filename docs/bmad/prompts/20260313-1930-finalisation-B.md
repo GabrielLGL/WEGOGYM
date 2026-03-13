@@ -83,4 +83,7 @@ Aucune dépendance — ce groupe peut être lancé en parallèle avec Groupe A.
 **Groupe C dépend de ce groupe** (BadgesScreen importe ShareBottomSheet).
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260313-1930
+
+## Résolution
+Rapport do : docs/bmad/do/20260313-1930-feat-share.md
