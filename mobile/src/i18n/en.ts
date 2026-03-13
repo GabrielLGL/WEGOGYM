@@ -1003,6 +1003,9 @@ export const en: typeof fr = {
     howItWorksText: 'Share your code with friends. They import your code to see you in their leaderboard. Update by resharing your code.',
     copied: 'Code copied!',
     myStats: 'My shared stats',
+    today: 'today',
+    yesterday: 'yesterday',
+    daysAgo: (days: number) => `${days}d ago`,
   },
 
   wearable: {

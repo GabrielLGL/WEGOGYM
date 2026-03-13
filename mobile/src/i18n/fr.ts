@@ -1004,6 +1004,9 @@ export const fr = {
     howItWorksText: 'Partage ton code avec tes amis. Ils importent ton code pour te voir dans leur classement. Mets à jour en repartageant ton code.',
     copied: 'Code copié !',
     myStats: 'Mes stats partagées',
+    today: "aujourd'hui",
+    yesterday: 'hier',
+    daysAgo: (days: number) => `il y a ${days}j`,
   },
 
   wearable: {
