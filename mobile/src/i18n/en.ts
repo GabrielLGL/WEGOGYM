@@ -295,6 +295,7 @@ export const en: typeof fr = {
     hallOfFame: 'Hall of Fame',
     statsBalance: 'Push/Pull Balance',
     titles: 'My Titles',
+    statsCompare: 'Comparator',
   },
 
   programs: {
@@ -379,6 +380,7 @@ export const en: typeof fr = {
     hallOfFame: 'Hall of Fame',
     balance: 'Balance',
     titles: 'Titles',
+    compare: 'Compare',
   },
 
   badges: {
@@ -1259,6 +1261,38 @@ export const en: typeof fr = {
     slightDropMessage: 'It\'s been {n} days — one short session is enough to get back on track.',
     keepGoingTitle: 'Keep the momentum',
     keepGoingMessage: 'Your usual training time is approaching. Stay consistent!',
+  },
+
+  warmup: {
+    title: 'Warm-up',
+    subtitle: 'Suggested exercises for your session',
+    done: 'done',
+    noMuscles: 'General warm-up',
+  },
+
+  compare: {
+    title: 'Compare Periods',
+    periodA: 'Period A',
+    periodB: 'Period B',
+    periods: {
+      this_month: 'This month',
+      last_month: 'Last month',
+      last_3m: 'Last 3 months',
+      last_6m: 'Last 6 months',
+      this_year: 'This year',
+    },
+    metrics: {
+      sessions: 'Sessions',
+      volume: 'Volume',
+      prs: 'PRs',
+      avgDuration: 'Avg. duration',
+    },
+    winner: 'Winner',
+    equal: 'Equal',
+    summaryAWins: 'Period A wins on {n} metric(s)',
+    summaryBWins: 'Period B wins on {n} metric(s)',
+    summaryEqual: 'Periods are equivalent',
+    noData: 'No sessions in this period',
   },
 
   share: {

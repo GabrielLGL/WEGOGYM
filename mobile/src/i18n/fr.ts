@@ -295,6 +295,8 @@ export const fr = {
     hallOfFame: 'Hall of Fame',
     statsBalance: 'Équilibre Push/Pull',
     titles: 'Mes Titres',
+    statsCompare: 'Comparateur',
+    monthlyBulletin: 'Bulletin Mensuel',
   },
 
   programs: {
@@ -380,6 +382,8 @@ export const fr = {
     hallOfFame: 'Hall of Fame',
     balance: 'Équilibre',
     titles: 'Titres',
+    compare: 'Comparer',
+    bulletin: 'Bulletin',
   },
 
   badges: {
@@ -1267,6 +1271,31 @@ export const fr = {
     subtitle: 'Exercices suggérés pour ta séance',
     done: 'faits',
     noMuscles: 'Échauffement général',
+  },
+
+  compare: {
+    title: 'Comparer des périodes',
+    periodA: 'Période A',
+    periodB: 'Période B',
+    periods: {
+      this_month: 'Ce mois',
+      last_month: 'Mois dernier',
+      last_3m: '3 derniers mois',
+      last_6m: '6 derniers mois',
+      this_year: 'Cette année',
+    },
+    metrics: {
+      sessions: 'Séances',
+      volume: 'Volume',
+      prs: 'PRs',
+      avgDuration: 'Durée moy.',
+    },
+    winner: 'Meilleur',
+    equal: 'Égal',
+    summaryAWins: 'Période A meilleure sur {n} métrique(s)',
+    summaryBWins: 'Période B meilleure sur {n} métrique(s)',
+    summaryEqual: 'Périodes équivalentes',
+    noData: 'Aucune séance sur cette période',
   },
 
   share: {

@@ -62,6 +62,7 @@ import DeloadRecommendationCard from '../components/DeloadRecommendationCard'
 import { computeDeloadRecommendation } from '../model/utils/deloadHelpers'
 import { computeFlashback } from '../model/utils/flashbackHelpers'
 import type { FlashbackData } from '../model/utils/flashbackHelpers'
+import { computeMotivation } from '../model/utils/motivationHelpers'
 import { WEEK_MS } from '../model/constants'
 import type { RootStackParamList } from '../navigation'
 import { buildWidgetData, saveWidgetData } from '../services/widgetDataService'
@@ -446,6 +447,26 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
     [histories, sets],
   )
 
+  // ── Motivation contextuelle ──
+  const motivationData = useMemo(
+    () => computeMotivation(histories),
+    [histories],
+  )
+  const motivationTitle = motivationData
+    ? {
+        returning_after_long: t.motivation.returningAfterLongTitle,
+        slight_drop: t.motivation.slightDropTitle,
+        keep_going: t.motivation.keepGoingTitle,
+      }[motivationData.context!]
+    : null
+  const motivationMessage = motivationData
+    ? {
+        returning_after_long: t.motivation.returningAfterLongMessage,
+        slight_drop: t.motivation.slightDropMessage,
+        keep_going: t.motivation.keepGoingMessage,
+      }[motivationData.context!]?.replace('{n}', String(motivationData.daysSinceLastWorkout))
+    : null
+
   // ── Exercise of the Week ──
   const exerciseOfWeek = useMemo(
     () => computeExerciseOfWeek(exercises, sets),
@@ -618,6 +639,21 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           ))}
         </View>
       </View>
+
+      {/* ── Motivation contextuelle ── */}
+      {motivationData && motivationTitle && motivationMessage && (
+        <View style={styles.motivationCard}>
+          <View style={styles.motivationHeader}>
+            <Ionicons
+              name={motivationData.context === 'returning_after_long' ? 'heart-outline' : 'flame-outline'}
+              size={20}
+              color={colors.primary}
+            />
+            <Text style={styles.motivationTitle}>{motivationTitle}</Text>
+          </View>
+          <Text style={styles.motivationText}>{motivationMessage}</Text>
+        </View>
+      )}
 
       {/* ── Weekly Report Card ── */}
       <WeeklyReportCard
@@ -1034,6 +1070,32 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       marginTop: spacing.xs,
       textAlign: 'center',
+    },
+    // Motivation contextuelle
+    motivationCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
+    },
+    motivationHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginBottom: spacing.xs,
+    },
+    motivationTitle: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+      fontWeight: '700',
+    },
+    motivationText: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
     // Exercise of the Week
     exerciseOfWeekCard: {
