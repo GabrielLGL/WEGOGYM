@@ -17,9 +17,9 @@ import {
   TextInput,
   StyleSheet,
   Share,
-  Clipboard,
   ActivityIndicator,
 } from 'react-native'
+import * as Clipboard from 'expo-clipboard'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 import { map } from 'rxjs/operators'
@@ -108,8 +108,8 @@ function LeaderboardScreenBase({ user, friends, histories }: LeaderboardScreenPr
     { key: 'prs', label: t.leaderboard.sortPrs },
   ]
 
-  const handleCopyCode = () => {
-    Clipboard.setString(encodedCode)
+  const handleCopyCode = async () => {
+    await Clipboard.setStringAsync(encodedCode)
     haptics.onSuccess()
   }
 
