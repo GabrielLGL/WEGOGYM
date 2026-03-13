@@ -69,12 +69,14 @@ export function StatsScreenBase({ user, histories, sets }: Props) {
   const { t, language } = useLanguage()
 
   const STAT_BUTTONS: StatButton[] = useMemo(() => [
-    { icon: 'time-outline',        label: t.stats.duration,  route: 'StatsDuration' },
-    { icon: 'barbell-outline',     label: t.stats.volume,    route: 'StatsVolume' },
-    { icon: 'calendar-outline',    label: t.stats.calendar,  route: 'StatsCalendar' },
-    { icon: 'stats-chart-outline', label: t.stats.exercises, route: 'StatsExercises' },
-    { icon: 'resize-outline',      label: t.stats.measures,  route: 'StatsMeasurements' },
-    { icon: 'list-outline',        label: t.stats.history,   route: 'StatsHistory' },
+    { icon: 'time-outline',        label: t.stats.duration,     route: 'StatsDuration' },
+    { icon: 'barbell-outline',     label: t.stats.volume,       route: 'StatsVolume' },
+    { icon: 'calendar-outline',    label: t.stats.calendar,     route: 'StatsCalendar' },
+    { icon: 'stats-chart-outline', label: t.stats.exercises,    route: 'StatsExercises' },
+    { icon: 'resize-outline',      label: t.stats.measures,     route: 'StatsMeasurements' },
+    { icon: 'list-outline',        label: t.stats.history,      route: 'StatsHistory' },
+    { icon: 'trophy-outline',      label: t.stats.selfLeagues,  route: 'SelfLeagues' },
+    { icon: 'medal-outline',       label: t.stats.hallOfFame,   route: 'StatsHallOfFame' },
   ], [t])
 
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
