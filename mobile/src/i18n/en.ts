@@ -1378,6 +1378,15 @@ export const en: typeof fr = {
     generic_2: 'Breathe — exhale on effort, inhale on descent.',
   },
 
+  constellation: {
+    title: 'Constellation',
+    subtitle: 'Each star is a personal record',
+    stars: 'star(s)',
+    brightest: 'Brightest stars',
+    emptyTitle: 'No stars yet',
+    emptyMessage: 'Set personal records to watch your constellation grow.',
+  },
+
   share: {
     appName: 'KORE',
     branding: 'kore-app.net',
