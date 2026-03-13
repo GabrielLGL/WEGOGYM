@@ -687,6 +687,12 @@ export const en: typeof fr = {
     sessionFallback: 'Session',
     unknownExercise: 'Unknown exercise',
     pageLabel: 'Page',
+    records: {
+      shortest: 'Fastest',
+      average: 'Average',
+      longest: 'Longest',
+      longestBadge: '🏆 Record',
+    },
   },
 
   exerciseHistory: {
@@ -1244,6 +1250,15 @@ export const en: typeof fr = {
       level_50:        'Reach level 50',
       elite:           'Reach level 75',
     },
+  },
+
+  motivation: {
+    returningAfterLongTitle: 'We missed you!',
+    returningAfterLongMessage: 'You haven\'t trained in {n} days. Start easy, every session counts.',
+    slightDropTitle: 'You can do it!',
+    slightDropMessage: 'It\'s been {n} days — one short session is enough to get back on track.',
+    keepGoingTitle: 'Keep the momentum',
+    keepGoingMessage: 'Your usual training time is approaching. Stay consistent!',
   },
 
   share: {

@@ -688,6 +688,12 @@ export const fr = {
     sessionFallback: 'Séance',
     unknownExercise: 'Exercice inconnu',
     pageLabel: 'Page',
+    records: {
+      shortest: 'Plus rapide',
+      average: 'Moyenne',
+      longest: 'Plus longue',
+      longestBadge: '🏆 Record',
+    },
   },
 
   exerciseHistory: {
@@ -1245,6 +1251,22 @@ export const fr = {
       level_50:        'Atteindre le niveau 50',
       elite:           'Atteindre le niveau 75',
     },
+  },
+
+  motivation: {
+    returningAfterLongTitle: 'On t\'a manqué !',
+    returningAfterLongMessage: 'Tu n\'as pas entraîné depuis {n} jours. Reprends à ton rythme, chaque séance compte.',
+    slightDropTitle: 'Tu peux le faire !',
+    slightDropMessage: 'Ça fait {n} jours — une petite séance suffit pour relancer la machine.',
+    keepGoingTitle: 'Continue sur ta lancée',
+    keepGoingMessage: 'Ta séance habituelle approche. Garde le rythme !',
+  },
+
+  warmup: {
+    title: 'Échauffement',
+    subtitle: 'Exercices suggérés pour ta séance',
+    done: 'faits',
+    noMuscles: 'Échauffement général',
   },
 
   share: {

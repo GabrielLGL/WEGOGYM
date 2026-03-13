@@ -108,6 +108,13 @@ export function StatsDurationScreenBase({ histories }: Props) {
     }
   }, [selectedPoint, stats.perSession, dateLocale])
 
+  const longestHistoryId = useMemo(
+    () => stats.historyAll.length > 0
+      ? stats.historyAll.reduce((a, b) => a.durationMin > b.durationMin ? a : b).id
+      : null,
+    [stats.historyAll]
+  )
+
   const totalPages = Math.max(1, Math.ceil(stats.historyAll.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
   const pageEntries = stats.historyAll.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE)
@@ -191,6 +198,26 @@ export function StatsDurationScreenBase({ histories }: Props) {
         <KpiCard label={t.statsDuration.maxLabel} value={formatDuration(stats.maxMin)} colors={colors} />
       </View>
 
+      {stats.historyAll.length > 0 && (
+        <View style={styles.recordsRow}>
+          <View style={styles.recordCard}>
+            <Ionicons name="flash-outline" size={18} color={colors.primary} />
+            <Text style={styles.recordValue}>{formatDuration(stats.minMin)}</Text>
+            <Text style={styles.recordLabel}>{t.statsDuration.records.shortest}</Text>
+          </View>
+          <View style={styles.recordCard}>
+            <Ionicons name="analytics-outline" size={18} color={colors.textSecondary} />
+            <Text style={styles.recordValue}>{formatDuration(Math.round(stats.avgMin))}</Text>
+            <Text style={styles.recordLabel}>{t.statsDuration.records.average}</Text>
+          </View>
+          <View style={styles.recordCard}>
+            <Ionicons name="trophy-outline" size={18} color="#F59E0B" />
+            <Text style={[styles.recordValue, { color: '#F59E0B' }]}>{formatDuration(stats.maxMin)}</Text>
+            <Text style={styles.recordLabel}>{t.statsDuration.records.longest}</Text>
+          </View>
+        </View>
+      )}
+
       <Text style={styles.sectionTitle}>
         {t.statsDuration.evolutionTitle} ({Math.min(stats.perSession.length, 30)} {t.statsDuration.lastSessions})
       </Text>
@@ -271,6 +298,11 @@ export function StatsDurationScreenBase({ histories }: Props) {
                     {sessionNames[entry.id] ?? '…'}
                   </Text>
                   <Text style={styles.historyDuration}>{formatDuration(entry.durationMin)}</Text>
+                  {entry.id === longestHistoryId && (
+                    <View style={styles.longestBadge}>
+                      <Text style={styles.longestBadgeText}>{t.statsDuration.records.longestBadge}</Text>
+                    </View>
+                  )}
                   <Ionicons
                     name={isExpanded ? 'chevron-up' : 'chevron-down'}
                     size={16}
@@ -508,6 +540,41 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
       color: colors.textSecondary,
       textAlign: 'center',
+    },
+    recordsRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.md,
+    },
+    recordCard: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.sm,
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    recordValue: {
+      fontSize: fontSize.md,
+      color: colors.text,
+      fontWeight: '700',
+    },
+    recordLabel: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    longestBadge: {
+      backgroundColor: '#F59E0B20',
+      borderRadius: borderRadius.xxs,
+      paddingHorizontal: spacing.xs,
+      paddingVertical: 2,
+    },
+    longestBadgeText: {
+      fontSize: fontSize.caption,
+      color: '#F59E0B',
+      fontWeight: '600',
     },
   }), [colors])
 }
