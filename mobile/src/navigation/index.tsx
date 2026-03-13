@@ -68,6 +68,11 @@ const ReportDetailScreen = React.lazy(() => import('../screens/ReportDetailScree
 const ProgressPhotosScreen = React.lazy(() => import('../screens/ProgressPhotosScreen'))
 const LegalScreen = React.lazy(() => import('../screens/LegalScreen'))
 const LeaderboardScreen = React.lazy(() => import('../screens/LeaderboardScreen'))
+const SelfLeaguesScreen = React.lazy(() => import('../screens/SelfLeaguesScreen'))
+const SkillTreeScreen = React.lazy(() => import('../screens/SkillTreeScreen'))
+const StatsHexagonScreen = React.lazy(() => import('../screens/StatsHexagonScreen'))
+const ActivityFeedScreen = React.lazy(() => import('../screens/ActivityFeedScreen'))
+const StatsHallOfFameScreen = React.lazy(() => import('../screens/StatsHallOfFameScreen'))
 
 function isVersionOlder(accepted: string, required: string): boolean {
   const [aMaj, aMin] = accepted.split('.').map(Number)
@@ -102,6 +107,11 @@ export type RootStackParamList = {
   ProgressPhotos: undefined;
   Legal: undefined;
   Leaderboard: undefined;
+  SelfLeagues: undefined;
+  SkillTree: undefined;
+  StatsHexagon: undefined;
+  ActivityFeed: undefined;
+  StatsHallOfFame: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -251,6 +261,11 @@ function AppContent() {
           <Stack.Screen name="ProgressPhotos" component={ProgressPhotosScreen} options={{ title: t.navigation.progressPhotos }} />
           <Stack.Screen name="Legal" component={LegalScreen} options={{ title: t.navigation.legal }} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: t.navigation.leaderboard }} />
+          <Stack.Screen name="SelfLeagues" component={SelfLeaguesScreen} options={{ title: t.navigation.selfLeagues }} />
+          <Stack.Screen name="SkillTree" component={SkillTreeScreen} options={{ title: t.navigation.skillTree }} />
+          <Stack.Screen name="StatsHexagon" component={StatsHexagonScreen} options={{ title: t.navigation.statsHexagon }} />
+          <Stack.Screen name="ActivityFeed" component={ActivityFeedScreen} options={{ title: t.navigation.activityFeed }} />
+          <Stack.Screen name="StatsHallOfFame" component={StatsHallOfFameScreen} options={{ title: t.navigation.hallOfFame }} />
         </Stack.Navigator>
       </Suspense>
     </NavigationContainer>

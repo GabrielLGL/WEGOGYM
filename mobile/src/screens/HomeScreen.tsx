@@ -60,6 +60,8 @@ import { useCoachMarks } from '../hooks/useCoachMarks'
 import { WeeklyReportCard } from '../components/WeeklyReportCard'
 import DeloadRecommendationCard from '../components/DeloadRecommendationCard'
 import { computeDeloadRecommendation } from '../model/utils/deloadHelpers'
+import { computeFlashback } from '../model/utils/flashbackHelpers'
+import type { FlashbackData } from '../model/utils/flashbackHelpers'
 import { WEEK_MS } from '../model/constants'
 import type { RootStackParamList } from '../navigation'
 import { buildWidgetData, saveWidgetData } from '../services/widgetDataService'
@@ -105,6 +107,107 @@ function KpiItem({ label, value, colors }: { label: string; value: string; color
   )
 }
 
+// ─── Flashback Card ───────────────────────────────────────────────────────────
+
+function FlashbackCard({
+  currentSessions,
+  currentVolume,
+  flashback1m,
+  flashback3m,
+}: {
+  currentSessions: number
+  currentVolume: number
+  flashback1m: FlashbackData | null
+  flashback3m: FlashbackData | null
+}) {
+  const colors = useColors()
+  const { t } = useLanguage()
+
+  const cardStyle = useMemo(() => ({
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  }), [colors])
+
+  const titleStyle = useMemo(() => ({
+    fontSize: fontSize.md,
+    fontWeight: '700' as const,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  }), [colors])
+
+  const periodLabelStyle = useMemo(() => ({
+    fontSize: fontSize.xs,
+    fontWeight: '600' as const,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  }), [colors])
+
+  const colHeaderStyle = useMemo(() => ({
+    fontSize: fontSize.xs,
+    color: colors.placeholder,
+    marginBottom: spacing.xs,
+  }), [colors])
+
+  const statValueStyle = useMemo(() => ({
+    fontSize: fontSize.sm,
+    color: colors.text,
+    fontWeight: '500' as const,
+  }), [colors])
+
+  const renderPeriod = (flashback: FlashbackData, label: string) => {
+    const sessionDelta = currentSessions - flashback.sessions
+    const volumePct = flashback.volumeKg > 0
+      ? Math.round(((currentVolume - flashback.volumeKg) / flashback.volumeKg) * 100)
+      : null
+    const sessionDeltaColor = sessionDelta >= 0 ? colors.primary : colors.danger
+    const volumeDeltaColor = (volumePct ?? 0) >= 0 ? colors.primary : colors.danger
+
+    return (
+      <View key={label}>
+        <Text style={periodLabelStyle}>{label}</Text>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flex: 1 }}>
+            <Text style={colHeaderStyle}>{t.flashback.thisWeek}</Text>
+            <Text style={statValueStyle}>{currentSessions} {t.flashback.sessions}</Text>
+            <Text style={statValueStyle}>{Math.round(currentVolume)} kg</Text>
+          </View>
+          <View style={{ width: 1, backgroundColor: colors.separator, marginHorizontal: spacing.sm }} />
+          <View style={{ flex: 1 }}>
+            <Text style={colHeaderStyle}>{label}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              <Text style={statValueStyle}>{flashback.sessions} {t.flashback.sessions}</Text>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '600', color: sessionDeltaColor }}>
+                {sessionDelta >= 0 ? '+' : ''}{sessionDelta}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              <Text style={statValueStyle}>{Math.round(flashback.volumeKg)} kg</Text>
+              {volumePct !== null && (
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '600', color: volumeDeltaColor }}>
+                  {volumePct >= 0 ? '+' : ''}{volumePct}%
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
+      </View>
+    )
+  }
+
+  return (
+    <View style={cardStyle}>
+      <Text style={titleStyle}>📸 {t.flashback.title}</Text>
+      {flashback1m && renderPeriod(flashback1m, t.flashback.monthAgo)}
+      {flashback1m && flashback3m && (
+        <View style={{ height: 1, backgroundColor: colors.separator, marginVertical: spacing.sm }} />
+      )}
+      {flashback3m && renderPeriod(flashback3m, t.flashback.threeMonthsAgo)}
+    </View>
+  )
+}
+
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 interface Props {
@@ -140,6 +243,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         { icon: 'library-outline', label: t.home.tiles.programs,  route: 'Programs' },
         { icon: 'barbell-outline',  label: t.home.tiles.exercises, route: 'Exercices' },
         { icon: 'calendar-outline', label: t.home.tiles.calendar,  route: 'StatsCalendar' },
+        { icon: 'newspaper-outline', label: t.home.tiles.activityFeed, route: 'ActivityFeed' },
       ],
     },
     {
@@ -149,6 +253,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         { icon: 'barbell-outline', label: t.home.tiles.volume,   route: 'StatsVolume' },
         { icon: 'resize-outline',  label: t.home.tiles.measures, route: 'StatsMeasurements' },
         { icon: 'camera-outline',  label: t.home.tiles.photos,   route: 'ProgressPhotos' },
+        { icon: 'git-network-outline', label: t.home.tiles.hexagon, route: 'StatsHexagon' },
       ],
     },
   ], [t])
@@ -320,6 +425,16 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
       currentStreak: user?.currentStreak ?? 0,
     })
   }, [histories, sets, user?.userLevel, user?.currentStreak])
+
+  // ── Flashback data ──
+  const flashback1m = useMemo(
+    () => computeFlashback(histories, sets, 1),
+    [histories, sets],
+  )
+  const flashback3m = useMemo(
+    () => computeFlashback(histories, sets, 3),
+    [histories, sets],
+  )
 
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
@@ -496,6 +611,16 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         }}
       />
 
+      {/* ── Flashback ── */}
+      {(flashback1m !== null || flashback3m !== null) && (
+        <FlashbackCard
+          currentSessions={weeklyReportData.sessionsCount}
+          currentVolume={weeklyReportData.totalVolumeKg}
+          flashback1m={flashback1m}
+          flashback3m={flashback3m}
+        />
+      )}
+
       {/* ── Deload Recommendation ── */}
       {deloadRecommendation && !dismissedDeload && (
         <DeloadRecommendationCard
@@ -524,7 +649,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         </View>
       ))}
 
-      {/* ── Tuile Classement ── */}
+      {/* ── Tuiles Outils (Leaderboard + Skill Tree) ── */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t.home.sections.tools}</Text>
         <View style={styles.grid}>
@@ -540,6 +665,14 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
                 {friends.length} ami{friends.length > 1 ? 's' : ''}
               </Text>
             )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.gridBtn}
+            onPress={() => { haptics.onPress(); navigation.navigate('SkillTree') }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="git-branch-outline" size={28} color={colors.primary} />
+            <Text style={styles.btnLabel}>{t.home.tiles.skillTree}</Text>
           </TouchableOpacity>
         </View>
       </View>
