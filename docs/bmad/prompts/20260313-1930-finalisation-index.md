@@ -8,9 +8,9 @@ Lancer 3 Claude instances pour commiter et valider les features déjà implémen
 
 | Groupe | Rapport | Fichiers | Vague | Statut |
 |--------|---------|----------|-------|--------|
-| A | `docs/bmad/prompts/20260313-1930-finalisation-A.md` | FriendSnapshot.ts, leaderboardHelpers.ts, seed.ts, navigation/index.tsx, HomeScreen.tsx, HomeScreen.test.tsx | 1 | ⏳ |
-| B | `docs/bmad/prompts/20260313-1930-finalisation-B.md` | ShareCard.tsx, ShareBottomSheet.tsx, shareService.ts, react-native-view-shot mock, WorkoutSummarySheet.tsx, jest.config.js | 1 | ⏳ |
-| C | `docs/bmad/prompts/20260313-1930-finalisation-C.md` | BadgeCard.tsx, BadgeCelebration.tsx, BadgesScreen.tsx + docs | 2 | ⏳ |
+| A | `docs/bmad/prompts/20260313-1930-finalisation-A.md` | FriendSnapshot.ts, leaderboardHelpers.ts, seed.ts, navigation/index.tsx, HomeScreen.tsx, HomeScreen.test.tsx | 1 | ✅ |
+| B | `docs/bmad/prompts/20260313-1930-finalisation-B.md` | ShareCard.tsx, ShareBottomSheet.tsx, shareService.ts, react-native-view-shot mock, WorkoutSummarySheet.tsx, jest.config.js | 1 | ✅ |
+| C | `docs/bmad/prompts/20260313-1930-finalisation-C.md` | BadgeCard.tsx, BadgeCelebration.tsx, BadgesScreen.tsx + docs | 2 | ✅ |
 
 ## Ordre d'exécution
 
