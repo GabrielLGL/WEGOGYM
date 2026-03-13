@@ -1,10 +1,16 @@
 import React, { useRef, useEffect, useMemo, useCallback } from 'react'
 import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import ViewShot from 'react-native-view-shot'
 import { BottomSheet } from './BottomSheet'
 import { Button } from './Button'
+import { ShareBottomSheet } from './ShareBottomSheet'
+import ShareCard from './ShareCard'
 import { updateHistoryNote } from '../model/utils/databaseHelpers'
 import { formatSecondsToMMSS } from '../model/utils/parseUtils'
+import { generateWorkoutShareText, shareText, shareImage } from '../services/shareService'
+import { useModalState } from '../hooks/useModalState'
+import { useHaptics } from '../hooks/useHaptics'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -24,6 +30,7 @@ interface WorkoutSummarySheetProps {
   xpGained: number
   level: number
   currentStreak: number
+  newBadges?: { title: string; icon: string }[]
   recapExercises: RecapExerciseData[]
   recapComparison: RecapComparisonData
 }
@@ -71,6 +78,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
   xpGained,
   level,
   currentStreak,
+  newBadges = [],
   recapExercises,
   recapComparison,
 }) => {
@@ -79,6 +87,9 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
   const { t } = useLanguage()
   const noteRef = useRef('')
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const viewShotRef = useRef<ViewShot>(null)
+  const shareSheet = useModalState()
+  const haptics = useHaptics()
 
   useEffect(() => {
     return () => {
@@ -103,6 +114,40 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     }
     onClose()
   }, [historyId, onClose])
+
+  const handleSharePress = useCallback(() => {
+    haptics.onPress()
+    shareSheet.open()
+  }, [haptics, shareSheet])
+
+  const handleShareText = useCallback(async () => {
+    shareSheet.close()
+    try {
+      const text = generateWorkoutShareText({
+        durationSeconds,
+        totalVolume,
+        totalSets,
+        totalPrs,
+        xpGained,
+        level,
+        currentStreak,
+        newBadges,
+        exerciseNames: recapExercises.map(e => e.exerciseName),
+      }, t)
+      await shareText(text)
+    } catch (e) {
+      if (__DEV__) console.warn('[WorkoutSummarySheet] shareText error:', e)
+    }
+  }, [shareSheet, durationSeconds, totalVolume, totalSets, totalPrs, xpGained, level, currentStreak, newBadges, recapExercises, t])
+
+  const handleShareImage = useCallback(async () => {
+    shareSheet.close()
+    try {
+      await shareImage(viewShotRef)
+    } catch (e) {
+      if (__DEV__) console.warn('[WorkoutSummarySheet] shareImage error:', e)
+    }
+  }, [shareSheet])
 
   const motivation = getMotivationMessage(totalPrs, recapComparison.volumeGain, colors, t.workoutSummary)
 
@@ -264,6 +309,18 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         />
 
         <Button
+          variant="secondary"
+          size="md"
+          fullWidth
+          onPress={handleSharePress}
+          enableHaptics={false}
+        >
+          {t.share.shareButton}
+        </Button>
+
+        <View style={{ height: spacing.sm }} />
+
+        <Button
           variant="primary"
           size="lg"
           fullWidth
@@ -273,6 +330,30 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
           {t.workoutSummary.finish}
         </Button>
       </ScrollView>
+
+      {/* Off-screen ViewShot for image capture */}
+      <View style={{ position: 'absolute', left: -9999 }}>
+        <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
+          <ShareCard
+            variant="workout"
+            durationSeconds={durationSeconds}
+            totalVolume={totalVolume}
+            totalSets={totalSets}
+            totalPrs={totalPrs}
+            xpGained={xpGained}
+            level={level}
+            currentStreak={currentStreak}
+            newBadges={newBadges}
+          />
+        </ViewShot>
+      </View>
+
+      <ShareBottomSheet
+        visible={shareSheet.isOpen}
+        onClose={shareSheet.close}
+        onShareText={handleShareText}
+        onShareImage={handleShareImage}
+      />
     </BottomSheet>
   )
 }

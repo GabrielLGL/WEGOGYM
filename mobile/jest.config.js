@@ -34,6 +34,8 @@ module.exports = {
     '.*\\/contexts\\/LanguageContext': '<rootDir>/__mocks__/LanguageContextMock.ts',
     // Mock @expo/vector-icons pour éviter loadedNativeFonts en environnement Jest
     '@expo/vector-icons': '<rootDir>/__mocks__/vectorIconsMock.js',
+    // Mock react-native-view-shot pour éviter le rendu off-screen dans les tests
+    'react-native-view-shot': '<rootDir>/__mocks__/react-native-view-shot.js',
   },
 
   // Ignore patterns

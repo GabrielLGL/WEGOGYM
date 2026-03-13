@@ -79,4 +79,7 @@ Commiter la feature "Leaderboard Amis" : le data layer (FriendSnapshot + leaderb
 Aucune dépendance — ce groupe peut être lancé en parallèle avec Groupe B.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260313-1930
+
+## Résolution
+Rapport do : docs/bmad/do/20260313-1930-feat-leaderboard-datalayer.md
