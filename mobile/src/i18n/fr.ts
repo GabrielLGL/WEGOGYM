@@ -297,6 +297,7 @@ export const fr = {
     titles: 'Mes Titres',
     statsCompare: 'Comparateur',
     monthlyBulletin: 'Bulletin Mensuel',
+    exerciseCollection: 'Ma Collection',
   },
 
   programs: {
@@ -384,6 +385,7 @@ export const fr = {
     titles: 'Titres',
     compare: 'Comparer',
     bulletin: 'Bulletin',
+    collection: 'Collection',
   },
 
   badges: {
@@ -728,6 +730,18 @@ export const fr = {
       reps: 'Reps',
       orm: '1RM',
       volume: 'Volume',
+    },
+    plateau: {
+      title: 'Analyse de plateau',
+      alert: 'Pas de progression depuis {sessions} séances ({days} jours).',
+      suggestions: 'Stratégies pour débloquer :',
+      strategies: {
+        deload: 'Semaine de décharge (−40% du volume)',
+        vary_reps: 'Changer la plage de reps (ex: 3×10 → 5×5)',
+        add_volume: "Ajouter des séries d'activation",
+        rest_pause: 'Technique pause-repos entre chaque série',
+        progressive: 'Micro-chargement : +0.5 kg à la prochaine séance',
+      },
     },
   },
 
@@ -1322,6 +1336,45 @@ export const fr = {
     },
     emptyTitle: 'Pas encore de bulletin',
     emptyMessage: 'Entraîne-toi pendant au moins 2 mois pour voir ton bulletin.',
+  },
+
+  overtraining: {
+    title: 'Attention — Surcharge détectée',
+    highFrequency: '{n} séances cette semaine — c\'est beaucoup !',
+    noRest: 'Tu n\'as pas pris de vrai repos depuis plusieurs jours.',
+    volumeSpike: 'Ton volume a augmenté de {n}% vs les semaines précédentes.',
+    advice: 'Pense à prévoir une journée de récupération.',
+  },
+
+  exerciseCollection: {
+    title: 'Collection d\'exercices',
+    subtitle: 'exercices découverts',
+    progressLabel: 'de la collection complétée',
+    sets: 'séries',
+    locked: 'Exercice non découvert',
+    emptyTitle: 'Aucun exercice',
+    emptyMessage: 'Lance ton premier entraînement pour commencer ta collection.',
+  },
+
+  workoutTips: {
+    pecs_0: 'Descends lentement (3s) pour maximiser l\'étirement pectoral.',
+    pecs_1: 'Pince les pecs en haut du mouvement pendant 1s.',
+    dos_0: 'Rétracte les omoplates avant de tirer pour un meilleur engagement dorsal.',
+    dos_1: 'Tire vers le nombril plutôt que vers la poitrine pour le bas du dos.',
+    quads_0: 'Garde les genoux dans l\'axe des orteils tout au long du mouvement.',
+    quads_1: 'Pousse dans le sol plutôt que de te "soulever".',
+    ischios_0: 'Fais une légère rétroversion du bassin pour protéger les lombaires.',
+    epaules_0: 'Évite de hausser les épaules — garde les trapèzes relâchés.',
+    epaules_1: 'Contrôle la descente pour protéger les tendons.',
+    biceps_0: 'Supine les poignets en haut du curl pour maximiser le pic.',
+    triceps_0: 'Garde les coudes fixes et proches du corps.',
+    trapezes_0: 'Pince les omoplates en fin de mouvement.',
+    abdos_0: 'Expire lors de la contraction pour une meilleure activation.',
+    mollets_0: 'Va chercher l\'amplitude maximale pour développer le soléaire.',
+    cardio_0: 'Maintiens une cadence régulière plutôt que des pics d\'intensité.',
+    generic_0: 'Concentre-toi sur la connexion musculaire plutôt que sur le poids.',
+    generic_1: 'La qualité du mouvement prime toujours sur la quantité.',
+    generic_2: 'Respire — expire à l\'effort, inspire à la descente.',
   },
 
   share: {

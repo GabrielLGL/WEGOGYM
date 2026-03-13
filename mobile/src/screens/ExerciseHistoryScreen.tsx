@@ -23,6 +23,7 @@ import Session from '../model/models/Session'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
 import { EPLEY_FORMULA_DIVISOR } from '../model/constants'
 import { computePRPrediction } from '../model/utils/prPredictionHelpers'
+import { computePlateauAnalysis } from '../model/utils/plateauHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -107,6 +108,11 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
 
   const prediction = useMemo(
     () => computePRPrediction(setsForExercise),
+    [setsForExercise],
+  )
+
+  const plateauData = useMemo(
+    () => computePlateauAnalysis(setsForExercise),
     [setsForExercise],
   )
 
@@ -281,6 +287,35 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
             </View>
           </View>
         </>
+      )}
+
+      {/* Plateau Section */}
+      {plateauData?.isPlateauing && (
+        <View>
+          <View style={styles.separator} />
+          <Text style={[styles.sectionTitle, styles.historySectionTitle]}>
+            {t.exerciseHistory.plateau.title}
+          </Text>
+          <View style={styles.plateauCard}>
+            <View style={styles.plateauHeader}>
+              <Ionicons name="alert-circle-outline" size={18} color={colors.warning} />
+              <Text style={styles.plateauAlert}>
+                {t.exerciseHistory.plateau.alert
+                  .replace('{sessions}', String(plateauData.sessionsSinceLastPR))
+                  .replace('{days}', String(plateauData.daysSinceLastProgress))}
+              </Text>
+            </View>
+            <Text style={styles.plateauSubtitle}>{t.exerciseHistory.plateau.suggestions}</Text>
+            {plateauData.strategies.map(strategy => (
+              <View key={strategy} style={styles.strategyRow}>
+                <Text style={styles.strategyBullet}>•</Text>
+                <Text style={styles.strategyText}>
+                  {t.exerciseHistory.plateau.strategies[strategy]}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
       )}
     </ScrollView>
   )
@@ -469,6 +504,46 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
       color: colors.textSecondary,
       marginLeft: spacing.xs,
+    },
+    plateauCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.md,
+    },
+    plateauHeader: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    plateauAlert: {
+      flex: 1,
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    plateauSubtitle: {
+      fontSize: fontSize.xs,
+      color: colors.text,
+      fontWeight: '600' as const,
+      marginBottom: spacing.xs,
+    },
+    strategyRow: {
+      flexDirection: 'row' as const,
+      gap: spacing.xs,
+      marginBottom: spacing.xs,
+    },
+    strategyBullet: {
+      color: colors.primary,
+      fontWeight: '700' as const,
+    },
+    strategyText: {
+      flex: 1,
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      lineHeight: 17,
     },
     metricToggle: {
       flexDirection: 'row',

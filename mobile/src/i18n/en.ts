@@ -297,6 +297,7 @@ export const en: typeof fr = {
     titles: 'My Titles',
     statsCompare: 'Comparator',
     monthlyBulletin: 'Monthly Report',
+    exerciseCollection: 'My Collection',
   },
 
   programs: {
@@ -383,6 +384,7 @@ export const en: typeof fr = {
     titles: 'Titles',
     compare: 'Compare',
     bulletin: 'Report',
+    collection: 'Collection',
   },
 
   badges: {
@@ -727,6 +729,18 @@ export const en: typeof fr = {
       reps: 'Reps',
       orm: '1RM',
       volume: 'Volume',
+    },
+    plateau: {
+      title: 'Plateau Analysis',
+      alert: 'No progress for {sessions} sessions ({days} days).',
+      suggestions: 'Strategies to break through:',
+      strategies: {
+        deload: 'Deload week (−40% volume)',
+        vary_reps: 'Change rep range (e.g. 3×10 → 5×5)',
+        add_volume: 'Add activation sets',
+        rest_pause: 'Rest-pause technique between sets',
+        progressive: 'Micro-loading: +0.5 kg next session',
+      },
     },
   },
 
@@ -1321,6 +1335,45 @@ export const en: typeof fr = {
     },
     emptyTitle: 'No report yet',
     emptyMessage: 'Train for at least 2 months to see your monthly report.',
+  },
+
+  overtraining: {
+    title: 'Warning — Overload detected',
+    highFrequency: '{n} sessions this week — that\'s a lot!',
+    noRest: 'You haven\'t taken a real rest day in several days.',
+    volumeSpike: 'Your volume increased by {n}% vs previous weeks.',
+    advice: 'Consider scheduling a recovery day.',
+  },
+
+  exerciseCollection: {
+    title: 'Exercise Collection',
+    subtitle: 'exercises discovered',
+    progressLabel: 'of collection completed',
+    sets: 'sets',
+    locked: 'Undiscovered exercise',
+    emptyTitle: 'No exercises',
+    emptyMessage: 'Start your first workout to begin your collection.',
+  },
+
+  workoutTips: {
+    pecs_0: 'Lower slowly (3s) to maximize pectoral stretch.',
+    pecs_1: 'Squeeze the pecs at the top for 1 second.',
+    dos_0: 'Retract shoulder blades before pulling for better lat engagement.',
+    dos_1: 'Pull toward your navel rather than your chest for lower back.',
+    quads_0: 'Keep knees aligned with toes throughout the movement.',
+    quads_1: 'Push the floor away rather than "lifting" yourself.',
+    ischios_0: 'Slight posterior pelvic tilt to protect the lower back.',
+    epaules_0: 'Avoid shrugging — keep traps relaxed.',
+    epaules_1: 'Control the descent to protect the tendons.',
+    biceps_0: 'Supinate your wrists at the top for a better peak contraction.',
+    triceps_0: 'Keep elbows fixed and close to your body.',
+    trapezes_0: 'Pinch your shoulder blades at the end of the movement.',
+    abdos_0: 'Exhale on contraction for better activation.',
+    mollets_0: 'Go for full range of motion to develop the soleus.',
+    cardio_0: 'Maintain a steady cadence rather than intensity spikes.',
+    generic_0: 'Focus on the muscle-mind connection rather than the weight.',
+    generic_1: 'Movement quality always comes before quantity.',
+    generic_2: 'Breathe — exhale on effort, inhale on descent.',
   },
 
   share: {
