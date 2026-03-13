@@ -382,6 +382,7 @@ export const en: typeof fr = {
     balance: 'Balance',
     titles: 'Titles',
     compare: 'Compare',
+    bulletin: 'Report',
   },
 
   badges: {
@@ -1294,6 +1295,32 @@ export const en: typeof fr = {
     summaryBWins: 'Period B wins on {n} metric(s)',
     summaryEqual: 'Periods are equivalent',
     noData: 'No sessions in this period',
+  },
+
+  bulletin: {
+    title: 'Monthly Report',
+    overallGrade: 'Overall grade',
+    categories: {
+      regularite: 'Consistency',
+      force: 'Strength',
+      volume: 'Volume',
+      equilibre: 'Balance',
+    },
+    average: 'avg.',
+    sessions: 'sessions',
+    prs: 'PRs',
+    muscleGroups: 'groups',
+    comments: {
+      aplus: "Exceptional month! You're pushing your limits.",
+      a: 'Excellent month! Keep up this momentum.',
+      bplus: "Very good month. You're making steady progress.",
+      b: 'Good month. A little extra effort and you can do even better!',
+      cplus: 'Decent month. Set yourself a goal for next month.',
+      c: "Below average month. Let's come back stronger next month!",
+      d: 'Tough month. Start with one small session to get back on track.',
+    },
+    emptyTitle: 'No report yet',
+    emptyMessage: 'Train for at least 2 months to see your monthly report.',
   },
 
   share: {
