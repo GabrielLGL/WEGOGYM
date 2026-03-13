@@ -111,4 +111,7 @@ Commiter la feature "Badge Detail" (clic sur badge → BottomSheet détail) et "
 Lancer ce groupe uniquement après que Groupe B soit committé et pushé.
 
 ## Statut
-⏳ En attente — bloqé par Groupe B
+✅ Résolu — 20260313-1940
+
+## Résolution
+Rapport do : docs/bmad/do/20260313-1940-feat-badges-detail-share.md
