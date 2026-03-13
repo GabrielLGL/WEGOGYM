@@ -298,6 +298,7 @@ export const en: typeof fr = {
     statsCompare: 'Comparator',
     monthlyBulletin: 'Monthly Report',
     exerciseCollection: 'My Collection',
+    statsConstellation: 'Constellation',
   },
 
   programs: {
@@ -385,6 +386,7 @@ export const en: typeof fr = {
     compare: 'Compare',
     bulletin: 'Report',
     collection: 'Collection',
+    constellation: 'Constellation',
   },
 
   badges: {

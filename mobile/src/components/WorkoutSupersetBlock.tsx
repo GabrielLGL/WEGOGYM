@@ -9,6 +9,7 @@ import Exercise from '../model/models/Exercise'
 import { validateSetInput } from '../model/utils/validationHelpers'
 import { getLastPerformanceForExercise } from '../model/utils/databaseHelpers'
 import { suggestProgression } from '../model/utils/progressionHelpers'
+import { getTipKeyForExercise } from '../model/utils/workoutTipsHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { WorkoutSetRow } from './WorkoutExerciseCard'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -72,6 +73,11 @@ const SupersetExerciseInfoContent: React.FC<SupersetExerciseInfoContentProps> = 
       </View>
       <View style={styles.exerciseInfoContent}>
         <Text style={styles.exerciseInfoName} numberOfLines={1}>{exercise.name}</Text>
+        {exercise.muscles?.length > 0 && (
+          <Text style={styles.tipText} numberOfLines={1}>
+            💡 {(t.workoutTips as Record<string, string>)[getTipKeyForExercise(exercise.id, exercise.muscles)] ?? ''}
+          </Text>
+        )}
         <View style={styles.exerciseInfoMeta}>
           {sessionExercise.setsTarget != null && (
             <Text style={styles.exerciseInfoMetaText}>
@@ -349,6 +355,12 @@ function createStyles(colors: ThemeColors) {
       color: colors.text,
       fontSize: fontSize.bodyMd,
       fontWeight: '700',
+    },
+    tipText: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      fontStyle: 'italic' as const,
+      lineHeight: 14,
     },
     exerciseInfoMeta: {
       flexDirection: 'row',

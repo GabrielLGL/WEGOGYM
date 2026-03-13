@@ -9,6 +9,7 @@ import Exercise from '../model/models/Exercise'
 import { validateSetInput } from '../model/utils/validationHelpers'
 import { getLastPerformanceForExercise, updateSessionExerciseNotes } from '../model/utils/databaseHelpers'
 import { suggestProgression } from '../model/utils/progressionHelpers'
+import { getTipKeyForExercise } from '../model/utils/workoutTipsHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
@@ -269,6 +270,14 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
       ]}
     >
       <Text style={styles.exerciseName}>{exercise.name}</Text>
+      {exercise.muscles?.length > 0 && (
+        <View style={styles.tipRow}>
+          <Text style={styles.tipIcon}>💡</Text>
+          <Text style={styles.tipText} numberOfLines={2}>
+            {(t.workoutTips as Record<string, string>)[getTipKeyForExercise(exercise.id, exercise.muscles)] ?? ''}
+          </Text>
+        </View>
+      )}
       {exercise.notes ? (
         <Text style={styles.exerciseNoteText}>
           {t.workout.exerciseNote} : {exercise.notes}
@@ -391,7 +400,23 @@ function createStyles(colors: ThemeColors) {
       color: colors.text,
       fontSize: fontSize.lg,
       fontWeight: '700',
+      marginBottom: spacing.xs,
+    },
+    tipRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      gap: spacing.xs,
       marginBottom: spacing.sm,
+    },
+    tipIcon: {
+      fontSize: fontSize.xs,
+    },
+    tipText: {
+      flex: 1,
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      lineHeight: 16,
+      fontStyle: 'italic' as const,
     },
     target: {
       color: colors.textSecondary,

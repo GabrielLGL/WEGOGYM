@@ -298,6 +298,7 @@ export const fr = {
     statsCompare: 'Comparateur',
     monthlyBulletin: 'Bulletin Mensuel',
     exerciseCollection: 'Ma Collection',
+    statsConstellation: 'Constellation',
   },
 
   programs: {
@@ -386,6 +387,7 @@ export const fr = {
     compare: 'Comparer',
     bulletin: 'Bulletin',
     collection: 'Collection',
+    constellation: 'Constellation',
   },
 
   badges: {
@@ -1375,6 +1377,15 @@ export const fr = {
     generic_0: 'Concentre-toi sur la connexion musculaire plutôt que sur le poids.',
     generic_1: 'La qualité du mouvement prime toujours sur la quantité.',
     generic_2: 'Respire — expire à l\'effort, inspire à la descente.',
+  },
+
+  constellation: {
+    title: 'Constellation',
+    subtitle: 'Chaque étoile est un record personnel',
+    stars: 'étoile(s)',
+    brightest: 'Étoiles les plus brillantes',
+    emptyTitle: 'Pas encore d\'étoiles',
+    emptyMessage: 'Bats des records personnels pour voir ta constellation grandir.',
   },
 
   share: {
