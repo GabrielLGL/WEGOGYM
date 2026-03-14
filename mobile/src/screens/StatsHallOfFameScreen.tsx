@@ -4,10 +4,13 @@ import {
   Text,
   FlatList,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
+import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { database } from '../model'
 import WorkoutSet from '../model/models/Set'
@@ -17,6 +20,7 @@ import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { useDeferredMount } from '../hooks/useDeferredMount'
+import type { RootStackParamList } from '../navigation'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,15 +60,16 @@ interface RowProps {
   colors: ThemeColors
   language: string
   t: ReturnType<typeof useLanguage>['t']
+  onPress: () => void
 }
 
-function HallOfFameRow({ entry, rank, colors, language, t }: RowProps) {
+function HallOfFameRow({ entry, rank, colors, language, t, onPress }: RowProps) {
   const styles = useRowStyles(colors)
   const isMedal = rank <= 3
   const medalColor = isMedal ? MEDAL_COLORS[rank - 1] : colors.textSecondary
 
   return (
-    <View style={styles.row}>
+    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
       {/* Rang / Médaille */}
       <View style={styles.rankContainer}>
         {isMedal ? (
@@ -100,7 +105,7 @@ function HallOfFameRow({ entry, rank, colors, language, t }: RowProps) {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   )
 }
 
@@ -179,6 +184,7 @@ function StatsHallOfFameScreenBase({ sets, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t, language } = useLanguage()
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   // Lookup exerciseId → Exercise
   const exerciseMap = useMemo(() => {
@@ -225,6 +231,7 @@ function StatsHallOfFameScreenBase({ sets, exercises }: Props) {
       colors={colors}
       language={language}
       t={t}
+      onPress={() => navigation.navigate('ExerciseCard', { exerciseId: item.exerciseId })}
     />
   )
 
