@@ -24,6 +24,7 @@ import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
 import { EPLEY_FORMULA_DIVISOR } from '../model/constants'
 import { computePRPrediction } from '../model/utils/prPredictionHelpers'
 import { computePlateauAnalysis } from '../model/utils/plateauHelpers'
+import { computeVariantSuggestions } from '../model/utils/variantHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -44,11 +45,12 @@ interface Props {
   setsForExercise: WorkoutSet[]
   histories: History[]
   sessions: Session[]
+  allExercises: Exercise[]
 }
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
-function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions }: Props) {
+function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions, allExercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const chartConfig = createChartConfig({ showDots: true, colors })
@@ -114,6 +116,18 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
   const plateauData = useMemo(
     () => computePlateauAnalysis(setsForExercise),
     [setsForExercise],
+  )
+
+  const usedExerciseIds = useMemo(
+    () => new Set(setsForExercise.map(s => s.exerciseId).filter((id): id is string => Boolean(id))),
+    [setsForExercise],
+  )
+
+  const variantSuggestions = useMemo(
+    () => exercise && allExercises.length > 0
+      ? computeVariantSuggestions(exercise, allExercises, usedExerciseIds)
+      : [],
+    [exercise, allExercises, usedExerciseIds],
   )
 
   return (
@@ -313,6 +327,44 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
                   {t.exerciseHistory.plateau.strategies[strategy]}
                 </Text>
               </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Variants Section */}
+      {variantSuggestions.length > 0 && (
+        <View>
+          <View style={styles.separator} />
+          <Text style={[styles.sectionTitle, styles.historySectionTitle]}>
+            {t.exerciseHistory.variants.title}
+          </Text>
+          <View style={styles.historyCard}>
+            {variantSuggestions.map((variant, index) => (
+              <TouchableOpacity
+                key={variant.exercise.id}
+                style={styles.variantRow}
+                onPress={() => {
+                  haptics.onPress()
+                  navigation.push('ExerciseHistory', { exerciseId: variant.exercise.id })
+                }}
+                activeOpacity={0.7}
+              >
+                {index > 0 && <View style={styles.separator} />}
+                <View style={styles.variantContent}>
+                  <View style={styles.variantLeft}>
+                    <Text style={styles.variantName}>{variant.exercise.name}</Text>
+                    <Text style={styles.variantMuscles}>{variant.sharedMuscles.join(' · ')}</Text>
+                  </View>
+                  <View style={styles.variantRight}>
+                    {variant.hasHistory
+                      ? <Text style={styles.variantDone}>{t.exerciseHistory.variants.done}</Text>
+                      : <Text style={styles.variantNew}>{t.exerciseHistory.variants.discover}</Text>
+                    }
+                    <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+                  </View>
+                </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -569,6 +621,43 @@ function useStyles(colors: ThemeColors) {
       color: colors.background,
       fontWeight: '700' as const,
     },
+    variantRow: {
+      paddingHorizontal: spacing.md,
+    },
+    variantContent: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      paddingVertical: spacing.sm,
+    },
+    variantLeft: {
+      flex: 1,
+    },
+    variantName: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+      fontWeight: '500' as const,
+    },
+    variantMuscles: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    variantRight: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing.xs,
+    },
+    variantDone: {
+      fontSize: fontSize.caption,
+      color: colors.primary,
+      fontWeight: '500' as const,
+    },
+    variantNew: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      fontStyle: 'italic' as const,
+    },
   }), [colors])
 }
 
@@ -578,6 +667,7 @@ const enhance = withObservables(
   ['exerciseId'],
   ({ exerciseId }: { exerciseId: string }) => ({
     exercise: database.get<Exercise>('exercises').findAndObserve(exerciseId),
+    allExercises: database.get<Exercise>('exercises').query().observe(),
     setsForExercise: database
       .get<WorkoutSet>('sets')
       .query(Q.where('exercise_id', exerciseId))

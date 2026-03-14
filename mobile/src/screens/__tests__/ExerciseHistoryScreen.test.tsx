@@ -46,6 +46,7 @@ jest.mock('@nozbe/with-observables', () =>
         setsForExercise: [],
         histories: [],
         sessions: [],
+        allExercises: [],
       })
     }
   }

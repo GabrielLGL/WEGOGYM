@@ -227,6 +227,7 @@ export const fr = {
       skillTree: 'Skill Tree',
       hexagon: 'Profil Athlète',
       activityFeed: 'Journal',
+      challenges: 'Défis',
     },
     weeklyActivity: 'Cette semaine',
     noSessions: 'Aucune séance',
@@ -299,6 +300,7 @@ export const fr = {
     monthlyBulletin: 'Bulletin Mensuel',
     exerciseCollection: 'Ma Collection',
     statsConstellation: 'Constellation',
+    personalChallenges: 'Défis Personnels',
   },
 
   programs: {
@@ -745,6 +747,11 @@ export const fr = {
         progressive: 'Micro-chargement : +0.5 kg à la prochaine séance',
       },
     },
+    variants: {
+      title: 'Exercices similaires',
+      done: '✓ Déjà pratiqué',
+      discover: '✦ À découvrir',
+    },
   },
 
   streak: {
@@ -1156,6 +1163,16 @@ export const fr = {
     },
     detailSection: 'Détail par axe',
     outOf: 'sur',
+    percentiles: {
+      sectionTitle: 'Percentiles estimés',
+      subtitle: 'Estimation basée sur les données de référence',
+      top5: '🔥 Top 5%',
+      top20: '⭐ Top 20%',
+      top35: '↑ Top 35%',
+      top50: '~ Top 50%',
+      bottom50: '▷ En progression',
+      disclaimer: 'Estimations indicatives basées sur des benchmarks généraux.',
+    },
   },
 
   activityFeed: {
@@ -1386,6 +1403,70 @@ export const fr = {
     brightest: 'Étoiles les plus brillantes',
     emptyTitle: 'Pas encore d\'étoiles',
     emptyMessage: 'Bats des records personnels pour voir ta constellation grandir.',
+  },
+
+  gratitude: {
+    question: 'Qu\'est-ce qui t\'a rendu fier aujourd\'hui ?',
+    placeholder: 'Ajoute une note (facultatif)...',
+    save: 'Enregistrer',
+    saved: 'Super séance !',
+  },
+
+  challenges: {
+    title: 'Défis Personnels',
+    completed: 'défis complétés',
+    completedBadge: 'COMPLÉTÉ',
+    difficulties: {
+      easy: 'FACILE',
+      medium: 'MOYEN',
+      hard: 'DIFFICILE',
+      legendary: 'LÉGENDAIRE',
+    },
+    challengeTitles: {
+      first_50: 'Le Vétéran',
+      first_100: 'Le Centurion',
+      first_250: 'La Légende',
+      tonnage_50k: 'Soulève-Tout',
+      tonnage_250k: 'Titan du Tonnage',
+      tonnage_1M: 'Un Million de kg',
+      prs_25: 'Briseur de Records',
+      prs_100: 'Machine à PRs',
+      prs_500: 'Inarrêtable',
+      streak_4: 'Le Régulier',
+      streak_26: 'Demi-Année Parfaite',
+      level_50: 'Maître du Niveau 50',
+    },
+    challengeDesc: {
+      first_50: '{n} séances complètes',
+      first_100: '{n} séances complètes',
+      first_250: '{n} séances complètes',
+      tonnage_50k: '{n} kg de tonnage total',
+      tonnage_250k: '{n} kg de tonnage total',
+      tonnage_1M: '{n} kg de tonnage total',
+      prs_25: '{n} records personnels',
+      prs_100: '{n} records personnels',
+      prs_500: '{n} records personnels',
+      streak_4: '{n} semaines de streak',
+      streak_26: '{n} semaines de streak',
+      level_50: 'Atteindre le niveau {n}',
+    },
+  },
+
+  exerciseCard: {
+    orm: '1RM estimé',
+    tonnage: 'Tonnage total',
+    sessions: 'Séances',
+    prs: 'PRs',
+    expertise: 'Expertise',
+    expertiseLevels: {
+      debutant: 'Débutant',
+      intermediaire: 'Intermédiaire',
+      avance: 'Avancé',
+      expert: 'Expert',
+    },
+    firstPR: 'Premier PR',
+    lastPR: 'Dernier PR',
+    noPRYet: 'Aucun PR encore',
   },
 
   share: {
