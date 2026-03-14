@@ -83,7 +83,7 @@ export const migrations = schemaMigrations({
     {
       toVersion: 34,
       steps: [
-        unsafeExecuteSql('CREATE INDEX IF NOT EXISTS sets_created_at ON sets (created_at)'),
+        unsafeExecuteSql('CREATE INDEX IF NOT EXISTS sets_created_at ON sets (created_at);'),
       ],
     },
     {
