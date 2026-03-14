@@ -87,6 +87,20 @@ function computeHexagonAxes(
   ]
 }
 
+// ─── Percentiles ──────────────────────────────────────────────────────────────
+
+type TPercentiles = {
+  top5: string; top20: string; top35: string; top50: string; bottom50: string
+}
+
+function getPercentileLabel(value: number, percentiles: TPercentiles): string {
+  if (value >= 0.9) return percentiles.top5
+  if (value >= 0.75) return percentiles.top20
+  if (value >= 0.5) return percentiles.top35
+  if (value >= 0.3) return percentiles.top50
+  return percentiles.bottom50
+}
+
 // ─── Barre de progression ─────────────────────────────────────────────────────
 
 function AxisDetailRow({ axis, outOf, colors }: { axis: HexagonAxis; outOf: string; colors: ThemeColors }) {
@@ -218,6 +232,33 @@ function StatsHexagonScreenBase({ user, histories, sets, exercises }: Props) {
           />
         ))}
       </View>
+
+      {/* ── Section Percentiles ── */}
+      {axes.length > 0 && (
+        <View style={styles.percentileSection}>
+          <Text style={styles.sectionTitle}>{t.hexagon.percentiles.sectionTitle}</Text>
+          <Text style={styles.percentileSubtitle}>{t.hexagon.percentiles.subtitle}</Text>
+
+          {axes.map(axis => (
+            <View key={axis.label} style={styles.percentileRow}>
+              <Text style={styles.percentileAxisLabel}>{axis.label}</Text>
+              <View style={[
+                styles.percentileBadge,
+                { backgroundColor: axis.value >= 0.75 ? colors.primary + '22' : colors.cardSecondary },
+              ]}>
+                <Text style={[
+                  styles.percentileBadgeText,
+                  { color: axis.value >= 0.75 ? colors.primary : colors.textSecondary },
+                ]}>
+                  {getPercentileLabel(axis.value, t.hexagon.percentiles)}
+                </Text>
+              </View>
+            </View>
+          ))}
+
+          <Text style={styles.percentileDisclaimer}>{t.hexagon.percentiles.disclaimer}</Text>
+        </View>
+      )}
     </ScrollView>
   )
 }
@@ -255,6 +296,44 @@ function useStyles(colors: ThemeColors) {
       backgroundColor: colors.card,
       borderRadius: borderRadius.lg,
       padding: spacing.md,
+    },
+    percentileSection: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginTop: spacing.md,
+      marginBottom: spacing.lg,
+    },
+    percentileSubtitle: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
+    },
+    percentileRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.xs,
+    },
+    percentileAxisLabel: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+    },
+    percentileBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs / 2,
+      borderRadius: borderRadius.sm,
+    },
+    percentileBadgeText: {
+      fontSize: fontSize.xs,
+      fontWeight: '600',
+    },
+    percentileDisclaimer: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      marginTop: spacing.sm,
+      fontStyle: 'italic',
+      textAlign: 'center',
     },
   }), [colors])
 }
