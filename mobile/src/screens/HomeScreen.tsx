@@ -734,6 +734,14 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
             <Ionicons name="git-branch-outline" size={28} color={colors.primary} />
             <Text style={styles.btnLabel}>{t.home.tiles.skillTree}</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.gridBtn}
+            onPress={() => { haptics.onPress(); navigation.navigate('PersonalChallenges') }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="shield-outline" size={28} color={colors.primary} />
+            <Text style={styles.btnLabel}>{t.home.tiles.challenges}</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
