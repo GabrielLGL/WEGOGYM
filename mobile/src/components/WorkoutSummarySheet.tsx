@@ -6,8 +6,13 @@ import { BottomSheet } from './BottomSheet'
 import { Button } from './Button'
 import { ShareBottomSheet } from './ShareBottomSheet'
 import ShareCard from './ShareCard'
+import { Q } from '@nozbe/watermelondb'
+import { database } from '../model/index'
 import { updateHistoryNote } from '../model/utils/databaseHelpers'
+import type WorkoutSet from '../model/models/Set'
 import { computeSessionIntensity } from '../model/utils/sessionIntensityHelpers'
+import { computeSessionComparison } from '../model/utils/sessionComparisonHelpers'
+import type { SessionComparison } from '../model/utils/sessionComparisonHelpers'
 import { formatSecondsToMMSS } from '../model/utils/parseUtils'
 import { generateWorkoutShareText, shareText, shareImage } from '../services/shareService'
 import { useModalState } from '../hooks/useModalState'
@@ -95,14 +100,58 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
   const [gratitudeNote, setGratitudeNote] = useState('')
   const [gratitudeSubmitted, setGratitudeSubmitted] = useState(false)
+  const [comparison, setComparison] = useState<SessionComparison | null>(null)
 
   useEffect(() => {
     if (!visible) {
       setSelectedEmoji(null)
       setGratitudeNote('')
       setGratitudeSubmitted(false)
+      setComparison(null)
     }
   }, [visible])
+
+  // Load historical sets for comparison
+  useEffect(() => {
+    if (!visible || recapExercises.length === 0 || !historyId) return
+
+    const exerciseIds = [...new Set(recapExercises.map(e => e.exerciseId))]
+    if (exerciseIds.length === 0) return
+
+    let cancelled = false
+    database.get<WorkoutSet>('sets')
+      .query(
+        Q.where('exercise_id', Q.oneOf(exerciseIds)),
+        Q.on('histories', Q.and(
+          Q.where('deleted_at', null),
+          Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+        )),
+        Q.sortBy('created_at', Q.desc),
+        Q.take(500),
+      )
+      .fetch()
+      .then(prevSets => {
+        if (cancelled) return
+        const currentSets = recapExercises.flatMap(e =>
+          e.sets.map(s => ({ ...s, exerciseId: e.exerciseId })),
+        )
+        const exercises = recapExercises.map(e => ({ id: e.exerciseId, name: e.exerciseName }))
+        const historicalSets = prevSets.map(s => ({
+          weight: s.weight,
+          reps: s.reps,
+          exerciseId: s.exerciseId,
+          historyId: s.historyId,
+          createdAt: s.createdAt,
+        }))
+        const result = computeSessionComparison(currentSets, historicalSets, exercises, historyId)
+        setComparison(result)
+      })
+      .catch(e => {
+        if (__DEV__) console.error('[WorkoutSummarySheet] comparison fetch:', e)
+      })
+
+    return () => { cancelled = true }
+  }, [visible, recapExercises, historyId])
 
   useEffect(() => {
     return () => {
@@ -270,6 +319,50 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                   {t.intensity.effort}: {intensity.breakdown.effortScore}/34
                 </Text>
               </View>
+            </View>
+            <View style={styles.sectionDivider} />
+          </>
+        )}
+
+        {/* ── Section Comparaison ── */}
+        {comparison?.hasComparison && (
+          <>
+            <View style={styles.comparisonSection}>
+              <Text style={styles.comparisonTitle}>{t.sessionComparison.title}</Text>
+
+              <View style={styles.comparisonOverall}>
+                <Text style={styles.comparisonOverallLabel}>{t.sessionComparison.totalVolume}</Text>
+                <Text style={[
+                  styles.comparisonOverallDelta,
+                  { color: comparison.overallVolumeDelta >= 0 ? colors.primary : colors.danger }
+                ]}>
+                  {comparison.overallVolumeDelta >= 0 ? '↑' : '↓'}
+                  {' '}{Math.abs(comparison.overallVolumeDeltaPercent).toFixed(1)}%
+                  {' '}({comparison.overallVolumeDelta >= 0 ? '+' : ''}{Math.round(comparison.overallVolumeDelta)} kg)
+                </Text>
+              </View>
+
+              {comparison.exercises.filter(e => e.deltas).map((ex) => (
+                <View key={ex.exerciseId} style={styles.comparisonExRow}>
+                  <Text style={styles.comparisonExName} numberOfLines={1}>{ex.exerciseName}</Text>
+                  <View style={styles.comparisonExDeltas}>
+                    <Text style={[
+                      styles.comparisonExDelta,
+                      { color: ex.deltas!.volume >= 0 ? colors.primary : colors.danger }
+                    ]}>
+                      {ex.deltas!.volume >= 0 ? '+' : ''}{Math.round(ex.deltas!.volume)} kg
+                    </Text>
+                    {ex.deltas!.maxWeight !== 0 && (
+                      <Text style={[
+                        styles.comparisonExDelta,
+                        { color: ex.deltas!.maxWeight >= 0 ? colors.primary : colors.danger }
+                      ]}>
+                        max {ex.deltas!.maxWeight >= 0 ? '+' : ''}{ex.deltas!.maxWeight} kg
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              ))}
             </View>
             <View style={styles.sectionDivider} />
           </>
@@ -743,6 +836,53 @@ function createStyles(colors: ThemeColors) {
     intensityBreakdownItem: {
       fontSize: fontSize.caption,
       color: colors.textSecondary,
+    },
+    comparisonSection: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md,
+    },
+    comparisonTitle: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+      textAlign: 'center',
+    },
+    comparisonOverall: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+      backgroundColor: colors.cardSecondary,
+      borderRadius: borderRadius.sm,
+      padding: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    comparisonOverallLabel: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+    },
+    comparisonOverallDelta: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+    },
+    comparisonExRow: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+      paddingVertical: spacing.xs,
+    },
+    comparisonExName: {
+      flex: 1,
+      fontSize: fontSize.sm,
+      color: colors.text,
+    },
+    comparisonExDeltas: {
+      flexDirection: 'row' as const,
+      gap: spacing.sm,
+    },
+    comparisonExDelta: {
+      fontSize: fontSize.caption,
+      fontWeight: '600',
     },
   })
 }

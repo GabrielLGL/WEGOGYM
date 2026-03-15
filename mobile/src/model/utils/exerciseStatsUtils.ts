@@ -224,6 +224,7 @@ export async function buildRecapExercises(
     const prevMaxWeight = await getMaxWeightForExercise(exercise.id, historyId)
 
     result.push({
+      exerciseId: exercise.id,
       exerciseName: exercise.name,
       setsValidated: seSets.length,
       setsTarget,

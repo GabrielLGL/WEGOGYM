@@ -26,6 +26,7 @@ import { computePRPrediction } from '../model/utils/prPredictionHelpers'
 import { computePlateauAnalysis } from '../model/utils/plateauHelpers'
 import { computeVariantSuggestions } from '../model/utils/variantHelpers'
 import { computeOverloadTrend } from '../model/utils/progressiveOverloadHelpers'
+import { findAlternatives } from '../model/utils/exerciseAlternativesHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -47,11 +48,12 @@ interface Props {
   histories: History[]
   sessions: Session[]
   allExercises: Exercise[]
+  allSets: WorkoutSet[]
 }
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
-function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions, allExercises }: Props) {
+function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions, allExercises, allSets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const chartConfig = createChartConfig({ showDots: true, colors })
@@ -134,6 +136,13 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
   const { weightTrend, volumeTrend } = useMemo(
     () => computeOverloadTrend(setsForExercise),
     [setsForExercise],
+  )
+
+  const alternatives = useMemo(
+    () => exercise && allExercises.length > 0
+      ? findAlternatives(exercise, allExercises, allSets)
+      : [],
+    [exercise, allExercises, allSets],
   )
 
   return (
@@ -241,6 +250,34 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
           <Text style={styles.overloadDisclaimer}>
             {t.exerciseHistory.overload.disclaimer.replace('{n}', String(weightTrend.lastSessions))}
           </Text>
+        </View>
+      )}
+
+      {/* Alternatives Section */}
+      {alternatives.length > 0 && (
+        <View style={styles.alternativesSection}>
+          <Text style={styles.alternativesTitle}>{t.exerciseHistory.alternatives.title}</Text>
+          {alternatives.map(alt => (
+            <TouchableOpacity
+              key={alt.exerciseId}
+              style={styles.alternativeRow}
+              onPress={() => {
+                haptics.onPress()
+                navigation.push('ExerciseHistory', { exerciseId: alt.exerciseId })
+              }}
+            >
+              <View style={styles.alternativeInfo}>
+                <Text style={styles.alternativeName}>{alt.exerciseName}</Text>
+                <Text style={styles.alternativeMuscles}>{alt.sharedMuscles.join(', ')}</Text>
+              </View>
+              <View style={styles.alternativeMeta}>
+                <Text style={styles.alternativeSets}>
+                  {alt.totalSets} {t.exerciseHistory.alternatives.sets}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
       )}
 
@@ -707,6 +744,47 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       fontStyle: 'italic' as const,
     },
+    alternativesSection: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginTop: spacing.md,
+    },
+    alternativesTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700' as const,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    alternativeRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.cardSecondary,
+    },
+    alternativeInfo: {
+      flex: 1,
+    },
+    alternativeName: {
+      fontSize: fontSize.sm,
+      fontWeight: '600' as const,
+      color: colors.text,
+    },
+    alternativeMuscles: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    alternativeMeta: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing.xs,
+    },
+    alternativeSets: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+    },
     overloadSection: {
       backgroundColor: colors.card,
       borderRadius: borderRadius.lg,
@@ -756,6 +834,7 @@ const enhance = withObservables(
   ({ exerciseId }: { exerciseId: string }) => ({
     exercise: database.get<Exercise>('exercises').findAndObserve(exerciseId),
     allExercises: database.get<Exercise>('exercises').query().observe(),
+    allSets: database.get<WorkoutSet>('sets').query().observe(),
     setsForExercise: database
       .get<WorkoutSet>('sets')
       .query(Q.where('exercise_id', exerciseId))

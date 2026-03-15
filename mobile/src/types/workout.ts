@@ -18,6 +18,7 @@ export interface LastPerformance {
 }
 
 export interface RecapExerciseData {
+  exerciseId: string
   exerciseName: string
   setsValidated: number
   setsTarget: number
