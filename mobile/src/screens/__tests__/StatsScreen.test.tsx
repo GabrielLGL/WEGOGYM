@@ -77,7 +77,8 @@ describe('StatsScreenBase', () => {
     expect(getByText('Séances')).toBeTruthy()
     // "Volume" apparaît à la fois comme KPI et comme bouton grille
     expect(getAllByText('Volume').length).toBeGreaterThanOrEqual(1)
-    expect(getByText('Records')).toBeTruthy()
+    // "Records" apparaît à la fois comme KPI et comme bouton grille (PR Timeline)
+    expect(getAllByText('Records').length).toBeGreaterThanOrEqual(1)
   })
 
   it('affiche les 6 boutons de navigation', () => {
