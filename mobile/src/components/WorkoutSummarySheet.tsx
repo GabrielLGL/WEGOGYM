@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useMemo, useCallback } from 'react'
-import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native'
+import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import ViewShot from 'react-native-view-shot'
 import { BottomSheet } from './BottomSheet'
@@ -7,6 +7,7 @@ import { Button } from './Button'
 import { ShareBottomSheet } from './ShareBottomSheet'
 import ShareCard from './ShareCard'
 import { updateHistoryNote } from '../model/utils/databaseHelpers'
+import { computeSessionIntensity } from '../model/utils/sessionIntensityHelpers'
 import { formatSecondsToMMSS } from '../model/utils/parseUtils'
 import { generateWorkoutShareText, shareText, shareImage } from '../services/shareService'
 import { useModalState } from '../hooks/useModalState'
@@ -91,6 +92,18 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
   const shareSheet = useModalState()
   const haptics = useHaptics()
 
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
+  const [gratitudeNote, setGratitudeNote] = useState('')
+  const [gratitudeSubmitted, setGratitudeSubmitted] = useState(false)
+
+  useEffect(() => {
+    if (!visible) {
+      setSelectedEmoji(null)
+      setGratitudeNote('')
+      setGratitudeSubmitted(false)
+    }
+  }, [visible])
+
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -151,6 +164,11 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 
   const motivation = getMotivationMessage(totalPrs, recapComparison.volumeGain, colors, t.workoutSummary)
 
+  const intensity = useMemo(() => {
+    if (totalSets === 0) return null
+    return computeSessionIntensity(totalVolume, totalPrs, recapExercises, colors)
+  }, [totalVolume, totalPrs, totalSets, recapExercises, colors])
+
   // Muscles uniques de tous les exercices
   const allMuscles = Array.from(
     new Set(recapExercises.flatMap(e => e.muscles))
@@ -168,6 +186,95 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
       title={t.workoutSummary.title}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* ── Section Gratitude ── */}
+        {!gratitudeSubmitted && (
+          <View style={styles.gratitudeSection}>
+            <Text style={styles.gratitudeQuestion}>{t.gratitude.question}</Text>
+            <View style={styles.emojiRow}>
+              {['💪', '🔥', '😌', '😤'].map(emoji => (
+                <TouchableOpacity
+                  key={emoji}
+                  style={[
+                    styles.emojiBtn,
+                    selectedEmoji === emoji && styles.emojiBtnActive,
+                  ]}
+                  onPress={() => {
+                    haptics.onSelect()
+                    setSelectedEmoji(prev => prev === emoji ? null : emoji)
+                  }}
+                >
+                  <Text style={styles.emojiText}>{emoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {selectedEmoji && (
+              <>
+                <TextInput
+                  style={styles.gratitudeInput}
+                  placeholder={t.gratitude.placeholder}
+                  placeholderTextColor={colors.placeholder}
+                  value={gratitudeNote}
+                  onChangeText={setGratitudeNote}
+                  maxLength={120}
+                  multiline
+                />
+                <TouchableOpacity
+                  style={styles.gratitudeSubmitBtn}
+                  onPress={() => {
+                    haptics.onSuccess()
+                    setGratitudeSubmitted(true)
+                  }}
+                >
+                  <Text style={styles.gratitudeSubmitText}>{t.gratitude.save}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
+
+        {gratitudeSubmitted && (
+          <View style={styles.gratitudeDoneRow}>
+            <Text style={styles.gratitudeDoneText}>{selectedEmoji} {t.gratitude.saved}</Text>
+          </View>
+        )}
+
+        <View style={styles.sectionDivider} />
+
+        {/* ── Section Intensité ── */}
+        {intensity && (
+          <>
+            <View style={styles.intensitySection}>
+              <Text style={styles.intensityTitle}>{t.intensity.title}</Text>
+              <View style={styles.intensityScoreRow}>
+                <Text style={[styles.intensityScore, { color: intensity.color }]}>
+                  {intensity.score}
+                </Text>
+                <Text style={[styles.intensityLabel, { color: intensity.color }]}>
+                  {t.intensity.levels[intensity.label]}
+                </Text>
+              </View>
+              <View style={styles.intensityBarBg}>
+                <View style={[
+                  styles.intensityBarFill,
+                  { width: `${intensity.score}%`, backgroundColor: intensity.color },
+                ]} />
+              </View>
+              <View style={styles.intensityBreakdown}>
+                <Text style={styles.intensityBreakdownItem}>
+                  {t.intensity.volume}: {intensity.breakdown.volumeScore}/33
+                </Text>
+                <Text style={styles.intensityBreakdownItem}>
+                  {t.intensity.prs}: {intensity.breakdown.prScore}/33
+                </Text>
+                <Text style={styles.intensityBreakdownItem}>
+                  {t.intensity.effort}: {intensity.breakdown.effortScore}/34
+                </Text>
+              </View>
+            </View>
+            <View style={styles.sectionDivider} />
+          </>
+        )}
+
         {/* Message motivant */}
         <Text style={[styles.motivationText, { color: motivation.color }]}>
           {motivation.text}
@@ -521,6 +628,121 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.md,
       marginBottom: spacing.lg,
       minHeight: 80,
+    },
+    gratitudeSection: {
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.md,
+    },
+    gratitudeQuestion: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+      textAlign: 'center',
+    },
+    emojiRow: {
+      flexDirection: 'row' as const,
+      justifyContent: 'center' as const,
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    emojiBtn: {
+      width: 52,
+      height: 52,
+      borderRadius: borderRadius.md,
+      backgroundColor: colors.cardSecondary,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    emojiBtnActive: {
+      backgroundColor: colors.primary + '33',
+      borderWidth: 2,
+      borderColor: colors.primary,
+    },
+    emojiText: {
+      fontSize: 26,
+    },
+    gratitudeInput: {
+      backgroundColor: colors.cardSecondary,
+      borderRadius: borderRadius.sm,
+      padding: spacing.sm,
+      fontSize: fontSize.sm,
+      color: colors.text,
+      minHeight: 60,
+      textAlignVertical: 'top' as const,
+      marginBottom: spacing.sm,
+    },
+    gratitudeSubmitBtn: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.sm,
+      paddingVertical: spacing.xs,
+      alignItems: 'center' as const,
+    },
+    gratitudeSubmitText: {
+      fontSize: fontSize.sm,
+      color: colors.background,
+      fontWeight: '600',
+    },
+    gratitudeDoneRow: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      alignItems: 'center' as const,
+    },
+    gratitudeDoneText: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+    },
+    sectionDivider: {
+      height: 1,
+      backgroundColor: colors.separator,
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.md,
+    },
+    intensitySection: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md,
+    },
+    intensityTitle: {
+      fontSize: fontSize.sm,
+      color: colors.text,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+      textAlign: 'center',
+    },
+    intensityScoreRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'baseline' as const,
+      justifyContent: 'center' as const,
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    intensityScore: {
+      fontSize: fontSize.jumbo,
+      fontWeight: '900',
+    },
+    intensityLabel: {
+      fontSize: fontSize.md,
+      fontWeight: '600',
+    },
+    intensityBarBg: {
+      height: 6,
+      backgroundColor: colors.cardSecondary,
+      borderRadius: 3,
+      marginBottom: spacing.sm,
+      overflow: 'hidden' as const,
+    },
+    intensityBarFill: {
+      height: '100%' as const,
+      borderRadius: 3,
+    },
+    intensityBreakdown: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-around' as const,
+    },
+    intensityBreakdownItem: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
     },
   })
 }
