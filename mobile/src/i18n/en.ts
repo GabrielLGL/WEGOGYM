@@ -267,6 +267,11 @@ export const en: typeof fr = {
     weekly: 'Weekly',
     monthly: 'Monthly',
     prs: 'PRs',
+    heatmap: {
+      title: 'Last 12 weeks',
+      less: 'Less',
+      more: 'More',
+    },
   },
 
   navigation: {
@@ -301,6 +306,8 @@ export const en: typeof fr = {
     exerciseCollection: 'My Collection',
     statsConstellation: 'Constellation',
     personalChallenges: 'Personal Challenges',
+    statsHeatmap: 'Muscle Heatmap',
+    statsStrength: 'Strength Standards',
   },
 
   programs: {
@@ -389,6 +396,27 @@ export const en: typeof fr = {
     bulletin: 'Report',
     collection: 'Collection',
     constellation: 'Constellation',
+    heatmap: 'Heatmap',
+    strength: 'Strength',
+  },
+
+  strengthStandards: {
+    title: 'Strength Standards',
+    basedOn: 'Based on your bodyweight: {w} kg',
+    noBodyweight: 'Add your weight in Body Measurements to see standards.',
+    estimated1RM: 'Est. 1RM',
+    ratio: 'ratio',
+    notPracticed: 'Not practiced',
+    noData: 'No data',
+    nextLevel: 'Next',
+    levels: {
+      beginner: 'Beginner',
+      novice: 'Novice',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced',
+      elite: 'Elite',
+    },
+    disclaimer: 'Approximate standards based on general averages.',
   },
 
   badges: {
@@ -750,6 +778,12 @@ export const en: typeof fr = {
       title: 'Similar exercises',
       done: '✓ Already practiced',
       discover: '✦ To discover',
+    },
+    overload: {
+      title: 'Progressive overload',
+      maxWeight: 'Max weight',
+      volume: 'Volume',
+      disclaimer: 'Based on last {n} sessions',
     },
   },
 
@@ -1468,6 +1502,19 @@ export const en: typeof fr = {
     noPRYet: 'No PR yet',
   },
 
+  intensity: {
+    title: 'Session intensity',
+    levels: {
+      light: 'Light',
+      moderate: 'Moderate',
+      intense: 'Intense',
+      extreme: 'Extreme',
+    },
+    volume: 'Volume',
+    prs: 'PRs',
+    effort: 'Effort',
+  },
+
   share: {
     appName: 'KORE',
     branding: 'kore-app.net',
@@ -1495,6 +1542,16 @@ export const en: typeof fr = {
     shareButton: 'Share',
     shareAsImage: 'Share as image',
     shareAsText: 'Share as text',
+  },
+
+  muscleHeatmap: {
+    title: 'Muscle Heatmap',
+    period7: '7 days',
+    period14: '14 days',
+    period30: '30 days',
+    volume: 'Volume',
+    sessions: 'sessions',
+    noData: 'Not trained',
   },
 
 } as const

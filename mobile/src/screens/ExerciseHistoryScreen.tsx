@@ -25,6 +25,7 @@ import { EPLEY_FORMULA_DIVISOR } from '../model/constants'
 import { computePRPrediction } from '../model/utils/prPredictionHelpers'
 import { computePlateauAnalysis } from '../model/utils/plateauHelpers'
 import { computeVariantSuggestions } from '../model/utils/variantHelpers'
+import { computeOverloadTrend } from '../model/utils/progressiveOverloadHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -130,6 +131,11 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
     [exercise, allExercises, usedExerciseIds],
   )
 
+  const { weightTrend, volumeTrend } = useMemo(
+    () => computeOverloadTrend(setsForExercise),
+    [setsForExercise],
+  )
+
   return (
     <ScrollView
       style={styles.container}
@@ -191,6 +197,49 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>
             {t.exerciseHistory.chartEmpty}
+          </Text>
+        </View>
+      )}
+
+      {/* Progressive overload section */}
+      {weightTrend.lastSessions >= 3 && (
+        <View style={styles.overloadSection}>
+          <Text style={styles.overloadTitle}>{t.exerciseHistory.overload.title}</Text>
+
+          <View style={styles.overloadRow}>
+            <Ionicons name="barbell-outline" size={16} color={colors.textSecondary} />
+            <Text style={styles.overloadLabel}>{t.exerciseHistory.overload.maxWeight}</Text>
+            <View style={styles.overloadTrendBadge}>
+              <Text style={[
+                styles.overloadTrendText,
+                { color: weightTrend.trend === 'up' ? colors.primary
+                  : weightTrend.trend === 'down' ? colors.danger
+                  : colors.textSecondary },
+              ]}>
+                {weightTrend.trend === 'up' ? '↑' : weightTrend.trend === 'down' ? '↓' : '→'}
+                {' '}{Math.abs(weightTrend.percentChange).toFixed(1)}%
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.overloadRow}>
+            <Ionicons name="trending-up-outline" size={16} color={colors.textSecondary} />
+            <Text style={styles.overloadLabel}>{t.exerciseHistory.overload.volume}</Text>
+            <View style={styles.overloadTrendBadge}>
+              <Text style={[
+                styles.overloadTrendText,
+                { color: volumeTrend.trend === 'up' ? colors.primary
+                  : volumeTrend.trend === 'down' ? colors.danger
+                  : colors.textSecondary },
+              ]}>
+                {volumeTrend.trend === 'up' ? '↑' : volumeTrend.trend === 'down' ? '↓' : '→'}
+                {' '}{Math.abs(volumeTrend.percentChange).toFixed(1)}%
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.overloadDisclaimer}>
+            {t.exerciseHistory.overload.disclaimer.replace('{n}', String(weightTrend.lastSessions))}
           </Text>
         </View>
       )}
@@ -657,6 +706,45 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.caption,
       color: colors.textSecondary,
       fontStyle: 'italic' as const,
+    },
+    overloadSection: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginTop: spacing.md,
+    },
+    overloadTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700' as const,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    overloadRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing.xs,
+      paddingVertical: spacing.xs,
+    },
+    overloadLabel: {
+      flex: 1,
+      fontSize: fontSize.sm,
+      color: colors.text,
+    },
+    overloadTrendBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs / 2,
+      borderRadius: borderRadius.sm,
+      backgroundColor: colors.cardSecondary,
+    },
+    overloadTrendText: {
+      fontSize: fontSize.sm,
+      fontWeight: '700' as const,
+    },
+    overloadDisclaimer: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      fontStyle: 'italic' as const,
+      marginTop: spacing.sm,
     },
   }), [colors])
 }

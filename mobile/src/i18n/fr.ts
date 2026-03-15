@@ -267,6 +267,11 @@ export const fr = {
     weekly: 'Hebdo',
     monthly: 'Mensuel',
     prs: 'PRs',
+    heatmap: {
+      title: '12 dernières semaines',
+      less: 'Moins',
+      more: 'Plus',
+    },
   },
 
   navigation: {
@@ -301,6 +306,8 @@ export const fr = {
     exerciseCollection: 'Ma Collection',
     statsConstellation: 'Constellation',
     personalChallenges: 'Défis Personnels',
+    statsHeatmap: 'Heatmap Musculaire',
+    statsStrength: 'Standards de Force',
   },
 
   programs: {
@@ -390,6 +397,27 @@ export const fr = {
     bulletin: 'Bulletin',
     collection: 'Collection',
     constellation: 'Constellation',
+    heatmap: 'Heatmap',
+    strength: 'Force',
+  },
+
+  strengthStandards: {
+    title: 'Standards de Force',
+    basedOn: 'Basé sur votre poids corporel : {w} kg',
+    noBodyweight: 'Ajoutez votre poids dans Mesures corporelles pour voir les standards.',
+    estimated1RM: '1RM estimé',
+    ratio: 'ratio',
+    notPracticed: 'Non pratiqué',
+    noData: 'Aucune donnée',
+    nextLevel: 'Prochain',
+    levels: {
+      beginner: 'Débutant',
+      novice: 'Novice',
+      intermediate: 'Intermédiaire',
+      advanced: 'Avancé',
+      elite: 'Élite',
+    },
+    disclaimer: 'Standards approximatifs basés sur des moyennes générales.',
   },
 
   badges: {
@@ -751,6 +779,12 @@ export const fr = {
       title: 'Exercices similaires',
       done: '✓ Déjà pratiqué',
       discover: '✦ À découvrir',
+    },
+    overload: {
+      title: 'Surcharge progressive',
+      maxWeight: 'Poids max',
+      volume: 'Volume',
+      disclaimer: 'Basé sur les {n} dernières séances',
     },
   },
 
@@ -1469,6 +1503,19 @@ export const fr = {
     noPRYet: 'Aucun PR encore',
   },
 
+  intensity: {
+    title: 'Intensité de la séance',
+    levels: {
+      light: 'Légère',
+      moderate: 'Modérée',
+      intense: 'Intense',
+      extreme: 'Extrême',
+    },
+    volume: 'Volume',
+    prs: 'PRs',
+    effort: 'Effort',
+  },
+
   share: {
     appName: 'KORE',
     branding: 'kore-app.net',
@@ -1496,6 +1543,16 @@ export const fr = {
     shareButton: 'Partager',
     shareAsImage: 'Partager en image',
     shareAsText: 'Partager en texte',
+  },
+
+  muscleHeatmap: {
+    title: 'Heatmap Musculaire',
+    period7: '7 jours',
+    period14: '14 jours',
+    period30: '30 jours',
+    volume: 'Volume',
+    sessions: 'séances',
+    noData: 'Non travaillé',
   },
 
 }
