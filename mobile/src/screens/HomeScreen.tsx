@@ -70,6 +70,7 @@ import { computeAthleteClass } from '../model/utils/athleteClassHelpers'
 import { computeExerciseOfWeek } from '../model/utils/exerciseOfWeekHelpers'
 import { useModalState } from '../hooks/useModalState'
 import { BottomSheet } from '../components/BottomSheet'
+import { computeTrainingCalendar } from '../model/utils/trainingCalendarHelpers'
 
 const DEFAULT_STATUS_BAR_HEIGHT = 44
 const DAY_CHIP_MIN_HEIGHT = 84
@@ -474,6 +475,12 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
   )
   const exerciseModal = useModalState()
 
+  // ── Training Heatmap ──
+  const calendarWeeks = useMemo(
+    () => computeTrainingCalendar(histories, sets, 12),
+    [histories, sets],
+  )
+
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
     try {
@@ -562,6 +569,60 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
             {userBadges.length}/{BADGES_LIST.length} {'\u203A'}
           </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* ── Calendrier Heatmap ── */}
+      <View style={styles.heatmapSection}>
+        <Text style={styles.heatmapTitle}>{t.home.heatmap.title}</Text>
+        <View style={styles.heatmapGrid}>
+          {calendarWeeks.map((week, wi) => (
+            <View key={wi} style={styles.heatmapColumn}>
+              {week.days.map((day, di) => (
+                <View
+                  key={di}
+                  style={[
+                    styles.heatmapCell,
+                    {
+                      backgroundColor: day.intensity === 0
+                        ? colors.cardSecondary
+                        : day.intensity === 1
+                          ? colors.primary + '33'
+                          : day.intensity === 2
+                            ? colors.primary + '66'
+                            : day.intensity === 3
+                              ? colors.primary + '99'
+                              : colors.primary,
+                    },
+                    day.isToday && styles.heatmapCellToday,
+                  ]}
+                />
+              ))}
+            </View>
+          ))}
+        </View>
+        <View style={styles.heatmapLegend}>
+          <Text style={styles.heatmapLegendText}>{t.home.heatmap.less}</Text>
+          {[0, 1, 2, 3, 4].map(i => (
+            <View
+              key={i}
+              style={[
+                styles.heatmapLegendCell,
+                {
+                  backgroundColor: i === 0
+                    ? colors.cardSecondary
+                    : i === 1
+                      ? colors.primary + '33'
+                      : i === 2
+                        ? colors.primary + '66'
+                        : i === 3
+                          ? colors.primary + '99'
+                          : colors.primary,
+                },
+              ]}
+            />
+          ))}
+          <Text style={styles.heatmapLegendText}>{t.home.heatmap.more}</Text>
+        </View>
       </View>
 
       {/* ── Quick-start ── */}
@@ -931,6 +992,52 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       fontWeight: '700',
       color: colors.primary,
+    },
+    // Heatmap
+    heatmapSection: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+    },
+    heatmapTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    heatmapGrid: {
+      flexDirection: 'row',
+      gap: 3,
+      justifyContent: 'center',
+    },
+    heatmapColumn: {
+      gap: 3,
+    },
+    heatmapCell: {
+      width: 14,
+      height: 14,
+      borderRadius: 3,
+    },
+    heatmapCellToday: {
+      borderWidth: 1.5,
+      borderColor: colors.primary,
+    },
+    heatmapLegend: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+      marginTop: spacing.sm,
+    },
+    heatmapLegendCell: {
+      width: 10,
+      height: 10,
+      borderRadius: 2,
+    },
+    heatmapLegendText: {
+      fontSize: fontSize.caption,
+      color: colors.placeholder,
     },
     // Quick-start Card
     quickStartCard: {

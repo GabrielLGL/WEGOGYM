@@ -81,6 +81,8 @@ const StatsConstellationScreen = React.lazy(() => import('../screens/StatsConste
 const ExerciseCollectionScreen = React.lazy(() => import('../screens/ExerciseCollectionScreen'))
 const PersonalChallengesScreen = React.lazy(() => import('../screens/PersonalChallengesScreen'))
 const ExerciseCardScreen = React.lazy(() => import('../screens/ExerciseCardScreen'))
+const StatsHeatmapScreen = React.lazy(() => import('../screens/StatsHeatmapScreen'))
+const StatsStrengthScreen = React.lazy(() => import('../screens/StatsStrengthScreen'))
 
 function isVersionOlder(accepted: string, required: string): boolean {
   const [aMaj, aMin] = accepted.split('.').map(Number)
@@ -128,6 +130,8 @@ export type RootStackParamList = {
   ExerciseCollection: undefined;
   PersonalChallenges: undefined;
   ExerciseCard: { exerciseId: string };
+  StatsHeatmap: undefined;
+  StatsStrength: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -290,6 +294,8 @@ function AppContent() {
           <Stack.Screen name="ExerciseCollection" component={ExerciseCollectionScreen} options={{ title: t.navigation.exerciseCollection }} />
           <Stack.Screen name="PersonalChallenges" component={PersonalChallengesScreen} options={{ title: t.navigation.personalChallenges }} />
           <Stack.Screen name="ExerciseCard" component={ExerciseCardScreen} options={{ title: '' }} />
+          <Stack.Screen name="StatsHeatmap" component={StatsHeatmapScreen} options={{ title: t.navigation.statsHeatmap }} />
+          <Stack.Screen name="StatsStrength" component={StatsStrengthScreen} options={{ title: t.navigation.statsStrength }} />
         </Stack.Navigator>
       </Suspense>
     </NavigationContainer>
