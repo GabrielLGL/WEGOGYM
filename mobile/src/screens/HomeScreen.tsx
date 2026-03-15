@@ -60,6 +60,8 @@ import { useCoachMarks } from '../hooks/useCoachMarks'
 import { WeeklyReportCard } from '../components/WeeklyReportCard'
 import DeloadRecommendationCard from '../components/DeloadRecommendationCard'
 import { computeDeloadRecommendation } from '../model/utils/deloadHelpers'
+import { computeFatigueIndex } from '../model/utils/fatigueIndexHelpers'
+import type { FatigueResult } from '../model/utils/fatigueIndexHelpers'
 import { computeFlashback } from '../model/utils/flashbackHelpers'
 import type { FlashbackData } from '../model/utils/flashbackHelpers'
 import { computeMotivation } from '../model/utils/motivationHelpers'
@@ -481,6 +483,12 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
     [histories, sets],
   )
 
+  // ── Fatigue Index ──
+  const fatigueResult = useMemo<FatigueResult | null>(() => {
+    if (!sets.length) return null
+    return computeFatigueIndex(sets, histories)
+  }, [sets, histories])
+
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
     try {
@@ -624,6 +632,52 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           <Text style={styles.heatmapLegendText}>{t.home.heatmap.more}</Text>
         </View>
       </View>
+
+      {/* ── Indice de fatigue ── */}
+      {fatigueResult && fatigueResult.weeklyVolume > 0 && (() => {
+        const fatigueColor = fatigueResult.zone === 'overreaching'
+          ? colors.danger
+          : fatigueResult.zone === 'reaching'
+            ? '#F59E0B'
+            : fatigueResult.zone === 'recovery'
+              ? colors.placeholder
+              : colors.primary
+        return (
+          <View style={styles.fatigueCard}>
+            <View style={styles.fatigueHeader}>
+              <Ionicons
+                name={
+                  fatigueResult.zone === 'overreaching' ? 'warning-outline'
+                    : fatigueResult.zone === 'reaching' ? 'alert-circle-outline'
+                      : fatigueResult.zone === 'recovery' ? 'bed-outline'
+                        : 'checkmark-circle-outline'
+                }
+                size={20}
+                color={fatigueColor}
+              />
+              <Text style={[styles.fatigueTitle, { color: fatigueColor }]}>
+                {t.home.fatigue.zones[fatigueResult.zone]}
+              </Text>
+            </View>
+            <View style={styles.fatigueBarBg}>
+              <View style={[
+                styles.fatigueBarFill,
+                { width: `${fatigueResult.index}%`, backgroundColor: fatigueColor },
+              ]} />
+              {/* Marker zone optimale (50%) */}
+              <View style={[styles.fatigueMarker, { left: '50%' }]} />
+            </View>
+            <Text style={styles.fatigueStats}>
+              {t.home.fatigue.thisWeek}: {Math.round(fatigueResult.weeklyVolume)} kg
+              {'  •  '}
+              {t.home.fatigue.average}: {Math.round(fatigueResult.avgWeeklyVolume)} kg
+            </Text>
+            <Text style={styles.fatigueRecommendation}>
+              {t.home.fatigue.recommendations[fatigueResult.zone]}
+            </Text>
+          </View>
+        )
+      })()}
 
       {/* ── Quick-start ── */}
       {lastCompletedHistory && lastSessionName && (
@@ -1038,6 +1092,55 @@ function useStyles(colors: ThemeColors) {
     heatmapLegendText: {
       fontSize: fontSize.caption,
       color: colors.placeholder,
+    },
+    // Fatigue Card
+    fatigueCard: {
+      marginBottom: spacing.md,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+    },
+    fatigueHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    fatigueTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+    },
+    fatigueBarBg: {
+      height: 6,
+      backgroundColor: colors.cardSecondary,
+      borderRadius: 3,
+      marginBottom: spacing.sm,
+      overflow: 'hidden',
+      position: 'relative',
+    },
+    fatigueBarFill: {
+      height: '100%',
+      borderRadius: 3,
+    },
+    fatigueMarker: {
+      position: 'absolute',
+      top: -2,
+      width: 2,
+      height: 10,
+      backgroundColor: colors.text,
+      borderRadius: 1,
+    },
+    fatigueStats: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: spacing.xs,
+    },
+    fatigueRecommendation: {
+      fontSize: fontSize.caption,
+      color: colors.placeholder,
+      fontStyle: 'italic',
+      textAlign: 'center',
     },
     // Quick-start Card
     quickStartCard: {
