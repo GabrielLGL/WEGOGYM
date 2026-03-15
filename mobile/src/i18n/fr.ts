@@ -272,6 +272,23 @@ export const fr = {
       less: 'Moins',
       more: 'Plus',
     },
+    fatigue: {
+      title: 'Indice de fatigue',
+      thisWeek: 'Cette semaine',
+      average: 'Moyenne',
+      zones: {
+        recovery: 'Récupération',
+        optimal: 'Zone optimale',
+        reaching: 'Attention',
+        overreaching: 'Surmenage',
+      },
+      recommendations: {
+        recovery: 'Volume faible — augmentez progressivement l\'intensité.',
+        optimal: 'Charge bien dosée — continuez comme ça !',
+        reaching: 'Volume élevé — pensez à récupérer bientôt.',
+        overreaching: 'Surcharge détectée — un jour de repos serait bénéfique.',
+      },
+    },
   },
 
   navigation: {
@@ -308,6 +325,8 @@ export const fr = {
     personalChallenges: 'Défis Personnels',
     statsHeatmap: 'Heatmap Musculaire',
     statsStrength: 'Standards de Force',
+    statsTrainingSplit: 'Analyse du Split',
+    statsPRTimeline: 'Timeline Records',
   },
 
   programs: {
@@ -399,6 +418,19 @@ export const fr = {
     constellation: 'Constellation',
     heatmap: 'Heatmap',
     strength: 'Force',
+    trainingSplit: 'Split',
+    prTimeline: 'Records',
+  },
+
+  prTimeline: {
+    title: 'Timeline des Records',
+    totalPRs: 'PRs total',
+    thisMonth: 'Ce mois',
+    avgGain: 'Gain moyen',
+    prs: 'PRs',
+    newPR: 'Nouveau PR !',
+    gain: 'gain',
+    noPRs: 'Aucun record personnel pour le moment.',
   },
 
   strengthStandards: {
@@ -418,6 +450,32 @@ export const fr = {
       elite: 'Élite',
     },
     disclaimer: 'Standards approximatifs basés sur des moyennes générales.',
+  },
+
+  trainingSplit: {
+    title: 'Analyse du Split',
+    detectedPattern: 'Pattern détecté',
+    consistency: 'Régularité',
+    distribution: 'Répartition',
+    sessions: 'séances',
+    patterns: {
+      ppl: 'Push / Pull / Legs',
+      upperLower: 'Upper / Lower',
+      fullBody: 'Full Body',
+      mixed: 'Mixte',
+    },
+    types: {
+      push: 'Push',
+      pull: 'Pull',
+      legs: 'Legs',
+      upper: 'Upper',
+      lower: 'Lower',
+      fullBody: 'Full Body',
+      cardio: 'Cardio',
+      arms: 'Bras',
+      other: 'Autre',
+    },
+    noData: 'Pas assez de données — entraînez-vous quelques semaines !',
   },
 
   badges: {
@@ -785,6 +843,11 @@ export const fr = {
       maxWeight: 'Poids max',
       volume: 'Volume',
       disclaimer: 'Basé sur les {n} dernières séances',
+    },
+    alternatives: {
+      title: 'Exercices similaires pratiqués',
+      sets: 'sets',
+      noAlternatives: 'Aucune alternative trouvée',
     },
   },
 
@@ -1514,6 +1577,13 @@ export const fr = {
     volume: 'Volume',
     prs: 'PRs',
     effort: 'Effort',
+  },
+
+  sessionComparison: {
+    title: 'vs séance précédente',
+    totalVolume: 'Volume total',
+    maxWeight: 'Poids max',
+    noComparison: 'Première séance avec ces exercices',
   },
 
   share: {

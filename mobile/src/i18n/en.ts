@@ -272,6 +272,23 @@ export const en: typeof fr = {
       less: 'Less',
       more: 'More',
     },
+    fatigue: {
+      title: 'Fatigue index',
+      thisWeek: 'This week',
+      average: 'Average',
+      zones: {
+        recovery: 'Recovery',
+        optimal: 'Optimal zone',
+        reaching: 'Caution',
+        overreaching: 'Overreaching',
+      },
+      recommendations: {
+        recovery: 'Low volume — gradually increase intensity.',
+        optimal: 'Well-balanced load — keep it up!',
+        reaching: 'High volume — consider recovery soon.',
+        overreaching: 'Overload detected — a rest day would be beneficial.',
+      },
+    },
   },
 
   navigation: {
@@ -308,6 +325,8 @@ export const en: typeof fr = {
     personalChallenges: 'Personal Challenges',
     statsHeatmap: 'Muscle Heatmap',
     statsStrength: 'Strength Standards',
+    statsTrainingSplit: 'Split Analysis',
+    statsPRTimeline: 'PR Timeline',
   },
 
   programs: {
@@ -398,6 +417,45 @@ export const en: typeof fr = {
     constellation: 'Constellation',
     heatmap: 'Heatmap',
     strength: 'Strength',
+    trainingSplit: 'Split',
+    prTimeline: 'Records',
+  },
+
+  prTimeline: {
+    title: 'PR Timeline',
+    totalPRs: 'Total PRs',
+    thisMonth: 'This month',
+    avgGain: 'Avg gain',
+    prs: 'PRs',
+    newPR: 'New PR!',
+    gain: 'gain',
+    noPRs: 'No personal records yet.',
+  },
+
+  trainingSplit: {
+    title: 'Split Analysis',
+    detectedPattern: 'Detected pattern',
+    consistency: 'Consistency',
+    distribution: 'Distribution',
+    sessions: 'sessions',
+    patterns: {
+      ppl: 'Push / Pull / Legs',
+      upperLower: 'Upper / Lower',
+      fullBody: 'Full Body',
+      mixed: 'Mixed',
+    },
+    types: {
+      push: 'Push',
+      pull: 'Pull',
+      legs: 'Legs',
+      upper: 'Upper',
+      lower: 'Lower',
+      fullBody: 'Full Body',
+      cardio: 'Cardio',
+      arms: 'Arms',
+      other: 'Other',
+    },
+    noData: 'Not enough data — train for a few weeks!',
   },
 
   strengthStandards: {
@@ -784,6 +842,11 @@ export const en: typeof fr = {
       maxWeight: 'Max weight',
       volume: 'Volume',
       disclaimer: 'Based on last {n} sessions',
+    },
+    alternatives: {
+      title: 'Similar exercises practiced',
+      sets: 'sets',
+      noAlternatives: 'No alternatives found',
     },
   },
 
@@ -1513,6 +1576,13 @@ export const en: typeof fr = {
     volume: 'Volume',
     prs: 'PRs',
     effort: 'Effort',
+  },
+
+  sessionComparison: {
+    title: 'vs previous session',
+    totalVolume: 'Total volume',
+    maxWeight: 'Max weight',
+    noComparison: 'First session with these exercises',
   },
 
   share: {
