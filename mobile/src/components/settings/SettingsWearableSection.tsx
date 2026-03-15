@@ -290,7 +290,7 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
                 handleConnect()
               }}
             >
-              {t.wearable.connect} {t.wearable.provider[WEARABLE_PROVIDER as 'health_connect' | 'healthkit']}
+              {`${t.wearable.connect} ${t.wearable.provider[WEARABLE_PROVIDER as 'health_connect' | 'healthkit']}`}
             </Button>
           )}
         </View>
