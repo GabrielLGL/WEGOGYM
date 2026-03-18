@@ -268,7 +268,9 @@ export const fr = {
     monthly: 'Mensuel',
     prs: 'PRs',
     heatmap: {
-      title: '12 dernières semaines',
+      title: 'Activité',
+      activeDays: 'jours actifs',
+      streak: 'Série :',
       less: 'Moins',
       more: 'Plus',
     },
@@ -288,6 +290,73 @@ export const fr = {
         reaching: 'Volume élevé — pensez à récupérer bientôt.',
         overreaching: 'Surcharge détectée — un jour de repos serait bénéfique.',
       },
+    },
+    recovery: {
+      title: 'Récupération musculaire',
+      disclaimer: 'Estimation basée sur le temps écoulé et le volume.',
+      statuses: {
+        fresh: 'Frais',
+        recovered: 'Récupéré',
+        recovering: 'En cours',
+        fatigued: 'Fatigué',
+      },
+    },
+    readiness: {
+      title: 'Prêt à t\'entraîner ?',
+      recovery: 'Récupération',
+      fatigue: 'Fatigue',
+      consistency: 'Régularité',
+      levels: { optimal: 'Optimal', good: 'Bon', moderate: 'Modéré', low: 'Faible' },
+      recommendations: {
+        optimal: 'Journée idéale pour une grosse séance !',
+        good: 'Bonne condition pour s\'entraîner.',
+        moderate: 'Privilégier une séance légère.',
+        low: 'Repos recommandé aujourd\'hui.',
+      },
+    },
+    weeklyGoals: {
+      title: 'Objectifs de la semaine',
+      sessions: 'Séances',
+      volume: 'Volume',
+      daysLeft: 'jours restants',
+      completed: 'Objectifs atteints !',
+    },
+    milestones: {
+      title: 'Jalons de streak',
+      streak: 'de suite',
+      nextIn: 'Prochain dans',
+      labels: {
+        3: '3 jours',
+        7: '1 semaine',
+        14: '2 semaines',
+        30: '1 mois',
+        60: '2 mois',
+        100: '100 jours',
+        200: '200 jours',
+        365: '1 an',
+      },
+    },
+    restSuggestion: {
+      title: 'Suggestion de repos',
+      confidence: {
+        high: 'Fortement recommandé',
+        medium: 'Recommandé',
+        low: 'Optionnel',
+      },
+      reasons: {
+        tooManyDays: 'Tu t\'entraînes depuis 5 jours consécutifs.',
+        highFatigue: 'Ton indice de fatigue est trop élevé.',
+        accumulatedFatigue: 'Fatigue accumulée détectée.',
+        muscleRecovery: 'Plusieurs muscles n\'ont pas récupéré.',
+        mildFatigue: 'Légère fatigue accumulée.',
+      },
+      suggestions: {
+        takeFullRest: 'Prends une journée de repos complet.',
+        lightActivity: 'Privilégie une activité légère (marche, étirements).',
+        optionalRest: 'Un jour de repos serait bénéfique mais pas obligatoire.',
+        readyToTrain: 'Tu es prêt à t\'entraîner !',
+      },
+      tiredMuscles: 'Muscles fatigués',
     },
   },
 
@@ -327,6 +396,15 @@ export const fr = {
     statsStrength: 'Standards de Force',
     statsTrainingSplit: 'Analyse du Split',
     statsPRTimeline: 'Timeline Records',
+    statsBodyComp: 'Composition Corporelle',
+    statsVolumeForecast: 'Prévision Volume',
+    statsRestTime: 'Temps de repos',
+    statsVolumeDistribution: 'Distribution du Volume',
+    statsMonthlyProgress: 'Progression mensuelle',
+    statsExerciseFrequency: 'Fréquence exercices',
+    statsMuscleBalance: 'Équilibre musculaire',
+    statsSetQuality: 'Qualité des séries',
+    statsVolumeRecords: 'Records de volume',
   },
 
   programs: {
@@ -375,6 +453,15 @@ export const fr = {
       selectInstruction: 'Cochez les exercices à grouper',
       hint: 'Astuce : groupez vos exercices en superset via le bouton "Grouper"',
     },
+    duration: {
+      estimate: 'Durée estimée',
+      confidence: {
+        high: 'Fiable',
+        medium: 'Approximatif',
+        low: 'Estimation',
+      },
+      basedOn: 'séance(s) précédente(s)',
+    },
   },
 
   exercises: {
@@ -396,6 +483,9 @@ export const fr = {
     descriptionLabel: 'Description (optionnelle)',
     descriptionPlaceholder: "Instructions d'exécution...",
     createError: "Impossible de créer l'exercice. Veuillez réessayer.",
+    mastery: {
+      levels: { 0: 'Non pratiqué', 1: 'Débutant', 2: 'Initié', 3: 'Confirmé', 4: 'Expert', 5: 'Maître' },
+    },
   },
 
   stats: {
@@ -420,6 +510,15 @@ export const fr = {
     strength: 'Force',
     trainingSplit: 'Split',
     prTimeline: 'Records',
+    bodyComp: 'Corps',
+    volumeForecast: 'Prévision',
+    restTime: 'Repos',
+    volumeDistribution: 'Distribution',
+    monthlyProgress: 'Progression',
+    exerciseFrequency: 'Fréquence',
+    muscleBalance: 'Équilibre',
+    setQuality: 'Qualité séries',
+    volumeRecords: 'Records',
   },
 
   prTimeline: {
@@ -431,6 +530,22 @@ export const fr = {
     newPR: 'Nouveau PR !',
     gain: 'gain',
     noPRs: 'Aucun record personnel pour le moment.',
+  },
+
+  bodyComp: {
+    title: 'Composition Corporelle',
+    period30: '30j',
+    period90: '90j',
+    period180: '180j',
+    metrics: {
+      weight: 'Poids',
+      waist: 'Tour de taille',
+      hips: 'Hanches',
+      chest: 'Poitrine',
+      arms: 'Bras',
+    },
+    noData: 'Aucune mesure',
+    addMeasurement: 'Ajouter une mesure',
   },
 
   strengthStandards: {
@@ -590,6 +705,13 @@ export const fr = {
     setsLabel: 'séries',
     restInProgress: 'REPOS EN COURS',
     skipRest: 'Ignorer',
+    density: {
+      label: 'Densité',
+      unit: 'kg/min',
+      faster: 'Plus rapide',
+      slower: 'Plus lent',
+      similar: 'Similaire',
+    },
   },
 
   programDetail: {
@@ -848,6 +970,14 @@ export const fr = {
       title: 'Exercices similaires pratiqués',
       sets: 'sets',
       noAlternatives: 'Aucune alternative trouvée',
+    },
+    repMax: {
+      title: 'Estimation 1RM',
+      estimated1RM: '1RM estimé',
+      estimated3RM: '3RM',
+      estimated5RM: '5RM',
+      bestSet: 'Meilleur set : {weight} kg × {reps}',
+      disclaimer: 'Moyenne Epley + Brzycki (reps ≤ 15)',
     },
   },
 
@@ -1623,6 +1753,132 @@ export const fr = {
     volume: 'Volume',
     sessions: 'séances',
     noData: 'Non travaillé',
+  },
+
+  restTime: {
+    title: 'Temps de repos',
+    globalAverage: 'Repos moyen',
+    average: 'Moyenne',
+    samples: 'mesures',
+    recommendations: {
+      short: 'Court',
+      optimal: 'Optimal',
+      long: 'Long',
+    },
+    noData: 'Pas encore assez de données pour analyser les temps de repos.',
+  },
+
+  volumeForecast: {
+    title: 'Prévision de Volume',
+    nextWeek: 'Semaine prochaine',
+    thisWeek: 'Cette semaine',
+    trend: 'Tendance',
+    trends: {
+      increasing: 'En hausse',
+      decreasing: 'En baisse',
+      stable: 'Stable',
+    },
+    perWeek: 'par semaine',
+    weeklyHistory: 'Historique hebdomadaire',
+    predicted: 'Projeté',
+    monthlyPace: 'Pace mensuel',
+    thisMonth: 'Ce mois',
+    projected: 'Projeté',
+    monthlyAvg: 'Moy. mensuelle',
+    noData: 'Au moins 4 semaines de données sont nécessaires pour générer une prévision.',
+  },
+
+  volumeDistribution: {
+    title: 'Répartition par muscle',
+    balance: 'Score d\'équilibre',
+    totalVolume: 'Volume total',
+    dominant: 'Dominant',
+    weakest: 'Plus faible',
+    noData: 'Pas encore assez de données pour analyser la distribution du volume.',
+    periods: {
+      week: '7j',
+      month: '30j',
+      quarter: '90j',
+      all: 'Tout',
+    },
+  },
+
+  monthlyProgress: {
+    title: 'Progression mensuelle',
+    volume: 'Volume',
+    sessions: 'Séances',
+    prs: 'Records',
+    activeDays: 'Jours actifs',
+    setsTotal: 'Séries',
+    avgPerWeek: 'Séances / sem.',
+    topExercise: 'Exercice phare',
+    trendUp: 'Volume en hausse',
+    trendDown: 'Volume en baisse',
+    trendStable: 'Volume stable',
+    noData: 'Aucune donnée pour ce mois.',
+  },
+
+  muscleBalance: {
+    title: 'Paires musculaires',
+    overallBalance: 'Équilibre global',
+    statuses: {
+      balanced: 'Équilibré',
+      slight: 'Léger déséquilibre',
+      imbalanced: 'Déséquilibré',
+    },
+    pairs: {
+      pushPull: { left: 'Push', right: 'Pull' },
+      quadsHams: { left: 'Quadriceps', right: 'Ischio-jambiers' },
+      bicepsTriceps: { left: 'Biceps', right: 'Triceps' },
+      upperLower: { left: 'Haut du corps', right: 'Bas du corps' },
+    },
+    noData: 'Pas encore assez de données pour analyser l\'équilibre musculaire.',
+    periods: {
+      month: '30j',
+      quarter: '90j',
+      all: 'Tout',
+    },
+  },
+
+  setQuality: {
+    title: 'Qualité des séries',
+    overallScore: 'Score global',
+    avgWeight: 'Poids moy.',
+    consistency: 'Régularité',
+    dropSets: 'Drop sets',
+    mostConsistent: 'Plus régulier',
+    leastConsistent: 'Moins régulier',
+    noData: 'Pas assez de données (min 5 sets).',
+    periods: { month: '30j', quarter: '90j', all: 'Tout' },
+  },
+
+  exerciseFrequency: {
+    title: 'Fréquence des exercices',
+    totalUsed: 'Exercices utilisés',
+    mostFrequent: 'Plus fréquent',
+    leastFrequent: 'Moins fréquent',
+    neglected: 'Négligés',
+    lastDone: 'Dernier :',
+    noData: 'Aucune donnée de fréquence pour le moment.',
+    periods: {
+      month: '30 jours',
+      quarter: '90 jours',
+      all: 'Tout',
+    },
+  },
+
+  volumeRecords: {
+    title: 'Records de volume',
+    session: 'Meilleure séance',
+    week: 'Meilleure semaine',
+    month: 'Meilleur mois',
+    current: 'Actuel',
+    newRecord: 'NOUVEAU RECORD !',
+    lifetime: 'Volume total',
+    avgSession: 'Moyenne / séance',
+    avgWeek: 'Moyenne / semaine',
+    trend: { up: 'En hausse', down: 'En baisse', stable: 'Stable' },
+    noData: 'Aucune donnée.',
   },
 
 }

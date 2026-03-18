@@ -85,6 +85,15 @@ const StatsHeatmapScreen = React.lazy(() => import('../screens/StatsHeatmapScree
 const StatsStrengthScreen = React.lazy(() => import('../screens/StatsStrengthScreen'))
 const StatsTrainingSplitScreen = React.lazy(() => import('../screens/StatsTrainingSplitScreen'))
 const StatsPRTimelineScreen = React.lazy(() => import('../screens/StatsPRTimelineScreen'))
+const StatsBodyCompScreen = React.lazy(() => import('../screens/StatsBodyCompScreen'))
+const StatsVolumeForecastScreen = React.lazy(() => import('../screens/StatsVolumeForecastScreen'))
+const StatsRestTimeScreen = React.lazy(() => import('../screens/StatsRestTimeScreen'))
+const StatsVolumeDistributionScreen = React.lazy(() => import('../screens/StatsVolumeDistributionScreen'))
+const StatsMonthlyProgressScreen = React.lazy(() => import('../screens/StatsMonthlyProgressScreen'))
+const StatsExerciseFrequencyScreen = React.lazy(() => import('../screens/StatsExerciseFrequencyScreen'))
+const StatsMuscleBalanceScreen = React.lazy(() => import('../screens/StatsMuscleBalanceScreen'))
+const StatsSetQualityScreen = React.lazy(() => import('../screens/StatsSetQualityScreen'))
+const StatsVolumeRecordsScreen = React.lazy(() => import('../screens/StatsVolumeRecordsScreen'))
 
 function isVersionOlder(accepted: string, required: string): boolean {
   const [aMaj, aMin] = accepted.split('.').map(Number)
@@ -136,6 +145,15 @@ export type RootStackParamList = {
   StatsStrength: undefined;
   StatsTrainingSplit: undefined;
   StatsPRTimeline: undefined;
+  StatsBodyComp: undefined;
+  StatsVolumeForecast: undefined;
+  StatsRestTime: undefined;
+  StatsVolumeDistribution: undefined;
+  StatsMonthlyProgress: undefined;
+  StatsExerciseFrequency: undefined;
+  StatsMuscleBalance: undefined;
+  StatsSetQuality: undefined;
+  StatsVolumeRecords: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -302,6 +320,15 @@ function AppContent() {
           <Stack.Screen name="StatsStrength" component={StatsStrengthScreen} options={{ title: t.navigation.statsStrength }} />
           <Stack.Screen name="StatsTrainingSplit" component={StatsTrainingSplitScreen} options={{ title: t.navigation.statsTrainingSplit }} />
           <Stack.Screen name="StatsPRTimeline" component={StatsPRTimelineScreen} options={{ title: t.navigation.statsPRTimeline }} />
+          <Stack.Screen name="StatsBodyComp" component={StatsBodyCompScreen} options={{ title: t.navigation.statsBodyComp }} />
+          <Stack.Screen name="StatsVolumeForecast" component={StatsVolumeForecastScreen} options={{ title: t.navigation.statsVolumeForecast }} />
+          <Stack.Screen name="StatsRestTime" component={StatsRestTimeScreen} options={{ title: t.navigation.statsRestTime }} />
+          <Stack.Screen name="StatsVolumeDistribution" component={StatsVolumeDistributionScreen} options={{ title: t.navigation.statsVolumeDistribution }} />
+          <Stack.Screen name="StatsMonthlyProgress" component={StatsMonthlyProgressScreen} options={{ title: t.navigation.statsMonthlyProgress }} />
+          <Stack.Screen name="StatsExerciseFrequency" component={StatsExerciseFrequencyScreen} options={{ title: t.navigation.statsExerciseFrequency }} />
+          <Stack.Screen name="StatsMuscleBalance" component={StatsMuscleBalanceScreen} options={{ title: t.navigation.statsMuscleBalance }} />
+          <Stack.Screen name="StatsSetQuality" component={StatsSetQualityScreen} options={{ title: t.navigation.statsSetQuality }} />
+          <Stack.Screen name="StatsVolumeRecords" component={StatsVolumeRecordsScreen} options={{ title: t.navigation.statsVolumeRecords }} />
         </Stack.Navigator>
       </Suspense>
     </NavigationContainer>

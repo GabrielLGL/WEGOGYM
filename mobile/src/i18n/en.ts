@@ -301,6 +301,63 @@ export const en: typeof fr = {
         fatigued: 'Fatigued',
       },
     },
+    readiness: {
+      title: 'Ready to train?',
+      recovery: 'Recovery',
+      fatigue: 'Fatigue',
+      consistency: 'Consistency',
+      levels: { optimal: 'Optimal', good: 'Good', moderate: 'Moderate', low: 'Low' },
+      recommendations: {
+        optimal: 'Perfect day for a heavy session!',
+        good: 'Good condition to train.',
+        moderate: 'Consider a lighter session.',
+        low: 'Rest recommended today.',
+      },
+    },
+    weeklyGoals: {
+      title: 'Weekly Goals',
+      sessions: 'Sessions',
+      volume: 'Volume',
+      daysLeft: 'days left',
+      completed: 'Goals achieved!',
+    },
+    milestones: {
+      title: 'Streak milestones',
+      streak: 'in a row',
+      nextIn: 'Next in',
+      labels: {
+        3: '3 days',
+        7: '1 week',
+        14: '2 weeks',
+        30: '1 month',
+        60: '2 months',
+        100: '100 days',
+        200: '200 days',
+        365: '1 year',
+      },
+    },
+    restSuggestion: {
+      title: 'Rest suggestion',
+      confidence: {
+        high: 'Strongly recommended',
+        medium: 'Recommended',
+        low: 'Optional',
+      },
+      reasons: {
+        tooManyDays: 'You\'ve been training for 5 consecutive days.',
+        highFatigue: 'Your fatigue index is too high.',
+        accumulatedFatigue: 'Accumulated fatigue detected.',
+        muscleRecovery: 'Several muscles haven\'t recovered.',
+        mildFatigue: 'Mild accumulated fatigue.',
+      },
+      suggestions: {
+        takeFullRest: 'Take a full rest day.',
+        lightActivity: 'Prefer light activity (walk, stretching).',
+        optionalRest: 'A rest day would help but is not mandatory.',
+        readyToTrain: 'You\'re ready to train!',
+      },
+      tiredMuscles: 'Tired muscles',
+    },
   },
 
   navigation: {
@@ -344,6 +401,10 @@ export const en: typeof fr = {
     statsRestTime: 'Rest Time',
     statsVolumeDistribution: 'Volume Distribution',
     statsMonthlyProgress: 'Monthly Progress',
+    statsExerciseFrequency: 'Exercise Frequency',
+    statsMuscleBalance: 'Muscle Balance',
+    statsSetQuality: 'Set Quality',
+    statsVolumeRecords: 'Volume Records',
   },
 
   programs: {
@@ -453,6 +514,10 @@ export const en: typeof fr = {
     restTime: 'Rest',
     volumeDistribution: 'Distribution',
     monthlyProgress: 'Progress',
+    exerciseFrequency: 'Frequency',
+    muscleBalance: 'Balance',
+    setQuality: 'Set quality',
+    volumeRecords: 'Records',
   },
 
   prTimeline: {
@@ -639,6 +704,13 @@ export const en: typeof fr = {
     setsLabel: 'sets',
     restInProgress: 'REST IN PROGRESS',
     skipRest: 'Skip',
+    density: {
+      label: 'Density',
+      unit: 'kg/min',
+      faster: 'Faster',
+      slower: 'Slower',
+      similar: 'Similar',
+    },
   },
 
   programDetail: {
@@ -1743,6 +1815,69 @@ export const en: typeof fr = {
     trendDown: 'Volume is down',
     trendStable: 'Volume is stable',
     noData: 'No data for this month.',
+  },
+
+  muscleBalance: {
+    title: 'Muscle Pairs',
+    overallBalance: 'Overall Balance',
+    statuses: {
+      balanced: 'Balanced',
+      slight: 'Slight imbalance',
+      imbalanced: 'Imbalanced',
+    },
+    pairs: {
+      pushPull: { left: 'Push', right: 'Pull' },
+      quadsHams: { left: 'Quads', right: 'Hamstrings' },
+      bicepsTriceps: { left: 'Biceps', right: 'Triceps' },
+      upperLower: { left: 'Upper body', right: 'Lower body' },
+    },
+    noData: 'Not enough data yet to analyze muscle balance.',
+    periods: {
+      month: '30d',
+      quarter: '90d',
+      all: 'All',
+    },
+  },
+
+  setQuality: {
+    title: 'Set quality',
+    overallScore: 'Overall score',
+    avgWeight: 'Avg weight',
+    consistency: 'Consistency',
+    dropSets: 'Drop sets',
+    mostConsistent: 'Most consistent',
+    leastConsistent: 'Least consistent',
+    noData: 'Not enough data (min 5 sets).',
+    periods: { month: '30d', quarter: '90d', all: 'All' },
+  },
+
+  exerciseFrequency: {
+    title: 'Exercise Frequency',
+    totalUsed: 'Exercises used',
+    mostFrequent: 'Most frequent',
+    leastFrequent: 'Least frequent',
+    neglected: 'Neglected',
+    lastDone: 'Last:',
+    noData: 'No frequency data yet.',
+    periods: {
+      month: '30 days',
+      quarter: '90 days',
+      all: 'All',
+    },
+  },
+
+  volumeRecords: {
+    title: 'Volume records',
+    session: 'Best session',
+    week: 'Best week',
+    month: 'Best month',
+    current: 'Current',
+    newRecord: 'NEW RECORD!',
+    lifetime: 'Lifetime volume',
+    avgSession: 'Avg / session',
+    avgWeek: 'Avg / week',
+    trend: { up: 'Trending up', down: 'Trending down', stable: 'Stable' },
+    noData: 'No data.',
   },
 
 }

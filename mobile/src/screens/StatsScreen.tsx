@@ -87,6 +87,15 @@ export function StatsScreenBase({ user, histories, sets }: Props) {
     { icon: 'fitness-outline',     label: t.stats.strength,        route: 'StatsStrength' },
     { icon: 'git-branch-outline',  label: t.stats.trainingSplit,   route: 'StatsTrainingSplit' },
     { icon: 'podium-outline',      label: t.stats.prTimeline,      route: 'StatsPRTimeline' },
+    { icon: 'body-outline',        label: t.stats.bodyComp,        route: 'StatsBodyComp' },
+    { icon: 'analytics-outline',   label: t.stats.volumeForecast,  route: 'StatsVolumeForecast' },
+    { icon: 'timer-outline',       label: t.stats.restTime,        route: 'StatsRestTime' },
+    { icon: 'pie-chart-outline',   label: t.stats.volumeDistribution, route: 'StatsVolumeDistribution' },
+    { icon: 'trending-up-outline', label: t.stats.monthlyProgress, route: 'StatsMonthlyProgress' },
+    { icon: 'bar-chart-outline',   label: t.stats.exerciseFrequency, route: 'StatsExerciseFrequency' },
+    { icon: 'swap-horizontal-outline', label: t.stats.muscleBalance, route: 'StatsMuscleBalance' },
+    { icon: 'checkmark-circle-outline', label: t.stats.setQuality, route: 'StatsSetQuality' },
+    { icon: 'trophy-outline',          label: t.stats.volumeRecords, route: 'StatsVolumeRecords' },
   ], [t])
 
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
