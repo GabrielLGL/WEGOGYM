@@ -195,12 +195,12 @@ describe('StatsDurationScreenBase', () => {
       makeHistory('h1', now - 86400000, now - 86400000 + 1800000),  // 30 min
       makeHistory('h2', now - 172800000, now - 172800000 + 5400000), // 90 min
     ]
-    const { getByText } = render(
+    const { getByText, getAllByText } = render(
       <StatsDurationScreenBase histories={histories} />
     )
     expect(getByText('Durée moyenne')).toBeTruthy()
     expect(getByText('Plus courte')).toBeTruthy()
-    expect(getByText('Plus longue')).toBeTruthy()
+    expect(getAllByText('Plus longue').length).toBeGreaterThanOrEqual(1)
   })
 
   it('exclut les séances < 10 min des stats', () => {

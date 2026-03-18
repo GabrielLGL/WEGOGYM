@@ -1,4 +1,22 @@
 // Mocks AVANT les imports
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn().mockResolvedValue(null),
+    setItem: jest.fn().mockResolvedValue(undefined),
+    removeItem: jest.fn().mockResolvedValue(undefined),
+    clear: jest.fn().mockResolvedValue(undefined),
+    getAllKeys: jest.fn().mockResolvedValue([]),
+    multiGet: jest.fn().mockResolvedValue([]),
+    multiSet: jest.fn().mockResolvedValue(undefined),
+    multiRemove: jest.fn().mockResolvedValue(undefined),
+  },
+}))
+
+jest.mock('react-native-android-widget', () => ({
+  requestWidgetUpdate: jest.fn(),
+}))
+
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
 import { HomeContent } from '../HomeScreen'
@@ -131,7 +149,11 @@ describe('HomeScreen Dashboard', () => {
   })
 
   it('affiche les KPIs', () => {
-    const fakeHistories = Array.from({ length: 5 }, (_, i) => ({ id: `h-${i}` })) as unknown as History[]
+    const fakeHistories = Array.from({ length: 5 }, (_, i) => ({
+      id: `h-${i}`,
+      startTime: new Date(Date.now() - i * 86400000),
+      isAbandoned: false,
+    })) as unknown as History[]
     const { getByText } = render(
       <HomeContent
         user={makeUser({ totalTonnage: 25000, totalPrs: 7 } as Partial<User>)}

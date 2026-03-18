@@ -1,4 +1,10 @@
 // Mocks AVANT les imports
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
+}))
+
 import React from 'react'
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native'
 import OnboardingScreen from '../OnboardingScreen'

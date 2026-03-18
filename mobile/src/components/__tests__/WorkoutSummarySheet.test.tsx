@@ -4,6 +4,20 @@ import { render, fireEvent, act, waitFor } from '@testing-library/react-native'
 import { WorkoutSummarySheet } from '../WorkoutSummarySheet'
 import { updateHistoryNote } from '../../model/utils/databaseHelpers'
 
+jest.mock('../../model/index', () => ({
+  database: {
+    get: jest.fn().mockReturnValue({
+      query: jest.fn().mockReturnValue({
+        observe: jest.fn().mockReturnValue({ pipe: jest.fn(), subscribe: jest.fn() }),
+        fetch: jest.fn().mockResolvedValue([]),
+        fetchCount: jest.fn().mockResolvedValue(0),
+      }),
+    }),
+    write: jest.fn().mockResolvedValue(undefined),
+    batch: jest.fn().mockResolvedValue(undefined),
+  },
+}))
+
 jest.mock('../../model/utils/databaseHelpers', () => ({
   updateHistoryNote: jest.fn().mockResolvedValue(undefined),
 }))
