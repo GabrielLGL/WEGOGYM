@@ -268,7 +268,9 @@ export const en: typeof fr = {
     monthly: 'Monthly',
     prs: 'PRs',
     heatmap: {
-      title: 'Last 12 weeks',
+      title: 'Activity',
+      activeDays: 'active days',
+      streak: 'Streak:',
       less: 'Less',
       more: 'More',
     },
@@ -287,6 +289,16 @@ export const en: typeof fr = {
         optimal: 'Well-balanced load — keep it up!',
         reaching: 'High volume — consider recovery soon.',
         overreaching: 'Overload detected — a rest day would be beneficial.',
+      },
+    },
+    recovery: {
+      title: 'Muscle Recovery',
+      disclaimer: 'Estimate based on elapsed time and volume.',
+      statuses: {
+        fresh: 'Fresh',
+        recovered: 'Recovered',
+        recovering: 'Recovering',
+        fatigued: 'Fatigued',
       },
     },
   },
@@ -327,6 +339,11 @@ export const en: typeof fr = {
     statsStrength: 'Strength Standards',
     statsTrainingSplit: 'Split Analysis',
     statsPRTimeline: 'PR Timeline',
+    statsBodyComp: 'Body Composition',
+    statsVolumeForecast: 'Volume Forecast',
+    statsRestTime: 'Rest Time',
+    statsVolumeDistribution: 'Volume Distribution',
+    statsMonthlyProgress: 'Monthly Progress',
   },
 
   programs: {
@@ -375,6 +392,15 @@ export const en: typeof fr = {
       selectInstruction: 'Check exercises to group',
       hint: 'Tip: group exercises into supersets with the "Group" button',
     },
+    duration: {
+      estimate: 'Estimated duration',
+      confidence: {
+        high: 'Reliable',
+        medium: 'Approximate',
+        low: 'Estimate',
+      },
+      basedOn: 'previous session(s)',
+    },
   },
 
   exercises: {
@@ -395,6 +421,9 @@ export const en: typeof fr = {
     descriptionLabel: 'Description (optional)',
     descriptionPlaceholder: 'Execution instructions...',
     createError: 'Unable to create exercise. Please try again.',
+    mastery: {
+      levels: { 0: 'Not practiced', 1: 'Beginner', 2: 'Initiate', 3: 'Proficient', 4: 'Expert', 5: 'Master' },
+    },
   },
 
   stats: {
@@ -419,6 +448,11 @@ export const en: typeof fr = {
     strength: 'Strength',
     trainingSplit: 'Split',
     prTimeline: 'Records',
+    bodyComp: 'Body',
+    volumeForecast: 'Forecast',
+    restTime: 'Rest',
+    volumeDistribution: 'Distribution',
+    monthlyProgress: 'Progress',
   },
 
   prTimeline: {
@@ -430,6 +464,22 @@ export const en: typeof fr = {
     newPR: 'New PR!',
     gain: 'gain',
     noPRs: 'No personal records yet.',
+  },
+
+  bodyComp: {
+    title: 'Body Composition',
+    period30: '30d',
+    period90: '90d',
+    period180: '180d',
+    metrics: {
+      weight: 'Weight',
+      waist: 'Waist',
+      hips: 'Hips',
+      chest: 'Chest',
+      arms: 'Arms',
+    },
+    noData: 'No measurements',
+    addMeasurement: 'Add measurement',
   },
 
   trainingSplit: {
@@ -847,6 +897,14 @@ export const en: typeof fr = {
       title: 'Similar exercises practiced',
       sets: 'sets',
       noAlternatives: 'No alternatives found',
+    },
+    repMax: {
+      title: '1RM Estimate',
+      estimated1RM: 'Estimated 1RM',
+      estimated3RM: '3RM',
+      estimated5RM: '5RM',
+      bestSet: 'Best set: {weight} kg × {reps}',
+      disclaimer: 'Epley + Brzycki average (reps ≤ 15)',
     },
   },
 
@@ -1624,4 +1682,67 @@ export const en: typeof fr = {
     noData: 'Not trained',
   },
 
-} as const
+  restTime: {
+    title: 'Rest Time',
+    globalAverage: 'Average rest',
+    average: 'Average',
+    samples: 'samples',
+    recommendations: {
+      short: 'Short',
+      optimal: 'Optimal',
+      long: 'Long',
+    },
+    noData: 'Not enough data yet to analyze rest times.',
+  },
+
+  volumeForecast: {
+    title: 'Volume Forecast',
+    nextWeek: 'Next week',
+    thisWeek: 'This week',
+    trend: 'Trend',
+    trends: {
+      increasing: 'Increasing',
+      decreasing: 'Decreasing',
+      stable: 'Stable',
+    },
+    perWeek: 'per week',
+    weeklyHistory: 'Weekly history',
+    predicted: 'Projected',
+    monthlyPace: 'Monthly pace',
+    thisMonth: 'This month',
+    projected: 'Projected',
+    monthlyAvg: 'Monthly avg',
+    noData: 'At least 4 weeks of data are needed to generate a forecast.',
+  },
+
+  volumeDistribution: {
+    title: 'Distribution by muscle',
+    balance: 'Balance score',
+    totalVolume: 'Total volume',
+    dominant: 'Dominant',
+    weakest: 'Weakest',
+    noData: 'Not enough data yet to analyze volume distribution.',
+    periods: {
+      week: '7d',
+      month: '30d',
+      quarter: '90d',
+      all: 'All',
+    },
+  },
+
+  monthlyProgress: {
+    title: 'Monthly Progress',
+    volume: 'Volume',
+    sessions: 'Sessions',
+    prs: 'PRs',
+    activeDays: 'Active Days',
+    setsTotal: 'Sets',
+    avgPerWeek: 'Sessions / wk',
+    topExercise: 'Top Exercise',
+    trendUp: 'Volume is up',
+    trendDown: 'Volume is down',
+    trendStable: 'Volume is stable',
+    noData: 'No data for this month.',
+  },
+
+}
