@@ -321,6 +321,14 @@ export const fr = {
       daysLeft: 'jours restants',
       completed: 'Objectifs atteints !',
     },
+    lastWorkout: {
+      title: 'Dernière séance',
+      duration: 'Durée',
+      volume: 'Volume',
+      sets: 'Séries',
+      prs: 'PR(s) battus !',
+      noSession: 'Aucune séance récente.',
+    },
     milestones: {
       title: 'Jalons de streak',
       streak: 'de suite',

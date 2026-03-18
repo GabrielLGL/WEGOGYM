@@ -321,6 +321,14 @@ export const en: typeof fr = {
       daysLeft: 'days left',
       completed: 'Goals achieved!',
     },
+    lastWorkout: {
+      title: 'Last workout',
+      duration: 'Duration',
+      volume: 'Volume',
+      sets: 'Sets',
+      prs: 'PR(s) hit!',
+      noSession: 'No recent session.',
+    },
     milestones: {
       title: 'Streak milestones',
       streak: 'in a row',

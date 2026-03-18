@@ -62,6 +62,9 @@ import DeloadRecommendationCard from '../components/DeloadRecommendationCard'
 import { computeDeloadRecommendation } from '../model/utils/deloadHelpers'
 import { computeFatigueIndex } from '../model/utils/fatigueIndexHelpers'
 import type { FatigueResult } from '../model/utils/fatigueIndexHelpers'
+import { computeMuscleRecovery, getRecoveryColor } from '../model/utils/muscleRecoveryHelpers'
+import { computeReadiness } from '../model/utils/workoutReadinessHelpers'
+import type { ReadinessResult, ReadinessLevel } from '../model/utils/workoutReadinessHelpers'
 import { computeFlashback } from '../model/utils/flashbackHelpers'
 import type { FlashbackData } from '../model/utils/flashbackHelpers'
 import { computeMotivation } from '../model/utils/motivationHelpers'
@@ -72,10 +75,25 @@ import { computeAthleteClass } from '../model/utils/athleteClassHelpers'
 import { computeExerciseOfWeek } from '../model/utils/exerciseOfWeekHelpers'
 import { useModalState } from '../hooks/useModalState'
 import { BottomSheet } from '../components/BottomSheet'
-import { computeTrainingCalendar } from '../model/utils/trainingCalendarHelpers'
+import { computeStreakHeatmap } from '../model/utils/streakHeatmapHelpers'
+import { computeStreakMilestones } from '../model/utils/streakMilestonesHelpers'
+import { computeWeeklyGoals } from '../model/utils/weeklyGoalsHelpers'
+import { computeRestSuggestion } from '../model/utils/restDaySuggestionsHelpers'
+import { computeWorkoutSummary } from '../model/utils/workoutSummaryHelpers'
+import type { WorkoutSummary } from '../model/utils/workoutSummaryHelpers'
+import Program from '../model/models/Program'
 
 const DEFAULT_STATUS_BAR_HEIGHT = 44
 const DAY_CHIP_MIN_HEIGHT = 84
+
+function getHeatmapColor(intensity: 0 | 1 | 2 | 3, colors: ThemeColors): string {
+  switch (intensity) {
+    case 0: return colors.card
+    case 1: return '#2D6A4F'
+    case 2: return '#40916C'
+    case 3: return '#52B788'
+  }
+}
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
@@ -477,17 +495,104 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
   )
   const exerciseModal = useModalState()
 
-  // ── Training Heatmap ──
-  const calendarWeeks = useMemo(
-    () => computeTrainingCalendar(histories, sets, 12),
-    [histories, sets],
+  // ── Streak Heatmap ──
+  const heatmapData = useMemo(
+    () => computeStreakHeatmap(histories),
+    [histories],
   )
+
+  // ── Streak Milestones ──
+  const milestonesData = useMemo(() => {
+    const mapped = histories.map(h => ({ startedAt: h.startTime, isAbandoned: h.isAbandoned }))
+    return computeStreakMilestones(mapped, t.home.milestones.labels as unknown as Record<number, string>)
+  }, [histories, t.home.milestones.labels])
 
   // ── Fatigue Index ──
   const fatigueResult = useMemo<FatigueResult | null>(() => {
     if (!sets.length) return null
     return computeFatigueIndex(sets, histories)
   }, [sets, histories])
+
+  // ── Weekly Goals ──
+  const weeklyGoals = useMemo(() => {
+    const mappedHistories = histories.map(h => ({
+      id: h.id,
+      startTime: h.startTime,
+      deletedAt: h.deletedAt,
+      isAbandoned: h.isAbandoned,
+    }))
+    const mappedSets = sets.map(s => ({
+      weight: s.weight,
+      reps: s.reps,
+      historyId: s.history.id,
+    }))
+    return computeWeeklyGoals(mappedHistories, mappedSets, language)
+  }, [histories, sets, language])
+
+  // ── Muscle Recovery ──
+  const recoveryEntries = useMemo(() => {
+    if (!sets.length || !exercises.length) return []
+    const mappedSets = sets.map(s => ({
+      weight: s.weight,
+      reps: s.reps,
+      exerciseId: s.exerciseId,
+      createdAt: s.createdAt,
+    }))
+    const mappedExercises = exercises.map(e => ({
+      id: e.id,
+      muscles: e.muscles,
+    }))
+    return computeMuscleRecovery(mappedSets, mappedExercises)
+  }, [sets, exercises])
+
+  // ── Workout Readiness ──
+  const readinessData = useMemo<ReadinessResult | null>(() => {
+    if (!sets.length) return null
+    const mappedSets = sets.map(s => ({ weight: s.weight, reps: s.reps, exerciseId: s.exerciseId, createdAt: s.createdAt }))
+    const mappedExercises = exercises.map(e => ({ id: e.id, muscles: e.muscles }))
+    const mappedHistories = histories.map(h => ({ startedAt: h.startTime, isAbandoned: h.isAbandoned }))
+    return computeReadiness(mappedSets, mappedExercises, mappedHistories)
+  }, [sets, exercises, histories])
+
+  // ── Rest Suggestion ──
+  const restSuggestion = useMemo(() => {
+    if (!histories.length) return null
+    const mappedHistories = histories.map(h => ({ startedAt: h.startTime, isAbandoned: h.isAbandoned }))
+    const mappedSets = sets.map(s => ({ weight: s.weight, reps: s.reps, exerciseId: s.exerciseId, createdAt: s.createdAt }))
+    const mappedExercises = exercises.map(e => ({ id: e.id, muscles: e.muscles }))
+    return computeRestSuggestion(mappedHistories, mappedSets, mappedExercises)
+  }, [histories, sets, exercises])
+
+  // ── Last Workout Summary ──
+  const [programs, setPrograms] = useState<Array<{ id: string; name: string }>>([])
+  useEffect(() => {
+    let cancelled = false
+    database.get<Program>('programs').query().fetch().then(progs => {
+      if (!cancelled) setPrograms(progs.map(p => ({ id: p.id, name: p.name })))
+    })
+    return () => { cancelled = true }
+  }, [sessions])
+
+  const lastWorkout = useMemo<WorkoutSummary | null>(() => {
+    if (!histories.length || !sets.length) return null
+    const mappedHistories = histories.map(h => ({
+      id: h.id,
+      startedAt: h.startTime,
+      completedAt: h.endTime,
+      isAbandoned: h.isAbandoned,
+      sessionId: h.sessionId,
+    }))
+    const mappedSets = sets.map(s => ({
+      weight: s.weight,
+      reps: s.reps,
+      exerciseId: s.exerciseId,
+      historyId: s.historyId,
+      isPr: s.isPr,
+    }))
+    const mappedExercises = exercises.map(e => ({ id: e.id, name: e.name }))
+    const mappedSessions = sessions.map(s => ({ id: s.id, name: s.name, programId: s.programId }))
+    return computeWorkoutSummary(mappedHistories, mappedSets, mappedExercises, mappedSessions, programs, language)
+  }, [histories, sets, exercises, sessions, programs, language])
 
   const handleTilePress = (tile: Tile) => {
     haptics.onPress()
@@ -579,59 +684,144 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         </TouchableOpacity>
       </View>
 
-      {/* ── Calendrier Heatmap ── */}
-      <View style={styles.heatmapSection}>
-        <Text style={styles.heatmapTitle}>{t.home.heatmap.title}</Text>
-        <View style={styles.heatmapGrid}>
-          {calendarWeeks.map((week, wi) => (
-            <View key={wi} style={styles.heatmapColumn}>
-              {week.days.map((day, di) => (
-                <View
-                  key={di}
-                  style={[
-                    styles.heatmapCell,
-                    {
-                      backgroundColor: day.intensity === 0
-                        ? colors.cardSecondary
-                        : day.intensity === 1
-                          ? colors.primary + '33'
-                          : day.intensity === 2
-                            ? colors.primary + '66'
-                            : day.intensity === 3
-                              ? colors.primary + '99'
-                              : colors.primary,
-                    },
-                    day.isToday && styles.heatmapCellToday,
-                  ]}
-                />
-              ))}
+      {/* ── Streak Heatmap ── */}
+      {heatmapData.totalWorkouts > 0 && (
+        <View style={styles.heatmapSection}>
+          <View style={styles.heatmapHeader}>
+            <Text style={styles.heatmapTitle}>{t.home.heatmap.title}</Text>
+            <View style={styles.heatmapStats}>
+              <Text style={styles.heatmapSubtitle}>
+                {heatmapData.activeDays} {t.home.heatmap.activeDays}
+              </Text>
+              {heatmapData.currentStreak > 0 && (
+                <Text style={styles.heatmapSubtitle}>
+                  {t.home.heatmap.streak} {heatmapData.currentStreak}j
+                </Text>
+              )}
             </View>
-          ))}
+          </View>
+          <View style={styles.heatmapGrid}>
+            {Array.from({ length: 13 }, (_, wi) => (
+              <View key={wi} style={styles.heatmapColumn}>
+                {heatmapData.days.slice(wi * 7, wi * 7 + 7).map((day, di) => (
+                  <View
+                    key={di}
+                    style={[
+                      styles.heatmapCell,
+                      { backgroundColor: getHeatmapColor(day.intensity, colors) },
+                      day.isToday && styles.heatmapCellToday,
+                    ]}
+                  />
+                ))}
+              </View>
+            ))}
+          </View>
+          <View style={styles.heatmapLegend}>
+            <Text style={styles.heatmapLegendText}>{t.home.heatmap.less}</Text>
+            {([0, 1, 2, 3] as const).map(i => (
+              <View
+                key={i}
+                style={[
+                  styles.heatmapLegendCell,
+                  { backgroundColor: getHeatmapColor(i, colors) },
+                ]}
+              />
+            ))}
+            <Text style={styles.heatmapLegendText}>{t.home.heatmap.more}</Text>
+          </View>
         </View>
-        <View style={styles.heatmapLegend}>
-          <Text style={styles.heatmapLegendText}>{t.home.heatmap.less}</Text>
-          {[0, 1, 2, 3, 4].map(i => (
-            <View
-              key={i}
-              style={[
-                styles.heatmapLegendCell,
-                {
-                  backgroundColor: i === 0
-                    ? colors.cardSecondary
-                    : i === 1
-                      ? colors.primary + '33'
-                      : i === 2
-                        ? colors.primary + '66'
-                        : i === 3
-                          ? colors.primary + '99'
-                          : colors.primary,
-                },
-              ]}
-            />
-          ))}
-          <Text style={styles.heatmapLegendText}>{t.home.heatmap.more}</Text>
+      )}
+
+      {/* ── Streak Milestones ── */}
+      {milestonesData.currentStreak > 0 && (
+        <View style={styles.milestonesCard}>
+          <View style={styles.milestonesHeader}>
+            <Text style={styles.milestonesTitle}>{t.home.milestones.title}</Text>
+            <Text style={styles.milestonesStreak}>
+              {milestonesData.currentStreak}j {t.home.milestones.streak}
+            </Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.milestonesScroll}>
+            {milestonesData.milestones.map(m => (
+              <View key={m.days} style={[
+                styles.milestoneBadge,
+                { backgroundColor: m.reached ? colors.primary : colors.background,
+                  opacity: m.reached ? 1 : 0.4 },
+              ]}>
+                <Text style={styles.milestoneIcon}>{m.icon}</Text>
+                <Text style={[styles.milestoneDays, { color: m.reached ? colors.primaryText : colors.textSecondary }]}>
+                  {m.days}j
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+          {milestonesData.nextMilestone && (
+            <View style={styles.nextMilestoneRow}>
+              <View style={styles.nextMilestoneBarTrack}>
+                <View style={[styles.nextMilestoneBarFill, {
+                  width: `${milestonesData.progressToNext}%`,
+                }]} />
+              </View>
+              <Text style={styles.nextMilestoneLabel}>
+                {milestonesData.daysToNext}j → {milestonesData.nextMilestone.label}
+              </Text>
+            </View>
+          )}
         </View>
-      </View>
+      )}
+
+      {/* ── Readiness Score ── */}
+      {readinessData && (() => {
+        const getReadinessLevel = (v: number): ReadinessLevel => {
+          if (v >= 80) return 'optimal'
+          if (v >= 60) return 'good'
+          if (v >= 40) return 'moderate'
+          return 'low'
+        }
+        const getReadinessColor = (level: ReadinessLevel) => {
+          switch (level) {
+            case 'optimal': return colors.primary
+            case 'good': return '#10B981'
+            case 'moderate': return '#F59E0B'
+            case 'low': return colors.danger
+          }
+        }
+        const levelColor = getReadinessColor(readinessData.level)
+        const ReadinessBar = ({ label, value }: { label: string; value: number }) => (
+          <View style={styles.readinessBarRow}>
+            <Text style={styles.readinessBarLabel}>{label}</Text>
+            <View style={styles.readinessBarBg}>
+              <View style={[styles.readinessBarFill, { width: `${value}%`, backgroundColor: getReadinessColor(getReadinessLevel(value)) }]} />
+            </View>
+            <Text style={styles.readinessBarValue}>{value}</Text>
+          </View>
+        )
+        return (
+          <View style={styles.readinessCard}>
+            <View style={styles.readinessHeader}>
+              <Ionicons name="fitness-outline" size={20} color={levelColor} />
+              <Text style={styles.readinessTitle}>{t.home.readiness.title}</Text>
+            </View>
+            <View style={styles.readinessScoreContainer}>
+              <Text style={[styles.readinessScore, { color: levelColor }]}>
+                {readinessData.score}
+              </Text>
+              <Text style={styles.readinessMax}>/100</Text>
+            </View>
+            <Text style={[styles.readinessLevel, { color: levelColor }]}>
+              {t.home.readiness.levels[readinessData.level]}
+            </Text>
+            <View style={styles.readinessComponents}>
+              <ReadinessBar label={t.home.readiness.recovery} value={readinessData.components.recovery} />
+              <ReadinessBar label={t.home.readiness.fatigue} value={readinessData.components.fatigue} />
+              <ReadinessBar label={t.home.readiness.consistency} value={readinessData.components.consistency} />
+            </View>
+            <Text style={styles.readinessRec}>
+              {t.home.readiness.recommendations[readinessData.level]}
+            </Text>
+          </View>
+        )
+      })()}
 
       {/* ── Indice de fatigue ── */}
       {fatigueResult && fatigueResult.weeklyVolume > 0 && (() => {
@@ -678,6 +868,144 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
           </View>
         )
       })()}
+
+      {/* ── Weekly Goals ── */}
+      <View style={styles.goalsCard}>
+        <View style={styles.goalsHeader}>
+          <Text style={styles.goalsTitle}>{t.home.weeklyGoals.title}</Text>
+          <Text style={styles.goalsWeekLabel}>
+            {weeklyGoals.completed
+              ? t.home.weeklyGoals.completed
+              : `${weeklyGoals.daysRemaining} ${t.home.weeklyGoals.daysLeft}`}
+          </Text>
+        </View>
+        {/* Sessions */}
+        <View style={styles.goalRow}>
+          <Text style={styles.goalLabel}>{t.home.weeklyGoals.sessions}</Text>
+          <Text style={styles.goalValue}>{weeklyGoals.sessionsCount}/{weeklyGoals.sessionsTarget}</Text>
+        </View>
+        <View style={styles.goalBarTrack}>
+          <View style={[
+            styles.goalBarFill,
+            {
+              width: `${weeklyGoals.sessionsPct}%`,
+              backgroundColor: weeklyGoals.sessionsPct >= 100 ? '#10B981' : colors.primary,
+            },
+          ]} />
+        </View>
+        {/* Volume */}
+        <View style={styles.goalRow}>
+          <Text style={styles.goalLabel}>{t.home.weeklyGoals.volume}</Text>
+          <Text style={styles.goalValue}>
+            {weeklyGoals.volumeKg >= 1000
+              ? `${(weeklyGoals.volumeKg / 1000).toFixed(1)}t`
+              : `${weeklyGoals.volumeKg} kg`}
+            {' / '}
+            {weeklyGoals.volumeTarget >= 1000
+              ? `${(weeklyGoals.volumeTarget / 1000).toFixed(0)}t`
+              : `${weeklyGoals.volumeTarget} kg`}
+          </Text>
+        </View>
+        <View style={styles.goalBarTrack}>
+          <View style={[
+            styles.goalBarFill,
+            {
+              width: `${weeklyGoals.volumePct}%`,
+              backgroundColor: weeklyGoals.volumePct >= 100 ? '#10B981' : colors.primary,
+            },
+          ]} />
+        </View>
+      </View>
+
+      {/* ── Last Workout Summary ── */}
+      {lastWorkout && (
+        <View style={styles.lastWorkoutCard}>
+          <View style={styles.lastWorkoutHeader}>
+            <Text style={styles.lastWorkoutTitle}>{t.home.lastWorkout.title}</Text>
+            <Text style={styles.lastWorkoutTime}>{lastWorkout.timeAgo}</Text>
+          </View>
+          <Text style={styles.lastWorkoutSession}>
+            {lastWorkout.sessionName}
+            {lastWorkout.programName && ` — ${lastWorkout.programName}`}
+          </Text>
+          <View style={styles.lastWorkoutStats}>
+            <View style={styles.lwStatItem}>
+              <Text style={styles.lwStatValue}>{lastWorkout.durationMinutes}m</Text>
+              <Text style={styles.lwStatLabel}>{t.home.lastWorkout.duration}</Text>
+            </View>
+            <View style={styles.lwStatItem}>
+              <Text style={styles.lwStatValue}>{(lastWorkout.totalVolume / 1000).toFixed(1)}t</Text>
+              <Text style={styles.lwStatLabel}>{t.home.lastWorkout.volume}</Text>
+            </View>
+            <View style={styles.lwStatItem}>
+              <Text style={styles.lwStatValue}>{lastWorkout.totalSets}</Text>
+              <Text style={styles.lwStatLabel}>{t.home.lastWorkout.sets}</Text>
+            </View>
+            <View style={styles.lwStatItem}>
+              <Text style={styles.lwStatValue}>{Math.round(lastWorkout.density)}</Text>
+              <Text style={styles.lwStatLabel}>kg/min</Text>
+            </View>
+          </View>
+          {lastWorkout.prsHit > 0 && (
+            <Text style={styles.lastWorkoutPRs}>
+              {lastWorkout.prsHit} {t.home.lastWorkout.prs}
+            </Text>
+          )}
+        </View>
+      )}
+
+      {/* ── Récupération musculaire ── */}
+      {recoveryEntries.length > 0 && (
+        <View style={styles.recoveryCard}>
+          <Text style={styles.recoveryTitle}>{t.home.recovery.title}</Text>
+          <View style={styles.recoveryGrid}>
+            {recoveryEntries.map(entry => {
+              const dotColor = getRecoveryColor(entry.status, colors)
+              return (
+                <View key={entry.muscle} style={styles.recoveryItem}>
+                  <View style={[styles.recoveryDot, { backgroundColor: dotColor }]} />
+                  <Text style={styles.recoveryMuscle} numberOfLines={1}>{entry.muscle}</Text>
+                  <Text style={[styles.recoveryPercent, { color: dotColor }]}>
+                    {entry.recoveryPercent}%
+                  </Text>
+                </View>
+              )
+            })}
+          </View>
+          <Text style={styles.recoveryDisclaimer}>{t.home.recovery.disclaimer}</Text>
+        </View>
+      )}
+
+      {/* ── Rest Suggestion ── */}
+      {restSuggestion && restSuggestion.shouldRest && (
+        <View style={[styles.restCard, {
+          borderLeftColor: restSuggestion.confidence === 'high' ? colors.danger
+            : restSuggestion.confidence === 'medium' ? '#F59E0B' : colors.textSecondary,
+        }]}>
+          <View style={styles.restHeader}>
+            <Text style={styles.restTitle}>{t.home.restSuggestion.title}</Text>
+            <View style={[styles.restConfidenceBadge, {
+              backgroundColor: restSuggestion.confidence === 'high' ? colors.danger
+                : restSuggestion.confidence === 'medium' ? '#F59E0B' : colors.textSecondary,
+            }]}>
+              <Text style={styles.restConfidenceText}>
+                {t.home.restSuggestion.confidence[restSuggestion.confidence]}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.restReason}>
+            {t.home.restSuggestion.reasons[restSuggestion.reason as keyof typeof t.home.restSuggestion.reasons]}
+          </Text>
+          <Text style={styles.restSuggestionText}>
+            {t.home.restSuggestion.suggestions[restSuggestion.suggestion as keyof typeof t.home.restSuggestion.suggestions]}
+          </Text>
+          {restSuggestion.musclesTired.length > 0 && (
+            <Text style={styles.restMuscles}>
+              {t.home.restSuggestion.tiredMuscles}: {restSuggestion.musclesTired.join(', ')}
+            </Text>
+          )}
+        </View>
+      )}
 
       {/* ── Quick-start ── */}
       {lastCompletedHistory && lastSessionName && (
@@ -1054,11 +1382,24 @@ function useStyles(colors: ThemeColors) {
       padding: spacing.md,
       marginBottom: spacing.md,
     },
+    heatmapHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
     heatmapTitle: {
       fontSize: fontSize.sm,
       fontWeight: '700',
       color: colors.text,
-      marginBottom: spacing.sm,
+    },
+    heatmapStats: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    heatmapSubtitle: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
     },
     heatmapGrid: {
       flexDirection: 'row',
@@ -1069,13 +1410,13 @@ function useStyles(colors: ThemeColors) {
       gap: 3,
     },
     heatmapCell: {
-      width: 14,
-      height: 14,
+      width: 18,
+      height: 18,
       borderRadius: 3,
     },
     heatmapCellToday: {
       borderWidth: 1.5,
-      borderColor: colors.primary,
+      borderColor: '#52B788',
     },
     heatmapLegend: {
       flexDirection: 'row',
@@ -1141,6 +1482,331 @@ function useStyles(colors: ThemeColors) {
       color: colors.placeholder,
       fontStyle: 'italic',
       textAlign: 'center',
+    },
+    // Recovery Card
+    recoveryCard: {
+      marginBottom: spacing.md,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+    },
+    recoveryTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    recoveryGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
+    },
+    recoveryItem: {
+      width: '48%',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      paddingVertical: spacing.xs,
+    },
+    recoveryDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    recoveryMuscle: {
+      flex: 1,
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+    },
+    recoveryPercent: {
+      fontSize: fontSize.caption,
+      fontWeight: '600',
+    },
+    recoveryDisclaimer: {
+      fontSize: fontSize.caption,
+      color: colors.placeholder,
+      fontStyle: 'italic',
+      textAlign: 'center',
+      marginTop: spacing.sm,
+    },
+    // Rest Suggestion Card
+    restCard: {
+      marginBottom: spacing.md,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      borderLeftWidth: 4,
+    },
+    restHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    restTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    restConfidenceBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: borderRadius.xs,
+    },
+    restConfidenceText: {
+      fontSize: fontSize.caption,
+      fontWeight: '600',
+      color: '#fff',
+    },
+    restReason: {
+      fontSize: fontSize.bodyMd,
+      color: colors.text,
+      marginBottom: spacing.xs,
+    },
+    restSuggestionText: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      fontStyle: 'italic',
+      marginBottom: spacing.xs,
+    },
+    restMuscles: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+    },
+    // Weekly Goals Card
+    goalsCard: {
+      marginBottom: spacing.md,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+    },
+    goalsHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.ms,
+    },
+    goalsTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    goalsWeekLabel: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+    },
+    goalRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.xs,
+      marginTop: spacing.sm,
+    },
+    goalLabel: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+    },
+    goalValue: {
+      fontSize: fontSize.xs,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    goalBarTrack: {
+      height: 6,
+      backgroundColor: colors.cardSecondary,
+      borderRadius: 3,
+      overflow: 'hidden',
+    },
+    goalBarFill: {
+      height: '100%',
+      borderRadius: 3,
+    },
+    // Readiness Card
+    readinessCard: {
+      marginBottom: spacing.md,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+    },
+    readinessHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    readinessTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    readinessScoreContainer: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      justifyContent: 'center',
+      marginBottom: spacing.xs,
+    },
+    readinessScore: {
+      fontSize: fontSize.jumbo,
+      fontWeight: '800',
+    },
+    readinessMax: {
+      fontSize: fontSize.md,
+      color: colors.placeholder,
+      marginLeft: spacing.xs,
+    },
+    readinessLevel: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      textAlign: 'center',
+      marginBottom: spacing.ms,
+    },
+    readinessComponents: {
+      gap: spacing.sm,
+      marginBottom: spacing.ms,
+    },
+    readinessBarRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    readinessBarLabel: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      width: 90,
+    },
+    readinessBarBg: {
+      flex: 1,
+      height: 8,
+      backgroundColor: colors.border,
+      borderRadius: borderRadius.xxs,
+      overflow: 'hidden',
+    },
+    readinessBarFill: {
+      height: 8,
+      borderRadius: borderRadius.xxs,
+    },
+    readinessBarValue: {
+      fontSize: fontSize.xs,
+      fontWeight: '600',
+      color: colors.text,
+      width: 28,
+      textAlign: 'right',
+    },
+    readinessRec: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      fontStyle: 'italic',
+      textAlign: 'center',
+    },
+    // Streak Milestones
+    milestonesCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+    },
+    milestonesHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: spacing.sm,
+    },
+    milestonesTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    milestonesStreak: {
+      fontSize: fontSize.caption,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    milestonesScroll: {
+      marginBottom: spacing.sm,
+    },
+    milestoneBadge: {
+      width: 48,
+      height: 48,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.sm,
+    },
+    milestoneIcon: {
+      fontSize: fontSize.lg,
+    },
+    milestoneDays: {
+      fontSize: fontSize.caption,
+      fontWeight: '600',
+    },
+    nextMilestoneRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    nextMilestoneBarTrack: {
+      flex: 1,
+      height: 6,
+      backgroundColor: colors.background,
+      borderRadius: borderRadius.xxs,
+      overflow: 'hidden' as const,
+    },
+    nextMilestoneBarFill: {
+      height: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.xxs,
+    },
+    nextMilestoneLabel: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+    },
+    // Last Workout Summary Card
+    lastWorkoutCard: {
+      marginBottom: spacing.md,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+    },
+    lastWorkoutHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: spacing.xs,
+    },
+    lastWorkoutTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    lastWorkoutTime: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+    },
+    lastWorkoutSession: {
+      fontSize: fontSize.bodyMd,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    lastWorkoutStats: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    lwStatItem: {
+      alignItems: 'center',
+    },
+    lwStatValue: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.primary,
+    },
+    lwStatLabel: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+    },
+    lastWorkoutPRs: {
+      fontSize: fontSize.caption,
+      color: '#10B981',
+      fontWeight: '600',
+      textAlign: 'center',
+      marginTop: spacing.sm,
     },
     // Quick-start Card
     quickStartCard: {
