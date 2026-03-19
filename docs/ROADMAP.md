@@ -13,10 +13,10 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 | Metrique | Valeur |
 |----------|--------|
-| Tests | 2220 (187 suites) |
+| Tests | 2230 (188 suites) |
 | Erreurs TS | 0 |
 | Score sante | 96/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
-| Ship score | 95/100 SHIP IT |
+| Ship score | 100/100 SHIP IT (20260319-1800) |
 | Tag MVP | `v0.1.0-mvp-20260319` |
 | Ecrans | 51 |
 | Helpers | 53 |
