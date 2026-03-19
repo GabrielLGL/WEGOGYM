@@ -321,7 +321,7 @@ const makeStyles = (colors: ThemeColors) =>
       fontWeight: '600',
     },
     toggleTextActive: {
-      color: '#FFFFFF',
+      color: colors.primaryText,
     },
     emptyContainer: {
       alignItems: 'center',

@@ -55,7 +55,7 @@ interface RowProps {
 
 const RankRow: React.FC<RowProps> = ({ entry, metric, colors, tAbove, tBelow }) => {
   const isTop3 = entry.rank <= 3
-  const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32']
+  const rankColors = [colors.gold, colors.silver, colors.bronze]
 
   const pctLabel = entry.pctFromAvg === 0
     ? null

@@ -23,7 +23,7 @@ import { useDeferredMount } from '../hooks/useDeferredMount'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const BAR_COLORS = ['#6C5CE7', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899']
+// BAR_COLORS moved to function using theme tokens
 
 interface PeriodOption {
   days: number | null
@@ -41,8 +41,8 @@ const PERIODS: PeriodOption[] = [
 
 function getBalanceColor(score: number, colors: ThemeColors): string {
   if (score >= 80) return colors.primary
-  if (score >= 60) return '#10B981'
-  if (score >= 40) return '#F59E0B'
+  if (score >= 60) return colors.success
+  if (score >= 40) return colors.amber
   return colors.danger
 }
 
@@ -68,7 +68,8 @@ export function StatsVolumeDistributionBase({ sets, exercises }: Props) {
   const periodLabels = t.volumeDistribution.periods
 
   const renderBar = ({ item, index }: { item: VolumeDistributionEntry; index: number }) => {
-    const barColor = BAR_COLORS[index % BAR_COLORS.length]
+    const barPalette = [colors.purple, colors.success, colors.amber, colors.pink, colors.blue]
+    const barColor = barPalette[index % barPalette.length]
     const maxPct = data.entries[0]?.percentage ?? 1
     const widthPct = maxPct > 0 ? (item.percentage / maxPct) * 100 : 0
 
@@ -113,7 +114,7 @@ export function StatsVolumeDistributionBase({ sets, exercises }: Props) {
                 onPress={() => setPeriodIndex(i)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.periodText, i === periodIndex && { color: '#FFFFFF' }]}>
+                <Text style={[styles.periodText, i === periodIndex && { color: colors.primaryText }]}>
                   {periodLabels[p.labelKey]}
                 </Text>
               </TouchableOpacity>

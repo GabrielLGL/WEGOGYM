@@ -4,6 +4,7 @@ const colors = {
   textSecondary: '#8E8E93',
   primary: '#007AFF',
   danger: '#FF3B30',
+  amber: '#F59E0B',
 }
 
 describe('computeSessionIntensity', () => {

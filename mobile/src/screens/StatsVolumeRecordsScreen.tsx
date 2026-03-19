@@ -25,7 +25,7 @@ import type { ThemeColors } from '../theme'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-const POSITIVE_COLOR = '#10B981'
+// Positive color uses colors.success from theme
 
 function formatVolume(kg: number): string {
   if (kg >= 1_000_000) return `${(kg / 1_000_000).toFixed(1)}M kg`
@@ -61,10 +61,12 @@ function getRecordIcon(type: VolumeRecord['type']): keyof typeof Ionicons.glyphM
   }
 }
 
-const TREND_ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-  up: { icon: 'trending-up', color: POSITIVE_COLOR },
-  down: { icon: 'trending-down', color: '#EF4444' },
-  stable: { icon: 'remove-outline', color: '#6B7280' },
+function getVolumeTrendIcon(trend: string, colors: ThemeColors): { icon: keyof typeof Ionicons.glyphMap; color: string } {
+  switch (trend) {
+    case 'up': return { icon: 'trending-up', color: colors.success }
+    case 'down': return { icon: 'trending-down', color: colors.negative }
+    default: return { icon: 'remove-outline', color: colors.neutralGray }
+  }
 }
 
 // ─── RecordCard ─────────────────────────────────────────────────────────────
@@ -105,7 +107,7 @@ function RecordCard({
       <View style={styles.recordBarTrack}>
         <View style={[styles.recordBarFill, {
           width: `${Math.min(record.percentOfRecord, 100)}%`,
-          backgroundColor: record.percentOfRecord >= 100 ? POSITIVE_COLOR : colors.primary,
+          backgroundColor: record.percentOfRecord >= 100 ? colors.success : colors.primary,
         }]} />
       </View>
       <Text style={styles.recordCurrent}>
@@ -143,7 +145,7 @@ export function StatsVolumeRecordsContent({ histories, sets }: Props) {
     )
   }
 
-  const trendInfo = TREND_ICONS[result.recentTrend]
+  const trendInfo = getVolumeTrendIcon(result.recentTrend, colors)
   const trendTexts = vr.trend
 
   return (
@@ -301,7 +303,7 @@ function useStyles(colors: ThemeColors) {
     newRecordBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: POSITIVE_COLOR,
+      backgroundColor: colors.success,
       borderRadius: borderRadius.xs,
       paddingHorizontal: spacing.sm,
       paddingVertical: 2,

@@ -25,15 +25,16 @@ import { useDeferredMount } from '../hooks/useDeferredMount'
 
 const DIFFICULTY_COLORS: Record<PersonalChallenge['difficulty'], string> = {
   easy: '',      // filled at render with colors.primary
-  medium: '#F59E0B',
+  medium: '',    // filled at render with colors.amber
   hard: '',      // filled at render with colors.danger
-  legendary: '#8B5CF6',
+  legendary: '',  // filled at render with colors.purple
 }
 
 function getDifficultyColor(difficulty: PersonalChallenge['difficulty'], colors: ThemeColors): string {
   if (difficulty === 'easy') return colors.primary
+  if (difficulty === 'medium') return colors.amber
   if (difficulty === 'hard') return colors.danger
-  return DIFFICULTY_COLORS[difficulty]
+  return colors.purple
 }
 
 // ─── Challenge Card ──────────────────────────────────────────────────────────

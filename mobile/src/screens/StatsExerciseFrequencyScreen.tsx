@@ -26,10 +26,12 @@ import type { ThemeColors } from '../theme'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const TREND_COLORS: Record<FrequencyTrend, string> = {
-  increasing: '#10B981',
-  decreasing: '#FF3B30',
-  stable: '',
+function getTrendColor(trend: FrequencyTrend, colors: ThemeColors): string {
+  switch (trend) {
+    case 'increasing': return colors.success
+    case 'decreasing': return colors.danger
+    case 'stable': return colors.textSecondary
+  }
 }
 
 const TREND_ICONS: Record<FrequencyTrend, string> = {
@@ -57,7 +59,7 @@ interface CardProps {
 
 function FrequencyCard({ entry, colors, lastDoneLabel, daysLabel }: CardProps) {
   const styles = useStyles(colors)
-  const trendColor = TREND_COLORS[entry.trend] || colors.textSecondary
+  const trendColor = getTrendColor(entry.trend, colors)
 
   return (
     <View style={styles.card}>
@@ -295,7 +297,7 @@ function useStyles(colors: ThemeColors) {
     countText: {
       fontSize: fontSize.sm,
       fontWeight: '700',
-      color: '#FFFFFF',
+      color: colors.primaryText,
     },
     cardInfo: {
       flex: 1,

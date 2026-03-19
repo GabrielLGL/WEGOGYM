@@ -325,7 +325,7 @@ function useStyles(colors: ThemeColors) {
     },
     abandonedText: {
       fontSize: fontSize.xs,
-      color: '#FFFFFF',
+      color: colors.primaryText,
       fontWeight: '600',
     },
     emptyContainer: {

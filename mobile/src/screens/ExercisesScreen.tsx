@@ -6,6 +6,8 @@ import withObservables from '@nozbe/with-observables'
 import { database } from '../model/index'
 import { Q } from '@nozbe/watermelondb'
 import Exercise from '../model/models/Exercise'
+import SetModel from '../model/models/Set'
+import { computeExerciseMastery } from '../model/utils/exerciseMasteryHelpers'
 import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -28,17 +30,25 @@ import { useLanguage } from '../contexts/LanguageContext'
 
 type ExercisesNavigation = NativeStackNavigationProp<RootStackParamList>
 
-interface Props { exercises: Exercise[] }
+interface Props { exercises: Exercise[]; sets: SetModel[] }
 
 interface ExerciseItemProps {
   item: Exercise
   onOptionsPress: (item: Exercise) => void
   onPress: (item: Exercise) => void
   colors: ThemeColors
+  masteryLevel?: number
+}
+
+function getMasteryColor(level: number, colors: ThemeColors): string {
+  if (level <= 2) return colors.textSecondary
+  if (level === 3) return colors.gold
+  if (level === 4) return colors.primary
+  return colors.purple
 }
 
 const ExerciseItem = memo<ExerciseItemProps>(
-  function ExerciseItem({ item, onOptionsPress, onPress, colors }) {
+  function ExerciseItem({ item, onOptionsPress, onPress, colors, masteryLevel }) {
     const styles = useExerciseItemStyles(colors)
     const { t } = useLanguage()
     const muscleNames = item.muscles?.map(m => t.muscleNames[m as keyof typeof t.muscleNames] ?? m) ?? []
@@ -46,7 +56,21 @@ const ExerciseItem = memo<ExerciseItemProps>(
     return (
       <TouchableOpacity style={styles.exoItem} onPress={() => onPress(item)} activeOpacity={0.7}>
         <View style={styles.exoInfo}>
-          <Text style={styles.exoTitle}>{item.name}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.exoTitle}>{item.name}</Text>
+            {masteryLevel != null && masteryLevel > 0 && (
+              <View style={styles.masteryBadge}>
+                {Array.from({ length: 5 }, (_, i) => (
+                  <Ionicons
+                    key={i}
+                    name={i < masteryLevel ? 'star' : 'star-outline'}
+                    size={10}
+                    color={i < masteryLevel ? getMasteryColor(masteryLevel, colors) : colors.border}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
           <Text style={styles.exoSubtitle}>{muscleNames.join(', ')} • {equipmentLabel}</Text>
         </View>
         {item.isCustom && (
@@ -60,7 +84,6 @@ const ExerciseItem = memo<ExerciseItemProps>(
       </TouchableOpacity>
     )
   },
-  // Comparateur custom : WatermelonDB mute les instances en place — on vérifie aussi les champs
   (prev, next) =>
     prev.item === next.item &&
     prev.item.name === next.item.name &&
@@ -68,16 +91,19 @@ const ExerciseItem = memo<ExerciseItemProps>(
     JSON.stringify(prev.item.muscles) === JSON.stringify(next.item.muscles) &&
     prev.onOptionsPress === next.onOptionsPress &&
     prev.onPress === next.onPress &&
-    prev.colors === next.colors,
+    prev.colors === next.colors &&
+    prev.masteryLevel === next.masteryLevel,
 )
 
-const ExercisesContent: React.FC<Props> = ({ exercises }) => {
+const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
   const colors = useColors()
   const styles = useStyles(colors)
   const navigation = useNavigation<ExercisesNavigation>()
   const haptics = useHaptics()
   const { t } = useLanguage()
   const slideAnim = useKeyboardAnimation(-200)
+
+  const masteryMap = useMemo(() => computeExerciseMastery(exercises, sets), [exercises, sets])
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   const { searchQuery, setSearchQuery, filterMuscle, setFilterMuscle, filterEquipment, setFilterEquipment, filteredExercises } = useExerciseFilters(exercises)
   const {
@@ -185,8 +211,8 @@ const ExercisesContent: React.FC<Props> = ({ exercises }) => {
   }, [infoSheetExercise, infoSheet, navigation])
 
   const renderExerciseItem = useCallback(({ item }: { item: Exercise }) => (
-    <ExerciseItem item={item} onOptionsPress={handleOptionsPress} onPress={handleRowPress} colors={colors} />
-  ), [handleOptionsPress, handleRowPress, colors])
+    <ExerciseItem item={item} onOptionsPress={handleOptionsPress} onPress={handleRowPress} colors={colors} masteryLevel={masteryMap.get(item.id)?.level} />
+  ), [handleOptionsPress, handleRowPress, colors, masteryMap])
 
   const renderSeparator = useCallback(() => <View style={styles.separator} />, [styles])
 
@@ -344,7 +370,9 @@ function useExerciseItemStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
     exoItem: { paddingVertical: spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     exoInfo: { flex: 1 },
+    titleRow: { flexDirection: 'row', alignItems: 'center' },
     exoTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: '600' },
+    masteryBadge: { flexDirection: 'row', gap: 1, marginLeft: spacing.xs },
     exoSubtitle: { color: colors.textSecondary, fontSize: fontSize.sm, marginTop: spacing.xs },
     moreBtn: { padding: spacing.sm },
     moreIcon: { color: colors.placeholder, fontSize: fontSize.lg, fontWeight: 'bold' },
@@ -396,7 +424,13 @@ function useStyles(colors: ThemeColors) {
 }
 
 const ObservableContent = withObservables([], () => ({
-  exercises: database.get<Exercise>('exercises').query(Q.sortBy('name', Q.asc)).observe()
+  exercises: database.get<Exercise>('exercises').query(Q.sortBy('name', Q.asc)).observe(),
+  sets: database.get<SetModel>('sets').query(
+    Q.on('histories', Q.and(
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+    )),
+  ).observe(),
 }))(ExercisesContent)
 
 const ExercisesScreen = () => {

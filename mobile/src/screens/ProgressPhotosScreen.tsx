@@ -507,7 +507,7 @@ function useStyles(colors: ThemeColors) {
     },
     thumbnailDate: {
       fontSize: fontSize.caption,
-      color: '#FFFFFF',
+      color: colors.primaryText,
       textAlign: 'center',
     },
     thumbnailBadge: {

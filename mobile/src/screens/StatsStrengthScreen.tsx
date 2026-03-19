@@ -28,12 +28,14 @@ import type { ThemeColors } from '../theme'
 
 // ─── Couleurs par niveau ──────────────────────────────────────────────────────
 
-const LEVEL_COLORS: Record<StrengthLevel, string> = {
-  beginner: '#9CA3AF',
-  novice: '#3B82F6',
-  intermediate: '#F59E0B',
-  advanced: '#EF4444',
-  elite: '#8B5CF6',
+function getLevelColor(level: StrengthLevel, colors: ThemeColors): string {
+  switch (level) {
+    case 'beginner': return colors.lightGray
+    case 'novice': return colors.blue
+    case 'intermediate': return colors.amber
+    case 'advanced': return colors.negative
+    case 'elite': return colors.purple
+  }
 }
 
 // ─── Composant LevelDots ──────────────────────────────────────────────────────
@@ -56,7 +58,7 @@ function LevelDots({ level, colors }: LevelDotsProps) {
             styles.dot,
             {
               backgroundColor: idx <= currentIdx
-                ? LEVEL_COLORS[level]
+                ? getLevelColor(level, colors)
                 : colors.cardSecondary,
             },
           ]}
@@ -105,7 +107,7 @@ function LiftCard({ result, bodyweight, colors }: LiftCardProps) {
             <>
               <View style={styles.levelRow}>
                 <LevelDots level={result.level} colors={colors} />
-                <Text style={[styles.levelLabel, { color: LEVEL_COLORS[result.level] }]}>
+                <Text style={[styles.levelLabel, { color: getLevelColor(result.level, colors) }]}>
                   {ss.levels[result.level]}
                 </Text>
               </View>

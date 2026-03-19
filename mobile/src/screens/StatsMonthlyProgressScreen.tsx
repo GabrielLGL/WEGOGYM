@@ -29,10 +29,8 @@ import type { ThemeColors } from '../theme'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-const POSITIVE_COLOR = '#10B981'
-
 function getDeltaColor(delta: number, colors: ThemeColors): string {
-  if (delta > 0) return POSITIVE_COLOR
+  if (delta > 0) return colors.success
   if (delta < 0) return colors.danger
   return colors.textSecondary
 }
@@ -96,10 +94,12 @@ function DeltaCard({
 
 // ─── TrendCard ──────────────────────────────────────────────────────────────
 
-const TREND_ICONS: Record<MonthlyTrend, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-  up: { icon: 'trending-up', color: POSITIVE_COLOR },
-  down: { icon: 'trending-down', color: '#EF4444' },
-  stable: { icon: 'remove-outline', color: '#6B7280' },
+function getTrendIcon(trend: MonthlyTrend, colors: ThemeColors): { icon: keyof typeof Ionicons.glyphMap; color: string } {
+  switch (trend) {
+    case 'up': return { icon: 'trending-up', color: colors.success }
+    case 'down': return { icon: 'trending-down', color: colors.negative }
+    case 'stable': return { icon: 'remove-outline', color: colors.neutralGray }
+  }
 }
 
 function TrendCard({
@@ -113,7 +113,7 @@ function TrendCard({
   colors: ThemeColors
   styles: ReturnType<typeof useStyles>
 }) {
-  const info = TREND_ICONS[trend]
+  const info = getTrendIcon(trend, colors)
   return (
     <View style={styles.trendCard}>
       <Ionicons name={info.icon} size={28} color={info.color} />

@@ -211,8 +211,8 @@ export function StatsDurationScreenBase({ histories }: Props) {
             <Text style={styles.recordLabel}>{t.statsDuration.records.average}</Text>
           </View>
           <View style={styles.recordCard}>
-            <Ionicons name="trophy-outline" size={18} color="#F59E0B" />
-            <Text style={[styles.recordValue, { color: '#F59E0B' }]}>{formatDuration(stats.maxMin)}</Text>
+            <Ionicons name="trophy-outline" size={18} color={colors.amber} />
+            <Text style={[styles.recordValue, { color: colors.amber }]}>{formatDuration(stats.maxMin)}</Text>
             <Text style={styles.recordLabel}>{t.statsDuration.records.longest}</Text>
           </View>
         </View>
@@ -573,7 +573,7 @@ function useStyles(colors: ThemeColors) {
     },
     longestBadgeText: {
       fontSize: fontSize.caption,
-      color: '#F59E0B',
+      color: colors.amber,
       fontWeight: '600',
     },
   }), [colors])

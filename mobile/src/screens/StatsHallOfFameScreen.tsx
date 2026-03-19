@@ -36,7 +36,14 @@ interface HallOfFameEntry {
 
 // ─── Medal colors ─────────────────────────────────────────────────────────────
 
-const MEDAL_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32'] as const
+function getMedalColor(rank: number, colors: ThemeColors): string {
+  switch (rank) {
+    case 1: return colors.gold
+    case 2: return colors.silver
+    case 3: return colors.bronze
+    default: return colors.textSecondary
+  }
+}
 
 // ─── Date formatting ──────────────────────────────────────────────────────────
 
@@ -66,7 +73,7 @@ interface RowProps {
 function HallOfFameRow({ entry, rank, colors, language, t, onPress }: RowProps) {
   const styles = useRowStyles(colors)
   const isMedal = rank <= 3
-  const medalColor = isMedal ? MEDAL_COLORS[rank - 1] : colors.textSecondary
+  const medalColor = getMedalColor(rank, colors)
 
   return (
     <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>

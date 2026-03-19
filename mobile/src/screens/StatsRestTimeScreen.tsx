@@ -25,10 +25,12 @@ import type { ThemeColors } from '../theme'
 
 // ─── Badge couleur ───────────────────────────────────────────────────────────
 
-const BADGE_COLORS: Record<RestRecommendation, string> = {
-  short: '#F59E0B',
-  optimal: '#10B981',
-  long: '#FF3B30',
+function getBadgeColor(rec: RestRecommendation, colors: ThemeColors): string {
+  switch (rec) {
+    case 'short': return colors.amber
+    case 'optimal': return colors.success
+    case 'long': return colors.danger
+  }
 }
 
 // ─── ExerciseCard ────────────────────────────────────────────────────────────
@@ -41,7 +43,7 @@ interface CardProps {
 
 function ExerciseRestCard({ entry, colors, labels }: CardProps) {
   const styles = useStyles(colors)
-  const badgeColor = BADGE_COLORS[entry.recommendation]
+  const badgeColor = getBadgeColor(entry.recommendation, colors)
 
   return (
     <View style={styles.card}>
@@ -209,7 +211,7 @@ function useStyles(colors: ThemeColors) {
     badgeText: {
       fontSize: fontSize.caption,
       fontWeight: '700',
-      color: '#FFFFFF',
+      color: colors.primaryText,
     },
     avgValue: {
       fontSize: fontSize.xl,

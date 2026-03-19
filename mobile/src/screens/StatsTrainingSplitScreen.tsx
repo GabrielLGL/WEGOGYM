@@ -22,17 +22,17 @@ import { useDeferredMount } from '../hooks/useDeferredMount'
 
 // ─── Couleurs par type de split ───────────────────────────────────────────────
 
-function getSplitColor(type: SplitType, primary: string, danger: string, textMuted: string): string {
+function getSplitColor(type: SplitType, colors: ThemeColors): string {
   switch (type) {
-    case 'push':     return primary
-    case 'pull':     return '#8B5CF6'
-    case 'legs':     return '#F59E0B'
-    case 'upper':    return primary
-    case 'lower':    return '#F59E0B'
-    case 'fullBody': return '#10B981'
-    case 'cardio':   return danger
-    case 'arms':     return '#EC4899'
-    case 'other':    return textMuted
+    case 'push':     return colors.primary
+    case 'pull':     return colors.purple
+    case 'legs':     return colors.amber
+    case 'upper':    return colors.primary
+    case 'lower':    return colors.amber
+    case 'fullBody': return colors.success
+    case 'cardio':   return colors.danger
+    case 'arms':     return colors.pink
+    case 'other':    return colors.placeholder
   }
 }
 
@@ -139,7 +139,7 @@ export function StatsTrainingSplitBase({ sets, exercises, histories }: Props) {
                 label={ts.types[type]}
                 count={analysis.distribution[type]}
                 total={total}
-                color={getSplitColor(type, colors.primary, colors.danger, colors.placeholder)}
+                color={getSplitColor(type, colors)}
                 sessionLabel={ts.sessions}
                 colors={colors}
               />
@@ -154,7 +154,7 @@ export function StatsTrainingSplitBase({ sets, exercises, histories }: Props) {
                 {days30.map(day => {
                   const splitType = sessionByDay.get(day)
                   const color = splitType
-                    ? getSplitColor(splitType, colors.primary, colors.danger, colors.placeholder)
+                    ? getSplitColor(splitType, colors)
                     : colors.cardSecondary
                   const dayNum = parseInt(day.slice(8, 10), 10)
                   return (
@@ -172,7 +172,7 @@ export function StatsTrainingSplitBase({ sets, exercises, histories }: Props) {
                 .filter(type => analysis.distribution[type] > 0)
                 .map(type => (
                   <View key={type} style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: getSplitColor(type, colors.primary, colors.danger, colors.placeholder) }]} />
+                    <View style={[styles.legendDot, { backgroundColor: getSplitColor(type, colors) }]} />
                     <Text style={styles.legendLabel}>{ts.types[type]}</Text>
                   </View>
                 ))}

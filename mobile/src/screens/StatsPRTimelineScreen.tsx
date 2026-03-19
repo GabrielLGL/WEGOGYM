@@ -20,8 +20,8 @@ import type { ThemeColors } from '../theme'
 
 // ─── Couleur par dot ──────────────────────────────────────────────────────────
 
-function getDotColor(entry: PRTimelineEntry, primaryColor: string): string {
-  return entry.previousPR === null ? '#F59E0B' : primaryColor
+function getDotColor(entry: PRTimelineEntry, colors: ThemeColors): string {
+  return entry.previousPR === null ? colors.amber : colors.primary
 }
 
 // ─── Composant TimelineItem ───────────────────────────────────────────────────
@@ -37,8 +37,8 @@ function TimelineItem({ entry, isLast, colors }: TimelineItemProps) {
   const styles = useStyles(colors)
   const pt = t.prTimeline
 
-  const dotColor = getDotColor(entry, colors.primary)
-  const gainColor = entry.previousPR === null ? '#F59E0B' : colors.primary
+  const dotColor = getDotColor(entry, colors)
+  const gainColor = entry.previousPR === null ? colors.amber : colors.primary
 
   const date = new Date(entry.date)
   const dateLabel = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })

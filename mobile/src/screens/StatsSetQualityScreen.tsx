@@ -34,9 +34,9 @@ const PERIOD_VALUES: Record<PeriodKey, number | null> = {
 
 function getGradeColor(grade: 'A' | 'B' | 'C' | 'D', colors: ThemeColors): string {
   switch (grade) {
-    case 'A': return '#10B981'
+    case 'A': return colors.success
     case 'B': return colors.primary
-    case 'C': return '#F59E0B'
+    case 'C': return colors.amber
     case 'D': return colors.danger
   }
 }
@@ -253,7 +253,7 @@ function useStyles(colors: ThemeColors) {
     overallGradeText: {
       fontSize: fontSize.xxl,
       fontWeight: '900',
-      color: '#FFFFFF',
+      color: colors.primaryText,
     },
     summaryScore: {
       fontSize: fontSize.xl,
@@ -325,7 +325,7 @@ function useStyles(colors: ThemeColors) {
     gradeText: {
       fontSize: fontSize.md,
       fontWeight: '900',
-      color: '#FFFFFF',
+      color: colors.primaryText,
     },
     metricsRow: {
       flexDirection: 'row',

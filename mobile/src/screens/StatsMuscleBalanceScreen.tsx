@@ -34,9 +34,12 @@ const PERIODS: PeriodOption[] = [
   { days: null, labelKey: 'all' },
 ]
 
-const STATUS_COLORS = {
-  balanced: '#10B981',
-  slight: '#F59E0B',
+function getStatusColor(status: string, colors: ThemeColors): string {
+  switch (status) {
+    case 'balanced': return colors.success
+    case 'slight': return colors.amber
+    default: return colors.danger
+  }
 }
 
 // ─── Pair names ─────────────────────────────────────────────────────────────
@@ -72,10 +75,8 @@ export function StatsMuscleBalanceBase({ sets, exercises }: Props) {
 
   const periodLabels = t.muscleBalance.periods
 
-  const getStatusColor = (status: MusclePair['status']): string => {
-    if (status === 'balanced') return STATUS_COLORS.balanced
-    if (status === 'slight') return STATUS_COLORS.slight
-    return colors.danger
+  const getPairStatusColor = (status: MusclePair['status']): string => {
+    return getStatusColor(status, colors)
   }
 
   const getStatusLabel = (status: MusclePair['status']): string => {
@@ -84,7 +85,7 @@ export function StatsMuscleBalanceBase({ sets, exercises }: Props) {
 
   const renderPair = ({ item }: { item: MusclePair }) => {
     const labels = getPairLabels(item.nameKey, t)
-    const statusColor = getStatusColor(item.status)
+    const statusColor = getPairStatusColor(item.status)
     const total = item.leftVolume + item.rightVolume
     const leftPct = total > 0 ? (item.leftVolume / total) * 100 : 50
     const rightPct = total > 0 ? (item.rightVolume / total) * 100 : 50
@@ -132,9 +133,9 @@ export function StatsMuscleBalanceBase({ sets, exercises }: Props) {
   }
 
   const scoreColor = data.overallBalance >= 80
-    ? '#10B981'
+    ? colors.success
     : data.overallBalance >= 60
-      ? '#F59E0B'
+      ? colors.amber
       : colors.danger
 
   return (
@@ -156,7 +157,7 @@ export function StatsMuscleBalanceBase({ sets, exercises }: Props) {
                 onPress={() => setPeriodIndex(i)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.periodText, i === periodIndex && { color: '#FFFFFF' }]}>
+                <Text style={[styles.periodText, i === periodIndex && { color: colors.primaryText }]}>
                   {periodLabels[p.labelKey]}
                 </Text>
               </TouchableOpacity>

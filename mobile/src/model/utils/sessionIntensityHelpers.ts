@@ -31,7 +31,7 @@ export function computeSessionIntensity(
   totalVolume: number,
   totalPrs: number,
   recapExercises: ExerciseForIntensity[],
-  colors: Pick<ThemeColors, 'textSecondary' | 'primary' | 'danger'>,
+  colors: Pick<ThemeColors, 'textSecondary' | 'primary' | 'danger' | 'amber'>,
 ): IntensityResult {
   // 1. volumeScore (0-33) : linéaire entre 500 kg et 10 000 kg
   const volumeScore =
@@ -68,7 +68,7 @@ export function computeSessionIntensity(
       : label === 'moderate'
         ? colors.primary
         : label === 'intense'
-          ? '#F59E0B'
+          ? colors.amber
           : colors.danger
 
   return { score, label, color, breakdown: { volumeScore, prScore, effortScore } }

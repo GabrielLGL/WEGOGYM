@@ -56,6 +56,30 @@ export const colors = {
 
   // Heatmap calendar intensity (index 0 = rest, 1-3 = activity levels)
   intensityColors: ['#252830', '#004d4a', '#007875', '#00cec9'] as [string, string, string, string],
+
+  // Status semantic
+  success: '#10B981',
+  amber: '#F59E0B',
+
+  // Medals
+  gold: '#FFD700',
+  silver: '#C0C0C0',
+  bronze: '#CD7F32',
+
+  // Data visualization palette
+  purple: '#8B5CF6',
+  pink: '#EC4899',
+  blue: '#3B82F6',
+  neutralGray: '#6B7280',
+  lightGray: '#9CA3AF',
+
+  // Heatmap intensity (HomeScreen weekly grid)
+  heatmap1: '#2D6A4F',
+  heatmap2: '#40916C',
+  heatmap3: '#52B788',
+
+  // Negative/error (distinct de danger pour data viz)
+  negative: '#EF4444',
 }
 
 /**
@@ -190,6 +214,30 @@ export const lightColors = {
 
   // Heatmap calendar intensity (index 0 = rest, 1-3 = activity levels)
   intensityColors: ['#c5cad2', '#c5bef6', '#9b90ed', '#6c5ce7'] as [string, string, string, string],
+
+  // Status semantic
+  success: '#059669',
+  amber: '#D97706',
+
+  // Medals
+  gold: '#FFD700',
+  silver: '#C0C0C0',
+  bronze: '#CD7F32',
+
+  // Data visualization palette
+  purple: '#7C3AED',
+  pink: '#DB2777',
+  blue: '#2563EB',
+  neutralGray: '#4B5563',
+  lightGray: '#6B7280',
+
+  // Heatmap intensity (HomeScreen weekly grid)
+  heatmap1: '#2D6A4F',
+  heatmap2: '#40916C',
+  heatmap3: '#52B788',
+
+  // Negative/error (distinct de danger pour data viz)
+  negative: '#DC2626',
 }
 
 /**

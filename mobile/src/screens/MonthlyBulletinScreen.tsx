@@ -29,7 +29,7 @@ import { formatVolume } from '../model/utils/statsHelpers'
 
 function getGradeColor(grade: GradePlus, colors: ThemeColors): string {
   if (grade === 'A+' || grade === 'A') return colors.primary
-  if (grade === 'B+' || grade === 'B') return '#34C759'
+  if (grade === 'B+' || grade === 'B') return colors.success
   if (grade === 'C+' || grade === 'C') return colors.warning
   return colors.danger
 }
