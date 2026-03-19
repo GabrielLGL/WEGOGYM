@@ -73,7 +73,7 @@ interface Props {
   histories: History[]
 }
 
-function StatsTrainingSplitBase({ sets, exercises, histories }: Props) {
+export function StatsTrainingSplitBase({ sets, exercises, histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()

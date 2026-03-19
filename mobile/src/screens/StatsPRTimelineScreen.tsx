@@ -81,7 +81,7 @@ interface Props {
   exercises: Exercise[]
 }
 
-function StatsPRTimelineBase({ sets, exercises }: Props) {
+export function StatsPRTimelineBase({ sets, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()

@@ -130,7 +130,7 @@ interface Props {
   exercises: Exercise[]
 }
 
-function StatsMonthlyProgressContent({ histories, sets, exercises }: Props) {
+export function StatsMonthlyProgressContent({ histories, sets, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t, language } = useLanguage()

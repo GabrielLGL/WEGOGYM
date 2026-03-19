@@ -11,10 +11,12 @@ import { Q } from '@nozbe/watermelondb'
 import { database } from '../model'
 import WorkoutSet from '../model/models/Set'
 import Exercise from '../model/models/Exercise'
+import History from '../model/models/History'
 import {
-  computeSetQuality,
-  type SetQualityEntry,
-} from '../model/utils/setQualityHelpers'
+  computeExerciseFrequency,
+  type ExerciseFrequencyEntry,
+  type FrequencyTrend,
+} from '../model/utils/exerciseFrequencyHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -24,65 +26,65 @@ import type { ThemeColors } from '../theme'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
+const TREND_COLORS: Record<FrequencyTrend, string> = {
+  increasing: '#10B981',
+  decreasing: '#FF3B30',
+  stable: '',
+}
+
+const TREND_ICONS: Record<FrequencyTrend, string> = {
+  increasing: '↑',
+  decreasing: '↓',
+  stable: '→',
+}
+
 type PeriodKey = '30' | '90' | '0'
 
-const PERIOD_VALUES: Record<PeriodKey, number | null> = {
+const PERIOD_VALUES: Record<PeriodKey, number> = {
   '30': 30,
   '90': 90,
-  '0': null,
+  '0': 0,
 }
 
-function getGradeColor(grade: 'A' | 'B' | 'C' | 'D', colors: ThemeColors): string {
-  switch (grade) {
-    case 'A': return '#10B981'
-    case 'B': return colors.primary
-    case 'C': return '#F59E0B'
-    case 'D': return colors.danger
-  }
-}
-
-// ─── QualityCard ──────────────────────────────────────────────────────────────
+// ─── ExerciseCard ─────────────────────────────────────────────────────────────
 
 interface CardProps {
-  entry: SetQualityEntry
+  entry: ExerciseFrequencyEntry
   colors: ThemeColors
-  labels: {
-    avgWeight: string
-    consistency: string
-    dropSets: string
-  }
+  lastDoneLabel: string
+  daysLabel: string
 }
 
-function QualityCard({ entry, colors, labels }: CardProps) {
+function FrequencyCard({ entry, colors, lastDoneLabel, daysLabel }: CardProps) {
   const styles = useStyles(colors)
+  const trendColor = TREND_COLORS[entry.trend] || colors.textSecondary
 
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
+        <View style={styles.countBadge}>
+          <Text style={styles.countText}>{entry.count}×</Text>
+        </View>
         <View style={styles.cardInfo}>
           <Text style={styles.exerciseName} numberOfLines={1}>
             {entry.exerciseName}
           </Text>
-          <Text style={styles.exerciseSets}>{entry.totalSets} sets</Text>
+          {entry.muscles.length > 0 && (
+            <Text style={styles.muscles} numberOfLines={1}>
+              {entry.muscles.join(', ')}
+            </Text>
+          )}
         </View>
-        <View style={[styles.gradeBadge, { backgroundColor: getGradeColor(entry.grade, colors) }]}>
-          <Text style={styles.gradeText}>{entry.grade}</Text>
-        </View>
+        <Text style={[styles.trendIcon, { color: trendColor }]}>
+          {TREND_ICONS[entry.trend]}
+        </Text>
       </View>
-      <View style={styles.metricsRow}>
-        <View style={styles.metricItem}>
-          <Text style={styles.metricValue}>{entry.avgWeight.toFixed(1)}kg</Text>
-          <Text style={styles.metricLabel}>{labels.avgWeight}</Text>
-        </View>
-        <View style={styles.metricItem}>
-          <Text style={styles.metricValue}>{entry.repConsistency}%</Text>
-          <Text style={styles.metricLabel}>{labels.consistency}</Text>
-        </View>
-        <View style={styles.metricItem}>
-          <Text style={styles.metricValue}>{entry.dropSetsDetected}</Text>
-          <Text style={styles.metricLabel}>{labels.dropSets}</Text>
-        </View>
-      </View>
+
+      {entry.daysSinceLastPerformed !== null && (
+        <Text style={styles.lastDone}>
+          {lastDoneLabel} {entry.daysSinceLastPerformed}{daysLabel}
+        </Text>
+      )}
     </View>
   )
 }
@@ -92,61 +94,40 @@ function QualityCard({ entry, colors, labels }: CardProps) {
 interface Props {
   sets: WorkoutSet[]
   exercises: Exercise[]
+  histories: History[]
 }
 
-export function StatsSetQualityBase({ sets, exercises }: Props) {
+export function StatsExerciseFrequencyBase({ sets, exercises, histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()
-  const sq = t.setQuality
+  const ef = t.exerciseFrequency
 
   const [period, setPeriod] = useState<PeriodKey>('30')
 
   const periodItems = ['30', '90', '0'] as const
 
   const periodLabelMap = useMemo<Record<string, string>>(() => ({
-    '30': sq.periods.month,
-    '90': sq.periods.quarter,
-    '0': sq.periods.all,
-  }), [sq])
-
-  const setsData = useMemo(() =>
-    sets.map(s => ({
-      weight: s.weight ?? 0,
-      reps: s.reps ?? 0,
-      exerciseId: s.exerciseId ?? '',
-      historyId: s.historyId ?? '',
-      createdAt: s.createdAt ?? 0,
-    })),
-    [sets],
-  )
-
-  const exercisesData = useMemo(() =>
-    exercises.map(e => ({ id: e.id, name: e.name ?? '' })),
-    [exercises],
-  )
+    '30': ef.periods.month,
+    '90': ef.periods.quarter,
+    '0': ef.periods.all,
+  }), [ef])
 
   const result = useMemo(
-    () => computeSetQuality(setsData, exercisesData, PERIOD_VALUES[period]),
-    [setsData, exercisesData, period],
+    () => computeExerciseFrequency(sets, exercises, histories, PERIOD_VALUES[period]),
+    [sets, exercises, histories, period],
   )
 
   if (!result) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>{sq.noData}</Text>
+        <Text style={styles.emptyText}>{ef.noData}</Text>
       </View>
     )
   }
 
-  const cardLabels = {
-    avgWeight: sq.avgWeight,
-    consistency: sq.consistency,
-    dropSets: sq.dropSets,
-  }
-
   return (
-    <FlatList<SetQualityEntry>
+    <FlatList<ExerciseFrequencyEntry>
       style={styles.container}
       contentContainerStyle={styles.content}
       data={result.entries}
@@ -166,38 +147,45 @@ export function StatsSetQualityBase({ sets, exercises }: Props) {
 
           {/* Summary card */}
           <View style={styles.summaryCard}>
-            <View style={[styles.overallGradeBadge, { backgroundColor: getGradeColor(result.overallGrade, colors) }]}>
-              <Text style={styles.overallGradeText}>{result.overallGrade}</Text>
-            </View>
-            <Text style={styles.summaryScore}>{result.overallScore}/100</Text>
-            <Text style={styles.summaryLabel}>{sq.overallScore}</Text>
+            <Text style={styles.summaryValue}>{result.totalExercisesUsed}</Text>
+            <Text style={styles.summaryLabel}>{ef.totalUsed}</Text>
 
             <View style={styles.summaryRow}>
-              {result.mostConsistent && (
+              {result.mostFrequent && (
                 <View style={styles.summaryItem}>
                   <Text style={styles.summaryItemValue} numberOfLines={1}>
-                    {result.mostConsistent}
+                    {result.mostFrequent.exerciseName}
                   </Text>
-                  <Text style={styles.summaryItemLabel}>{sq.mostConsistent}</Text>
+                  <Text style={styles.summaryItemLabel}>{ef.mostFrequent}</Text>
                 </View>
               )}
-              {result.leastConsistent && result.entries.length > 1 && (
+              {result.leastFrequent && result.entries.length > 1 && (
                 <View style={styles.summaryItem}>
                   <Text style={styles.summaryItemValue} numberOfLines={1}>
-                    {result.leastConsistent}
+                    {result.leastFrequent.exerciseName}
                   </Text>
-                  <Text style={styles.summaryItemLabel}>{sq.leastConsistent}</Text>
+                  <Text style={styles.summaryItemLabel}>{ef.leastFrequent}</Text>
                 </View>
               )}
             </View>
           </View>
+
+          {/* Neglected section */}
+          {result.neglected.length > 0 && (
+            <View style={styles.neglectedHeader}>
+              <Text style={styles.sectionTitle}>
+                {ef.neglected} ({result.neglected.length})
+              </Text>
+            </View>
+          )}
         </View>
       }
       renderItem={({ item }) => (
-        <QualityCard
+        <FrequencyCard
           entry={item}
           colors={colors}
-          labels={cardLabels}
+          lastDoneLabel={ef.lastDone}
+          daysLabel="j"
         />
       )}
       showsVerticalScrollIndicator={false}
@@ -242,22 +230,9 @@ function useStyles(colors: ThemeColors) {
       marginBottom: spacing.md,
       alignItems: 'center',
     },
-    overallGradeBadge: {
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: spacing.sm,
-    },
-    overallGradeText: {
-      fontSize: fontSize.xxl,
+    summaryValue: {
+      fontSize: fontSize.jumbo,
       fontWeight: '900',
-      color: '#FFFFFF',
-    },
-    summaryScore: {
-      fontSize: fontSize.xl,
-      fontWeight: '700',
       color: colors.text,
     },
     summaryLabel: {
@@ -288,6 +263,16 @@ function useStyles(colors: ThemeColors) {
       color: colors.placeholder,
       marginTop: 2,
     },
+    // Neglected
+    neglectedHeader: {
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    sectionTitle: {
+      fontSize: fontSize.md,
+      fontWeight: '700',
+      color: colors.text,
+    },
     // Cards
     card: {
       backgroundColor: colors.card,
@@ -299,7 +284,18 @@ function useStyles(colors: ThemeColors) {
     cardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: spacing.sm,
+    },
+    countBadge: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.xs,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      marginRight: spacing.sm,
+    },
+    countText: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      color: '#FFFFFF',
     },
     cardInfo: {
       flex: 1,
@@ -309,44 +305,20 @@ function useStyles(colors: ThemeColors) {
       fontWeight: '600',
       color: colors.text,
     },
-    exerciseSets: {
+    muscles: {
       fontSize: fontSize.caption,
       color: colors.textSecondary,
       marginTop: 2,
     },
-    gradeBadge: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      alignItems: 'center',
-      justifyContent: 'center',
+    trendIcon: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
       marginLeft: spacing.sm,
     },
-    gradeText: {
-      fontSize: fontSize.md,
-      fontWeight: '900',
-      color: '#FFFFFF',
-    },
-    metricsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      borderTopWidth: 1,
-      borderTopColor: colors.separator,
-      paddingTop: spacing.sm,
-    },
-    metricItem: {
-      alignItems: 'center',
-      flex: 1,
-    },
-    metricValue: {
-      fontSize: fontSize.sm,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    metricLabel: {
+    lastDone: {
       fontSize: fontSize.caption,
-      color: colors.textSecondary,
-      marginTop: 2,
+      color: colors.placeholder,
+      marginTop: spacing.xs,
     },
   }), [colors])
 }
@@ -361,18 +333,22 @@ const enhance = withObservables([], () => ({
     )),
   ).observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
+  histories: database.get<History>('histories').query(
+    Q.where('deleted_at', null),
+    Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+  ).observe(),
 }))
 
-const ObservableStatsSetQuality = enhance(StatsSetQualityBase)
+const ObservableStatsExerciseFrequency = enhance(StatsExerciseFrequencyBase)
 
-const StatsSetQualityScreen = () => {
+const StatsExerciseFrequencyScreen = () => {
   const colors = useColors()
   const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {mounted && <ObservableStatsSetQuality />}
+      {mounted && <ObservableStatsExerciseFrequency />}
     </View>
   )
 }
 
-export default StatsSetQualityScreen
+export default StatsExerciseFrequencyScreen
