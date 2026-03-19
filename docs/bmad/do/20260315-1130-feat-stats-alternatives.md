@@ -43,4 +43,4 @@ aucune
 ✅ Résolu — 20260315-1130
 
 ## Commit
-[sera rempli à l'étape 7]
+6590b77 feat(stats): exercise alternatives — similar exercises suggestions in history screen

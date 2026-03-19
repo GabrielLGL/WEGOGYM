@@ -81,3 +81,4 @@ aucune
 ✅ Résolu — 20260319-1200
 
 ## Commit
+5314f13 style(theme): replace 71 hardcoded hex colors with semantic theme tokens

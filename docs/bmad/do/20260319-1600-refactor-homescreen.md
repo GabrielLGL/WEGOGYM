@@ -53,4 +53,6 @@ aucune
 ✅ Résolu — 20260319-1600
 
 ## Commit
-[sera rempli après commit]
+5314f13 style(theme): replace 71 hardcoded hex colors with semantic theme tokens
+Note : fichiers embarqués dans le commit de l'autre Claude Code (couleurs hardcodées).
+Le refactoring HomeScreen est bien inclus dans ce commit.

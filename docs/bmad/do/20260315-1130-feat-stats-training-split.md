@@ -37,4 +37,4 @@ aucune
 ✅ Résolu — 20260315-1130
 
 ## Commit
-[à remplir]
+c51d94b feat(stats): training split analysis — auto-detect PPL/Upper-Lower/FullBody pattern

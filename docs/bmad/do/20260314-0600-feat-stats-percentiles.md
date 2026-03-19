@@ -34,4 +34,4 @@ aucune
 ✅ Résolu — 20260314-0600
 
 ## Commit
-[sera rempli]
+e086c84 feat(stats): estimated percentiles section in hexagon profile screen

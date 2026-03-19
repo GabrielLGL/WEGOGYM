@@ -38,3 +38,4 @@ aucune
 ✅ Résolu — 20260315-1200
 
 ## Commit
+6590b77 feat(stats): exercise alternatives (commit partagé avec agent B)

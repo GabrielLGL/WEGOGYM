@@ -38,4 +38,4 @@ aucune
 ✅ Résolu — 20260314-0620
 
 ## Commit
-[sera rempli à l'étape 7]
+dfc2288 feat(stats): exercise card screen — trophy profile with 1RM/tonnage/expertise + tap from Hall of Fame
