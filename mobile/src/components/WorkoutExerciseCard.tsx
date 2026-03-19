@@ -133,7 +133,13 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
             <Text style={styles.prBadge}>PR !</Text>
           </View>
         )}
-        <TouchableOpacity onPress={() => onUnvalidate(setOrder)} style={styles.undoBtn} testID="validate-btn">
+        <TouchableOpacity
+          onPress={() => onUnvalidate(setOrder)}
+          style={styles.undoBtn}
+          testID="validate-btn"
+          accessibilityRole="button"
+          accessibilityLabel={t.accessibility.unvalidateSet + ' ' + setOrder}
+        >
           <Ionicons name="arrow-undo-outline" size={14} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
@@ -162,6 +168,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           placeholderTextColor={colors.placeholder}
           keyboardType="numeric"
           textAlign="center"
+          accessibilityLabel={t.accessibility.weightInput + ', ' + t.accessibility.validateSet + ' ' + setOrder}
         />
         <Text style={styles.inputSuffix}>{t.statsMeasurements.weightUnit}</Text>
       </View>
@@ -174,6 +181,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           placeholderTextColor={colors.placeholder}
           keyboardType="numeric"
           textAlign="center"
+          accessibilityLabel={t.accessibility.repsInput + ', ' + t.accessibility.validateSet + ' ' + setOrder}
         />
         <Text style={styles.inputSuffix}>{t.workout.reps}</Text>
       </View>
@@ -184,6 +192,9 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           disabled={!valid}
           activeOpacity={0.7}
           testID="validate-btn"
+          accessibilityRole="button"
+          accessibilityLabel={t.accessibility.validateSet + ' ' + setOrder}
+          accessibilityState={{ disabled: !valid }}
         >
           <Ionicons name="checkmark" size={22} color={valid ? colors.primary : colors.border} />
         </TouchableOpacity>
@@ -293,9 +304,14 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
           style={styles.noteInput}
           autoFocus
           multiline
+          accessibilityLabel={t.workout.sessionNotePlaceholder}
         />
       ) : sessionExercise.notes ? (
-        <TouchableOpacity onPress={() => setIsEditingSessionNote(true)}>
+        <TouchableOpacity
+          onPress={() => setIsEditingSessionNote(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t.common.edit + ' ' + t.common.notes}
+        >
           <Text style={styles.noteText}>{sessionExercise.notes}</Text>
         </TouchableOpacity>
       ) : (
@@ -303,6 +319,8 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
           onPress={() => { haptics.onPress(); setIsEditingSessionNote(true) }}
           style={styles.addNoteButton}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={t.common.add + ' ' + t.common.notes}
         >
           <Ionicons name="create-outline" size={12} color={colors.primary} />
           <Text style={styles.addNoteLink}>{t.workout.addSessionNote}</Text>

@@ -191,10 +191,23 @@ const RestTimer: React.FC<Props> = ({
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY: animValue }] }]}>
-      <TouchableOpacity style={styles.content} onPress={closeTimer} activeOpacity={0.9}>
+      <TouchableOpacity
+        style={styles.content}
+        onPress={closeTimer}
+        activeOpacity={0.9}
+        accessibilityRole="button"
+        accessibilityLabel={t.accessibility.skipTimer}
+      >
         <View style={styles.left}>
           <Text style={styles.label}>{t.workout.restInProgress}</Text>
-          <Text style={[styles.timer, { color: timerColor }]}>{formatTime(timeLeft)}</Text>
+          <Text
+            style={[styles.timer, { color: timerColor }]}
+            accessibilityRole="timer"
+            accessibilityLabel={t.accessibility.restTimer + ': ' + formatTime(timeLeft)}
+            accessibilityLiveRegion="polite"
+          >
+            {formatTime(timeLeft)}
+          </Text>
         </View>
         <View style={styles.hintChip}>
           <Text style={styles.hint}>{t.workout.skipRest}</Text>

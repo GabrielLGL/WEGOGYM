@@ -104,4 +104,4 @@ accessibilityLabel={t.accessibility.skipTimer}
 Aucune — independant.
 
 ## Statut
-⏳ En attente
+✅ Résolu

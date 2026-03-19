@@ -251,6 +251,9 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                     haptics.onSelect()
                     setSelectedEmoji(prev => prev === emoji ? null : emoji)
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={emoji}
+                  accessibilityState={{ selected: selectedEmoji === emoji }}
                 >
                   <Text style={styles.emojiText}>{emoji}</Text>
                 </TouchableOpacity>
@@ -266,6 +269,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                   onChangeText={setGratitudeNote}
                   maxLength={120}
                   multiline
+                  accessibilityLabel={t.gratitude.placeholder}
                 />
                 <TouchableOpacity
                   style={styles.gratitudeSubmitBtn}
@@ -273,6 +277,8 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
                     haptics.onSuccess()
                     setGratitudeSubmitted(true)
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.common.validate}
                 >
                   <Text style={styles.gratitudeSubmitText}>{t.gratitude.save}</Text>
                 </TouchableOpacity>
@@ -506,6 +512,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
           placeholder={t.workoutSummary.notePlaceholder}
           placeholderTextColor={colors.placeholder}
           textAlignVertical="top"
+          accessibilityLabel={t.workoutSummary.notePlaceholder}
         />
 
         <Button

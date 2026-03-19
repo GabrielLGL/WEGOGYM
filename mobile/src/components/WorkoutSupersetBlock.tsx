@@ -68,7 +68,10 @@ const SupersetExerciseInfoContent: React.FC<SupersetExerciseInfoContentProps> = 
 
   return (
     <View style={styles.exerciseInfoRow}>
-      <View style={[styles.letterBadge, { borderColor: letterColor }]}>
+      <View
+        style={[styles.letterBadge, { borderColor: letterColor }]}
+        accessibilityLabel={t.accessibility.exerciseInSuperset + ' ' + letter}
+      >
         <Text style={[styles.letterBadgeText, { color: letterColor }]}>{letter}</Text>
       </View>
       <View style={styles.exerciseInfoContent}>
@@ -189,7 +192,10 @@ const SupersetSetRowWrapper = React.memo(function SupersetSetRowWrapper({
 
   return (
     <View style={styles.setRowWithLabel}>
-      <View style={[styles.setLetterBadge, { backgroundColor: letterColor + '20', borderColor: letterColor }]}>
+      <View
+        style={[styles.setLetterBadge, { backgroundColor: letterColor + '20', borderColor: letterColor }]}
+        accessibilityLabel={letter}
+      >
         <Text style={[styles.setLetterText, { color: letterColor }]}>{letter}</Text>
       </View>
       <View style={styles.setRowContent}>
@@ -243,7 +249,10 @@ export const WorkoutSupersetBlock: React.FC<WorkoutSupersetBlockProps> = ({
   return (
     <View style={[styles.block, neuShadow.elevated, { borderLeftColor: color }]}>
       {/* Header banner */}
-      <View style={[styles.blockHeader, { backgroundColor: color + '15' }]}>
+      <View
+        style={[styles.blockHeader, { backgroundColor: color + '15' }]}
+        accessibilityLabel={label + ' (' + count + ')'}
+      >
         <Ionicons name={icon} size={16} color={color} />
         <Text style={[styles.blockHeaderText, { color }]}>
           {label} ({count})

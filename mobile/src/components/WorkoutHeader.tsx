@@ -26,14 +26,17 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
   return (
     <View style={[styles.container, neuShadow.elevated]}>
       <View style={styles.row}>
-        <Text style={styles.timer}>{formattedTime}</Text>
-        <View style={styles.volumeBlock}>
+        <Text style={styles.timer} accessibilityRole="timer" accessibilityLabel={t.accessibility.workoutTimer + ': ' + formattedTime}>{formattedTime}</Text>
+        <View style={styles.volumeBlock} accessibilityLabel={t.accessibility.totalVolume + ': ' + totalVolume.toFixed(1) + ' kg'}>
           <Text style={styles.volumeValue}>{totalVolume.toFixed(1)}</Text>
           <Text style={styles.volumeUnit}>kg</Text>
         </View>
       </View>
 
-      <Text style={[styles.setsCounter, { color: completedSets > 0 ? colors.primary : colors.textSecondary }]}>
+      <Text
+        style={[styles.setsCounter, { color: completedSets > 0 ? colors.primary : colors.textSecondary }]}
+        accessibilityLabel={t.accessibility.completedSets + ': ' + completedSets + ' / ' + totalSetsTarget}
+      >
         {completedSets} / {totalSetsTarget} {t.workout.setsLabel}
       </Text>
 
