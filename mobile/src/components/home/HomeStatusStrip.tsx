@@ -111,6 +111,8 @@ export function HomeStatusStrip({ user, histories, sets, exercises }: HomeStatus
           style={styles.chip}
           onPress={() => { haptics.onSelect(); chip.onPress() }}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={chip.label}
         >
           <Text style={styles.chipIcon}>{chip.icon}</Text>
           <Text style={styles.chipLabel}>{chip.label}</Text>

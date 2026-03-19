@@ -189,6 +189,7 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
               placeholder={t.settings.profile.namePlaceholder}
               placeholderTextColor={colors.placeholder}
               maxLength={30}
+              accessibilityLabel={t.accessibility.nameInput}
             />
           </View>
 
@@ -197,6 +198,9 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
             style={styles.settingRow}
             onPress={toggleLevel}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t.accessibility.level}
+            accessibilityHint={t.accessibility.toggleExpand}
           >
             <View style={styles.settingInfo}>
               <View style={styles.settingLabelRow}>
@@ -235,6 +239,9 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
             style={[styles.settingRow, styles.settingRowLast]}
             onPress={toggleGoal}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t.accessibility.goal}
+            accessibilityHint={t.accessibility.toggleExpand}
           >
             <View style={styles.settingInfo}>
               <View style={styles.settingLabelRow}>
@@ -296,6 +303,9 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
               }}
               trackColor={{ false: colors.cardSecondary, true: colors.primary }}
               thumbColor={colors.switchThumb}
+              accessibilityRole="switch"
+              accessibilityLabel={t.accessibility.darkMode}
+              accessibilityState={{ checked: isDark }}
             />
           </View>
           {/* Langue */}
@@ -318,6 +328,9 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
                   await setLanguage(lang)
                 }}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={lang === 'fr' ? t.onboarding.language.fr : t.onboarding.language.en}
+                accessibilityState={{ selected: language === lang }}
               >
                 <Text style={[styles.languageBtnText, language === lang && styles.languageBtnTextActive]}>
                   {lang === 'fr' ? `\u{1F1EB}\u{1F1F7} ${t.onboarding.language.fr}` : `\u{1F1EC}\u{1F1E7} ${t.onboarding.language.en}`}

@@ -78,6 +78,9 @@ export function HomeWeeklyActivityCard({ histories, sets, sessions, weeklyCardRe
                 onPress={() => handleDayPress(day)}
                 activeOpacity={hasSessions ? 0.7 : 1}
                 disabled={!hasSessions}
+                accessibilityRole="button"
+                accessibilityLabel={`${day.dayLabel} ${day.dayNumber}`}
+                accessibilityState={{ disabled: !hasSessions }}
               >
                 <Text style={[styles.dayLabel, day.isToday && styles.dayLabelToday]}>
                   {day.dayLabel}

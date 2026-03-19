@@ -96,7 +96,13 @@ export function HomeHeroAction({ histories, sets, exercises, sessions, programs 
   return (
     <View style={styles.container}>
       {/* Hero Card */}
-      <TouchableOpacity style={styles.heroCard} onPress={handleGo} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={styles.heroCard}
+        onPress={handleGo}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={activeWorkout ? t.accessibility.resumeWorkout : t.accessibility.startWorkout}
+      >
         {activeWorkout ? (
           // State: Workout in progress
           <>
@@ -124,6 +130,8 @@ export function HomeHeroAction({ histories, sets, exercises, sessions, programs 
               style={[styles.heroBtn, { backgroundColor: colors.cardSecondary }]}
               onPress={handleGo}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t.accessibility.trainAnyway}
             >
               <Text style={[styles.heroBtnText, { color: colors.text }]}>{t.home.hero.trainAnyway}</Text>
             </TouchableOpacity>
@@ -160,6 +168,8 @@ export function HomeHeroAction({ histories, sets, exercises, sessions, programs 
             style={styles.pill}
             onPress={() => handleShortcut(s.route)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={s.label}
           >
             <Ionicons name={s.icon} size={16} color={colors.primary} />
             <Text style={styles.pillLabel} numberOfLines={1}>{s.label}</Text>

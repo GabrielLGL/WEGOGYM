@@ -98,7 +98,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
     <Portal>
       <View style={styles.container}>
         {/* Overlay sombre cliquable pour fermer */}
-        <TouchableWithoutFeedback onPress={handleCancel}>
+        <TouchableWithoutFeedback onPress={handleCancel} accessibilityRole="button" accessibilityLabel={t.accessibility.closeModal}>
           <Animated.View style={[styles.overlay, { opacity: fadeAnim }]} />
         </TouchableWithoutFeedback>
 
@@ -109,6 +109,8 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
             neuShadow.elevated,
             { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
           ]}
+          accessibilityRole="alert"
+          accessibilityLabel={title}
         >
           <Text style={styles.title}>{title}</Text>
 
@@ -121,6 +123,8 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
                 style={[styles.button, styles.cancelButton]}
                 onPress={handleCancel}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={cancelText}
               >
                 <Text style={styles.buttonText}>{cancelText}</Text>
               </TouchableOpacity>
@@ -130,6 +134,8 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
               style={[styles.button, { backgroundColor: effectiveConfirmColor }]}
               onPress={handleConfirm}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={confirmText}
             >
               <Text style={styles.confirmButtonText}>{confirmText}</Text>
             </TouchableOpacity>

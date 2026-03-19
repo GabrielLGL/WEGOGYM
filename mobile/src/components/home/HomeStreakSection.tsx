@@ -50,7 +50,14 @@ export function HomeStreakSection({ histories }: HomeStreakSectionProps) {
   return (
     <View style={styles.container}>
       {/* Collapsed header (always visible) */}
-      <TouchableOpacity style={styles.headerCard} onPress={handleToggle} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.headerCard}
+        onPress={handleToggle}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={t.accessibility.streak}
+        accessibilityHint={t.accessibility.toggleExpand}
+      >
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>{t.home.heatmap.title}</Text>
           <View style={styles.headerRight}>

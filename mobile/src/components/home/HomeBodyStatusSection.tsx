@@ -95,7 +95,14 @@ export function HomeBodyStatusSection({ sets, exercises, histories }: HomeBodySt
   return (
     <View style={styles.container}>
       {/* Compact summary (always visible) */}
-      <TouchableOpacity style={styles.summaryCard} onPress={handleToggle} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.summaryCard}
+        onPress={handleToggle}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={t.accessibility.bodyStatus}
+        accessibilityHint={t.accessibility.toggleExpand}
+      >
         <View style={styles.summaryContent}>
           {readinessData && (
             <View style={styles.summaryMetric}>

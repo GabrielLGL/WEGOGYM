@@ -51,6 +51,8 @@ export function HomeHeaderCard({ user, histories, sets, headerCardRef, settingsB
             haptics.onPress()
             navigation.navigate('Settings')
           }}
+          accessibilityRole="button"
+          accessibilityLabel={t.accessibility.settings}
         >
           <Ionicons name="settings-outline" size={22} color={colors.textSecondary} />
         </TouchableOpacity>

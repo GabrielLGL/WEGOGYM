@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated, Easing, Bac
 import { Portal } from '@gorhom/portal'
 import { borderRadius, spacing, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 
 const OVERLAY_FADE_IN = 200
@@ -52,6 +53,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   animationDuration = 250,
 }) => {
   const { colors, neuShadow } = useTheme()
+  const { t } = useLanguage()
   const styles = useStyles(colors)
   const { height: screenHeight } = useWindowDimensions()
   const [showContent, setShowContent] = useState(visible)
@@ -105,7 +107,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     <Portal>
       <View style={styles.container}>
         {/* Overlay semi-transparent cliquable pour fermer */}
-        <TouchableWithoutFeedback onPress={onClose}>
+        <TouchableWithoutFeedback onPress={onClose} accessibilityRole="button" accessibilityLabel={t.accessibility.closeModal}>
           <Animated.View style={[styles.overlay, { opacity: fadeAnim }]} />
         </TouchableWithoutFeedback>
 
@@ -116,6 +118,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             neuShadow.elevated,
             { transform: [{ translateY: slideAnim }] },
           ]}
+          accessibilityLabel={title}
         >
           {/* Handle de drag visuel */}
           <View style={styles.dragHandle} />

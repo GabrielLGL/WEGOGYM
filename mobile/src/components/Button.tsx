@@ -19,6 +19,8 @@ interface ButtonProps {
   textStyle?: TextStyle
   fullWidth?: boolean
   enableHaptics?: boolean // Désactiver les haptics si nécessaire (défaut: true)
+  accessibilityLabel?: string
+  accessibilityHint?: string
 }
 
 /**
@@ -59,6 +61,8 @@ export const Button: React.FC<ButtonProps> = ({
   textStyle,
   fullWidth = false,
   enableHaptics = true,
+  accessibilityLabel,
+  accessibilityHint,
 }) => {
   const { colors, neuShadow } = useTheme()
   const styles = useStyles(colors)
@@ -101,6 +105,10 @@ export const Button: React.FC<ButtonProps> = ({
       ].filter(Boolean)}
       onPress={handlePress}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? (typeof children === 'string' ? children : undefined)}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
     >
       {({ pressed }) => (
         <>
