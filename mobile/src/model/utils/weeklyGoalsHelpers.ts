@@ -69,8 +69,8 @@ export function computeWeeklyGoals(
     }
   }
 
-  const sessionsPct = Math.min(100, Math.round((sessionsCount / sessionsTarget) * 100))
-  const volumePct = Math.min(100, Math.round((volumeKg / volumeTarget) * 100))
+  const sessionsPct = sessionsTarget > 0 ? Math.min(100, Math.round((sessionsCount / sessionsTarget) * 100)) : 0
+  const volumePct = volumeTarget > 0 ? Math.min(100, Math.round((volumeKg / volumeTarget) * 100)) : 0
 
   // Days remaining (including today)
   const todayStart = new Date(now)

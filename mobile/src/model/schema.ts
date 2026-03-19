@@ -1,7 +1,7 @@
 /**
  * schema.ts — Schéma de la base de données WatermelonDB (SQLite)
  *
- * Version actuelle : 35
+ * Version actuelle : 38
  *
  * Tables et relations principales :
  * - programs          : Programmes d'entraînement (nom, position, équipement)

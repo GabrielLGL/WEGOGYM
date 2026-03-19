@@ -31,7 +31,7 @@ export function computeTrainingDensity(
   previousDuration?: number,
 ): DensityResult {
   const totalVolume = currentSets.reduce((sum, s) => sum + s.weight * s.reps, 0)
-  const elapsedMinutes = Math.max(1, (Date.now() - startTime) / 60000)
+  const elapsedMinutes = Math.max(1, Math.max(0, Date.now() - startTime) / 60000)
   const currentDensity = totalVolume / elapsedMinutes
 
   let previousDensity: number | null = null

@@ -21,9 +21,10 @@ interface SettingsWearableSectionProps {
   styles: SettingsStyles
 }
 
-function formatTimeAgo(timestamp: number | null, t: ReturnType<typeof useLanguage>['t']): string {
+function formatTimeAgo(timestamp: Date | number | null, t: ReturnType<typeof useLanguage>['t']): string {
   if (!timestamp) return ''
-  const diff = Date.now() - timestamp
+  const ts = timestamp instanceof Date ? timestamp.getTime() : timestamp
+  const diff = Date.now() - ts
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
@@ -157,7 +158,7 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
 
           // Create sync log
           await database.get<WearableSyncLog>('wearable_sync_logs').create(log => {
-            log.syncAt = Date.now()
+            log.syncAt = new Date()
             log.provider = WEARABLE_PROVIDER!
             log.status = 'success'
             log.recordsSynced = recordsSynced
@@ -165,20 +166,20 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
 
           // Update last sync
           await currentUser.update(u => {
-            u.wearableLastSyncAt = Date.now()
+            u.wearableLastSyncAt = new Date()
           })
         })
       } else {
         // No new data
         await database.write(async () => {
           await database.get<WearableSyncLog>('wearable_sync_logs').create(log => {
-            log.syncAt = Date.now()
+            log.syncAt = new Date()
             log.provider = WEARABLE_PROVIDER!
             log.status = 'success'
             log.recordsSynced = 0
           })
           await currentUser.update(u => {
-            u.wearableLastSyncAt = Date.now()
+            u.wearableLastSyncAt = new Date()
           })
         })
       }
@@ -190,7 +191,7 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
       try {
         await database.write(async () => {
           await database.get<WearableSyncLog>('wearable_sync_logs').create(log => {
-            log.syncAt = Date.now()
+            log.syncAt = new Date()
             log.provider = WEARABLE_PROVIDER!
             log.status = 'error'
             log.errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -221,8 +222,8 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
     }
   }, [])
 
-  const formatLogDate = (timestamp: number): string => {
-    const d = new Date(timestamp)
+  const formatLogDate = (timestamp: Date | number): string => {
+    const d = timestamp instanceof Date ? timestamp : new Date(timestamp)
     return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) +
       ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
   }

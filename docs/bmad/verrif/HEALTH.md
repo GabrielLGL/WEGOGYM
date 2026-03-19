@@ -67,6 +67,7 @@
 | 2026-03-10 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1690 tests, 108 suites, 3 WARN fixés: useWindowDimensions, OPENAI_MODEL const, useCallback SessionDetail) |
 | 2026-03-11 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1694 tests, 109 suites, 8 WARN fixés: kg→i18n 6 écrans, useCallback SessionDetail+ChartsScreen) |
 | 2026-03-11 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (1694 tests, 109 suites, 5 CRIT + 3 WARN fixés: muscleKey sentinelle, isMountedRef guards, RestTimer spring cleanup, fetch hors write, dead prop BadgeCard) |
+| 2026-03-19 | 20 | 20 | 18 | 18 | 20 | **96/100** | ↓ -4 (2220 tests, 187 suites, 3 CRIT + 6 WARN fixés: HomeScreen 90d query, div/0 weeklyGoals, schema v38, ISO week, stddev Bessel, @date decorators, formatTimeAgo guard) |
 
 ---
 

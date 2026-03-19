@@ -4,7 +4,7 @@ import { field, readonly, date } from '@nozbe/watermelondb/decorators'
 export default class WearableSyncLog extends Model {
   static table = 'wearable_sync_logs'
 
-  @field('sync_at') syncAt!: number
+  @date('sync_at') syncAt!: Date
   @field('provider') provider!: string
   @field('status') status!: string
   @field('records_synced') recordsSynced!: number | null

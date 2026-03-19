@@ -56,6 +56,7 @@ interface ProgramInput {
 export function formatTimeAgo(date: Date, language: 'fr' | 'en'): string {
   const now = Date.now()
   const diffMs = now - date.getTime()
+  if (diffMs < 0) return language === 'fr' ? 'à l\'instant' : 'just now'
   const diffMin = Math.floor(diffMs / 60_000)
   const diffH = Math.floor(diffMs / 3_600_000)
   const diffD = Math.floor(diffMs / 86_400_000)

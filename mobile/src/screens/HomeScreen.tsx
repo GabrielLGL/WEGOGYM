@@ -2051,7 +2051,6 @@ export { HomeScreenBase as HomeContent }
 
 // ─── withObservables ──────────────────────────────────────────────────────────
 
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000
 
 const enhance = withObservables([], () => ({
@@ -2070,7 +2069,7 @@ const enhance = withObservables([], () => ({
       Q.where('deleted_at', null),
       Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
     )),
-    Q.where('created_at', Q.gte(Date.now() - THIRTY_DAYS_MS)),
+    Q.where('created_at', Q.gte(Date.now() - NINETY_DAYS_MS)),
   ).observe(),
   sessions: database.get<Session>('sessions').query().observe(),
   userBadges: database.get<UserBadge>('user_badges').query().observe(),

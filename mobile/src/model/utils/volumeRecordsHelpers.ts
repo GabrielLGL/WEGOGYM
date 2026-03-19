@@ -34,10 +34,13 @@ function getWeekKey(date: Date): string {
   const day = d.getDay()
   const diff = d.getDate() - day + (day === 0 ? -6 : 1)
   d.setDate(diff)
-  const year = d.getFullYear()
-  const jan1 = new Date(year, 0, 1)
-  const weekNum = Math.ceil(((d.getTime() - jan1.getTime()) / 86400000 + jan1.getDay() + 1) / 7)
-  return `${year}-W${String(weekNum).padStart(2, '0')}`
+  // Use the year of the Monday to handle year boundaries correctly
+  const mondayYear = d.getFullYear()
+  const jan4 = new Date(mondayYear, 0, 4)
+  const jan4Day = jan4.getDay() || 7
+  const jan4Monday = new Date(jan4.getTime() - (jan4Day - 1) * 86400000)
+  const weekNum = Math.round((d.getTime() - jan4Monday.getTime()) / (7 * 86400000)) + 1
+  return `${mondayYear}-W${String(weekNum).padStart(2, '0')}`
 }
 
 function getMonthKey(date: Date): string {

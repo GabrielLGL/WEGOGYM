@@ -41,7 +41,7 @@ function stdDev(values: number[]): number {
   if (values.length < 2) return 0
   const mean = values.reduce((a, b) => a + b, 0) / values.length
   const sqDiffs = values.map(v => (v - mean) ** 2)
-  return Math.sqrt(sqDiffs.reduce((a, b) => a + b, 0) / values.length)
+  return Math.sqrt(sqDiffs.reduce((a, b) => a + b, 0) / (values.length - 1))
 }
 
 function toGrade(score: number): 'A' | 'B' | 'C' | 'D' {
