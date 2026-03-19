@@ -122,7 +122,7 @@ interface Props {
   sets: WorkoutSet[]
 }
 
-function StatsVolumeRecordsContent({ histories, sets }: Props) {
+export function StatsVolumeRecordsContent({ histories, sets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t, language } = useLanguage()

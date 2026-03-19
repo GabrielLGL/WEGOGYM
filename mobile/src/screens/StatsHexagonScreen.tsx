@@ -167,7 +167,7 @@ interface Props {
   exercises: Exercise[]
 }
 
-function StatsHexagonScreenBase({ user, histories, sets, exercises }: Props) {
+export function StatsHexagonScreenBase({ user, histories, sets, exercises }: Props) {
   const colors = useColors()
   const { t } = useLanguage()
   const isMounted = useDeferredMount()

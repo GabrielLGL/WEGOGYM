@@ -102,7 +102,7 @@ interface Props {
   sets: WorkoutSet[]
 }
 
-function StatsCompareBase({ histories, sets }: Props) {
+export function StatsCompareBase({ histories, sets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()

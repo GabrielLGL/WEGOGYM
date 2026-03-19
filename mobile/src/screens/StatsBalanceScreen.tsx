@@ -78,7 +78,7 @@ interface Props {
   exercises: Exercise[]
 }
 
-function StatsBalanceScreenBase({ sets, exercises }: Props) {
+export function StatsBalanceScreenBase({ sets, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()

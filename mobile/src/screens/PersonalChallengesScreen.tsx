@@ -195,7 +195,7 @@ interface Props {
   histories: History[]
 }
 
-function PersonalChallengesBase({ user, histories }: Props) {
+export function PersonalChallengesBase({ user, histories }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()

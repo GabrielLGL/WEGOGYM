@@ -73,7 +73,7 @@ interface LeaderboardScreenProps {
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
-function LeaderboardScreenBase({ user, friends, histories }: LeaderboardScreenProps) {
+export function LeaderboardScreenBase({ user, friends, histories }: LeaderboardScreenProps) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()

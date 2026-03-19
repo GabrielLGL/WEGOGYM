@@ -128,7 +128,7 @@ interface Props {
   sets: WorkoutSet[]
 }
 
-function TitlesScreenBase({ user, histories, sets }: Props) {
+export function TitlesScreenBase({ user, histories, sets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()

@@ -180,7 +180,7 @@ interface Props {
   exercises: Exercise[]
 }
 
-function StatsHallOfFameScreenBase({ sets, exercises }: Props) {
+export function StatsHallOfFameScreenBase({ sets, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t, language } = useLanguage()
