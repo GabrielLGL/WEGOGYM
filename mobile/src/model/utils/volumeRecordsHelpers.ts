@@ -1,5 +1,6 @@
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
+import { getMondayOfWeek } from './dateHelpers'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -45,15 +46,6 @@ function getWeekKey(date: Date): string {
 
 function getMonthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-}
-
-function getMondayOfWeek(date: Date): Date {
-  const d = new Date(date.getTime())
-  d.setHours(0, 0, 0, 0)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  d.setDate(diff)
-  return d
 }
 
 // ─── Public API ─────────────────────────────────────────────────────────────

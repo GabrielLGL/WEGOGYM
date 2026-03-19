@@ -16,18 +16,12 @@ export interface WeeklyGoalProgress {
   completed: boolean
 }
 
+import { getMondayOfWeek } from './dateHelpers'
+
 const DAY_MS = 24 * 60 * 60 * 1000
 
-/** Retourne le lundi 00:00 de la semaine contenant `date` */
-export function getWeekStart(date: Date): Date {
-  const d = new Date(date)
-  d.setHours(0, 0, 0, 0)
-  const day = d.getDay()
-  // getDay(): 0=Sun, 1=Mon … → offset to Monday
-  const diff = day === 0 ? 6 : day - 1
-  d.setDate(d.getDate() - diff)
-  return d
-}
+/** @deprecated Utiliser getMondayOfWeek de dateHelpers directement */
+export const getWeekStart = getMondayOfWeek
 
 /**
  * Calcule la progression des objectifs de la semaine en cours (lun-dim).
@@ -46,7 +40,7 @@ export function computeWeeklyGoals(
   volumeTarget = 20000,
 ): WeeklyGoalProgress {
   const now = new Date()
-  const monday = getWeekStart(now)
+  const monday = getMondayOfWeek(now)
   const mondayTs = monday.getTime()
   const sunday = new Date(mondayTs + 7 * DAY_MS - 1)
 

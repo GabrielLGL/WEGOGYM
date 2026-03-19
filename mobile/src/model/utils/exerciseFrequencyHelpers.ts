@@ -111,8 +111,9 @@ export function computeExerciseFrequency(
     const lastPerformed = agg.lastTs > 0 ? new Date(agg.lastTs) : null
     const daysSince = agg.lastTs > 0 ? Math.floor((now - agg.lastTs) / MS_PER_DAY) : null
 
+    const MIN_TREND_PERIOD = 14
     let trend: FrequencyTrend = 'stable'
-    if (midpoint > 0 && count >= 2) {
+    if (midpoint > 0 && count >= 2 && periodDays >= MIN_TREND_PERIOD) {
       if (agg.secondHalfCount > agg.firstHalfCount) trend = 'increasing'
       else if (agg.secondHalfCount < agg.firstHalfCount) trend = 'decreasing'
     }

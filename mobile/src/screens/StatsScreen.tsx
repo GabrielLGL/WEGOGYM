@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import {
   View,
   Text,
@@ -101,10 +101,10 @@ export function StatsScreenBase({ user, histories, sets }: Props) {
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])
   const motivationalPhrase = useMemo(() => computeMotivationalPhrase(histories, sets, language), [histories, sets, language])
 
-  const handleNavigate = (route: StatRoute) => {
+  const handleNavigate = useCallback((route: StatRoute) => {
     haptics.onPress()
     navigation.navigate(route as never)
-  }
+  }, [haptics, navigation])
 
   return (
     <ScrollView

@@ -4,6 +4,8 @@
  * Uses history (session) count per day as intensity metric.
  */
 
+import { getMondayOfWeekTs as getMondayOfWeek } from './dateHelpers'
+
 export interface CalendarDay {
   date: number            // timestamp début de journée
   setsCount: number       // nombre de sessions ce jour (based on histories)
@@ -33,19 +35,6 @@ interface SetLike {
 function startOfDay(ts: number): number {
   const d = new Date(ts)
   d.setHours(0, 0, 0, 0)
-  return d.getTime()
-}
-
-/**
- * Get the Monday of the week containing the given timestamp.
- */
-function getMondayOfWeek(ts: number): number {
-  const d = new Date(ts)
-  d.setHours(0, 0, 0, 0)
-  const day = d.getDay()
-  // JS: Sunday=0, Monday=1 ... Saturday=6
-  const diff = day === 0 ? 6 : day - 1
-  d.setDate(d.getDate() - diff)
   return d.getTime()
 }
 

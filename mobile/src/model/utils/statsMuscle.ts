@@ -17,16 +17,8 @@ import type { StatsPeriod, StatsContext, MuscleRepartitionEntry, MuscleWeekEntry
 import { getPeriodStart } from './statsDateUtils'
 import { WEEK_MS, MUSCLE_TOP_N, MUSCLE_WEEK_CHART_LIMIT, MONTHLY_CHART_MAX_MONTHS } from '../constants'
 
-/** Retourne le timestamp (ms) du lundi 00:00:00 de la semaine en cours */
-export function getMondayOfCurrentWeek(): number {
-  const now = new Date()
-  const day = now.getDay() // 0=dim, 1=lun, ..., 6=sam
-  const diff = (day === 0 ? -6 : 1 - day) // jours à soustraire pour aller au lundi
-  const monday = new Date(now)
-  monday.setDate(now.getDate() + diff)
-  monday.setHours(0, 0, 0, 0)
-  return monday.getTime()
-}
+import { getMondayOfCurrentWeek } from './dateHelpers'
+export { getMondayOfCurrentWeek } from './dateHelpers'
 
 /**
  * Calcule la répartition du volume (poids × reps) par muscle sur une période donnée.

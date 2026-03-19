@@ -2,6 +2,8 @@
  * streakHeatmapHelpers — GitHub-style heatmap with streak stats (13 weeks).
  */
 
+import { getMondayOfWeekTs as getMondayOfWeek } from './dateHelpers'
+
 export interface HeatmapDay {
   date: string          // 'YYYY-MM-DD'
   count: number
@@ -28,15 +30,6 @@ const DAY_MS = 24 * 60 * 60 * 1000
 function startOfDay(ts: number): number {
   const d = new Date(ts)
   d.setHours(0, 0, 0, 0)
-  return d.getTime()
-}
-
-function getMondayOfWeek(ts: number): number {
-  const d = new Date(ts)
-  d.setHours(0, 0, 0, 0)
-  const day = d.getDay()
-  const diff = day === 0 ? 6 : day - 1
-  d.setDate(d.getDate() - diff)
   return d.getTime()
 }
 

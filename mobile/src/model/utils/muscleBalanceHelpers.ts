@@ -66,7 +66,7 @@ export function computeMuscleBalance(
     for (const m of def.left) leftVolume += volumeByMuscle.get(m) ?? 0
     for (const m of def.right) rightVolume += volumeByMuscle.get(m) ?? 0
 
-    const ratio = rightVolume > 0 ? leftVolume / rightVolume : leftVolume > 0 ? 2 : 1
+    const ratio = rightVolume > 0 ? leftVolume / rightVolume : leftVolume > 0 ? 5 : 1
     return {
       nameKey: def.nameKey,
       left: def.left,
