@@ -103,7 +103,8 @@ export function StatsScreenBase({ user, histories, sets }: Props) {
 
   const handleNavigate = useCallback((route: StatRoute) => {
     haptics.onPress()
-    navigation.navigate(route as never)
+    // React Navigation overloads don't resolve union route types; all stat routes have no required params
+    ;(navigation.navigate as (screen: string) => void)(route)
   }, [haptics, navigation])
 
   return (

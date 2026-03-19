@@ -77,4 +77,7 @@ Si une route n'existe PAS dans RootStackParamList (comme potentiellement `Report
 Aucune.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260319-2200
+
+## Résolution
+Rapport do : docs/bmad/do/20260319-2200-refactor-nav-typesafety.md
