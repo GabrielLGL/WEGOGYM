@@ -46,14 +46,22 @@ function startOfDay(ts: number): number {
 /**
  * Calcule les milestones de streak.
  *
+ * **Sémantique du streak** : nombre de jours calendrier uniques avec au moins
+ * 1 séance non-abandonnée, dans une fenêtre consécutive où aucun gap ne
+ * dépasse 1 jour de repos. Seuls les jours d'entraînement effectifs sont
+ * comptés (un jour de repos toléré ne s'ajoute PAS au total).
+ *
+ * Exemple : sessions lundi, mercredi, jeudi → streak = 3 (pas 4).
+ *
  * Algorithme :
- * 1. Calcule le streak actuel (jours consécutifs avec au moins 1 séance)
- *    - Un "jour" = date locale (pas 24h glissantes)
- *    - Max 1 jour de gap autorisé (repos)
- *    - Compte les jours uniques d'entraînement, pas les séances
- * 2. Pour chaque milestone : reached = currentStreak >= days
- * 3. nextMilestone = premier milestone non-atteint
- * 4. progressToNext = progression entre le dernier atteint et le prochain
+ * 1. Collecte les jours uniques d'entraînement (startOfDay, locale)
+ * 2. Itère en arrière depuis le jour le plus récent
+ *    - Gap ≤ 2 × DAY_MS entre 2 jours consécutifs → streak++
+ *    - Sinon → fin du streak
+ * 3. Le streak n'est valide que s'il inclut aujourd'hui ou hier
+ * 4. Pour chaque milestone : reached = currentStreak >= days
+ * 5. nextMilestone = premier milestone non-atteint
+ * 6. progressToNext = progression entre le dernier atteint et le prochain
  */
 export function computeStreakMilestones(
   histories: HistoryLike[],
@@ -84,7 +92,7 @@ export function computeStreakMilestones(
       for (let i = sortedDays.length - 2; i >= 0; i--) {
         const gap = sortedDays[i + 1] - sortedDays[i]
         if (gap <= 2 * DAY_MS) {
-          // Count actual training days in the streak span
+          // Gap ≤ 2 jours → tolérance 1 jour de repos, on compte ce jour d'entraînement
           streak++
         } else {
           break

@@ -77,6 +77,27 @@ describe('computeMuscleRecovery', () => {
     expect(triceps!.recoveryPercent).toBeLessThan(100)
   })
 
+  it('resultat identique quel que soit l ordre des sets (determinisme)', () => {
+    const setsChronological = [
+      makeSet('ex1', 80, 10, 2),
+      makeSet('ex1', 100, 8, 1.5),
+      makeSet('ex1', 100, 6, 1),
+    ]
+    const setsReversed = [...setsChronological].reverse()
+    const setsShuffled = [setsChronological[1], setsChronological[2], setsChronological[0]]
+
+    const resultChrono = computeMuscleRecovery(setsChronological, exercises)
+    const resultReversed = computeMuscleRecovery(setsReversed, exercises)
+    const resultShuffled = computeMuscleRecovery(setsShuffled, exercises)
+
+    const pecsChrono = resultChrono.find(e => e.muscle === 'Pecs')!
+    const pecsReversed = resultReversed.find(e => e.muscle === 'Pecs')!
+    const pecsShuffled = resultShuffled.find(e => e.muscle === 'Pecs')!
+
+    expect(pecsReversed.recoveryPercent).toBe(pecsChrono.recoveryPercent)
+    expect(pecsShuffled.recoveryPercent).toBe(pecsChrono.recoveryPercent)
+  })
+
   it('ignore les sets de plus de 7 jours', () => {
     const sets = [makeSet('ex1', 100, 10, 200)] // 200h > 7 jours
     const result = computeMuscleRecovery(sets, exercises)
@@ -88,6 +109,8 @@ describe('computeMuscleRecovery', () => {
 describe('getRecoveryColor', () => {
   const mockColors = {
     primary: '#007AFF',
+    success: '#10B981',
+    amber: '#F59E0B',
     danger: '#FF3B30',
   } as any
 

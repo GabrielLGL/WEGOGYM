@@ -83,7 +83,10 @@ export function computeMuscleRecovery(
   const muscleLastTs = new Map<string, number>()
   const muscleDayVolume = new Map<string, number>()
 
-  for (const s of sets) {
+  // Tri chronologique pour garantir une accumulation de volume déterministe
+  const sortedSets = [...sets].sort((a, b) => getTs(a.createdAt) - getTs(b.createdAt))
+
+  for (const s of sortedSets) {
     const ts = getTs(s.createdAt)
     if (ts < sevenDaysAgo) continue
 
@@ -144,8 +147,8 @@ export function computeMuscleRecovery(
 export function getRecoveryColor(status: RecoveryStatus, colors: ThemeColors): string {
   switch (status) {
     case 'fresh': return colors.primary
-    case 'recovered': return '#10B981'
-    case 'recovering': return '#F59E0B'
+    case 'recovered': return colors.success
+    case 'recovering': return colors.amber
     case 'fatigued': return colors.danger
   }
 }

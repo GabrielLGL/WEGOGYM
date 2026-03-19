@@ -74,6 +74,17 @@ describe('computeStreakMilestones', () => {
     expect(days).toEqual([3, 7, 14, 30, 60, 100, 200, 365])
   })
 
+  it('streak compte les jours d entrainement, pas les jours calendrier totaux', () => {
+    // Lundi, mercredi, jeudi (mardi = repos toléré) → streak = 3 (pas 4)
+    const histories = [
+      makeHistory(0), // aujourd'hui (jeudi)
+      makeHistory(1), // mercredi
+      makeHistory(3), // lundi (mardi = repos)
+    ]
+    const result = computeStreakMilestones(histories, labels)
+    expect(result.currentStreak).toBe(3)
+  })
+
   it('exclut les séances abandonnées du calcul', () => {
     const histories = [
       makeHistory(0),             // aujourd'hui
