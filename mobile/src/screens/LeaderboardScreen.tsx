@@ -606,7 +606,7 @@ const enhance = withObservables([], () => ({
   friends: database.get<FriendSnapshot>('friend_snapshots').query().observe(),
   histories: database.get<History>('histories').query(
     Q.where('deleted_at', null),
-    Q.where('is_abandoned', false)
+    Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false))
   ).observe(),
 }))
 
