@@ -545,7 +545,7 @@ function useStyles(colors: ThemeColors) {
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: colors.bottomSheetOverlay,
       paddingVertical: 2,
       paddingHorizontal: spacing.xs,
     },
