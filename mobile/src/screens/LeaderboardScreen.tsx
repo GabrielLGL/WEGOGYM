@@ -8,7 +8,7 @@
  * - Un AlertDialog pour confirmer la suppression d'un ami
  */
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -610,4 +610,13 @@ const enhance = withObservables([], () => ({
   ).observe(),
 }))
 
-export default enhance(LeaderboardScreenBase)
+const Enhanced = enhance(LeaderboardScreenBase)
+
+function LeaderboardScreen(props: any) {
+  const [ready, setReady] = useState(false)
+  useEffect(() => { setReady(true) }, [])
+  if (!ready) return null
+  return <Enhanced {...props} />
+}
+
+export default LeaderboardScreen

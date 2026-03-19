@@ -1,28 +1,19 @@
 /**
- * HomeScreen — Dashboard principal / hub de navigation
+ * HomeScreen — Action-First Dashboard
  *
- * Affiche en un coup d'œil :
- * - Profil utilisateur (niveau, XP, streak, badges récents)
- * - KPIs globaux (séances totales, tonnage, PRs)
- * - Activité de la semaine (jours d'entraînement)
- * - Phrase motivationnelle dynamique
- * - CoachMarks (tutoriel premier lancement)
- *
- * Toutes les données sont observées via withObservables → mise à jour automatique.
- * Les célébrations (milestones, badges) sont transmises depuis WorkoutScreen
- * via les params de navigation et affichées en overlay au retour sur Home.
+ * Layout:
+ * ZONE A (above fold): Header + Hero CTA + Status Strip + Weekly Activity
+ * ZONE B (first scroll): Insights Carousel + Body Status (collapsible) + Streak (collapsible)
+ * ZONE C (navigation): Unified navigation grid
  */
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 import { useNavigation, useRoute } from '@react-navigation/native'
@@ -43,29 +34,24 @@ import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
 import type { BadgeDefinition } from '../model/utils/badgeConstants'
 import { MilestoneCelebration } from '../components/MilestoneCelebration'
 import { BadgeCelebration } from '../components/BadgeCelebration'
-import { spacing, borderRadius, fontSize } from '../theme'
+import { spacing } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
-import type { ThemeColors } from '../theme'
-import { useHaptics } from '../hooks/useHaptics'
 import { CoachMarks } from '../components/CoachMarks'
 import type { CoachMarkStep } from '../components/CoachMarks'
 import { useCoachMarks } from '../hooks/useCoachMarks'
-import { computeExerciseOfWeek } from '../model/utils/exerciseOfWeekHelpers'
-import { useModalState } from '../hooks/useModalState'
-import { BottomSheet } from '../components/BottomSheet'
 import { buildWidgetData, saveWidgetData } from '../services/widgetDataService'
 import type { RootStackParamList } from '../navigation'
 
 import {
   HomeHeaderCard,
-  HomeGamificationCard,
-  HomeStreakSection,
-  HomeBodyStatusSection,
-  HomeWeeklyGoalsCard,
-  HomeWorkoutSection,
+  HomeHeroAction,
+  HomeStatusStrip,
   HomeWeeklyActivityCard,
-  HomeInsightsSection,
+  HomeInsightsCarousel,
+  HomeBodyStatusSection,
+  HomeStreakSection,
+  HomeNavigationGrid,
 } from '../components/home'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
@@ -78,19 +64,6 @@ type HomeRoute = RouteProp<RootStackParamList, 'Home'>
 type CelebrationItem =
   | { type: 'milestone'; data: MilestoneEvent }
   | { type: 'badge'; data: BadgeDefinition }
-
-// ─── Sections & Tuiles ───────────────────────────────────────────────────────
-
-interface Tile {
-  icon: keyof typeof Ionicons.glyphMap
-  label: string
-  route: keyof RootStackParamList
-}
-
-interface Section {
-  title: string
-  tiles: Tile[]
-}
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
@@ -108,40 +81,16 @@ interface Props {
 
 function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises, friends, programs }: Props) {
   const colors = useColors()
-  const styles = useStyles(colors)
+  const styles = useStyles()
   const navigation = useNavigation<HomeNavigation>()
   const route = useRoute<HomeRoute>()
-  const haptics = useHaptics()
   const { t } = useLanguage()
 
   // Coach marks refs
   const headerCardRef = useRef<View>(null)
-  const gamificationCardRef = useRef<View>(null)
   const weeklyCardRef = useRef<View>(null)
-  const trainingGridRef = useRef<View>(null)
+  const navigationGridRef = useRef<View>(null)
   const settingsBtnRef = useRef<View>(null)
-
-  const SECTIONS: Section[] = useMemo(() => [
-    {
-      title: t.home.sections.training,
-      tiles: [
-        { icon: 'library-outline', label: t.home.tiles.programs,  route: 'Programs' },
-        { icon: 'barbell-outline',  label: t.home.tiles.exercises, route: 'Exercices' },
-        { icon: 'calendar-outline', label: t.home.tiles.calendar,  route: 'StatsCalendar' },
-        { icon: 'newspaper-outline', label: t.home.tiles.activityFeed, route: 'ActivityFeed' },
-      ],
-    },
-    {
-      title: t.home.sections.stats,
-      tiles: [
-        { icon: 'time-outline',    label: t.home.tiles.duration, route: 'StatsDuration' },
-        { icon: 'barbell-outline', label: t.home.tiles.volume,   route: 'StatsVolume' },
-        { icon: 'resize-outline',  label: t.home.tiles.measures, route: 'StatsMeasurements' },
-        { icon: 'camera-outline',  label: t.home.tiles.photos,   route: 'ProgressPhotos' },
-        { icon: 'git-network-outline', label: t.home.tiles.hexagon, route: 'StatsHexagon' },
-      ],
-    },
-  ], [t])
 
   // ── Celebrations ──
   const celebrationQueueRef = useRef<CelebrationItem[]>([])
@@ -184,27 +133,10 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
 
   const coachMarkSteps: CoachMarkStep[] = useMemo(() => [
     { key: 'kpis', targetRef: headerCardRef, text: t.coachMarks.steps.kpis, position: 'bottom' },
-    { key: 'gamification', targetRef: gamificationCardRef, text: t.coachMarks.steps.gamification, position: 'bottom' },
     { key: 'weeklyActivity', targetRef: weeklyCardRef, text: t.coachMarks.steps.weeklyActivity, position: 'bottom' },
-    { key: 'programs', targetRef: trainingGridRef, text: t.coachMarks.steps.programs, position: 'top' },
+    { key: 'programs', targetRef: navigationGridRef, text: t.coachMarks.steps.programs, position: 'top' },
     { key: 'settings', targetRef: settingsBtnRef, text: t.coachMarks.steps.settings, position: 'bottom' },
   ], [t])
-
-  // Exercise of the Week
-  const exerciseOfWeek = useMemo(
-    () => computeExerciseOfWeek(exercises, sets),
-    [exercises, sets],
-  )
-  const exerciseModal = useModalState()
-
-  const handleTilePress = (tile: Tile) => {
-    haptics.onPress()
-    try {
-      navigation.navigate(tile.route as never)
-    } catch {
-      if (__DEV__) console.warn(`[HomeScreen] Route "${tile.route}" non disponible`)
-    }
-  }
 
   return (
     <LinearGradient
@@ -218,39 +150,29 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
+      {/* ── ZONE A — Au-dessus du fold ── */}
+
       <HomeHeaderCard
         user={user}
-        historiesCount={historiesCount}
         histories={histories}
         sets={sets}
         headerCardRef={headerCardRef}
         settingsBtnRef={settingsBtnRef}
       />
 
-      <HomeGamificationCard
-        user={user}
-        userBadges={userBadges}
-        sets={sets}
-        exercises={exercises}
-        gamificationCardRef={gamificationCardRef}
-      />
-
-      <HomeStreakSection histories={histories} />
-
-      <HomeBodyStatusSection
-        sets={sets}
-        exercises={exercises}
-        histories={histories}
-      />
-
-      <HomeWeeklyGoalsCard histories={histories} sets={sets} />
-
-      <HomeWorkoutSection
+      <HomeHeroAction
         histories={histories}
         sets={sets}
         exercises={exercises}
         sessions={sessions}
         programs={programs}
+      />
+
+      <HomeStatusStrip
+        user={user}
+        histories={histories}
+        sets={sets}
+        exercises={exercises}
       />
 
       <HomeWeeklyActivityCard
@@ -260,118 +182,31 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         weeklyCardRef={weeklyCardRef}
       />
 
-      <HomeInsightsSection
+      {/* ── ZONE B — Premier scroll ── */}
+
+      <HomeInsightsCarousel
         histories={histories}
         sets={sets}
         exercises={exercises}
         user={user}
       />
 
-      {/* ── Sections de tuiles ── */}
-      {SECTIONS.map((section, sectionIndex) => (
-        <View key={section.title} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <View ref={sectionIndex === 0 ? trainingGridRef : undefined} style={styles.grid}>
-            {section.tiles.map(tile => (
-              <TouchableOpacity
-                key={tile.route}
-                style={styles.gridBtn}
-                onPress={() => handleTilePress(tile)}
-                activeOpacity={0.7}
-              >
-                <Ionicons name={tile.icon} size={28} color={colors.primary} />
-                <Text style={styles.btnLabel}>{tile.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      ))}
+      <HomeBodyStatusSection
+        sets={sets}
+        exercises={exercises}
+        histories={histories}
+      />
 
-      {/* ── Tuiles Outils ── */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t.home.sections.tools}</Text>
-        <View style={styles.grid}>
-          <TouchableOpacity
-            style={styles.gridBtn}
-            onPress={() => { haptics.onPress(); navigation.navigate('Leaderboard') }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="trophy-outline" size={28} color={colors.primary} />
-            <Text style={styles.btnLabel}>{t.leaderboard.title}</Text>
-            {friends.length > 0 && (
-              <Text style={[styles.btnLabel, { color: colors.textSecondary, marginTop: 0 }]}>
-                {friends.length} ami{friends.length > 1 ? 's' : ''}
-              </Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.gridBtn}
-            onPress={() => { haptics.onPress(); navigation.navigate('SkillTree') }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="git-branch-outline" size={28} color={colors.primary} />
-            <Text style={styles.btnLabel}>{t.home.tiles.skillTree}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.gridBtn}
-            onPress={() => { haptics.onPress(); navigation.navigate('PersonalChallenges') }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="shield-outline" size={28} color={colors.primary} />
-            <Text style={styles.btnLabel}>{t.home.tiles.challenges}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <HomeStreakSection histories={histories} />
 
-      {/* ── Exercice de la Semaine ── */}
-      {exerciseOfWeek && (
-        <TouchableOpacity
-          style={styles.exerciseOfWeekCard}
-          onPress={() => { haptics.onPress(); exerciseModal.open() }}
-          activeOpacity={0.8}
-        >
-          <View style={styles.exerciseOfWeekHeader}>
-            <Ionicons name="sparkles-outline" size={18} color={colors.primary} />
-            <Text style={styles.exerciseOfWeekTitle}>{t.exerciseOfWeek.title}</Text>
-          </View>
-          <Text style={styles.exerciseOfWeekName}>{exerciseOfWeek.exercise.name}</Text>
-          <Text style={styles.exerciseOfWeekSub}>
-            {exerciseOfWeek.isNew
-              ? t.exerciseOfWeek.neverDone
-              : t.exerciseOfWeek.daysAgo.replace('{n}', String(exerciseOfWeek.daysSinceLastDone))}
-          </Text>
-          {exerciseOfWeek.exercise.muscles.length > 0 && (
-            <View style={styles.exerciseOfWeekMuscles}>
-              {exerciseOfWeek.exercise.muscles.slice(0, 3).map(m => (
-                <View key={m} style={styles.muscleChip}>
-                  <Text style={styles.muscleChipText}>{m}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </TouchableOpacity>
-      )}
+      {/* ── ZONE C — Navigation ── */}
+
+      <HomeNavigationGrid
+        friends={friends}
+        navigationGridRef={navigationGridRef}
+      />
+
     </ScrollView>
-
-    {/* Modal detail exercice */}
-    <BottomSheet
-      visible={exerciseModal.isOpen}
-      onClose={exerciseModal.close}
-      title={exerciseOfWeek?.exercise.name ?? ''}
-    >
-      {exerciseOfWeek && (
-        <View style={styles.exerciseModalContent}>
-          <Text style={styles.exerciseModalMuscles}>
-            {exerciseOfWeek.exercise.muscles.join(' · ')}
-          </Text>
-          <Text style={styles.exerciseModalHint}>
-            {exerciseOfWeek.isNew
-              ? t.exerciseOfWeek.tryItNever
-              : t.exerciseOfWeek.tryItAgain.replace('{n}', String(exerciseOfWeek.daysSinceLastDone))}
-          </Text>
-        </View>
-      )}
-    </BottomSheet>
 
     <MilestoneCelebration
       visible={currentCelebration?.type === 'milestone'}
@@ -397,107 +232,17 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-function useStyles(colors: ThemeColors) {
+function useStyles() {
   return useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.background,
     },
     content: {
       padding: spacing.md,
       paddingTop: 44 + spacing.sm,
       paddingBottom: spacing.xl,
     },
-    section: {
-      marginBottom: spacing.md,
-    },
-    sectionTitle: {
-      fontSize: fontSize.lg,
-      fontWeight: '700',
-      color: colors.text,
-      marginBottom: spacing.sm,
-    },
-    grid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: spacing.sm,
-    },
-    gridBtn: {
-      backgroundColor: colors.card,
-      borderRadius: borderRadius.md,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.sm,
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '31%',
-    },
-    btnLabel: {
-      fontSize: fontSize.xs,
-      color: colors.textSecondary,
-      marginTop: spacing.xs,
-      textAlign: 'center',
-    },
-    exerciseOfWeekCard: {
-      backgroundColor: colors.card,
-      borderRadius: borderRadius.lg,
-      padding: spacing.md,
-      marginBottom: spacing.md,
-      borderWidth: 1,
-      borderColor: colors.separator,
-    },
-    exerciseOfWeekHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      marginBottom: spacing.xs,
-    },
-    exerciseOfWeekTitle: {
-      fontSize: fontSize.xs,
-      color: colors.primary,
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    exerciseOfWeekName: {
-      fontSize: fontSize.md,
-      color: colors.text,
-      fontWeight: '700',
-      marginBottom: spacing.xs,
-    },
-    exerciseOfWeekSub: {
-      fontSize: fontSize.xs,
-      color: colors.textSecondary,
-      marginBottom: spacing.sm,
-    },
-    exerciseOfWeekMuscles: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: spacing.xs,
-    },
-    muscleChip: {
-      backgroundColor: colors.primaryBg,
-      borderRadius: borderRadius.xs,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: spacing.xs,
-    },
-    muscleChipText: {
-      fontSize: fontSize.xs,
-      color: colors.primary,
-      fontWeight: '600',
-    },
-    exerciseModalContent: {
-      padding: spacing.md,
-    },
-    exerciseModalMuscles: {
-      fontSize: fontSize.sm,
-      color: colors.textSecondary,
-      marginBottom: spacing.sm,
-    },
-    exerciseModalHint: {
-      fontSize: fontSize.sm,
-      color: colors.text,
-    },
-  }), [colors])
+  }), [])
 }
 
 // ─── Export pour les tests ────────────────────────────────────────────────────
@@ -533,4 +278,18 @@ const enhance = withObservables([], () => ({
   programs: database.get<Program>('programs').query().observe(),
 }))
 
-export default enhance(HomeScreenBase)
+const Enhanced = enhance(HomeScreenBase)
+
+/**
+ * Deferred wrapper — mounts the withObservables component only after the
+ * wrapper itself has mounted, preventing the "setState before mount" warning
+ * caused by WatermelonDB's synchronous first emission on React 18 + Fabric.
+ */
+function HomeScreen(props: any) {
+  const [ready, setReady] = useState(false)
+  useEffect(() => { setReady(true) }, [])
+  if (!ready) return null
+  return <Enhanced {...props} />
+}
+
+export default HomeScreen
