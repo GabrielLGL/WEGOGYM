@@ -152,11 +152,25 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 ## Features — Phase 4 (post-release)
 
+### Priorite haute (impact adoption)
+- [ ] Cloud backup (Google Drive / iCloud) — sauvegarde sans compte
+- [ ] Onboarding progressif (guidage par etapes, decouverte features)
+- [ ] Empty states avec CTA sur tous les ecrans sans data
+- [ ] Toast/Snackbar global (feedback visuel apres actions)
+- [ ] Accessibilite (a11y labels, roles, screen reader support)
+
+### Priorite moyenne (differenciation)
+- [ ] Cloud sync multi-device (avec compte optionnel)
 - [ ] Themes debloquables (recompenses cosmetiques)
-- [ ] Cloud sync multi-device
 - [ ] iOS (App Store)
 - [ ] Widgets iOS
-- [ ] Wear OS companion app
+- [ ] Skeleton loaders sur les ecrans stats
+- [ ] Navigation stats groupee (Performance / Corps / Habitudes / Avance)
+- [ ] Videos d'execution des exercices
+- [ ] Nutrition basique (calories / proteines)
+
+### Priorite basse (long terme)
+- [ ] Wear OS / Apple Watch companion app
 - [ ] Internationalisation (ES, DE, PT…)
 - [ ] Partage social avance (screenshots stylises)
 - [ ] Mode coach (creer et partager des programmes)
@@ -164,6 +178,8 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 - [ ] Communaute / feed
 - [ ] Programme marketplace
 - [ ] Notifications push intelligentes
+- [ ] Challenges entre amis (temps reel)
+- [ ] Comparaison 1RM avec stats globales
 
 ---
 
