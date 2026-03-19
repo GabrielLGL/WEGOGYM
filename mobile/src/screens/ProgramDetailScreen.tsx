@@ -123,16 +123,18 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
     }
   }, [moveSession, sessionOptionsModal])
 
+  const handleSessionPress = useCallback((session: Session) => {
+    haptics.onPress()
+    navigation.navigate('SessionDetail', { sessionId: session.id })
+  }, [haptics, navigation])
+
   const renderSession = useCallback(({ item }: { item: Session }) => (
     <SessionPreviewRow
       session={item}
-      onPress={() => {
-        haptics.onPress()
-        navigation.navigate('SessionDetail', { sessionId: item.id })
-      }}
+      onPress={() => handleSessionPress(item)}
       onOptionsPress={() => handleSessionOptions(item)}
     />
-  ), [haptics, navigation, handleSessionOptions])
+  ), [handleSessionPress, handleSessionOptions])
 
   return (
     <SafeAreaView style={styles.container}>

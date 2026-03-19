@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -29,7 +29,7 @@ interface MuscleCardProps {
   noDataLabel: string
 }
 
-function MuscleCard({ entry, colors, sessionLabel, noDataLabel }: MuscleCardProps) {
+const MuscleCard = memo<MuscleCardProps>(function MuscleCard({ entry, colors, sessionLabel, noDataLabel }: MuscleCardProps) {
   const styles = useCardStyles(colors)
   const isActive = entry.totalVolume > 0
 
@@ -74,7 +74,7 @@ function MuscleCard({ entry, colors, sessionLabel, noDataLabel }: MuscleCardProp
       </View>
     </View>
   )
-}
+})
 
 function useCardStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
@@ -180,14 +180,14 @@ export function StatsHeatmapScreenBase({ sets, exercises }: Props) {
     [rawSets, rawExercises, period],
   )
 
-  const renderItem = ({ item }: { item: MuscleHeatmapEntry }) => (
+  const renderItem = useCallback(({ item }: { item: MuscleHeatmapEntry }) => (
     <MuscleCard
       entry={item}
       colors={colors}
       sessionLabel={t.muscleHeatmap.sessions}
       noDataLabel={t.muscleHeatmap.noData}
     />
-  )
+  ), [colors, t.muscleHeatmap.sessions, t.muscleHeatmap.noData])
 
   return (
     <View style={styles.container}>

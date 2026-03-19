@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -53,7 +53,7 @@ interface CardProps {
   }
 }
 
-function QualityCard({ entry, colors, labels }: CardProps) {
+const QualityCard = memo<CardProps>(function QualityCard({ entry, colors, labels }: CardProps) {
   const styles = useStyles(colors)
 
   return (
@@ -85,7 +85,7 @@ function QualityCard({ entry, colors, labels }: CardProps) {
       </View>
     </View>
   )
-}
+})
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
@@ -139,11 +139,19 @@ export function StatsSetQualityBase({ sets, exercises }: Props) {
     )
   }
 
-  const cardLabels = {
+  const cardLabels = useMemo(() => ({
     avgWeight: sq.avgWeight,
     consistency: sq.consistency,
     dropSets: sq.dropSets,
-  }
+  }), [sq.avgWeight, sq.consistency, sq.dropSets])
+
+  const renderQualityItem = useCallback(({ item }: { item: SetQualityEntry }) => (
+    <QualityCard
+      entry={item}
+      colors={colors}
+      labels={cardLabels}
+    />
+  ), [colors, cardLabels])
 
   return (
     <FlatList<SetQualityEntry>
@@ -193,13 +201,7 @@ export function StatsSetQualityBase({ sets, exercises }: Props) {
           </View>
         </View>
       }
-      renderItem={({ item }) => (
-        <QualityCard
-          entry={item}
-          colors={colors}
-          labels={cardLabels}
-        />
-      )}
+      renderItem={renderQualityItem}
       showsVerticalScrollIndicator={false}
     />
   )

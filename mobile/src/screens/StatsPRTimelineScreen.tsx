@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import {
   View,
   Text,
@@ -32,7 +32,7 @@ interface TimelineItemProps {
   colors: ThemeColors
 }
 
-function TimelineItem({ entry, isLast, colors }: TimelineItemProps) {
+const TimelineItem = memo<TimelineItemProps>(function TimelineItem({ entry, isLast, colors }: TimelineItemProps) {
   const { t } = useLanguage()
   const styles = useStyles(colors)
   const pt = t.prTimeline
@@ -72,7 +72,7 @@ function TimelineItem({ entry, isLast, colors }: TimelineItemProps) {
       </View>
     </View>
   )
-}
+})
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
@@ -120,6 +120,18 @@ export function StatsPRTimelineBase({ sets, exercises }: Props) {
     [months],
   )
 
+  const renderTimelineItem = useCallback(({ item, index, section }: {
+    item: PRTimelineEntry
+    index: number
+    section: { data: PRTimelineEntry[] }
+  }) => (
+    <TimelineItem
+      entry={item}
+      isLast={index === section.data.length - 1}
+      colors={colors}
+    />
+  ), [colors])
+
   if (months.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -165,13 +177,7 @@ export function StatsPRTimelineBase({ sets, exercises }: Props) {
         </View>
       )}
       // ── Chaque PR ───────────────────────────────────────────────────────────
-      renderItem={({ item, index, section }) => (
-        <TimelineItem
-          entry={item}
-          isLast={index === section.data.length - 1}
-          colors={colors}
-        />
-      )}
+      renderItem={renderTimelineItem}
       showsVerticalScrollIndicator={false}
       stickySectionHeadersEnabled={false}
     />

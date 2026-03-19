@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import {
   View,
   Text,
@@ -67,16 +67,16 @@ interface RowProps {
   colors: ThemeColors
   language: string
   t: ReturnType<typeof useLanguage>['t']
-  onPress: () => void
+  onPress: (exerciseId: string) => void
 }
 
-function HallOfFameRow({ entry, rank, colors, language, t, onPress }: RowProps) {
+const HallOfFameRow = memo<RowProps>(function HallOfFameRow({ entry, rank, colors, language, t, onPress }: RowProps) {
   const styles = useRowStyles(colors)
   const isMedal = rank <= 3
   const medalColor = getMedalColor(rank, colors)
 
   return (
-    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.row} onPress={() => onPress(entry.exerciseId)} activeOpacity={0.7}>
       {/* Rang / Médaille */}
       <View style={styles.rankContainer}>
         {isMedal ? (
@@ -114,7 +114,7 @@ function HallOfFameRow({ entry, rank, colors, language, t, onPress }: RowProps) 
       </View>
     </TouchableOpacity>
   )
-}
+})
 
 function useRowStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
@@ -231,16 +231,20 @@ export function StatsHallOfFameScreenBase({ sets, exercises }: Props) {
       .slice(0, 50)
   }, [sets, exerciseMap])
 
-  const renderItem = ({ item, index }: { item: HallOfFameEntry; index: number }) => (
+  const handleRowPress = useCallback((exerciseId: string) => {
+    navigation.navigate('ExerciseCard', { exerciseId })
+  }, [navigation])
+
+  const renderItem = useCallback(({ item, index }: { item: HallOfFameEntry; index: number }) => (
     <HallOfFameRow
       entry={item}
       rank={index + 1}
       colors={colors}
       language={language}
       t={t}
-      onPress={() => navigation.navigate('ExerciseCard', { exerciseId: item.exerciseId })}
+      onPress={handleRowPress}
     />
-  )
+  ), [colors, language, t, handleRowPress])
 
   return (
     <FlatList

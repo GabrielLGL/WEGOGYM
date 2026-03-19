@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -57,7 +57,7 @@ interface CardProps {
   daysLabel: string
 }
 
-function FrequencyCard({ entry, colors, lastDoneLabel, daysLabel }: CardProps) {
+const FrequencyCard = memo<CardProps>(function FrequencyCard({ entry, colors, lastDoneLabel, daysLabel }: CardProps) {
   const styles = useStyles(colors)
   const trendColor = getTrendColor(entry.trend, colors)
 
@@ -89,7 +89,7 @@ function FrequencyCard({ entry, colors, lastDoneLabel, daysLabel }: CardProps) {
       )}
     </View>
   )
-}
+})
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
@@ -119,6 +119,15 @@ export function StatsExerciseFrequencyBase({ sets, exercises, histories }: Props
     () => computeExerciseFrequency(sets, exercises, histories, PERIOD_VALUES[period]),
     [sets, exercises, histories, period],
   )
+
+  const renderFrequencyItem = useCallback(({ item }: { item: ExerciseFrequencyEntry }) => (
+    <FrequencyCard
+      entry={item}
+      colors={colors}
+      lastDoneLabel={ef.lastDone}
+      daysLabel="j"
+    />
+  ), [colors, ef.lastDone])
 
   if (!result) {
     return (
@@ -182,14 +191,7 @@ export function StatsExerciseFrequencyBase({ sets, exercises, histories }: Props
           )}
         </View>
       }
-      renderItem={({ item }) => (
-        <FrequencyCard
-          entry={item}
-          colors={colors}
-          lastDoneLabel={ef.lastDone}
-          daysLabel="j"
-        />
-      )}
+      renderItem={renderFrequencyItem}
       showsVerticalScrollIndicator={false}
     />
   )

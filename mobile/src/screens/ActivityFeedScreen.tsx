@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import {
   View,
   Text,
@@ -66,6 +66,82 @@ function formatVolume(kg: number): string {
   }
   return `${Math.round(kg).toLocaleString()}`
 }
+
+// ─── ActivityCardItem ─────────────────────────────────────────────────────────
+
+interface ActivityCardItemProps {
+  item: ActivityCard
+  colors: ThemeColors
+  styles: ReturnType<typeof useStyles>
+  t: ReturnType<typeof useLanguage>['t']
+  language: string
+  onPress: (card: ActivityCard) => void
+}
+
+const ActivityCardItem = memo<ActivityCardItemProps>(function ActivityCardItem({
+  item, colors, styles, t, language, onPress,
+}: ActivityCardItemProps) {
+  return (
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => onPress(item)}
+    >
+      {/* Row 1: Icon + Name + Date */}
+      <View style={styles.cardHeader}>
+        <View style={styles.cardHeaderLeft}>
+          <Ionicons name="play-circle-outline" size={22} color={colors.primary} />
+          <Text style={styles.sessionName} numberOfLines={1}>{item.sessionName}</Text>
+          {item.isAbandoned && (
+            <View style={styles.abandonedBadge}>
+              <Text style={styles.abandonedText}>{t.activityFeed.abandoned}</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.dateText}>{formatRelativeDate(item.startTime, t, language)}</Text>
+      </View>
+
+      {/* Row 2: Stats */}
+      <Text style={styles.statsLine}>
+        {item.durationMin !== null ? formatDuration(item.durationMin) : '—'}
+        {'  ·  '}
+        {formatVolume(item.totalVolumeKg)} kg
+        {'  ·  '}
+        {item.totalSets} {t.activityFeed.sets}
+      </Text>
+
+      {/* Row 3: PRs */}
+      {item.totalPrs > 0 && (
+        <View style={styles.prRow}>
+          <Ionicons name="trophy-outline" size={14} color={colors.primary} />
+          <Text style={styles.prText}>{item.totalPrs} {t.activityFeed.prs}</Text>
+        </View>
+      )}
+
+      {/* Row 4: Exercises */}
+      {item.topExercises.length > 0 && (
+        <Text style={styles.exercisesLine} numberOfLines={1}>
+          {item.topExercises.join(' · ')}
+        </Text>
+      )}
+
+      {/* Row 5: Muscle chips */}
+      {item.topMuscles.length > 0 && (
+        <View style={styles.muscleRow}>
+          {item.topMuscles.map(muscle => (
+            <View key={muscle} style={styles.muscleChip}>
+              <Text style={styles.muscleChipText}>
+                {(t.muscleNames as Record<string, string>)[muscle] ?? muscle}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </TouchableOpacity>
+  )
+})
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
   histories: History[]
@@ -156,69 +232,21 @@ export function ActivityFeedScreenBase({ histories, sessions, sets, exercises }:
     return result
   }, [histories, sessions, sets, exercises, t.activityFeed.sessionFallback])
 
-  const handlePress = (card: ActivityCard) => {
+  const handlePress = useCallback((card: ActivityCard) => {
     haptics.onPress()
     navigation.navigate('HistoryDetail', { historyId: card.historyId })
-  }
+  }, [haptics, navigation])
 
-  const renderCard = ({ item }: { item: ActivityCard }) => (
-    <TouchableOpacity
-      style={styles.card}
-      activeOpacity={0.7}
-      onPress={() => handlePress(item)}
-    >
-      {/* Row 1: Icon + Name + Date */}
-      <View style={styles.cardHeader}>
-        <View style={styles.cardHeaderLeft}>
-          <Ionicons name="play-circle-outline" size={22} color={colors.primary} />
-          <Text style={styles.sessionName} numberOfLines={1}>{item.sessionName}</Text>
-          {item.isAbandoned && (
-            <View style={styles.abandonedBadge}>
-              <Text style={styles.abandonedText}>{t.activityFeed.abandoned}</Text>
-            </View>
-          )}
-        </View>
-        <Text style={styles.dateText}>{formatRelativeDate(item.startTime, t, language)}</Text>
-      </View>
-
-      {/* Row 2: Stats */}
-      <Text style={styles.statsLine}>
-        {item.durationMin !== null ? formatDuration(item.durationMin) : '—'}
-        {'  ·  '}
-        {formatVolume(item.totalVolumeKg)} kg
-        {'  ·  '}
-        {item.totalSets} {t.activityFeed.sets}
-      </Text>
-
-      {/* Row 3: PRs */}
-      {item.totalPrs > 0 && (
-        <View style={styles.prRow}>
-          <Ionicons name="trophy-outline" size={14} color={colors.primary} />
-          <Text style={styles.prText}>{item.totalPrs} {t.activityFeed.prs}</Text>
-        </View>
-      )}
-
-      {/* Row 4: Exercises */}
-      {item.topExercises.length > 0 && (
-        <Text style={styles.exercisesLine} numberOfLines={1}>
-          {item.topExercises.join(' · ')}
-        </Text>
-      )}
-
-      {/* Row 5: Muscle chips */}
-      {item.topMuscles.length > 0 && (
-        <View style={styles.muscleRow}>
-          {item.topMuscles.map(muscle => (
-            <View key={muscle} style={styles.muscleChip}>
-              <Text style={styles.muscleChipText}>
-                {(t.muscleNames as Record<string, string>)[muscle] ?? muscle}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </TouchableOpacity>
-  )
+  const renderCard = useCallback(({ item }: { item: ActivityCard }) => (
+    <ActivityCardItem
+      item={item}
+      colors={colors}
+      styles={styles}
+      t={t}
+      language={language}
+      onPress={handlePress}
+    />
+  ), [colors, styles, t, language, handlePress])
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
