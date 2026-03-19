@@ -44,7 +44,12 @@ function buildInitialInputs(
  */
 export function useWorkoutState(
   sessionExercises: SessionExercise[],
-  historyId: string
+  historyId: string,
+  restoredSets?: {
+    validated: Record<string, ValidatedSetData>
+    inputs: Record<string, SetInputData>
+    volume: number
+  } | null,
 ) {
   const [setInputs, setSetInputs] = useState<Record<string, SetInputData>>(
     () => buildInitialInputs(sessionExercises, {})
@@ -65,6 +70,17 @@ export function useWorkoutState(
   const [totalVolume, setTotalVolume] = useState(0)
   // Guard contre double-tap rapide (validateSet/unvalidateSet)
   const pendingOpsRef = useRef<Set<string>>(new Set())
+
+  // Apply restored sets when resuming a workout
+  const restoredAppliedRef = useRef(false)
+  useEffect(() => {
+    if (!restoredSets || restoredAppliedRef.current) return
+    restoredAppliedRef.current = true
+    setValidatedSets(restoredSets.validated)
+    setTotalVolume(restoredSets.volume)
+    // Merge restored inputs over the initial inputs (keep unvalidated fields from suggestions)
+    setSetInputs(prev => ({ ...prev, ...restoredSets.inputs }))
+  }, [restoredSets])
 
   useEffect(() => {
     const exerciseIds = sessionExercises.map(se => se.exercise.id)

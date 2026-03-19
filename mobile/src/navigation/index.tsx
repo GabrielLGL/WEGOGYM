@@ -112,7 +112,7 @@ export type RootStackParamList = {
   ProgramDetail: { programId: string };
   SessionDetail: { sessionId: string };
   Settings: undefined;
-  Workout: { sessionId: string };
+  Workout: { sessionId: string; historyId?: string };
   StatsDuration: undefined;
   StatsVolume: undefined;
   StatsCalendar: undefined;

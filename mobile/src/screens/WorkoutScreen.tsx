@@ -37,6 +37,7 @@ import Session from '../model/models/Session'
 import SessionExercise from '../model/models/SessionExercise'
 import User from '../model/models/User'
 import History from '../model/models/History'
+import WorkoutSet from '../model/models/Set'
 import {
   createWorkoutHistory,
   abandonWorkoutHistory,
@@ -69,7 +70,7 @@ import { spacing, fontSize, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
-import type { RecapExerciseData, RecapComparisonData } from '../types/workout'
+import type { RecapExerciseData, RecapComparisonData, ValidatedSetData, SetInputData } from '../types/workout'
 import {
   setupNotificationChannel,
   requestNotificationPermission,
@@ -113,6 +114,7 @@ interface WorkoutContentProps {
   sessionExercises: SessionExercise[]
   user: User | null
   navigation: NativeStackNavigationProp<RootStackParamList>
+  resumeHistoryId?: string
 }
 
 export const WorkoutContent: React.FC<WorkoutContentProps> = ({
@@ -120,6 +122,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   sessionExercises,
   user,
   navigation,
+  resumeHistoryId,
 }) => {
   const colors = useColors()
   const styles = useStyles(colors)
@@ -129,7 +132,12 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const notificationPermissionRef = useRef<boolean>(false)
   const summaryWasOpenRef = useRef(false)
 
-  const [historyId, setHistoryId] = useState<string>('')
+  const [historyId, setHistoryId] = useState<string>(resumeHistoryId ?? '')
+  const [restoredSets, setRestoredSets] = useState<{
+    validated: Record<string, ValidatedSetData>
+    inputs: Record<string, SetInputData>
+    volume: number
+  } | null>(null)
   const warmupModal = useModalState()
   const warmupOpenRef = useRef(warmupModal.open)
   warmupOpenRef.current = warmupModal.open
@@ -159,7 +167,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const footerSlide = useKeyboardAnimation(KEYBOARD_OFFSET)
   const { formattedTime } = useWorkoutTimer(startTimestampRef.current)
   const { setInputs, validatedSets, totalVolume, suggestedExerciseIds, updateSetInput, validateSet, unvalidateSet } =
-    useWorkoutState(sessionExercises, historyId)
+    useWorkoutState(sessionExercises, historyId, restoredSets)
 
   const completedSets = useMemo(() => Object.keys(validatedSets).length, [validatedSets])
   const totalSetsTarget = useMemo(() => sessionExercises.reduce((sum, se) => sum + (se.setsTarget ?? 0), 0), [sessionExercises])
@@ -269,17 +277,56 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
   useEffect(() => {
     let cancelled = false
-    createWorkoutHistory(session.id, startTimestampRef.current)
-      .then(history => {
-        if (cancelled) return
-        historyRef.current = history
-        setHistoryId(history.id)
-      })
-      .catch(e => {
-        if (cancelled) return
-        if (__DEV__) console.error('[WorkoutScreen] createWorkoutHistory:', e)
-        startErrorModal.open()
-      })
+    if (resumeHistoryId) {
+      // Resume: load existing History + its validated sets
+      database.get<History>('histories').find(resumeHistoryId)
+        .then(async history => {
+          if (cancelled) return
+          historyRef.current = history
+          startTimestampRef.current = history.startTime.getTime()
+          setHistoryId(history.id)
+
+          // Reload already-validated sets from DB
+          const existingSets = await database.get<WorkoutSet>('sets')
+            .query(Q.where('history_id', history.id))
+            .fetch()
+          if (cancelled || existingSets.length === 0) return
+
+          const restored: Record<string, ValidatedSetData> = {}
+          const restoredInputs: Record<string, SetInputData> = {}
+          let restoredVolume = 0
+          for (const s of existingSets) {
+            // Find session exercise matching this set's exercise
+            const se = sessionExercises.find(e => e.exercise.id === s.exerciseId)
+            if (!se) continue
+            const key = `${se.id}_${s.setOrder}`
+            restored[key] = { weight: s.weight, reps: s.reps, isPr: s.isPr }
+            restoredInputs[key] = { weight: String(s.weight), reps: String(s.reps) }
+            restoredVolume += s.weight * s.reps
+          }
+          if (!cancelled) {
+            setRestoredSets({ validated: restored, inputs: restoredInputs, volume: restoredVolume })
+          }
+        })
+        .catch(e => {
+          if (cancelled) return
+          if (__DEV__) console.error('[WorkoutScreen] resume history failed:', e)
+          startErrorModal.open()
+        })
+    } else {
+      // New workout: create a fresh History
+      createWorkoutHistory(session.id, startTimestampRef.current)
+        .then(history => {
+          if (cancelled) return
+          historyRef.current = history
+          setHistoryId(history.id)
+        })
+        .catch(e => {
+          if (cancelled) return
+          if (__DEV__) console.error('[WorkoutScreen] createWorkoutHistory:', e)
+          startErrorModal.open()
+        })
+    }
     return () => { cancelled = true }
   }, [])
 
@@ -300,18 +347,24 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     // La navigation vers Home (avec célébrations) est gérée par le useEffect ci-dessus
   }, [haptics, summaryModal])
 
+  // Refs pour éviter stale closures dans le BackHandler
+  const summaryIsOpenRef = useRef(false)
+  summaryIsOpenRef.current = summaryModal.isOpen
+  const abandonOpenRef = useRef(abandonModal.open)
+  abandonOpenRef.current = abandonModal.open
+
   // Back handler Android : prioritaire sur le GlobalBackHandler (LIFO)
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (summaryModal.isOpen) {
+      if (summaryIsOpenRef.current) {
         handleClose()
         return true
       }
-      abandonModal.open()
+      abandonOpenRef.current()
       return true
     })
     return () => backHandler.remove()
-  }, [summaryModal.isOpen, handleClose])
+  }, [handleClose])
 
   const handleConfirmEnd = useCallback(async () => {
     try {
@@ -334,7 +387,7 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       if (__DEV__) console.error('[WorkoutScreen] handleConfirmEnd failed:', e)
       confirmEndModal.close()
     }
-  }, [completeWorkout, haptics])
+  }, [completeWorkout, haptics, confirmEndModal.close, summaryModal.open])
 
   const handleConfirmAbandon = useCallback(async () => {
     const activeHistoryId = historyRef.current?.id || historyId
@@ -605,7 +658,7 @@ const WorkoutScreen = ({ route, navigation }: {
   const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {mounted && <ObservableWorkoutContent route={route} navigation={navigation} />}
+      {mounted && <ObservableWorkoutContent route={route} navigation={navigation} resumeHistoryId={route.params.historyId} />}
     </View>
   )
 }
