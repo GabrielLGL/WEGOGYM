@@ -147,7 +147,7 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
           <Text style={styles.emptyText}>{t.programDetail.noSessions}</Text>
         }
         ListFooterComponent={
-          <TouchableOpacity style={styles.addButton} onPress={handleAddSession}>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddSession} accessibilityRole="button" accessibilityLabel={t.accessibility.addSession}>
             <Text style={styles.addButtonText}>{t.programDetail.addSession}</Text>
           </TouchableOpacity>
         }

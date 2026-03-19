@@ -80,4 +80,7 @@ Les `React.RefObject` sont stables par nature — pas de probleme a les passer.
 Aucune.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260319-2100
+
+## Résolution
+Rapport do : docs/bmad/do/20260319-2100-perf-homescreen-memo.md

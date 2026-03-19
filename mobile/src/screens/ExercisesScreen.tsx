@@ -55,7 +55,7 @@ const ExerciseItem = memo<ExerciseItemProps>(
     const muscleNames = item.muscles?.map(m => t.muscleNames[m as keyof typeof t.muscleNames] ?? m) ?? []
     const equipmentLabel = t.equipmentNames[item.equipment as keyof typeof t.equipmentNames] ?? item.equipment
     return (
-      <TouchableOpacity style={styles.exoItem} onPress={() => onPress(item)} activeOpacity={0.7}>
+      <TouchableOpacity style={styles.exoItem} onPress={() => onPress(item)} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={item.name} accessibilityHint={muscleNames.join(', ')}>
         <View style={styles.exoInfo}>
           <View style={styles.titleRow}>
             <Text style={styles.exoTitle}>{item.name}</Text>
@@ -234,6 +234,8 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
                   searchModal.open()
                 }}
                 style={styles.searchFakeInput}
+                accessibilityRole="button"
+                accessibilityLabel={t.accessibility.searchExercises}
               >
                 <View style={styles.searchFakeRow}>
                   <Ionicons name="search-outline" size={16} color={colors.placeholder} />
@@ -255,6 +257,8 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
                     searchModal.close()
                     setSearchQuery('')
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.accessibility.closeSearch}
                 >
                   <Text style={styles.closeSearchText}>{t.common.close}</Text>
                 </TouchableOpacity>
@@ -305,6 +309,8 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
                   haptics.onPress()
                   navigation.navigate('CreateExercise')
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={t.accessibility.addExercise}
               >
                 <Text style={styles.addButtonText}>{t.exercises.createExercise}</Text>
               </TouchableOpacity>

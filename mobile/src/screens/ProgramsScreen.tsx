@@ -241,6 +241,8 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
               haptics.onPress()
               createChoiceModal.open()
             }}
+            accessibilityRole="button"
+            accessibilityLabel={t.accessibility.createProgram}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
               <Ionicons name="add-circle-outline" size={20} color={colors.primaryText} />
@@ -315,13 +317,13 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           onClose={optionsModal.close}
           title={selectedProgram?.name}
         >
-          <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedProgram) prepareRenameProgram(selectedProgram); optionsModal.close(); if (renameTimerRef.current) clearTimeout(renameTimerRef.current); renameTimerRef.current = setTimeout(() => { programModal.open(); renameTimerRef.current = null }, 300) }}>
+          <TouchableOpacity style={styles.sheetOption} onPress={() => { if (selectedProgram) prepareRenameProgram(selectedProgram); optionsModal.close(); if (renameTimerRef.current) clearTimeout(renameTimerRef.current); renameTimerRef.current = setTimeout(() => { programModal.open(); renameTimerRef.current = null }, 300) }} accessibilityRole="button" accessibilityLabel={t.accessibility.renameProgram}>
             <Ionicons name="pencil-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.rename}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateProgram}>
+          <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateProgram} accessibilityRole="button" accessibilityLabel={t.accessibility.duplicateProgram}>
             <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.duplicate}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sheetOption} onPress={() => { optionsModal.close(); setAlertConfig({ title: `${t.programs.deleteTitle} ${selectedProgram?.name} ?`, message: t.programs.deleteMessage, onConfirm: async () => { await deleteProgram(); showToast({ message: t.toasts.programDeleted }) } }); alertModal.open(); }}>
+          <TouchableOpacity style={styles.sheetOption} onPress={() => { optionsModal.close(); setAlertConfig({ title: `${t.programs.deleteTitle} ${selectedProgram?.name} ?`, message: t.programs.deleteMessage, onConfirm: async () => { await deleteProgram(); showToast({ message: t.toasts.programDeleted }) } }); alertModal.open(); }} accessibilityRole="button" accessibilityLabel={t.accessibility.deleteProgram}>
             <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={[styles.sheetOptionText, { color: colors.danger }]}>{t.programs.delete}</Text>
           </TouchableOpacity>
         </BottomSheet>

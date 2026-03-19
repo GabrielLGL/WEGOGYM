@@ -28,7 +28,7 @@ interface HomeGamificationCardProps {
   gamificationCardRef: React.RefObject<View>
 }
 
-export function HomeGamificationCard({ user, userBadges, sets, exercises, gamificationCardRef }: HomeGamificationCardProps) {
+function HomeGamificationCardInner({ user, userBadges, sets, exercises, gamificationCardRef }: HomeGamificationCardProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -84,6 +84,8 @@ export function HomeGamificationCard({ user, userBadges, sets, exercises, gamifi
     </View>
   )
 }
+
+export const HomeGamificationCard = React.memo(HomeGamificationCardInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

@@ -26,7 +26,7 @@ interface DayDetail {
   sessions: Array<{ sessionName: string; setCount: number; durationMin: number | null; volumeKg: number }>
 }
 
-export function HomeWeeklyActivityCard({ histories, sets, sessions, weeklyCardRef }: HomeWeeklyActivityCardProps) {
+function HomeWeeklyActivityCardInner({ histories, sets, sessions, weeklyCardRef }: HomeWeeklyActivityCardProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -122,6 +122,8 @@ export function HomeWeeklyActivityCard({ histories, sets, sessions, weeklyCardRe
     </>
   )
 }
+
+export const HomeWeeklyActivityCard = React.memo(HomeWeeklyActivityCardInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

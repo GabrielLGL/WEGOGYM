@@ -124,7 +124,13 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
 
   const renderExerciseItem = useCallback(({ item: exo }: { item: Exercise }) => (
     <View style={[styles.exoChip, selectedExerciseId === exo.id && styles.exoChipSelected]}>
-      <TouchableOpacity style={styles.exoNameArea} onPress={() => handleExerciseSelect(exo.id)}>
+      <TouchableOpacity
+        style={styles.exoNameArea}
+        onPress={() => handleExerciseSelect(exo.id)}
+        accessibilityRole="button"
+        accessibilityLabel={`${t.accessibility.selectExercise} ${exo.name}`}
+        accessibilityState={{ selected: selectedExerciseId === exo.id }}
+      >
         <Text style={[styles.exoText, selectedExerciseId === exo.id && styles.exoTextSelected]}>
           {exo.name}
         </Text>
@@ -132,6 +138,8 @@ export const ExercisePickerModal: React.FC<ExercisePickerModalProps> = ({
       <TouchableOpacity
         onPress={() => { haptics.onPress(); setInfoExercise(exo) }}
         style={styles.exoInfoBtn}
+        accessibilityRole="button"
+        accessibilityLabel={`${t.accessibility.exerciseInfo} ${exo.name}`}
       >
         <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} />
       </TouchableOpacity>

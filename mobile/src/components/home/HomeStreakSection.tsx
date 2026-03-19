@@ -23,7 +23,7 @@ interface HomeStreakSectionProps {
   histories: History[]
 }
 
-export function HomeStreakSection({ histories }: HomeStreakSectionProps) {
+function HomeStreakSectionInner({ histories }: HomeStreakSectionProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -159,6 +159,8 @@ export function HomeStreakSection({ histories }: HomeStreakSectionProps) {
     </View>
   )
 }
+
+export const HomeStreakSection = React.memo(HomeStreakSectionInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

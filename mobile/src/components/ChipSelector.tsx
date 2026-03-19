@@ -4,6 +4,7 @@ import { borderRadius, spacing, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useHaptics } from '../hooks/useHaptics'
+import { useLanguage } from '../contexts/LanguageContext'
 
 interface ChipSelectorProps {
   items: readonly string[]
@@ -49,6 +50,7 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
   const { colors, neuShadow } = useTheme()
   const styles = useStyles(colors)
   const haptics = useHaptics()
+  const { t } = useLanguage()
 
   const handleSelect = (value: string | null) => {
     haptics.onSelect() // Light haptic pour sélection
@@ -72,6 +74,9 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
           ]}
           onPress={() => handleSelect(null)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={t.accessibility.allFilters}
+          accessibilityState={{ selected: selectedValue === null }}
         >
           <Text
             style={[
@@ -95,6 +100,9 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
           ]}
           onPress={() => handleSelect(item)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`${t.accessibility.filterBy} ${labelMap?.[item] ?? item}`}
+          accessibilityState={{ selected: selectedValue === item }}
         >
           <Text
             style={[

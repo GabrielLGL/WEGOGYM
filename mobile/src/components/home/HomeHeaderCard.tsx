@@ -22,7 +22,7 @@ interface HomeHeaderCardProps {
   settingsBtnRef: React.RefObject<View>
 }
 
-export function HomeHeaderCard({ user, histories, sets, headerCardRef, settingsBtnRef }: HomeHeaderCardProps) {
+function HomeHeaderCardInner({ user, histories, sets, headerCardRef, settingsBtnRef }: HomeHeaderCardProps) {
   const colors = useColors()
   const { t, language } = useLanguage()
   const haptics = useHaptics()
@@ -60,6 +60,8 @@ export function HomeHeaderCard({ user, histories, sets, headerCardRef, settingsB
     </View>
   )
 }
+
+export const HomeHeaderCard = React.memo(HomeHeaderCardInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

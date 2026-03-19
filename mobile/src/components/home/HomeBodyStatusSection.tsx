@@ -38,7 +38,7 @@ function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
   }
 }
 
-export function HomeBodyStatusSection({ sets, exercises, histories }: HomeBodyStatusSectionProps) {
+function HomeBodyStatusSectionInner({ sets, exercises, histories }: HomeBodyStatusSectionProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -255,6 +255,8 @@ export function HomeBodyStatusSection({ sets, exercises, histories }: HomeBodySt
     </View>
   )
 }
+
+export const HomeBodyStatusSection = React.memo(HomeBodyStatusSectionInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

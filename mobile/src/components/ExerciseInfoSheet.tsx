@@ -95,7 +95,12 @@ export const ExerciseInfoSheet: React.FC<ExerciseInfoSheetProps> = ({
 
       {/* Bouton historique */}
       {onViewHistory && (
-        <TouchableOpacity style={styles.historyButton} onPress={onViewHistory}>
+        <TouchableOpacity
+          style={styles.historyButton}
+          onPress={onViewHistory}
+          accessibilityRole="button"
+          accessibilityLabel={t.exerciseInfoSheet.viewHistory}
+        >
           <Text style={styles.historyButtonText}>{t.exerciseInfoSheet.viewHistory}</Text>
           <Ionicons name="arrow-forward" size={16} color={colors.primary} />
         </TouchableOpacity>

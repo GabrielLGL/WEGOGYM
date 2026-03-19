@@ -33,7 +33,7 @@ interface InsightCard {
   render: () => React.ReactElement
 }
 
-export function HomeInsightsCarousel({ histories, sets, exercises, user }: HomeInsightsCarouselProps) {
+function HomeInsightsCarouselInner({ histories, sets, exercises, user }: HomeInsightsCarouselProps) {
   const colors = useColors()
   const { t, language } = useLanguage()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
@@ -337,6 +337,8 @@ export function HomeInsightsCarousel({ histories, sets, exercises, user }: HomeI
     </View>
   )
 }
+
+export const HomeInsightsCarousel = React.memo(HomeInsightsCarouselInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
