@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -46,6 +46,29 @@ function getBalanceColor(score: number, colors: ThemeColors): string {
   return colors.danger
 }
 
+// ─── DistributionBar (memo) ──────────────────────────────────────────────────
+
+interface DistributionBarProps {
+  item: VolumeDistributionEntry
+  barColor: string
+  widthPct: number
+}
+
+const DistributionBar = React.memo(function DistributionBar({ item, barColor, widthPct }: DistributionBarProps) {
+  const colors = useColors()
+  const styles = useStyles(colors)
+
+  return (
+    <View style={styles.barRow}>
+      <Text style={styles.barLabel} numberOfLines={1}>{item.muscle}</Text>
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, { width: `${widthPct}%`, backgroundColor: barColor }]} />
+      </View>
+      <Text style={styles.barPct}>{item.percentage}%</Text>
+    </View>
+  )
+})
+
 // ─── Composant principal ─────────────────────────────────────────────────────
 
 interface Props {
@@ -67,22 +90,16 @@ export function StatsVolumeDistributionBase({ sets, exercises }: Props) {
 
   const periodLabels = t.volumeDistribution.periods
 
-  const renderBar = ({ item, index }: { item: VolumeDistributionEntry; index: number }) => {
-    const barPalette = [colors.purple, colors.success, colors.amber, colors.pink, colors.blue]
-    const barColor = barPalette[index % barPalette.length]
-    const maxPct = data.entries[0]?.percentage ?? 1
-    const widthPct = maxPct > 0 ? (item.percentage / maxPct) * 100 : 0
+  const maxPct = data.entries[0]?.percentage ?? 1
+  const barPalette = [colors.purple, colors.success, colors.amber, colors.pink, colors.blue]
 
-    return (
-      <View style={styles.barRow}>
-        <Text style={styles.barLabel} numberOfLines={1}>{item.muscle}</Text>
-        <View style={styles.barTrack}>
-          <View style={[styles.barFill, { width: `${widthPct}%`, backgroundColor: barColor }]} />
-        </View>
-        <Text style={styles.barPct}>{item.percentage}%</Text>
-      </View>
-    )
-  }
+  const renderBar = useCallback(({ item, index }: { item: VolumeDistributionEntry; index: number }) => (
+    <DistributionBar
+      item={item}
+      barColor={barPalette[index % barPalette.length]}
+      widthPct={maxPct > 0 ? (item.percentage / maxPct) * 100 : 0}
+    />
+  ), [maxPct, barPalette])
 
   if (data.entries.length === 0) {
     return (

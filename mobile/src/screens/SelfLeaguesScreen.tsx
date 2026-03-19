@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import {
   View,
   Text,
@@ -54,7 +54,7 @@ interface RowProps {
   tBelow: string
 }
 
-const RankRow: React.FC<RowProps> = ({ entry, metric, colors, tAbove, tBelow }) => {
+const RankRow = React.memo(function RankRow({ entry, metric, colors, tAbove, tBelow }: RowProps) {
   const isTop3 = entry.rank <= 3
   const rankColors = [colors.gold, colors.silver, colors.bronze]
 
@@ -98,7 +98,7 @@ const RankRow: React.FC<RowProps> = ({ entry, metric, colors, tAbove, tBelow }) 
       </View>
     </View>
   )
-}
+})
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
@@ -132,6 +132,16 @@ export function SelfLeaguesScreenBase({ histories, sets }: Props) {
     { key: 'tonnage',  label: sl.metricTonnage },
     { key: 'duration', label: sl.metricDuration },
   ]
+
+  const renderItem = useCallback(({ item }: { item: SelfLeaguesEntry }) => (
+    <RankRow
+      entry={item}
+      metric={metric}
+      colors={colors}
+      tAbove={sl.above}
+      tBelow={sl.below}
+    />
+  ), [metric, colors, sl.above, sl.below])
 
   const footerText = periodSize === 'week'
     ? sl.footerBased.replace('{n}', String(ranking.length))
@@ -199,15 +209,7 @@ export function SelfLeaguesScreenBase({ histories, sets }: Props) {
           keyExtractor={item => `${item.startDate}`}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <RankRow
-              entry={item}
-              metric={metric}
-              colors={colors}
-              tAbove={sl.above}
-              tBelow={sl.below}
-            />
-          )}
+          renderItem={renderItem}
           ListFooterComponent={
             <Text style={[styles.footerText, { color: colors.textSecondary }]}>{footerText}</Text>
           }

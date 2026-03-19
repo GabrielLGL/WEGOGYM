@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useCallback } from 'react'
 import {
   View,
   Text,
@@ -41,7 +41,7 @@ interface CardProps {
   labels: Record<string, string>
 }
 
-function ExerciseRestCard({ entry, colors, labels }: CardProps) {
+const ExerciseRestCard = React.memo(function ExerciseRestCard({ entry, colors, labels }: CardProps) {
   const styles = useStyles(colors)
   const badgeColor = getBadgeColor(entry.recommendation, colors)
 
@@ -77,7 +77,7 @@ function ExerciseRestCard({ entry, colors, labels }: CardProps) {
       </View>
     </View>
   )
-}
+})
 
 // ─── Composant principal ─────────────────────────────────────────────────────
 
@@ -96,6 +96,14 @@ export function StatsRestTimeBase({ sets, exercises }: Props) {
     () => computeRestTimeAnalysis(sets, exercises),
     [sets, exercises],
   )
+
+  const renderItem = useCallback(({ item }: { item: RestTimeEntry }) => (
+    <ExerciseRestCard
+      entry={item}
+      colors={colors}
+      labels={rt.recommendations}
+    />
+  ), [colors, rt.recommendations])
 
   if (!result) {
     return (
@@ -122,13 +130,7 @@ export function StatsRestTimeBase({ sets, exercises }: Props) {
           </Text>
         </View>
       }
-      renderItem={({ item }) => (
-        <ExerciseRestCard
-          entry={item}
-          colors={colors}
-          labels={rt.recommendations}
-        />
-      )}
+      renderItem={renderItem}
       showsVerticalScrollIndicator={false}
     />
   )

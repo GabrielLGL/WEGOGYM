@@ -81,4 +81,4 @@ const renderItem = useCallback(({ item }: { item: CatalogExercise }) => (
 Aucune — independant.
 
 ## Statut
-⏳ En attente
+✅ Résolu

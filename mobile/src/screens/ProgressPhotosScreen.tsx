@@ -38,6 +38,65 @@ type CategoryFilter = 'all' | 'front' | 'side' | 'back'
 
 const CATEGORY_FILTERS: CategoryFilter[] = ['all', 'front', 'side', 'back']
 
+// ─── PhotoThumbnail (memo) ────────────────────────────────────────────────────
+
+interface PhotoThumbnailProps {
+  item: ProgressPhoto
+  isSelectedBefore: boolean
+  isSelectedAfter: boolean
+  onPress: (photo: ProgressPhoto) => void
+  onLongPress: (photo: ProgressPhoto) => void
+  thumbSize: number
+  formatDate: (timestamp: number) => string
+  beforeLabel: string
+  afterLabel: string
+}
+
+const PhotoThumbnail = React.memo(function PhotoThumbnail({
+  item,
+  isSelectedBefore,
+  isSelectedAfter,
+  onPress,
+  onLongPress,
+  thumbSize,
+  formatDate,
+  beforeLabel,
+  afterLabel,
+}: PhotoThumbnailProps) {
+  const colors = useColors()
+  const styles = useStyles(colors)
+  const isSelected = isSelectedBefore || isSelectedAfter
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.thumbnail,
+        { width: thumbSize, height: thumbSize * (4 / 3) },
+        isSelected && styles.thumbnailSelected,
+      ]}
+      onPress={() => onPress(item)}
+      onLongPress={() => onLongPress(item)}
+      activeOpacity={0.7}
+    >
+      <Image
+        source={{ uri: item.photoUri }}
+        style={styles.thumbnailImage}
+        contentFit="cover"
+      />
+      <View style={styles.thumbnailOverlay}>
+        <Text style={styles.thumbnailDate}>{formatDate(item.date)}</Text>
+      </View>
+      {isSelected && (
+        <View style={styles.thumbnailBadge}>
+          <Text style={styles.thumbnailBadgeText}>
+            {isSelectedBefore ? beforeLabel : afterLabel}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  )
+})
+
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 interface Props {
@@ -178,40 +237,22 @@ function ProgressPhotosScreenBase({ photos }: Props) {
     })
   }, [locale])
 
-  const renderThumbnail = useCallback(({ item }: { item: ProgressPhoto }) => {
-    const isSelectedBefore = beforePhoto?.id === item.id
-    const isSelectedAfter = afterPhoto?.id === item.id
-    const isSelected = isSelectedBefore || isSelectedAfter
+  const beforePhotoId = beforePhoto?.id ?? null
+  const afterPhotoId = afterPhoto?.id ?? null
 
-    return (
-      <TouchableOpacity
-        style={[
-          styles.thumbnail,
-          { width: thumbSize, height: thumbSize * (4 / 3) },
-          isSelected && styles.thumbnailSelected,
-        ]}
-        onPress={() => handlePhotoTap(item)}
-        onLongPress={() => handleLongPress(item)}
-        activeOpacity={0.7}
-      >
-        <Image
-          source={{ uri: item.photoUri }}
-          style={styles.thumbnailImage}
-          contentFit="cover"
-        />
-        <View style={styles.thumbnailOverlay}>
-          <Text style={styles.thumbnailDate}>{formatDate(item.date)}</Text>
-        </View>
-        {isSelected && (
-          <View style={styles.thumbnailBadge}>
-            <Text style={styles.thumbnailBadgeText}>
-              {isSelectedBefore ? t.progressPhotos.before : t.progressPhotos.after}
-            </Text>
-          </View>
-        )}
-      </TouchableOpacity>
-    )
-  }, [beforePhoto, afterPhoto, thumbSize, styles, handlePhotoTap, handleLongPress, formatDate, t])
+  const renderThumbnail = useCallback(({ item }: { item: ProgressPhoto }) => (
+    <PhotoThumbnail
+      item={item}
+      isSelectedBefore={beforePhotoId === item.id}
+      isSelectedAfter={afterPhotoId === item.id}
+      onPress={handlePhotoTap}
+      onLongPress={handleLongPress}
+      thumbSize={thumbSize}
+      formatDate={formatDate}
+      beforeLabel={t.progressPhotos.before}
+      afterLabel={t.progressPhotos.after}
+    />
+  ), [beforePhotoId, afterPhotoId, thumbSize, handlePhotoTap, handleLongPress, formatDate, t])
 
   return (
     <>

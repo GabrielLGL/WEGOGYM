@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -54,6 +54,53 @@ function getPairLabels(nameKey: string, t: ReturnType<typeof useLanguage>['t']):
   return labels[nameKey] ?? { left: nameKey, right: nameKey }
 }
 
+// ─── MusclePairCard (memo) ───────────────────────────────────────────────────
+
+interface MusclePairCardProps {
+  item: MusclePair
+  t: ReturnType<typeof useLanguage>['t']
+}
+
+const MusclePairCard = React.memo(function MusclePairCard({ item, t }: MusclePairCardProps) {
+  const colors = useColors()
+  const styles = useStyles(colors)
+  const labels = getPairLabels(item.nameKey, t)
+  const statusColor = getStatusColor(item.status, colors)
+  const statusLabel = t.muscleBalance.statuses[item.status]
+  const total = item.leftVolume + item.rightVolume
+  const leftPct = total > 0 ? (item.leftVolume / total) * 100 : 50
+  const rightPct = total > 0 ? (item.rightVolume / total) * 100 : 50
+
+  return (
+    <View style={styles.pairCard}>
+      <View style={styles.pairHeader}>
+        <Text style={styles.pairLabel}>{labels.left}</Text>
+        <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
+          <Text style={[styles.statusText, { color: statusColor }]}>
+            {statusLabel}
+          </Text>
+        </View>
+        <Text style={[styles.pairLabel, { textAlign: 'right' }]}>{labels.right}</Text>
+      </View>
+
+      <View style={styles.barsRow}>
+        <View style={styles.barTrackLeft}>
+          <View style={[styles.barFillLeft, { width: `${leftPct}%`, backgroundColor: colors.primary }]} />
+        </View>
+        <Text style={styles.ratioText}>{item.ratio.toFixed(2)}</Text>
+        <View style={styles.barTrackRight}>
+          <View style={[styles.barFillRight, { width: `${rightPct}%`, backgroundColor: statusColor }]} />
+        </View>
+      </View>
+
+      <View style={styles.volumeRow}>
+        <Text style={styles.volumeText}>{formatVolume(item.leftVolume)}</Text>
+        <Text style={styles.volumeText}>{formatVolume(item.rightVolume)}</Text>
+      </View>
+    </View>
+  )
+})
+
 // ─── Composant principal ─────────────────────────────────────────────────────
 
 interface Props {
@@ -75,53 +122,9 @@ export function StatsMuscleBalanceBase({ sets, exercises }: Props) {
 
   const periodLabels = t.muscleBalance.periods
 
-  const getPairStatusColor = (status: MusclePair['status']): string => {
-    return getStatusColor(status, colors)
-  }
-
-  const getStatusLabel = (status: MusclePair['status']): string => {
-    return t.muscleBalance.statuses[status]
-  }
-
-  const renderPair = ({ item }: { item: MusclePair }) => {
-    const labels = getPairLabels(item.nameKey, t)
-    const statusColor = getPairStatusColor(item.status)
-    const total = item.leftVolume + item.rightVolume
-    const leftPct = total > 0 ? (item.leftVolume / total) * 100 : 50
-    const rightPct = total > 0 ? (item.rightVolume / total) * 100 : 50
-
-    return (
-      <View style={styles.pairCard}>
-        {/* Labels row */}
-        <View style={styles.pairHeader}>
-          <Text style={styles.pairLabel}>{labels.left}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {getStatusLabel(item.status)}
-            </Text>
-          </View>
-          <Text style={[styles.pairLabel, { textAlign: 'right' }]}>{labels.right}</Text>
-        </View>
-
-        {/* Bars */}
-        <View style={styles.barsRow}>
-          <View style={styles.barTrackLeft}>
-            <View style={[styles.barFillLeft, { width: `${leftPct}%`, backgroundColor: colors.primary }]} />
-          </View>
-          <Text style={styles.ratioText}>{item.ratio.toFixed(2)}</Text>
-          <View style={styles.barTrackRight}>
-            <View style={[styles.barFillRight, { width: `${rightPct}%`, backgroundColor: statusColor }]} />
-          </View>
-        </View>
-
-        {/* Volume values */}
-        <View style={styles.volumeRow}>
-          <Text style={styles.volumeText}>{formatVolume(item.leftVolume)}</Text>
-          <Text style={styles.volumeText}>{formatVolume(item.rightVolume)}</Text>
-        </View>
-      </View>
-    )
-  }
+  const renderPair = useCallback(({ item }: { item: MusclePair }) => (
+    <MusclePairCard item={item} t={t} />
+  ), [t])
 
   if (data.pairs.every(p => p.leftVolume === 0 && p.rightVolume === 0)) {
     return (
