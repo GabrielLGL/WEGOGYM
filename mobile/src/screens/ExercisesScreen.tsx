@@ -222,6 +222,15 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
 
   const renderSeparator = useCallback(() => <View style={styles.separator} />, [styles])
 
+  const getItemLayout = useCallback(
+    (_data: unknown, index: number) => ({
+      length: ITEM_HEIGHT,
+      offset: (ITEM_HEIGHT + SEPARATOR_HEIGHT) * index,
+      index,
+    }),
+    [],
+  )
+
   return (
     <View style={styles.baseContainer}>
       <SafeAreaView style={styles.container}>
@@ -293,6 +302,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
               style={styles.list}
               contentContainerStyle={styles.listContent}
               ItemSeparatorComponent={renderSeparator}
+              getItemLayout={getItemLayout}
               ListEmptyComponent={<Text style={styles.emptyList}>{t.exercises.noExercises}</Text>}
               initialNumToRender={15}
               maxToRenderPerBatch={10}
@@ -377,6 +387,8 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
 
 const SEARCH_HEIGHT = 45
 const LIST_PADDING_BOTTOM = 150
+const ITEM_HEIGHT = 74
+const SEPARATOR_HEIGHT = 1
 
 function useExerciseItemStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
