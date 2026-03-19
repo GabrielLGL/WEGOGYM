@@ -15,7 +15,7 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 |----------|--------|
 | Tests | 2231 (188 suites) |
 | Erreurs TS | 0 |
-| Score sante | 98/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
+| Score sante | 100/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
 | Ship score | 100/100 SHIP IT (20260319-1800) |
 | Tag MVP | `v0.1.0-mvp-20260319` |
 | Ecrans | 51 |
@@ -193,8 +193,8 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 ### Phase 2 — Polish (en cours)
 - [ ] UI Review globale (coherence visuelle 51 ecrans)
 - [ ] 71 couleurs hardcodees → tokens theme (21 fichiers)
-- [ ] HomeScreen refactor (2082 lignes → split composants)
-- [ ] DRY getMondayOfWeek (5 implementations → 1)
+- [x] HomeScreen refactor (HomeHeroAction, HomeStatusStrip extraits)
+- [x] DRY getMondayOfWeek (commit b8dcb76)
 - [ ] Perf audit HomeScreen (16+ cartes, re-renders)
 - [ ] Empty states (tous les ecrans sans data)
 - [ ] Error boundaries
@@ -234,20 +234,10 @@ Cloud sync, iOS, themes debloquables, partage avance, mode coach, premium (voir 
 
 ## Dette technique
 
-Issues restantes du verrif 20260319-1408 (score 98/100) :
-
-| # | Probleme | Fichiers | Effort | Groupe |
-|---|----------|----------|--------|--------|
-| A1 | handleGo sans useCallback (stale closure) | HomeHeroAction.tsx | 5min | A |
-| A2 | Inline arrow dans shortcuts.map | HomeHeroAction.tsx | 5min | A |
-| B1 | BackHandler stale closure summaryModal | WorkoutScreen.tsx | 10min | B |
-| B2 | handleConfirmEnd deps incompletes | WorkoutScreen.tsx | 5min | B |
-| C1 | CoachMarks timer cleanup partiel | CoachMarks.tsx | 10min | C |
-| D1 | s.history.id sans optional chaining | HomeInsightsCarousel.tsx | 5min | D |
-| D2 | Render functions instables dans cards | HomeInsightsCarousel.tsx | 15min | D |
-| D3 | Hardcoded fallback 'intermediate' | HomeInsightsCarousel.tsx, HomeInsightsSection.tsx | 5min | D |
-
-Parallelisation : memes lettres = sequentiel, lettres differentes = parallele.
+Toutes les issues du verrif 20260319-1408 sont resolues ou classees faux positif :
+- **A1-A2, B1-B2** : corriges dans commit `a088050` (useCallback, stale closures)
+- **C1, D1-D3** : classes faux positif apres verification manuelle
+- Score : 0 issue ouverte (date : 2026-03-19)
 
 ---
 
