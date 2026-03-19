@@ -18,6 +18,7 @@
  */
 
 import React, { useEffect, useRef, useLayoutEffect, useState, useMemo, useCallback } from 'react'
+import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler'
 import {
   View,
   Text,
@@ -130,6 +131,8 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
 
   const [historyId, setHistoryId] = useState<string>('')
   const warmupModal = useModalState()
+  const warmupOpenRef = useRef(warmupModal.open)
+  warmupOpenRef.current = warmupModal.open
   const restTimerModal = useModalState()
   const [currentRestDuration, setCurrentRestDuration] = useState(user?.restDuration ?? 90)
   const confirmEndModal = useModalState()
@@ -254,15 +257,15 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
       headerStyle: { backgroundColor: colors.background },
       headerTintColor: colors.text,
       headerRight: () => (
-        <TouchableOpacity
+        <GHTouchableOpacity
           style={{ marginRight: spacing.sm }}
-          onPress={() => { haptics.onPress(); warmupModal.open() }}
+          onPress={() => { haptics.onPress(); warmupOpenRef.current() }}
         >
           <Ionicons name="body-outline" size={22} color={colors.primary} />
-        </TouchableOpacity>
+        </GHTouchableOpacity>
       ),
     })
-  }, [navigation, session.name, colors, haptics, warmupModal])
+  }, [navigation, session.name, colors, haptics])
 
   useEffect(() => {
     let cancelled = false
