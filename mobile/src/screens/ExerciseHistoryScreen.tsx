@@ -27,6 +27,7 @@ import { computePlateauAnalysis } from '../model/utils/plateauHelpers'
 import { computeVariantSuggestions } from '../model/utils/variantHelpers'
 import { computeOverloadTrend } from '../model/utils/progressiveOverloadHelpers'
 import { findAlternatives } from '../model/utils/exerciseAlternativesHelpers'
+import { getBestRepMax } from '../model/utils/repMaxHelpers'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -145,6 +146,11 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
     [exercise, allExercises, allSets],
   )
 
+  const repMaxData = useMemo(
+    () => getBestRepMax(setsForExercise.map(s => ({ weight: s.weight, reps: s.reps }))),
+    [setsForExercise],
+  )
+
   return (
     <ScrollView
       style={styles.container}
@@ -207,6 +213,33 @@ function ExerciseHistoryContent({ exercise, setsForExercise, histories, sessions
           <Text style={styles.emptyText}>
             {t.exerciseHistory.chartEmpty}
           </Text>
+        </View>
+      )}
+
+      {/* Rep Max Estimator */}
+      {repMaxData && (
+        <View style={styles.repMaxCard}>
+          <Text style={styles.repMaxTitle}>{t.exerciseHistory.repMax.title}</Text>
+          <View style={styles.repMaxRow}>
+            <View style={styles.repMaxStat}>
+              <Text style={styles.repMaxValue}>{repMaxData.estimated1RM} {t.statsMeasurements.weightUnit}</Text>
+              <Text style={styles.repMaxLabel}>{t.exerciseHistory.repMax.estimated1RM}</Text>
+            </View>
+            <View style={styles.repMaxStat}>
+              <Text style={styles.repMaxValue}>{repMaxData.estimated3RM} {t.statsMeasurements.weightUnit}</Text>
+              <Text style={styles.repMaxLabel}>{t.exerciseHistory.repMax.estimated3RM}</Text>
+            </View>
+            <View style={styles.repMaxStat}>
+              <Text style={styles.repMaxValue}>{repMaxData.estimated5RM} {t.statsMeasurements.weightUnit}</Text>
+              <Text style={styles.repMaxLabel}>{t.exerciseHistory.repMax.estimated5RM}</Text>
+            </View>
+          </View>
+          <Text style={styles.repMaxBestSet}>
+            {t.exerciseHistory.repMax.bestSet
+              .replace('{weight}', String(repMaxData.bestWeight))
+              .replace('{reps}', String(repMaxData.bestReps))}
+          </Text>
+          <Text style={styles.repMaxDisclaimer}>{t.exerciseHistory.repMax.disclaimer}</Text>
         </View>
       )}
 
@@ -784,6 +817,47 @@ function useStyles(colors: ThemeColors) {
     alternativeSets: {
       fontSize: fontSize.caption,
       color: colors.textSecondary,
+    },
+    repMaxCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginTop: spacing.md,
+    },
+    repMaxTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700' as const,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    repMaxRow: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      marginBottom: spacing.sm,
+    },
+    repMaxStat: {
+      alignItems: 'center' as const,
+      flex: 1,
+    },
+    repMaxValue: {
+      fontSize: fontSize.md,
+      fontWeight: '700' as const,
+      color: colors.primary,
+    },
+    repMaxLabel: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    repMaxBestSet: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      fontStyle: 'italic' as const,
+    },
+    repMaxDisclaimer: {
+      fontSize: fontSize.caption,
+      color: colors.textSecondary,
+      marginTop: spacing.xs,
     },
     overloadSection: {
       backgroundColor: colors.card,

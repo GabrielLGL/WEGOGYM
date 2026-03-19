@@ -142,6 +142,50 @@ export async function getLastSessionVolume(
 }
 
 /**
+ * Retourne le volume, la durée et les séries de la dernière séance terminée
+ * pour une session donnée (pour le calcul de densité).
+ */
+export async function getLastSessionDensity(
+  sessionId: string,
+  excludeHistoryId: string
+): Promise<{ volume: number; durationMinutes: number; sets: Array<{ weight: number; reps: number }> } | null> {
+  const histories = await database
+    .get<History>('histories')
+    .query(
+      Q.where('session_id', sessionId),
+      Q.where('deleted_at', null),
+      Q.or(Q.where('is_abandoned', null), Q.where('is_abandoned', false)),
+      Q.where('id', Q.notEq(excludeHistoryId))
+    )
+    .fetch()
+
+  const completed = histories.filter(h => h.endTime != null)
+  if (completed.length === 0) return null
+
+  const mostRecent = completed.sort(
+    (a, b) => b.startTime.getTime() - a.startTime.getTime()
+  )[0]
+
+  const durationMinutes = Math.max(
+    1,
+    (mostRecent.endTime!.getTime() - mostRecent.startTime.getTime()) / 60000
+  )
+
+  const sets = await database
+    .get<SetModel>('sets')
+    .query(Q.where('history_id', mostRecent.id))
+    .fetch()
+
+  const volume = sets.reduce((sum, s) => sum + s.weight * s.reps, 0)
+
+  return {
+    volume,
+    durationMinutes,
+    sets: sets.map(s => ({ weight: s.weight, reps: s.reps })),
+  }
+}
+
+/**
  * Soft-delete un historique (met deletedAt = new Date()).
  * La séance disparaîtra des listes filtrées par deleted_at = null.
  *

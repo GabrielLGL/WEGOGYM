@@ -27,6 +27,8 @@ import { fontSize, spacing, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useLanguage } from '../contexts/LanguageContext'
+import History from '../model/models/History'
+import { predictSessionDuration, DurationPrediction } from '../model/utils/durationPredictorHelpers'
 
 const TOAST_FADE_IN = 200
 const TOAST_FADE_OUT = 300
@@ -78,6 +80,22 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   const alertModal = useModalState()
   const [alertConfig, setAlertConfig] = useState<{ title: string; message: string }>({ title: '', message: '' })
   const alertConfirmRef = useRef<() => void | Promise<unknown>>(() => {})
+
+  // --- DURATION PREDICTION ---
+  const [histories, setHistories] = useState<History[]>([])
+  useEffect(() => {
+    let cancelled = false
+    database.get<History>('histories')
+      .query(Q.where('session_id', session.id))
+      .fetch()
+      .then(results => { if (!cancelled) setHistories(results) })
+    return () => { cancelled = true }
+  }, [session.id])
+
+  const prediction: DurationPrediction | null = useMemo(() => {
+    if (sessionExercises.length === 0) return null
+    return predictSessionDuration(sessionExercises.length, histories, session.id)
+  }, [sessionExercises.length, histories, session.id])
 
   // --- SUPERSET SELECTION MODE ---
   const [selectionMode, setSelectionMode] = useState(false)
@@ -281,6 +299,29 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       <View style={styles.footerContainer}>
         {!selectionMode && (
           <>
+            {prediction && (
+              <View style={styles.durationRow}>
+                <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.durationText}>
+                  {t.sessionDetail.duration.estimate} : ~{prediction.estimatedMinutes} min
+                </Text>
+                <View style={[
+                  styles.durationBadge,
+                  prediction.confidence === 'high' && { backgroundColor: colors.primary + '22' },
+                  prediction.confidence === 'medium' && { backgroundColor: colors.warning + '22' },
+                  prediction.confidence === 'low' && { backgroundColor: colors.textSecondary + '22' },
+                ]}>
+                  <Text style={[
+                    styles.durationBadgeText,
+                    prediction.confidence === 'high' && { color: colors.primary },
+                    prediction.confidence === 'medium' && { color: colors.warning },
+                    prediction.confidence === 'low' && { color: colors.textSecondary },
+                  ]}>
+                    {t.sessionDetail.duration.confidence[prediction.confidence]}
+                  </Text>
+                </View>
+              </View>
+            )}
             <TouchableOpacity
               style={[styles.launchButton, sessionExercises.length === 0 && { opacity: 0.4 }]}
               onPress={() => {
@@ -519,6 +560,29 @@ function useStyles(colors: ThemeColors) {
       alignItems: 'center',
     },
     toastText: { color: colors.primaryText, fontSize: fontSize.sm, fontWeight: '600' },
+
+    // Duration predictor
+    durationRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
+    durationText: {
+      flex: 1,
+      color: colors.textSecondary,
+      fontSize: fontSize.xs,
+    },
+    durationBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.xs,
+    },
+    durationBadgeText: {
+      fontSize: fontSize.caption,
+      fontWeight: '600',
+    },
 
     // Hint
     hintText: {
