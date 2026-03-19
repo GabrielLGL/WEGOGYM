@@ -16,6 +16,7 @@ import type Exercise from '../../models/Exercise'
 import type SetModel from '../../models/Set'
 import type History from '../../models/History'
 import type PerformanceLog from '../../models/PerformanceLog'
+import type BodyMeasurement from '../../models/BodyMeasurement'
 import type { Database } from '@nozbe/watermelondb'
 
 // ---------------------------------------------------------------------------
@@ -296,6 +297,7 @@ type MockSetFields = {
   exerciseId: string
   history: { id: string }
   exercise: { id: string }
+  createdAt: Date
 }
 
 export type MockSet = MockSetFields
@@ -311,6 +313,7 @@ export function mockSet(
     isPr: false,
     historyId: 'h-1',
     exerciseId: 'exo-1',
+    createdAt: new Date(),
     history: { id: overrides.historyId ?? 'h-1' },
     exercise: { id: overrides.exerciseId ?? 'exo-1' },
     ...overrides,
@@ -330,6 +333,7 @@ type MockHistoryFields = {
   sessionId: string
   session: { id: string }
   deletedAt: Date | null
+  isAbandoned: boolean
 }
 
 export type MockHistory = MockHistoryFields
@@ -345,6 +349,7 @@ export function mockHistory(
     sessionId: 'sess-1',
     session: { id: overrides.sessionId ?? 'sess-1' },
     deletedAt: null,
+    isAbandoned: false,
     ...overrides,
   }
   return mock as unknown as History
@@ -409,4 +414,38 @@ export function mockPerformanceLog(
     ...overrides,
   }
   return mock as unknown as PerformanceLog
+}
+
+// ---------------------------------------------------------------------------
+// MockBodyMeasurement
+// ---------------------------------------------------------------------------
+
+type MockBodyMeasurementFields = {
+  id: string
+  date: number
+  weight: number | null
+  waist: number | null
+  hips: number | null
+  chest: number | null
+  arms: number | null
+  createdAt: Date
+}
+
+export type MockBodyMeasurement = MockBodyMeasurementFields
+
+export function mockBodyMeasurement(
+  overrides: Partial<MockBodyMeasurementFields> = {},
+): BodyMeasurement {
+  const mock: MockBodyMeasurement = {
+    id: 'bm-1',
+    date: Date.now(),
+    weight: 80,
+    waist: null,
+    hips: null,
+    chest: null,
+    arms: null,
+    createdAt: new Date(),
+    ...overrides,
+  }
+  return mock as unknown as BodyMeasurement
 }

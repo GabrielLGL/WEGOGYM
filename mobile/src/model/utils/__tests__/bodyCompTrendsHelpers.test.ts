@@ -1,4 +1,5 @@
 import { computeBodyCompTrends } from '../bodyCompTrendsHelpers'
+import { mockBodyMeasurement } from './testFactories'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -6,14 +7,14 @@ function makeMeasurement(
   daysAgo: number,
   overrides: Partial<Record<'weight' | 'waist' | 'hips' | 'chest' | 'arms', number | null>> = {},
 ) {
-  return {
+  return mockBodyMeasurement({
     date: Date.now() - daysAgo * DAY_MS,
     weight: overrides.weight ?? 80,
     waist: overrides.waist ?? 85,
     hips: overrides.hips ?? null,
     chest: overrides.chest ?? null,
     arms: overrides.arms ?? null,
-  } as any
+  })
 }
 
 describe('computeBodyCompTrends', () => {

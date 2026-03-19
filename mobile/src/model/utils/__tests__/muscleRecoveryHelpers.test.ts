@@ -1,6 +1,8 @@
 import { computeMuscleRecovery, getRecoveryColor } from '../muscleRecoveryHelpers'
+import type SetModel from '../../models/Set'
+import type Exercise from '../../models/Exercise'
+import type { ThemeColors } from '../../../theme'
 
-const DAY_MS = 24 * 60 * 60 * 1000
 const HOUR_MS = 60 * 60 * 1000
 
 function makeSet(exerciseId: string, weight: number, reps: number, hoursAgo: number) {
@@ -9,14 +11,14 @@ function makeSet(exerciseId: string, weight: number, reps: number, hoursAgo: num
     reps,
     exerciseId,
     createdAt: new Date(Date.now() - hoursAgo * HOUR_MS),
-  }
+  } as unknown as SetModel
 }
 
 const exercises = [
   { id: 'ex1', muscles: ['Pecs', 'Triceps'] },
   { id: 'ex2', muscles: ['Dos', 'Biceps'] },
   { id: 'ex3', muscles: ['Quadriceps'] },
-]
+] as unknown as Exercise[]
 
 describe('computeMuscleRecovery', () => {
   it('retourne un tableau vide si aucune séance (aucun muscle sollicité)', () => {
@@ -112,7 +114,7 @@ describe('getRecoveryColor', () => {
     success: '#10B981',
     amber: '#F59E0B',
     danger: '#FF3B30',
-  } as any
+  } as unknown as ThemeColors
 
   it('retourne la couleur correcte par statut', () => {
     expect(getRecoveryColor('fresh', mockColors)).toBe('#007AFF')

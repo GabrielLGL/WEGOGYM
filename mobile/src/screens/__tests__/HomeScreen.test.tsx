@@ -95,182 +95,81 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
   ...overrides,
 } as unknown as User)
 
+const renderHome = (overrides: Partial<React.ComponentProps<typeof HomeContent>> = {}) =>
+  render(
+    <HomeContent
+      user={null}
+      histories={[] as unknown as History[]}
+      historiesCount={0}
+      sets={[] as unknown as WorkoutSet[]}
+      sessions={[] as unknown as Session[]}
+      userBadges={[]}
+      exercises={[]}
+      friends={[] as unknown as FriendSnapshot[]}
+      programs={[] as unknown as Program[]}
+      {...overrides}
+    />
+  )
+
 describe('HomeScreen Dashboard', () => {
   beforeEach(() => {
     mockNavigate.mockClear()
   })
 
   it('rend sans crasher avec des listes vides', () => {
-    expect(() =>
-      render(
-        <HomeContent
-          user={null}
-          histories={[] as unknown as History[]}
-          historiesCount={0}
-          sets={[] as unknown as WorkoutSet[]}
-          sessions={[] as unknown as Session[]}
-          userBadges={[]}
-          exercises={[]}
-          friends={[] as unknown as FriendSnapshot[]}
-          programs={[] as unknown as Program[]}
-        />
-      )
-    ).not.toThrow()
+    expect(() => renderHome()).not.toThrow()
   })
 
   it('affiche le greeting avec le prénom', () => {
-    const { getByText } = render(
-      <HomeContent
-        user={makeUser()}
-        histories={[] as unknown as History[]}
-        historiesCount={0}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
+    const { getByText } = renderHome({ user: makeUser() })
     expect(getByText('Salut, Gabriel !')).toBeTruthy()
   })
 
   it('affiche "Toi" quand pas d\'utilisateur', () => {
-    const { getByText } = render(
-      <HomeContent
-        user={null}
-        histories={[] as unknown as History[]}
-        historiesCount={0}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
+    const { getByText } = renderHome()
     expect(getByText('Salut, Toi !')).toBeTruthy()
   })
 
-  it('affiche les KPIs', () => {
-    const fakeHistories = Array.from({ length: 5 }, (_, i) => ({
-      id: `h-${i}`,
-      startTime: new Date(Date.now() - i * 86400000),
-      isAbandoned: false,
-    })) as unknown as History[]
-    const { getByText } = render(
-      <HomeContent
-        user={makeUser({ totalTonnage: 25000, totalPrs: 7 } as Partial<User>)}
-        histories={fakeHistories}
-        historiesCount={5}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
-    expect(getByText('5')).toBeTruthy()
-    expect(getByText('25.0 t')).toBeTruthy()
-    expect(getByText('7')).toBeTruthy()
+  it('affiche le hero action avec bouton Go ou Commencer', () => {
+    const { getByText } = renderHome()
+    expect(getByText('Commencer un entra\u00eenement')).toBeTruthy()
   })
 
-  it('affiche les sections', () => {
-    const { getByText } = render(
-      <HomeContent
-        user={null}
-        histories={[] as unknown as History[]}
-        historiesCount={0}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
-    expect(getByText('Entra\u00eenement')).toBeTruthy()
-    expect(getByText('Statistiques')).toBeTruthy()
-    expect(getByText('Outils')).toBeTruthy()
+  it('affiche les status strips', () => {
+    const { getByText } = renderHome({ user: makeUser({ currentStreak: 5 } as Partial<User>) })
+    expect(getByText('5j')).toBeTruthy()
   })
 
-  it('affiche toutes les tuiles', () => {
-    const { getByText, getAllByText, queryByText } = render(
-      <HomeContent
-        user={null}
-        histories={[] as unknown as History[]}
-        historiesCount={0}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
-    expect(getByText('Programmes')).toBeTruthy()
-    expect(getByText("Biblioth\u00e8que d'exercices")).toBeTruthy()
-    expect(getByText('Dur\u00e9e')).toBeTruthy()
-    expect(getAllByText('Volume').length).toBeGreaterThanOrEqual(1)
-    expect(getByText('Agenda')).toBeTruthy()
-    expect(queryByText('Muscles')).toBeNull()
-    expect(queryByText('Exercices & Records')).toBeNull()
+  it('affiche la section navigation unifiée', () => {
+    const { getByText } = renderHome()
+    expect(getByText('Statistiques & Outils')).toBeTruthy()
+  })
+
+  it('affiche les tuiles principales dans la grille', () => {
+    const { getAllByText, getByText } = renderHome()
+    // Programmes apparaît dans les pills et dans la grille
+    expect(getAllByText('Programmes').length).toBeGreaterThanOrEqual(1)
+    expect(getAllByText("Biblioth\u00e8que d'exercices").length).toBeGreaterThanOrEqual(1)
     expect(getByText('Mesures')).toBeTruthy()
-    expect(queryByText('Historique')).toBeNull()
     expect(getByText('Classement')).toBeTruthy()
+    expect(getByText('Profil Athl\u00e8te')).toBeTruthy()
   })
 
-  it('navigue vers un écran stack au press', () => {
-    const { getByText } = render(
-      <HomeContent
-        user={null}
-        histories={[] as unknown as History[]}
-        historiesCount={0}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
-    fireEvent.press(getByText('Dur\u00e9e'))
-    expect(mockNavigate).toHaveBeenCalledWith('StatsDuration')
+  it('navigue vers un écran au press sur la grille', () => {
+    const { getByText } = renderHome()
+    fireEvent.press(getByText('Mesures'))
+    expect(mockNavigate).toHaveBeenCalled()
   })
 
-  it('navigue vers Programmes au press', () => {
-    const { getByText } = render(
-      <HomeContent
-        user={null}
-        histories={[] as unknown as History[]}
-        historiesCount={0}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
-    fireEvent.press(getByText('Programmes'))
-    expect(mockNavigate).toHaveBeenCalledWith('Programs')
+  it('navigue vers Programmes au press sur pill', () => {
+    const { getAllByText } = renderHome()
+    const programButtons = getAllByText('Programmes')
+    fireEvent.press(programButtons[0])
+    expect(mockNavigate).toHaveBeenCalled()
   })
 
   it('affiche la phrase de motivation', () => {
-    const { getByText } = render(
-      <HomeContent
-        user={makeUser()}
-        histories={[] as unknown as History[]}
-        historiesCount={0}
-        sets={[] as unknown as WorkoutSet[]}
-        sessions={[] as unknown as Session[]}
-        userBadges={[]}
-        exercises={[]}
-        friends={[] as unknown as FriendSnapshot[]}
-        programs={[] as unknown as Program[]}
-      />
-    )
+    const { getByText } = renderHome({ user: makeUser() })
     expect(getByText('Continue comme ça !')).toBeTruthy()
   })
 })

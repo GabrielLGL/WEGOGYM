@@ -1,21 +1,22 @@
 import { computeRestTimeAnalysis, formatRestTime } from '../restTimeAnalysisHelpers'
+import { mockSet, mockExercise } from './testFactories'
 
-function makeSet(
+function makeSet_(
   historyId: string,
   exerciseId: string,
   minutesAgo: number,
 ) {
-  return {
+  return mockSet({
     historyId,
     exerciseId,
     weight: 100,
     reps: 10,
     createdAt: new Date(Date.now() - minutesAgo * 60 * 1000),
-  } as any
+  })
 }
 
-function makeExercise(id: string, name: string) {
-  return { id, name } as any
+function makeExercise_(id: string, name: string) {
+  return mockExercise({ id, name })
 }
 
 describe('computeRestTimeAnalysis', () => {
@@ -24,18 +25,18 @@ describe('computeRestTimeAnalysis', () => {
   })
 
   it('retourne null si un seul set par exercice', () => {
-    const sets = [makeSet('h1', 'ex1', 5)]
-    const exercises = [makeExercise('ex1', 'Bench')]
+    const sets = [makeSet_('h1', 'ex1', 5)]
+    const exercises = [makeExercise_('ex1', 'Bench')]
     expect(computeRestTimeAnalysis(sets, exercises)).toBeNull()
   })
 
   it('calcule le temps de repos entre sets consécutifs du même exercice', () => {
     // 2 sets du même exercice, espacés de 2 minutes
     const sets = [
-      makeSet('h1', 'ex1', 4), // 4 min ago
-      makeSet('h1', 'ex1', 2), // 2 min ago → delta = 120s
+      makeSet_('h1', 'ex1', 4), // 4 min ago
+      makeSet_('h1', 'ex1', 2), // 2 min ago → delta = 120s
     ]
-    const exercises = [makeExercise('ex1', 'Bench Press')]
+    const exercises = [makeExercise_('ex1', 'Bench Press')]
     const result = computeRestTimeAnalysis(sets, exercises)
     expect(result).not.toBeNull()
     expect(result!.entries).toHaveLength(1)
@@ -46,13 +47,13 @@ describe('computeRestTimeAnalysis', () => {
 
   it('ignore les sets d\'exercices différents dans la même séance', () => {
     const sets = [
-      makeSet('h1', 'ex1', 6),
-      makeSet('h1', 'ex2', 4), // exercice différent
-      makeSet('h1', 'ex1', 2), // même exercice que le 1er mais pas consécutif par tri
+      makeSet_('h1', 'ex1', 6),
+      makeSet_('h1', 'ex2', 4), // exercice différent
+      makeSet_('h1', 'ex1', 2), // même exercice que le 1er mais pas consécutif par tri
     ]
     const exercises = [
-      makeExercise('ex1', 'Bench'),
-      makeExercise('ex2', 'Squat'),
+      makeExercise_('ex1', 'Bench'),
+      makeExercise_('ex2', 'Squat'),
     ]
     const result = computeRestTimeAnalysis(sets, exercises)
     // Seulement ex1 a 2 sets consécutifs (triés par date)
@@ -68,30 +69,30 @@ describe('computeRestTimeAnalysis', () => {
   it('ignore les deltas < 10 secondes', () => {
     const now = Date.now()
     const sets = [
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 5000) },
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) },
-    ] as any[]
-    const exercises = [makeExercise('ex1', 'Bench')]
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 5000) }),
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) }),
+    ]
+    const exercises = [makeExercise_('ex1', 'Bench')]
     expect(computeRestTimeAnalysis(sets, exercises)).toBeNull()
   })
 
   it('ignore les deltas > 600 secondes (10 min)', () => {
     const sets = [
-      makeSet('h1', 'ex1', 20), // 20 min ago
-      makeSet('h1', 'ex1', 5),  // 5 min ago → delta = 15 min = 900s > 600
+      makeSet_('h1', 'ex1', 20), // 20 min ago
+      makeSet_('h1', 'ex1', 5),  // 5 min ago → delta = 15 min = 900s > 600
     ]
-    const exercises = [makeExercise('ex1', 'Bench')]
+    const exercises = [makeExercise_('ex1', 'Bench')]
     expect(computeRestTimeAnalysis(sets, exercises)).toBeNull()
   })
 
   it('calcule la moyenne globale correctement', () => {
     const now = Date.now()
     const sets = [
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 180_000) },
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 60_000) },
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) },
-    ] as any[]
-    const exercises = [makeExercise('ex1', 'Bench')]
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 180_000) }),
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 60_000) }),
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) }),
+    ]
+    const exercises = [makeExercise_('ex1', 'Bench')]
     const result = computeRestTimeAnalysis(sets, exercises)
     expect(result).not.toBeNull()
     // 2 deltas de 120s et 60s → moyenne = 90s
@@ -102,10 +103,10 @@ describe('computeRestTimeAnalysis', () => {
   it('recommande "short" pour repos < 60s', () => {
     const now = Date.now()
     const sets = [
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 30_000) },
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) },
-    ] as any[]
-    const exercises = [makeExercise('ex1', 'Bench')]
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 30_000) }),
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) }),
+    ]
+    const exercises = [makeExercise_('ex1', 'Bench')]
     const result = computeRestTimeAnalysis(sets, exercises)
     expect(result).not.toBeNull()
     expect(result!.entries[0].recommendation).toBe('short')
@@ -114,10 +115,10 @@ describe('computeRestTimeAnalysis', () => {
   it('recommande "long" pour repos > 180s', () => {
     const now = Date.now()
     const sets = [
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 300_000) },
-      { historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) },
-    ] as any[]
-    const exercises = [makeExercise('ex1', 'Bench')]
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now - 300_000) }),
+      mockSet({ historyId: 'h1', exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(now) }),
+    ]
+    const exercises = [makeExercise_('ex1', 'Bench')]
     const result = computeRestTimeAnalysis(sets, exercises)
     expect(result).not.toBeNull()
     expect(result!.entries[0].recommendation).toBe('long')

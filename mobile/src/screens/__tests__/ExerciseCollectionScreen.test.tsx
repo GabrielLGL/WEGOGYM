@@ -27,14 +27,16 @@ jest.mock('../../model/index', () => ({
 // Déclenche l'évaluation du module → capture du Base
 require('../ExerciseCollectionScreen')
 
-const makeExercise = (id: string, name: string, muscles: string[] = []) =>
-  ({ id, name, muscles }) as any
+import { mockExercise, mockSet } from '../../model/utils/__tests__/testFactories'
 
-const makeSet = (exerciseId: string, daysAgo = 0) =>
-  ({
+const makeExercise = (id: string, name: string, muscles: string[] = []) =>
+  mockExercise({ id, name, muscles })
+
+const makeSet_ = (exerciseId: string, daysAgo = 0) =>
+  mockSet({
     exerciseId,
     createdAt: new Date(Date.now() - daysAgo * 86400000),
-  }) as any
+  })
 
 describe('ExerciseCollectionScreenBase', () => {
   const Base = () => mockCaptured.Base!
@@ -52,7 +54,7 @@ describe('ExerciseCollectionScreenBase', () => {
       makeExercise('e2', 'Squat', ['Quadriceps']),
       makeExercise('e3', 'Curl', ['Biceps']),
     ]
-    const sets = [makeSet('e1', 1), makeSet('e1', 2)]
+    const sets = [makeSet_('e1', 1), makeSet_('e1', 2)]
     const { getByText } = render(<Component exercises={exercises} sets={sets} />)
     expect(getByText(/1 \/ 3/)).toBeTruthy()
     expect(getByText('Bench Press')).toBeTruthy()
@@ -64,7 +66,7 @@ describe('ExerciseCollectionScreenBase', () => {
       makeExercise('e1', 'Bench Press', ['Pecs']),
       makeExercise('e2', 'Deadlift', ['Dos']),
     ]
-    const sets = [makeSet('e1', 1)]
+    const sets = [makeSet_('e1', 1)]
     const { getByText } = render(<Component exercises={exercises} sets={sets} />)
     // e1 est découvert, e2 est verrouillé (nom masqué par ?)
     expect(getByText('Bench Press')).toBeTruthy()
@@ -77,7 +79,7 @@ describe('ExerciseCollectionScreenBase', () => {
       makeExercise('e1', 'Bench', ['Pecs']),
       makeExercise('e2', 'Squat', ['Quadriceps']),
     ]
-    const sets = [makeSet('e1'), makeSet('e2')]
+    const sets = [makeSet_('e1'), makeSet_('e2')]
     const { getByText } = render(<Component exercises={exercises} sets={sets} />)
     expect(getByText(/100/)).toBeTruthy()
   })

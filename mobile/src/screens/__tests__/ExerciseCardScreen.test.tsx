@@ -29,16 +29,18 @@ jest.mock('@react-navigation/native', () => ({
 
 require('../ExerciseCardScreen')
 
-const makeExercise = (id: string, name: string, muscles: string[] = []) =>
-  ({ id, name, muscles }) as any
+import { mockExercise, mockSet } from '../../model/utils/__tests__/testFactories'
 
-const makeSet = (weight: number, reps: number, isPr = false, daysAgo = 0) =>
-  ({
+const makeExercise = (id: string, name: string, muscles: string[] = []) =>
+  mockExercise({ id, name, muscles })
+
+const makeSet_ = (weight: number, reps: number, isPr = false, daysAgo = 0) =>
+  mockSet({
     weight,
     reps,
     isPr,
     createdAt: new Date(Date.now() - daysAgo * 86400000),
-  }) as any
+  })
 
 describe('ExerciseCardContent', () => {
   const Base = () => mockCaptured.Base!
@@ -63,9 +65,9 @@ describe('ExerciseCardContent', () => {
     const Component = Base()
     const exercise = makeExercise('e1', 'Bench Press', ['Pecs'])
     const sets = [
-      makeSet(100, 10, true, 1),
-      makeSet(80, 12, false, 2),
-      makeSet(90, 8, false, 3),
+      makeSet_(100, 10, true, 1),
+      makeSet_(80, 12, false, 2),
+      makeSet_(90, 8, false, 3),
     ]
     const { getByText } = render(<Component exercise={exercise} sets={sets} />)
     // Vérifie que le tonnage est affiché (100*10 + 80*12 + 90*8 = 2680 kg)
@@ -77,7 +79,7 @@ describe('ExerciseCardContent', () => {
   it('affiche le niveau expertise débutant avec peu de sessions', () => {
     const Component = Base()
     const exercise = makeExercise('e1', 'Curl', ['Biceps'])
-    const sets = [makeSet(20, 10, false, 1)]
+    const sets = [makeSet_(20, 10, false, 1)]
     const { getByText } = render(<Component exercise={exercise} sets={sets} />)
     expect(getByText('Débutant')).toBeTruthy()
   })

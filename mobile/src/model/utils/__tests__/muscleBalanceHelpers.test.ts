@@ -1,16 +1,17 @@
 import { computeMuscleBalance } from '../muscleBalanceHelpers'
+import { mockSet, mockExercise } from './testFactories'
 
-function makeSet(exerciseId: string, weight: number, reps: number, daysAgo = 0) {
-  return {
+function makeSet_(exerciseId: string, weight: number, reps: number, daysAgo = 0) {
+  return mockSet({
     exerciseId,
     weight,
     reps,
     createdAt: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000),
-  } as any
+  })
 }
 
-function makeExercise(id: string, muscles: string[]) {
-  return { id, muscles } as any
+function makeExercise_(id: string, muscles: string[]) {
+  return mockExercise({ id, muscles })
 }
 
 describe('computeMuscleBalance', () => {
@@ -35,8 +36,8 @@ describe('computeMuscleBalance', () => {
 
   it('ratio 1.0 et status balanced quand volumes égaux', () => {
     // Push (Pecs) et Pull (Dos) avec même volume
-    const exercises = [makeExercise('e1', ['Pecs']), makeExercise('e2', ['Dos'])]
-    const sets = [makeSet('e1', 100, 10), makeSet('e2', 100, 10)]
+    const exercises = [makeExercise_('e1', ['Pecs']), makeExercise_('e2', ['Dos'])]
+    const sets = [makeSet_('e1', 100, 10), makeSet_('e2', 100, 10)]
     const result = computeMuscleBalance(sets, exercises, null)
     const pushPull = result.pairs.find(p => p.nameKey === 'pushPull')!
     expect(pushPull.ratio).toBe(1)
@@ -45,11 +46,11 @@ describe('computeMuscleBalance', () => {
 
   it('ratio > 1.5 retourne imbalanced', () => {
     // Beaucoup de push, pas de pull
-    const exercises = [makeExercise('e1', ['Pecs']), makeExercise('e2', ['Dos'])]
+    const exercises = [makeExercise_('e1', ['Pecs']), makeExercise_('e2', ['Dos'])]
     const sets = [
-      makeSet('e1', 100, 10), // 1000 push
-      makeSet('e1', 100, 10), // 1000 push
-      makeSet('e1', 100, 10), // 1000 push
+      makeSet_('e1', 100, 10), // 1000 push
+      makeSet_('e1', 100, 10), // 1000 push
+      makeSet_('e1', 100, 10), // 1000 push
       // Pas de pull → ratio = 3000/0 → 2 (capped)
     ]
     const result = computeMuscleBalance(sets, exercises, null)
@@ -58,10 +59,10 @@ describe('computeMuscleBalance', () => {
   })
 
   it('filtre par période', () => {
-    const exercises = [makeExercise('e1', ['Pecs'])]
+    const exercises = [makeExercise_('e1', ['Pecs'])]
     const sets = [
-      makeSet('e1', 100, 10, 5),   // 5 jours → dans la période
-      makeSet('e1', 100, 10, 60),  // 60 jours → hors période 30j
+      makeSet_('e1', 100, 10, 5),   // 5 jours → dans la période
+      makeSet_('e1', 100, 10, 60),  // 60 jours → hors période 30j
     ]
     const result30 = computeMuscleBalance(sets, exercises, 30)
     const resultAll = computeMuscleBalance(sets, exercises, null)
@@ -71,8 +72,8 @@ describe('computeMuscleBalance', () => {
   })
 
   it('overallBalance dans [0, 100]', () => {
-    const exercises = [makeExercise('e1', ['Pecs']), makeExercise('e2', ['Dos'])]
-    const sets = [makeSet('e1', 100, 10), makeSet('e2', 80, 10)]
+    const exercises = [makeExercise_('e1', ['Pecs']), makeExercise_('e2', ['Dos'])]
+    const sets = [makeSet_('e1', 100, 10), makeSet_('e2', 80, 10)]
     const result = computeMuscleBalance(sets, exercises, null)
     expect(result.overallBalance).toBeGreaterThanOrEqual(0)
     expect(result.overallBalance).toBeLessThanOrEqual(100)
@@ -80,8 +81,8 @@ describe('computeMuscleBalance', () => {
 
   it('overallBalance élevé quand tout est équilibré', () => {
     // Volumes identiques pour push et pull
-    const exercises = [makeExercise('e1', ['Pecs']), makeExercise('e2', ['Dos'])]
-    const sets = [makeSet('e1', 100, 10), makeSet('e2', 100, 10)]
+    const exercises = [makeExercise_('e1', ['Pecs']), makeExercise_('e2', ['Dos'])]
+    const sets = [makeSet_('e1', 100, 10), makeSet_('e2', 100, 10)]
     const result = computeMuscleBalance(sets, exercises, null)
     expect(result.overallBalance).toBeGreaterThanOrEqual(70)
   })
