@@ -42,8 +42,6 @@ import {
   createWorkoutHistory,
   abandonWorkoutHistory,
 } from '../model/utils/databaseHelpers'
-import { computeTrainingDensity, type DensityResult } from '../model/utils/trainingDensityHelpers'
-import { getLastSessionDensity } from '../model/utils/workoutSessionUtils'
 import { type MilestoneEvent } from '../model/utils/gamificationHelpers'
 import { type BadgeDefinition } from '../model/utils/badgeConstants'
 import { useWorkoutTimer } from '../hooks/useWorkoutTimer'
@@ -172,34 +170,6 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
   const completedSets = useMemo(() => Object.keys(validatedSets).length, [validatedSets])
   const totalSetsTarget = useMemo(() => sessionExercises.reduce((sum, se) => sum + (se.setsTarget ?? 0), 0), [sessionExercises])
   const totalPrs = useMemo(() => Object.values(validatedSets).filter(s => s.isPr).length, [validatedSets])
-
-  // --- Training density ---
-  const [prevDensityData, setPrevDensityData] = useState<{
-    sets: Array<{ weight: number; reps: number }>
-    durationMinutes: number
-  } | null>(null)
-
-  useEffect(() => {
-    if (!historyId || !session.id) return
-    let cancelled = false
-    getLastSessionDensity(session.id, historyId).then(data => {
-      if (!cancelled && data) {
-        setPrevDensityData({ sets: data.sets, durationMinutes: data.durationMinutes })
-      }
-    })
-    return () => { cancelled = true }
-  }, [historyId, session.id])
-
-  const densityData = useMemo<DensityResult | null>(() => {
-    const sets = Object.values(validatedSets).map(s => ({ weight: s.weight, reps: s.reps }))
-    if (sets.length === 0) return null
-    return computeTrainingDensity(
-      sets,
-      startTimestampRef.current,
-      prevDensityData?.sets,
-      prevDensityData?.durationMinutes,
-    )
-  }, [validatedSets, prevDensityData])
 
   const { completeWorkout } = useWorkoutCompletion({
     historyId,
@@ -468,21 +438,6 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
         totalSetsTarget={totalSetsTarget}
       />
 
-      {densityData && densityData.totalVolume > 0 && (
-        <View style={styles.densityBadge}>
-          <Text style={styles.densityValue}>{densityData.pace}</Text>
-          {densityData.comparison && (
-            <Text style={[styles.densityComparison, {
-              color: densityData.comparison === 'faster' ? colors.success
-                : densityData.comparison === 'slower' ? colors.danger
-                : colors.textSecondary
-            }]}>
-              {densityData.comparison === 'faster' ? '↑' : densityData.comparison === 'slower' ? '↓' : '→'}
-            </Text>
-          )}
-        </View>
-      )}
-
       {historyId ? (
         <FlatList
           data={workoutList}
@@ -603,26 +558,6 @@ function useStyles(colors: ThemeColors) {
       marginTop: spacing.xxl,
       fontSize: fontSize.md,
       fontStyle: 'italic',
-    },
-    densityBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      backgroundColor: colors.card,
-      borderRadius: borderRadius.sm,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: spacing.xs,
-      alignSelf: 'center',
-      marginBottom: spacing.xs,
-    },
-    densityValue: {
-      fontSize: fontSize.caption,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    densityComparison: {
-      fontSize: fontSize.sm,
-      fontWeight: '700',
     },
     timerContainer: {
       position: 'absolute',
