@@ -24,25 +24,6 @@ const mockNavigation = {
   setOptions: jest.fn(),
 }
 
-const _makeHistory = (id: string, date: number) =>
-  ({
-    id,
-    startTime: new Date(date),
-    endTime: new Date(date + 3600000),
-    deletedAt: null,
-  }) as never
-
-const _makeSet = (id: string, historyId: string, weight: number, reps: number) =>
-  ({
-    id,
-    weight,
-    reps,
-    isPr: false,
-    history: { id: historyId },
-    exercise: { id: 'e1' },
-    createdAt: new Date(),
-  }) as never
-
 const makeUser = (name = 'Test') =>
   ({
     id: 'u1',

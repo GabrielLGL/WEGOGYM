@@ -72,4 +72,7 @@ Les imports qui n'importent QUE des types devraient utiliser `import type { ... 
 Aucune.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260319-2300
+
+## Résolution
+Rapport do : docs/bmad/do/20260319-2300-chore-dead-code.md

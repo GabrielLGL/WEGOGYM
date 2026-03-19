@@ -18,12 +18,10 @@ const SENTRY_DSN =
 export function initSentry() {
   // Ne pas initialiser Sentry en développement (optionnel)
   if (__DEV__ && !SENTRY_DSN) {
-    if (__DEV__) console.log('[Sentry] Skipped in development (no DSN provided)')
     return
   }
 
   if (!SENTRY_DSN) {
-    if (__DEV__) console.warn('[Sentry] DSN not configured. Error monitoring is disabled.')
     return
   }
 
@@ -53,8 +51,6 @@ export function initSentry() {
     beforeSend(event, hint) {
       // En dev, logger l'événement au lieu de l'envoyer
       if (__DEV__) {
-        console.log('[Sentry] Event:', event)
-        console.log('[Sentry] Hint:', hint)
         return null // Ne pas envoyer en dev
       }
 
@@ -67,7 +63,6 @@ export function initSentry() {
     ],
   })
 
-  if (__DEV__) { console.log('[Sentry] Initialized successfully') }
 }
 
 /**

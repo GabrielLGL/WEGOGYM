@@ -32,7 +32,7 @@ function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
   }
 }
 
-export function HomeStatusStrip({ user, histories, sets, exercises }: HomeStatusStripProps) {
+function HomeStatusStripInner({ user, histories, sets, exercises }: HomeStatusStripProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -88,7 +88,7 @@ export function HomeStatusStrip({ user, histories, sets, exercises }: HomeStatus
     {
       label: `${weekSessions}/${weekSessionsTarget}`,
       icon: '📊',
-      onPress: () => navigation.navigate('ReportDetail' as never),
+      onPress: () => navigation.navigate('ReportDetail'),
     },
     {
       label: readiness ? String(readiness.score) : '—',
@@ -124,6 +124,8 @@ export function HomeStatusStrip({ user, histories, sets, exercises }: HomeStatus
     </View>
   )
 }
+
+export const HomeStatusStrip = React.memo(HomeStatusStripInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

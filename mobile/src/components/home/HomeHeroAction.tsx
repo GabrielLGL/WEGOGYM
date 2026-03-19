@@ -34,7 +34,7 @@ function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
   }
 }
 
-export function HomeHeroAction({ histories, sets, exercises, sessions, programs }: HomeHeroActionProps) {
+function HomeHeroActionInner({ histories, sets, exercises, sessions, programs }: HomeHeroActionProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -81,9 +81,10 @@ export function HomeHeroAction({ histories, sets, exercises, sessions, programs 
     }
   }, [haptics, activeWorkout, lastSession, navigation])
 
-  const handleShortcut = useCallback((route: string) => {
+  const handleShortcut = useCallback((route: keyof RootStackParamList) => {
     haptics.onSelect()
-    navigation.navigate(route as never)
+    // React Navigation overloads don't resolve union route types; all shortcut routes have no required params
+    ;(navigation.navigate as (screen: string) => void)(route)
   }, [haptics, navigation])
 
   const shortcuts: Array<{ icon: keyof typeof Ionicons.glyphMap; label: string; route: keyof RootStackParamList }> = [
@@ -179,6 +180,8 @@ export function HomeHeroAction({ histories, sets, exercises, sessions, programs 
     </View>
   )
 }
+
+export const HomeHeroAction = React.memo(HomeHeroActionInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

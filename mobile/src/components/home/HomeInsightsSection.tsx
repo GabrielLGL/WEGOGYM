@@ -131,7 +131,7 @@ function FlashbackCard({
 
 // ── Main Component ──────────────────────────────────────────────────────────
 
-export function HomeInsightsSection({ histories, sets, exercises, user }: HomeInsightsSectionProps) {
+function HomeInsightsSectionInner({ histories, sets, exercises, user }: HomeInsightsSectionProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
@@ -283,7 +283,7 @@ export function HomeInsightsSection({ histories, sets, exercises, user }: HomeIn
         topMuscles={weeklyReportData.topMuscles}
         onPress={() => {
           try {
-            navigation.navigate('ReportDetail' as never)
+            navigation.navigate('ReportDetail')
           } catch {
             if (__DEV__) console.warn('[HomeScreen] Route "ReportDetail" non disponible')
           }
@@ -310,6 +310,8 @@ export function HomeInsightsSection({ histories, sets, exercises, user }: HomeIn
     </>
   )
 }
+
+export const HomeInsightsSection = React.memo(HomeInsightsSectionInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({

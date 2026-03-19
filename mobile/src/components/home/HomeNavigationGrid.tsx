@@ -23,7 +23,7 @@ interface GridTile {
   subtitle?: string
 }
 
-export function HomeNavigationGrid({ friends, navigationGridRef }: HomeNavigationGridProps) {
+function HomeNavigationGridInner({ friends, navigationGridRef }: HomeNavigationGridProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -60,7 +60,8 @@ export function HomeNavigationGrid({ friends, navigationGridRef }: HomeNavigatio
             style={styles.gridBtn}
             onPress={() => {
               haptics.onPress()
-              navigation.navigate(tile.route as never)
+              // React Navigation overloads don't resolve union route types; all grid routes have no required params
+              ;(navigation.navigate as (screen: string) => void)(tile.route)
             }}
             activeOpacity={0.7}
           >
@@ -75,6 +76,8 @@ export function HomeNavigationGrid({ friends, navigationGridRef }: HomeNavigatio
     </View>
   )
 }
+
+export const HomeNavigationGrid = React.memo(HomeNavigationGridInner)
 
 function useStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
