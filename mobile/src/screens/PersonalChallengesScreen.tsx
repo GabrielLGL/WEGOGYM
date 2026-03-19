@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useCallback } from 'react'
 import {
   View,
   Text,
@@ -212,13 +212,27 @@ export function PersonalChallengesBase({ user, histories }: Props) {
   const challengeTitles = (t.challenges?.challengeTitles ?? {}) as Record<string, string>
   const challengeDesc = (t.challenges?.challengeDesc ?? {}) as Record<string, string>
   const difficulties = (t.challenges?.difficulties ?? {}) as Record<string, string>
+  const completedBadge = t.challenges?.completedBadge ?? 'COMPLÉTÉ'
+
+  const keyExtractor = useCallback((item: PersonalChallenge) => item.id, [])
+
+  const renderItem = useCallback(({ item }: { item: PersonalChallenge }) => (
+    <ChallengeCard
+      challenge={item}
+      colors={colors}
+      challengeTitles={challengeTitles}
+      challengeDesc={challengeDesc}
+      difficulties={difficulties}
+      completedBadge={completedBadge}
+    />
+  ), [colors, challengeTitles, challengeDesc, difficulties, completedBadge])
 
   return (
     <FlatList
       style={styles.container}
       contentContainerStyle={styles.content}
       data={challenges}
-      keyExtractor={item => item.id}
+      keyExtractor={keyExtractor}
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={
         <View style={styles.headerCard}>
@@ -231,16 +245,7 @@ export function PersonalChallengesBase({ user, histories }: Props) {
           </View>
         </View>
       }
-      renderItem={({ item }) => (
-        <ChallengeCard
-          challenge={item}
-          colors={colors}
-          challengeTitles={challengeTitles}
-          challengeDesc={challengeDesc}
-          difficulties={difficulties}
-          completedBadge={t.challenges?.completedBadge ?? 'COMPLÉTÉ'}
-        />
-      )}
+      renderItem={renderItem}
     />
   )
 }

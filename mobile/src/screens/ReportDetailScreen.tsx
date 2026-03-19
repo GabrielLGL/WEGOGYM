@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import {
   View,
   Text,
@@ -63,23 +63,23 @@ function ReportDetailScreenBase({ histories, sets, exercises }: Props) {
     return computeReportSummary(histories, sets, exercises, period, ctx)
   }, [histories, sets, exercises, reportType, periodOffset])
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     haptics.onSelect()
     setPeriodOffset(prev => prev - 1)
-  }
+  }, [haptics])
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (periodOffset >= 0) return
     haptics.onSelect()
     setPeriodOffset(prev => prev + 1)
-  }
+  }, [periodOffset, haptics])
 
-  const handleToggleType = (type: 'weekly' | 'monthly') => {
+  const handleToggleType = useCallback((type: 'weekly' | 'monthly') => {
     if (type === reportType) return
     haptics.onSelect()
     setReportType(type)
     setPeriodOffset(0)
-  }
+  }, [reportType, haptics])
 
   const styles = makeStyles(colors)
   const hasData = report.sessionsCount > 0

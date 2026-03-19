@@ -8,7 +8,7 @@
  * - Un AlertDialog pour confirmer la suppression d'un ami
  */
 
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import {
   View,
   Text,
@@ -108,21 +108,21 @@ export function LeaderboardScreenBase({ user, friends, histories }: LeaderboardS
     { key: 'prs', label: t.leaderboard.sortPrs },
   ]
 
-  const handleCopyCode = async () => {
+  const handleCopyCode = useCallback(async () => {
     await Clipboard.setStringAsync(encodedCode)
     haptics.onSuccess()
-  }
+  }, [encodedCode, haptics])
 
-  const handleShareCode = async () => {
+  const handleShareCode = useCallback(async () => {
     try {
       await Share.share({ message: encodedCode })
       haptics.onSuccess()
     } catch {
       // User cancelled share — no action needed
     }
-  }
+  }, [encodedCode, haptics])
 
-  const handleImport = async () => {
+  const handleImport = useCallback(async () => {
     const result = await importFriend(importText.trim())
     setImportResult(result)
     if (result === 'success') {
@@ -131,27 +131,27 @@ export function LeaderboardScreenBase({ user, friends, histories }: LeaderboardS
     } else {
       haptics.onError()
     }
-  }
+  }, [importText, importFriend, haptics])
 
-  const handleOpenRemove = (friendCode: string) => {
+  const handleOpenRemove = useCallback((friendCode: string) => {
     haptics.onDelete()
     setSelectedFriendCode(friendCode)
     removeAlert.open()
-  }
+  }, [haptics, removeAlert])
 
-  const handleConfirmRemove = async () => {
+  const handleConfirmRemove = useCallback(async () => {
     if (!selectedFriendCode) return
     await removeFriend(selectedFriendCode)
     setSelectedFriendCode(null)
     removeAlert.close()
-  }
+  }, [selectedFriendCode, removeFriend, removeAlert])
 
-  const handleOpenAddModal = () => {
+  const handleOpenAddModal = useCallback(() => {
     haptics.onPress()
     setImportText('')
     setImportResult(null)
     addModal.open()
-  }
+  }, [haptics, addModal])
 
   const getSecondaryValue = (entry: LeaderboardEntry): string => {
     switch (sort) {

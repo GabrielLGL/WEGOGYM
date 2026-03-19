@@ -76,4 +76,7 @@ Pour chaque fichier :
 Aucune.
 
 ## Statut
-⏳ En attente
+✅ Résolu — 20260319-2130
+
+## Résolution
+Rapport do : docs/bmad/do/20260319-2130-perf-usecallback-audit.md
