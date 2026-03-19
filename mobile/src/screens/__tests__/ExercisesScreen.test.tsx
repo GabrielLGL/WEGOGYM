@@ -153,17 +153,17 @@ describe('ExercisesContent', () => {
   })
 
   it('affiche le bouton de recherche', () => {
-    const { getByText } = render(<ExercisesContent exercises={[]} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={[]} />)
     expect(getByText(/Rechercher un exercice/)).toBeTruthy()
   })
 
   it('affiche le bouton créer un exercice', () => {
-    const { getByText } = render(<ExercisesContent exercises={[]} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={[]} />)
     expect(getByText('+ Créer un exercice')).toBeTruthy()
   })
 
   it('affiche le message vide quand pas d\'exercices', () => {
-    const { getByText } = render(<ExercisesContent exercises={[]} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={[]} />)
     expect(getByText('Aucun exercice trouvé.')).toBeTruthy()
   })
 
@@ -172,39 +172,39 @@ describe('ExercisesContent', () => {
       makeExercise({ id: 'ex-1', name: 'Développé couché' }),
       makeExercise({ id: 'ex-2', name: 'Squat Arrière', muscles: ['Quadriceps'], _muscles: '["Quadriceps"]' }),
     ]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     expect(getByText('Développé couché')).toBeTruthy()
     expect(getByText('Squat Arrière')).toBeTruthy()
   })
 
   it('affiche les muscles et l\'équipement des exercices', () => {
     const exercises = [makeExercise()]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     expect(getByText(/Pectoraux.*Triceps/)).toBeTruthy()
   })
 
   it('ouvre la barre de recherche au clic', () => {
-    const { getByText, queryByText } = render(<ExercisesContent exercises={[]} />)
+    const { getByText, queryByText } = render(<ExercisesContent sets={[]} exercises={[]} />)
     fireEvent.press(getByText(/Rechercher un exercice/))
     expect(queryByText(/Rechercher un exercice/)).toBeNull()
   })
 
   it('ferme la barre de recherche avec le bouton Fermer', () => {
-    const { getByText } = render(<ExercisesContent exercises={[]} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={[]} />)
     fireEvent.press(getByText(/Rechercher un exercice/))
     fireEvent.press(getByText('Fermer'))
     expect(getByText(/Rechercher un exercice/)).toBeTruthy()
   })
 
   it('navigue vers CreateExercise au clic sur le bouton créer', () => {
-    const { getByText } = render(<ExercisesContent exercises={[]} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={[]} />)
     fireEvent.press(getByText('+ Créer un exercice'))
     expect(mockNavigation.navigate).toHaveBeenCalledWith('CreateExercise')
   })
 
   it('les exercices pré-installés n\'ont pas de bouton •••', () => {
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: false })]
-    const { queryByText } = render(<ExercisesContent exercises={exercises} />)
+    const { queryByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     expect(queryByText('•••')).toBeNull()
   })
 
@@ -213,7 +213,7 @@ describe('ExercisesContent', () => {
       makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }),
       makeExercise({ id: 'ex-2', name: 'Développé couché', isCustom: true }),
     ]
-    const { getAllByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getAllByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     expect(getAllByText('•••').length).toBe(2)
   })
 
@@ -222,7 +222,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     expect(getByText("Modifier l'exercice")).toBeTruthy()
     expect(getByText("Supprimer l'exercice")).toBeTruthy()
@@ -233,7 +233,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     expect(getByText("Supprimer l'exercice")).toBeTruthy()
     expect(getByText("Modifier l'exercice")).toBeTruthy()
@@ -244,7 +244,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     fireEvent.press(getByText("Modifier l'exercice"))
     expect(getByText("Modifier l'exercice")).toBeTruthy()
@@ -256,7 +256,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     fireEvent.press(getByText("Supprimer l'exercice"))
     expect(getByText('Supprimer Squat ?')).toBeTruthy()
@@ -267,7 +267,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     fireEvent.press(getByText("Supprimer l'exercice"))
     fireEvent.press(getByText('Supprimer'))
@@ -281,7 +281,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText, queryByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText, queryByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     fireEvent.press(getByText("Supprimer l'exercice"))
     fireEvent.press(getByText('Annuler'))
@@ -293,7 +293,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     fireEvent.press(getByText("Modifier l'exercice"))
     fireEvent.press(getByText('Enregistrer'))
@@ -307,7 +307,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText, queryByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText, queryByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     expect(getByText("Modifier l'exercice")).toBeTruthy()
     fireEvent.press(getByText('CloseSheet'))
@@ -319,7 +319,7 @@ describe('ExercisesContent', () => {
       makeManagerMock(makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true }))
     )
     const exercises = [makeExercise({ id: 'ex-1', name: 'Squat', isCustom: true })]
-    const { getByText } = render(<ExercisesContent exercises={exercises} />)
+    const { getByText } = render(<ExercisesContent sets={[]} exercises={exercises} />)
     fireEvent.press(getByText('•••'))
     fireEvent.press(getByText("Modifier l'exercice"))
     expect(getByText("Modifier l'exercice")).toBeTruthy()

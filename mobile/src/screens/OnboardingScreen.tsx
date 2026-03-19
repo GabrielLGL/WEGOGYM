@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, ToastAndroid, Platform, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, ToastAndroid, Platform, ScrollView, TouchableOpacity } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
 
@@ -31,6 +32,7 @@ export default function OnboardingScreen() {
   const route = useRoute<NativeStackScreenProps<RootStackParamList, 'Onboarding'>['route']>()
   const haptics = useHaptics()
   const { t, language, setLanguage } = useLanguage()
+  const insets = useSafeAreaInsets()
 
   const disclaimerOnly = route.params?.disclaimerOnly ?? false
 
@@ -153,8 +155,8 @@ export default function OnboardingScreen() {
   )
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+    <View style={styles.container}>
+      <View style={[styles.content, { paddingTop: insets.top + spacing.lg }]}>
         {renderDots()}
 
         {step === 0 ? (
@@ -298,7 +300,7 @@ export default function OnboardingScreen() {
           </>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -311,7 +313,6 @@ function useStyles(colors: ThemeColors) {
     content: {
       flex: 1,
       padding: spacing.lg,
-      paddingTop: (StatusBar.currentHeight ?? 44) + spacing.lg,
     },
     dotsRow: {
       flexDirection: 'row',
