@@ -22,6 +22,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Platform, BackHandler, ToastAndroid } from 'react-native'
 import { useNavigationContainerRef } from '@react-navigation/native'
 import { PortalProvider } from '@gorhom/portal'
+import { ToastProvider } from '../contexts/ToastContext'
 import { useHaptics } from '../hooks/useHaptics'
 import { ThemeProvider, useTheme } from '../contexts/ThemeContext'
 import { LanguageProvider, useLanguage } from '../contexts/LanguageContext'
@@ -374,7 +375,9 @@ export default function AppNavigator() {
       <LanguageProvider initialLang={initialLang}>
         <ThemeProvider initialMode={initialMode}>
           <PortalProvider>
-            <AppContent />
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
           </PortalProvider>
         </ThemeProvider>
       </LanguageProvider>
