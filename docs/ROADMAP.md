@@ -1,0 +1,266 @@
+# Kore — Roadmap & Avancement
+> Derniere MAJ : 2026-03-19
+
+---
+
+## Resume executif
+
+L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`. 120+ features implementees sur 14 sprints, 0 erreur TypeScript, score de sante 96/100, ship score 95/100. Le MVP est pret a shipper sur le Play Store. La phase actuelle est le **polish post-ship** : correction des 13 issues restantes du dernier verrif (couleurs hardcodees, HomeScreen monolithique, DRY helpers).
+
+---
+
+## Metriques
+
+| Metrique | Valeur |
+|----------|--------|
+| Tests | 2220 (187 suites) |
+| Erreurs TS | 0 |
+| Score sante | 96/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
+| Ship score | 95/100 SHIP IT |
+| Tag MVP | `v0.1.0-mvp-20260319` |
+| Ecrans | 51 |
+| Helpers | 53 |
+| Routes | 52 |
+| Services | 10 |
+| Tables DB | 13 (schema v38) |
+| Badges | 50+ |
+| Features | #1 → #120 |
+| Sprints | 14 completes |
+
+---
+
+## Features — Training
+
+- [x] Programmes, seances, exercices personnalises — Sprint 1-3
+- [x] Supersets / Circuits (groupement, header visuel) — Sprint 1-3
+- [x] Workout tracker temps reel avec rest timer — Sprint 1-3
+- [x] Timer de repos configurable (duree, vibration, son) — Sprint 1-3
+- [x] Timer par exercice (repos different par exo) — Sprint 1-3
+- [x] Notes par exercice pendant le workout — Sprint 1-3
+- [x] Detection automatique des PRs — Sprint 1-3
+- [x] Resume post-entrainement anime (XP, confetti) — Sprint 3
+- [x] Relancer la derniere seance en 1 tap — Sprint 1-3
+- [x] Edition d'un historique post-workout — Sprint 1-3
+- [x] Dupliquer programme / seance — Sprint 1-3
+- [x] Historique avec soft-delete — Sprint 1-3
+- [x] Progression automatique (prefill poids/reps) — Sprint 14
+- [x] Deload / periodisation (recommandations repos) — Sprint 12
+
+## Features — Exercises
+
+- [x] Bibliotheque de 873 exercices (catalogue cloud + animations) — Sprint 1-3
+- [x] Creer ses propres exercices (nom, muscles, equipement) — Sprint 1-3
+- [x] Filtrer par muscle (11 groupes) / equipement (4 types) — Sprint 1-3
+- [x] Recherche textuelle instantanee — Sprint 1-3
+- [x] Fiche detaillee par exercice (animation, description) — Sprint 1-3
+- [x] Historique de performance par exercice avec graphique — Sprint 5
+- [x] Catalogue global importable depuis le cloud — Sprint 1-3
+- [x] Alternatives d'exercices — Sprint 10
+
+## Features — Gamification
+
+- [x] Systeme XP et niveaux (1 a 100) — Sprint 1-3
+- [x] Streaks hebdomadaires avec objectif personnalisable — Sprint 1-3
+- [x] 50+ badges a debloquer en 7 categories — Sprint 1-3
+- [x] Tonnage cumule lifetime avec milestones — Sprint 1-3
+- [x] Celebrations animees (badges, level up, milestones) — Sprint 3
+- [x] Titres athlete — Sprint 7
+- [x] Leaderboard — Sprint 6
+- [x] Self-Leagues — Sprint 3-4
+- [x] Skill Tree — Sprint 3-4
+- [x] Challenges personnels — Sprint 8
+- [x] Activity Feed — Sprint 6
+- [x] Bulletin mensuel — Sprint 8
+- [ ] Themes debloquables (recompenses cosmetiques) — Phase 4
+
+## Features — Stats (21 ecrans)
+
+- [x] Calendrier (grille mensuelle coloree par intensite) — Sprint 5
+- [x] Volume (bar chart hebdo/mensuel, KPIs) — Sprint 5
+- [x] Duree (graphique evolution, moyenne, total) — Sprint 5
+- [x] Exercices (Top 5 frequence, PRs par exercice) — Sprint 5
+- [x] Mensurations (poids, taille, hanches, bras, poitrine) — Sprint 5
+- [x] Heatmap — Sprint 9
+- [x] PRs Timeline — Sprint 9
+- [x] Training Split — Sprint 9
+- [x] Body Composition — Sprint 9
+- [x] Balance musculaire — Sprint 7
+- [x] Force Standards — Sprint 7
+- [x] Volume Forecast — Sprint 10
+- [x] Rest Time — Sprint 11
+- [x] Volume Distribution — Sprint 11
+- [x] Monthly Progress — Sprint 11
+- [x] Exercise Frequency — Sprint 13
+- [x] Set Quality — Sprint 14
+- [x] Volume Records — Sprint 14
+- [x] Constellation — Sprint 8
+- [x] Hexagon — Sprint 7
+- [x] Hall of Fame — Sprint 7
+- [x] Rapports hebdomadaires automatiques — Sprint 12
+- [x] Analytics avancees (balance, fatigue, volume optimal) — Sprint 10-13
+
+## Features — HomeScreen (16+ cartes)
+
+- [x] KPIs (seances, tonnage, PRs)
+- [x] Gamification (level, XP, streak, classe athlete)
+- [x] Streak heatmap 13 semaines
+- [x] Streak milestones (jalons visuels)
+- [x] Readiness score (recup/fatigue/regularite)
+- [x] Fatigue index (ACWR)
+- [x] Objectifs hebdo (seances + volume)
+- [x] Resume derniere seance
+- [x] Recuperation musculaire (grille par muscle)
+- [x] Suggestion de repos
+- [x] Motivation contextuelle
+- [x] Rapport hebdo
+- [x] Flashback (1 mois / 3 mois)
+- [x] Recommandation deload
+- [x] Exercice de la semaine
+
+## Features — Assistant IA
+
+- [x] Wizard intelligent en 9 etapes (programme) / 4 etapes (seance) — Sprint 1-3
+- [x] 10 types de split (Full Body, PPL, Arnold, PHUL…) — Sprint 1-3
+- [x] 4 objectifs (Bodybuilding, Power, Renfo, Cardio) — Sprint 1-3
+- [x] Gestion des blessures et priorites musculaires — Sprint 1-3
+- [x] Moteur offline (gratuit, toujours disponible) — Sprint 1-3
+- [x] Providers cloud (Claude, OpenAI, Gemini) — Sprint 1-3
+- [x] Previsualisation du programme avant import — Sprint 1-3
+
+## Features — Settings & Data
+
+- [x] Dark / Light mode — Sprint 1-3
+- [x] Design neumorphique — Sprint 1-3
+- [x] Langue FR / EN (i18n custom) — Sprint 1-3
+- [x] Profil utilisateur (nom, niveau, objectif) — Sprint 1-3
+- [x] Onboarding guide au premier lancement — Sprint 1-3
+- [x] Rappels d'entrainement (notifications planifiees) — Sprint 1-3
+- [x] Export complet JSON — Sprint 1-3
+- [x] Import avec confirmation — Sprint 1-3
+- [x] Donnees sensibles chiffrees (Secure Store) — Sprint 1-3
+- [x] Suppression de compte / donnees (RGPD) — Sprint 1-3
+- [x] Splash screen anime — Sprint 1-3
+
+## Features — Services
+
+- [x] Wearables (Health Connect + HealthKit) — Sprint 8+
+- [x] Widget Android (streak, prochain workout) — Sprint 8+
+- [x] Photos de progression (before/after) — Sprint 8+
+- [x] Partage (texte + image) — Sprint 8+
+- [x] Crash reporting (Sentry) — Sprint 1-3
+- [x] Notifications locales (timer de repos) — Sprint 1-3
+
+## Features — Phase 4 (post-release)
+
+- [ ] Themes debloquables (recompenses cosmetiques)
+- [ ] Cloud sync multi-device
+- [ ] iOS (App Store)
+- [ ] Widgets iOS
+- [ ] Wear OS companion app
+- [ ] Internationalisation (ES, DE, PT…)
+- [ ] Partage social avance (screenshots stylises)
+- [ ] Mode coach (creer et partager des programmes)
+- [ ] Premium / abonnement
+- [ ] Communaute / feed
+- [ ] Programme marketplace
+- [ ] Notifications push intelligentes
+
+---
+
+## Phases de release
+
+### Phase 1 — Stabilisation (terminee)
+- [x] Tests helpers Sprint 9-14 (35 helpers testes)
+- [x] Tests ecrans Sprint 5-14 (30 ecrans testes)
+- [x] Coverage 80%+ atteinte
+
+### Phase 2 — Polish (en cours)
+- [ ] UI Review globale (coherence visuelle 51 ecrans)
+- [ ] 71 couleurs hardcodees → tokens theme (21 fichiers)
+- [ ] HomeScreen refactor (2082 lignes → split composants)
+- [ ] DRY getMondayOfWeek (5 implementations → 1)
+- [ ] Perf audit HomeScreen (16+ cartes, re-renders)
+- [ ] Empty states (tous les ecrans sans data)
+- [ ] Error boundaries
+- [ ] Accessibilite (labels, contraste)
+- [ ] Test sur device reel (scroll, haptics, notifications)
+
+### Phase 3 — Release
+- [ ] Build production (`eas build --platform android --profile production`)
+- [ ] Screenshots Google Play (5-8 ecrans cles)
+- [ ] Description store FR/EN
+- [ ] Politique de confidentialite (page web)
+- [ ] Soumission Play Store
+
+### Phase 4 — Roadmap post-release
+Cloud sync, iOS, themes debloquables, partage avance, mode coach, premium (voir section Features — Phase 4).
+
+---
+
+## Sprints (1-14)
+
+| Sprint | Date | Features cles |
+|--------|------|---------------|
+| 1-3 | 5-13 mars | Core app, gamification, assistant IA, legal |
+| 4 | 13 mars | Animated recap, self-leagues, skill tree |
+| 5 | 14 mars | Stats avances (calendar, exercises, measurements) |
+| 6 | 14 mars | Leaderboard, selfLeagues, skillTree, activityFeed |
+| 7 | 14 mars | Hexagon, hallOfFame, balance, titles, compare |
+| 8 | 14 mars | Bulletin, constellation, collection, challenges, card |
+| 9 | 15 mars | Heatmap, strength, trainingSplit, prTimeline, bodyComp |
+| 10 | 15 mars | VolumeForecast, fatigueIndex, exerciseAlternatives, durationPredictor, exerciseMastery |
+| 11 | 15 mars | RepMax, volumeDistribution, streakHeatmap, restTime, monthlyProgress |
+| 12 | 17 mars | MuscleRecovery, bodyCompTrends, overtraining, workoutTips, plateau |
+| 13 | 18 mars | Readiness, muscleBalance, density, exerciseFrequency, weeklyGoals |
+| 14 | 18 mars | WorkoutSummary, setQuality, streakMilestones, volumeRecords, restSuggestions |
+
+---
+
+## Dette technique
+
+Issues restantes du verrif 20260319-1009 (score 96/100) :
+
+| # | Probleme | Fichiers | Effort | Groupe |
+|---|----------|----------|--------|--------|
+| A | 71 couleurs hardcodees (#10B981, #F59E0B…) | 21 fichiers screens + helpers | 60min | A |
+| B1 | HomeScreen monolithique (2082 lignes) | HomeScreen.tsx | 90min | B |
+| B2 | Non-null assertion sur motivationData.context | HomeScreen.tsx:476-488 | 10min | B |
+| B3 | Fetch imperatif programs au lieu de withObservables | HomeScreen.tsx:567-574 | 15min | B |
+| C1 | 5 implementations de getMondayOfWeek | 5 helpers | 20min | C |
+| C2 | exerciseFrequencyHelpers trend detection inutile <14j | exerciseFrequencyHelpers.ts | 5min | C |
+| C3 | muscleBalanceHelpers ratio cap masque desequilibres | muscleBalanceHelpers.ts | 5min | C |
+| C4 | handleNavigate non useCallback | StatsScreen.tsx | 5min | C |
+| D1 | muscleRecoveryHelpers volume depend de l'ordre des sets | muscleRecoveryHelpers.ts | 10min | D |
+| D2 | streakMilestonesHelpers semantique streak ambigue | streakMilestonesHelpers.ts | 10min | D |
+| E1 | overtrainingHelpers.ts code mort | overtrainingHelpers.ts | 5min | E |
+| E2 | 12+ fichiers tests `as any` au lieu de testFactories | 12 fichiers tests | 30min | E |
+
+Parallelisation : memes lettres = sequentiel, lettres differentes = parallele.
+
+---
+
+## Architecture
+
+```
+mobile/src/
+├── components/        12 composants reutilisables
+├── contexts/          2 contextes (Theme, Language)
+├── hooks/             5 hooks custom
+├── i18n/              FR + EN (1800+ lignes chacun)
+├── model/
+│   ├── models/        13 modeles WatermelonDB (schema v38)
+│   └── utils/         53 helpers
+├── navigation/        52 routes (Native Stack)
+├── screens/           51 ecrans
+├── services/          10 services
+└── theme/             Couleurs, spacing, typography
+```
+
+---
+
+## References
+
+- **Score de sante** : [`docs/bmad/verrif/HEALTH.md`](bmad/verrif/HEALTH.md) (historique time-series)
+- **Dernier verrif** : [`docs/bmad/verrif/20260319-1009/`](bmad/verrif/20260319-1009/)
+- **Verdict ship** : commit `2f9c0c4` — MVP ship verdict 95/100 SHIP IT
+- **Sprints detailles** : `docs/bmad/do/` (un rapport par sprint/feature)
