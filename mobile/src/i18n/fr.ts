@@ -207,6 +207,14 @@ export const fr = {
 
   home: {
     greeting: 'Salut, {name} !',
+    hero: {
+      inProgress: 'Entraînement en cours',
+      resume: 'Reprendre',
+      readyToTrain: 'Prêt à s\'entraîner',
+      getStarted: 'Commencer un entraînement',
+      restRecommended: 'Repos recommandé',
+      trainAnyway: 'S\'entraîner quand même',
+    },
     sections: {
       training: 'Entraînement',
       stats: 'Statistiques',
@@ -1277,6 +1285,7 @@ export const fr = {
 
   leaderboard: {
     title: 'Classement',
+    friendCount: (n: number) => `${n} ami${n > 1 ? 's' : ''}`,
     myCode: 'Mon code',
     shareCode: 'Partager mon code',
     addFriend: 'Ajouter un ami',

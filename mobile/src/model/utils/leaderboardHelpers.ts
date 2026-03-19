@@ -73,7 +73,7 @@ export function buildLeaderboard(
     {
       rank: 0,
       isMe: true,
-      friendCode: user.friendCode,
+      friendCode: user.friendCode ?? '',
       displayName: user.name || 'Moi',
       totalXp: user.totalXp,
       level: user.level,

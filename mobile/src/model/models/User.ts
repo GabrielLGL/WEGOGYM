@@ -55,7 +55,7 @@ export default class User extends Model {
   @text('cgu_version_accepted') cguVersionAccepted!: string | null
 
   // Leaderboard amis — version 37
-  @text('friend_code') friendCode!: string
+  @text('friend_code') friendCode!: string | null
 
   // Wearables — version 38
   @text('wearable_provider') wearableProvider!: string | null

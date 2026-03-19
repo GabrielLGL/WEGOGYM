@@ -612,7 +612,7 @@ const enhance = withObservables([], () => ({
 
 const Enhanced = enhance(LeaderboardScreenBase)
 
-function LeaderboardScreen(props: any) {
+function LeaderboardScreen(props: Record<string, unknown>) {
   const [ready, setReady] = useState(false)
   useEffect(() => { setReady(true) }, [])
   if (!ready) return null

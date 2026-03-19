@@ -207,6 +207,14 @@ export const en: typeof fr = {
 
   home: {
     greeting: 'Hey, {name}!',
+    hero: {
+      inProgress: 'Workout in progress',
+      resume: 'Resume',
+      readyToTrain: 'Ready to train',
+      getStarted: 'Start a workout',
+      restRecommended: 'Rest recommended',
+      trainAnyway: 'Train anyway',
+    },
     sections: {
       training: 'Training',
       stats: 'Statistics',
@@ -1276,6 +1284,7 @@ export const en: typeof fr = {
 
   leaderboard: {
     title: 'Leaderboard',
+    friendCount: (n: number) => `${n} friend${n > 1 ? 's' : ''}`,
     myCode: 'My code',
     shareCode: 'Share my code',
     addFriend: 'Add a friend',

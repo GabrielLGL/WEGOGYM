@@ -39,7 +39,11 @@ export async function saveWidgetData(data: WidgetData): Promise<void> {
 export async function loadWidgetData(): Promise<WidgetData | null> {
   const raw = await AsyncStorage.getItem(WIDGET_DATA_KEY)
   if (!raw) return null
-  return JSON.parse(raw) as WidgetData
+  try {
+    return JSON.parse(raw) as WidgetData
+  } catch {
+    return null
+  }
 }
 
 export async function buildWidgetData(database: Database): Promise<WidgetData> {

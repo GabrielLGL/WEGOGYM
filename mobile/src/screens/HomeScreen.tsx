@@ -285,7 +285,7 @@ const Enhanced = enhance(HomeScreenBase)
  * wrapper itself has mounted, preventing the "setState before mount" warning
  * caused by WatermelonDB's synchronous first emission on React 18 + Fabric.
  */
-function HomeScreen(props: any) {
+function HomeScreen(props: Record<string, unknown>) {
   const [ready, setReady] = useState(false)
   useEffect(() => { setReady(true) }, [])
   if (!ready) return null

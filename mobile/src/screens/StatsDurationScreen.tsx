@@ -566,7 +566,7 @@ function useStyles(colors: ThemeColors) {
       textAlign: 'center',
     },
     longestBadge: {
-      backgroundColor: '#F59E0B20',
+      backgroundColor: colors.amber + '20',
       borderRadius: borderRadius.xxs,
       paddingHorizontal: spacing.xs,
       paddingVertical: 2,
