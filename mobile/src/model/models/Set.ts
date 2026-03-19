@@ -33,6 +33,12 @@ export default class Set extends Model {
   // Colonne booléenne : vrai si cette série est un record personnel (Personal Record)
   @field('is_pr') isPr!: boolean
 
+  // Type de série : 'normal' | 'warmup' | 'drop' | 'failure' (null = normal)
+  @field('set_type') setType!: string | null
+
+  // RPE (Rate of Perceived Exertion) : échelle 1-10, null si non renseigné
+  @field('rpe') rpe!: number | null
+
   @field('history_id') historyId!: string
   @field('exercise_id') exerciseId!: string
 

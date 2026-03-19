@@ -1,7 +1,7 @@
 /**
  * schema.ts — Schéma de la base de données WatermelonDB (SQLite)
  *
- * Version actuelle : 38
+ * Version actuelle : 39
  *
  * Tables et relations principales :
  * - programs          : Programmes d'entraînement (nom, position, équipement)
@@ -22,7 +22,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 38, // v38 : wearable fields in users + wearable_sync_logs table
+  version: 39, // v39 : set_type + rpe fields in sets table
   tables: [
     tableSchema({
       name: 'programs',
@@ -184,6 +184,8 @@ export const mySchema = appSchema({
         { name: 'reps', type: 'number' },
         { name: 'set_order', type: 'number' },
         { name: 'is_pr', type: 'boolean' },
+        { name: 'set_type', type: 'string', isOptional: true },
+        { name: 'rpe', type: 'number', isOptional: true },
         { name: 'created_at', type: 'number', isIndexed: true },
         { name: 'updated_at', type: 'number' },
       ]

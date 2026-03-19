@@ -250,6 +250,10 @@ export const fr = {
       go: 'Go',
       noSession: 'Aucune séance récente',
     },
+    freeWorkout: {
+      label: 'Entraînement libre',
+      sessionName: 'Libre',
+    },
     motivational: {
       streak: '🔥 {n} jours consécutifs — ne lâche rien !',
       weeklyRecord: '💥 Nouveau record cette semaine — tu progresses !',
@@ -721,6 +725,14 @@ export const fr = {
     setsLabel: 'séries',
     restInProgress: 'REPOS EN COURS',
     skipRest: 'Ignorer',
+    setTypes: {
+      normal: 'Normal',
+      warmup: 'Échauffement',
+      drop: 'Drop set',
+      failure: 'Échec',
+    },
+    rpeLabel: 'RPE',
+    rpePlaceholder: '1-10',
     density: {
       label: 'Densité',
       unit: 'kg/min',

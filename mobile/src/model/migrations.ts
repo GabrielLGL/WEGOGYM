@@ -164,5 +164,17 @@ export const migrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 39,
+      steps: [
+        addColumns({
+          table: 'sets',
+          columns: [
+            { name: 'set_type', type: 'string', isOptional: true },
+            { name: 'rpe', type: 'number', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })

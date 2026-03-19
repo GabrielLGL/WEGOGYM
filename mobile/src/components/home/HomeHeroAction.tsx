@@ -10,6 +10,7 @@ import Session from '../../model/models/Session'
 import Program from '../../model/models/Program'
 import { computeReadiness } from '../../model/utils/workoutReadinessHelpers'
 import type { ReadinessLevel } from '../../model/utils/workoutReadinessHelpers'
+import { createQuickStartSession } from '../../model/utils/workoutSessionUtils'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useHaptics } from '../../hooks/useHaptics'
@@ -80,6 +81,17 @@ function HomeHeroActionInner({ histories, sets, exercises, sessions, programs }:
       navigation.navigate('Programs')
     }
   }, [haptics, activeWorkout, lastSession, navigation])
+
+  const handleQuickStart = useCallback(async () => {
+    haptics.onPress()
+    try {
+      const today = new Date().toLocaleDateString('fr-FR')
+      const sessionId = await createQuickStartSession(`${t.home.freeWorkout.sessionName} ${today}`)
+      navigation.navigate('SessionDetail', { sessionId })
+    } catch (e) {
+      if (__DEV__) console.error('Quick start failed:', e)
+    }
+  }, [haptics, navigation, t])
 
   const handleShortcut = useCallback((route: keyof RootStackParamList) => {
     haptics.onSelect()
@@ -160,6 +172,20 @@ function HomeHeroActionInner({ histories, sets, exercises, sessions, programs }:
           </>
         )}
       </TouchableOpacity>
+
+      {/* Quick Start — Entraînement libre */}
+      {!activeWorkout && (
+        <TouchableOpacity
+          style={styles.quickStartBtn}
+          onPress={handleQuickStart}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={t.home.freeWorkout.label}
+        >
+          <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+          <Text style={styles.quickStartText}>{t.home.freeWorkout.label}</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Shortcut Pills */}
       <View style={styles.pillsRow}>
@@ -249,6 +275,24 @@ function useStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
       fontWeight: '700',
       color: colors.primaryText,
+    },
+    quickStartBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.sm,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      paddingVertical: spacing.ms,
+      marginTop: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.primary + '40',
+      borderStyle: 'dashed',
+    },
+    quickStartText: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.primary,
     },
     pillsRow: {
       flexDirection: 'row',

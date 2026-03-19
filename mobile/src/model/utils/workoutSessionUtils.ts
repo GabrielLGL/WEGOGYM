@@ -9,6 +9,9 @@ import History from '../models/History'
 import Session from '../models/Session'
 import SessionExercise from '../models/SessionExercise'
 import SetModel from '../models/Set'
+import Program from '../models/Program'
+
+const QUICK_START_PROGRAM_NAME = '__quick_start__'
 
 /**
  * Crée une entrée History en base pour démarrer une séance en direct
@@ -168,7 +171,7 @@ export async function getLastSessionDensity(
 
   const durationMinutes = Math.max(
     1,
-    (mostRecent.endTime!.getTime() - mostRecent.startTime.getTime()) / 60000
+    ((mostRecent.endTime?.getTime() ?? mostRecent.startTime.getTime()) - mostRecent.startTime.getTime()) / 60000
   )
 
   const sets = await database
@@ -183,6 +186,36 @@ export async function getLastSessionDensity(
     durationMinutes,
     sets: sets.map(s => ({ weight: s.weight, reps: s.reps })),
   }
+}
+
+/**
+ * Crée une session "Entraînement libre" dans un programme caché __quick_start__.
+ * L'utilisateur peut ensuite ajouter des exercices dans SessionDetail avant de lancer le workout.
+ *
+ * @param sessionName - Nom de la session (ex: "Entraînement 20/03/2026")
+ * @returns L'ID de la session créée
+ */
+export async function createQuickStartSession(sessionName: string): Promise<string> {
+  const existing = await database
+    .get<Program>('programs')
+    .query(Q.where('name', QUICK_START_PROGRAM_NAME))
+    .fetch()
+
+  let program = existing[0] ?? null
+
+  const session = await database.write(async () => {
+    if (!program) {
+      program = await database.get<Program>('programs').create(p => {
+        p.name = QUICK_START_PROGRAM_NAME
+      })
+    }
+    return await database.get<Session>('sessions').create(s => {
+      s.name = sessionName
+      s.program.set(program!)
+    })
+  })
+
+  return session.id
 }
 
 /**

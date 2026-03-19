@@ -69,33 +69,29 @@ export function StatsScreenBase({ user, histories, sets }: Props) {
   const { t, language } = useLanguage()
 
   const STAT_BUTTONS: StatButton[] = useMemo(() => [
+    // Core — Essentiel
     { icon: 'time-outline',        label: t.stats.duration,     route: 'StatsDuration' },
     { icon: 'barbell-outline',     label: t.stats.volume,       route: 'StatsVolume' },
     { icon: 'calendar-outline',    label: t.stats.calendar,     route: 'StatsCalendar' },
     { icon: 'stats-chart-outline', label: t.stats.exercises,    route: 'StatsExercises' },
     { icon: 'resize-outline',      label: t.stats.measures,     route: 'StatsMeasurements' },
     { icon: 'list-outline',        label: t.stats.history,      route: 'StatsHistory' },
-    { icon: 'trophy-outline',      label: t.stats.selfLeagues,  route: 'SelfLeagues' },
+    // Progression & Records
     { icon: 'medal-outline',       label: t.stats.hallOfFame,   route: 'StatsHallOfFame' },
-    { icon: 'ribbon-outline',      label: t.stats.titles,       route: 'Titles' },
-    { icon: 'scale-outline',       label: t.stats.balance,      route: 'StatsBalance' },
+    { icon: 'podium-outline',      label: t.stats.prTimeline,      route: 'StatsPRTimeline' },
+    { icon: 'fitness-outline',     label: t.stats.strength,        route: 'StatsStrength' },
+    // Analyse avancée
+    { icon: 'git-branch-outline',  label: t.stats.trainingSplit,   route: 'StatsTrainingSplit' },
+    { icon: 'pie-chart-outline',   label: t.stats.volumeDistribution, route: 'StatsVolumeDistribution' },
+    { icon: 'swap-horizontal-outline', label: t.stats.muscleBalance, route: 'StatsMuscleBalance' },
+    { icon: 'flame-outline',       label: t.stats.heatmap,         route: 'StatsHeatmap' },
+    { icon: 'body-outline',        label: t.stats.bodyComp,        route: 'StatsBodyComp' },
+    // Comparaison & Rapports
     { icon: 'git-compare-outline', label: t.stats.compare,      route: 'StatsCompare' },
     { icon: 'school-outline',      label: t.stats.bulletin,     route: 'MonthlyBulletin' },
-    { icon: 'star-outline',        label: t.stats.constellation, route: 'StatsConstellation' },
+    { icon: 'trophy-outline',      label: t.stats.selfLeagues,  route: 'SelfLeagues' },
+    // Collection & Gamification
     { icon: 'albums-outline',      label: t.stats.collection,   route: 'ExerciseCollection' },
-    { icon: 'flame-outline',       label: t.stats.heatmap,         route: 'StatsHeatmap' },
-    { icon: 'fitness-outline',     label: t.stats.strength,        route: 'StatsStrength' },
-    { icon: 'git-branch-outline',  label: t.stats.trainingSplit,   route: 'StatsTrainingSplit' },
-    { icon: 'podium-outline',      label: t.stats.prTimeline,      route: 'StatsPRTimeline' },
-    { icon: 'body-outline',        label: t.stats.bodyComp,        route: 'StatsBodyComp' },
-    { icon: 'analytics-outline',   label: t.stats.volumeForecast,  route: 'StatsVolumeForecast' },
-    { icon: 'timer-outline',       label: t.stats.restTime,        route: 'StatsRestTime' },
-    { icon: 'pie-chart-outline',   label: t.stats.volumeDistribution, route: 'StatsVolumeDistribution' },
-    { icon: 'trending-up-outline', label: t.stats.monthlyProgress, route: 'StatsMonthlyProgress' },
-    { icon: 'bar-chart-outline',   label: t.stats.exerciseFrequency, route: 'StatsExerciseFrequency' },
-    { icon: 'swap-horizontal-outline', label: t.stats.muscleBalance, route: 'StatsMuscleBalance' },
-    { icon: 'checkmark-circle-outline', label: t.stats.setQuality, route: 'StatsSetQuality' },
-    { icon: 'trophy-outline',          label: t.stats.volumeRecords, route: 'StatsVolumeRecords' },
   ], [t])
 
   const kpis = useMemo(() => computeGlobalKPIs(histories, sets), [histories, sets])

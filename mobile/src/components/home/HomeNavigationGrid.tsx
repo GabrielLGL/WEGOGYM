@@ -46,7 +46,6 @@ function HomeNavigationGridInner({ friends, navigationGridRef }: HomeNavigationG
       subtitle: friends.length > 0 ? t.leaderboard.friendCount(friends.length) : undefined,
     },
     { icon: 'shield-outline', label: t.home.tiles.challenges, route: 'PersonalChallenges' },
-    { icon: 'git-branch-outline', label: t.home.tiles.skillTree, route: 'SkillTree' },
     { icon: 'newspaper-outline', label: t.home.tiles.activityFeed, route: 'ActivityFeed' },
   ], [t, friends.length])
 

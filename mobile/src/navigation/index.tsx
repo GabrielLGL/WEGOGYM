@@ -70,7 +70,7 @@ const ProgressPhotosScreen = React.lazy(() => import('../screens/ProgressPhotosS
 const LegalScreen = React.lazy(() => import('../screens/LegalScreen'))
 const LeaderboardScreen = React.lazy(() => import('../screens/LeaderboardScreen'))
 const SelfLeaguesScreen = React.lazy(() => import('../screens/SelfLeaguesScreen'))
-const SkillTreeScreen = React.lazy(() => import('../screens/SkillTreeScreen'))
+// SkillTree removed — over-engineering (RPG mechanic in a fitness app)
 const StatsHexagonScreen = React.lazy(() => import('../screens/StatsHexagonScreen'))
 const ActivityFeedScreen = React.lazy(() => import('../screens/ActivityFeedScreen'))
 const StatsHallOfFameScreen = React.lazy(() => import('../screens/StatsHallOfFameScreen'))
@@ -78,7 +78,7 @@ const StatsBalanceScreen = React.lazy(() => import('../screens/StatsBalanceScree
 const TitlesScreen = React.lazy(() => import('../screens/TitlesScreen'))
 const StatsCompareScreen = React.lazy(() => import('../screens/StatsCompareScreen'))
 const MonthlyBulletinScreen = React.lazy(() => import('../screens/MonthlyBulletinScreen'))
-const StatsConstellationScreen = React.lazy(() => import('../screens/StatsConstellationScreen'))
+// StatsConstellation removed — visual gadget with no actionable value
 const ExerciseCollectionScreen = React.lazy(() => import('../screens/ExerciseCollectionScreen'))
 const PersonalChallengesScreen = React.lazy(() => import('../screens/PersonalChallengesScreen'))
 const ExerciseCardScreen = React.lazy(() => import('../screens/ExerciseCardScreen'))
@@ -87,14 +87,14 @@ const StatsStrengthScreen = React.lazy(() => import('../screens/StatsStrengthScr
 const StatsTrainingSplitScreen = React.lazy(() => import('../screens/StatsTrainingSplitScreen'))
 const StatsPRTimelineScreen = React.lazy(() => import('../screens/StatsPRTimelineScreen'))
 const StatsBodyCompScreen = React.lazy(() => import('../screens/StatsBodyCompScreen'))
-const StatsVolumeForecastScreen = React.lazy(() => import('../screens/StatsVolumeForecastScreen'))
-const StatsRestTimeScreen = React.lazy(() => import('../screens/StatsRestTimeScreen'))
+// StatsVolumeForecast removed — predictions on limited data = noise
+// StatsRestTime removed — micro-optimization, 99% of users don't need this
 const StatsVolumeDistributionScreen = React.lazy(() => import('../screens/StatsVolumeDistributionScreen'))
 const StatsMonthlyProgressScreen = React.lazy(() => import('../screens/StatsMonthlyProgressScreen'))
 const StatsExerciseFrequencyScreen = React.lazy(() => import('../screens/StatsExerciseFrequencyScreen'))
 const StatsMuscleBalanceScreen = React.lazy(() => import('../screens/StatsMuscleBalanceScreen'))
-const StatsSetQualityScreen = React.lazy(() => import('../screens/StatsSetQualityScreen'))
-const StatsVolumeRecordsScreen = React.lazy(() => import('../screens/StatsVolumeRecordsScreen'))
+// StatsSetQuality removed — "quality" is not objectively measurable
+// StatsVolumeRecords removed — merged into StatsVolume
 
 function isVersionOlder(accepted: string, required: string): boolean {
   const [aMaj, aMin] = accepted.split('.').map(Number)
@@ -130,7 +130,6 @@ export type RootStackParamList = {
   Legal: undefined;
   Leaderboard: undefined;
   SelfLeagues: undefined;
-  SkillTree: undefined;
   StatsHexagon: undefined;
   ActivityFeed: undefined;
   StatsHallOfFame: undefined;
@@ -138,7 +137,6 @@ export type RootStackParamList = {
   Titles: undefined;
   StatsCompare: undefined;
   MonthlyBulletin: undefined;
-  StatsConstellation: undefined;
   ExerciseCollection: undefined;
   PersonalChallenges: undefined;
   ExerciseCard: { exerciseId: string };
@@ -147,14 +145,10 @@ export type RootStackParamList = {
   StatsTrainingSplit: undefined;
   StatsPRTimeline: undefined;
   StatsBodyComp: undefined;
-  StatsVolumeForecast: undefined;
-  StatsRestTime: undefined;
   StatsVolumeDistribution: undefined;
   StatsMonthlyProgress: undefined;
   StatsExerciseFrequency: undefined;
   StatsMuscleBalance: undefined;
-  StatsSetQuality: undefined;
-  StatsVolumeRecords: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -305,7 +299,7 @@ function AppContent() {
           <Stack.Screen name="Legal" component={LegalScreen} options={{ title: t.navigation.legal }} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: t.navigation.leaderboard }} />
           <Stack.Screen name="SelfLeagues" component={SelfLeaguesScreen} options={{ title: t.navigation.selfLeagues }} />
-          <Stack.Screen name="SkillTree" component={SkillTreeScreen} options={{ title: t.navigation.skillTree }} />
+          {/* SkillTree removed */}
           <Stack.Screen name="StatsHexagon" component={StatsHexagonScreen} options={{ title: t.navigation.statsHexagon }} />
           <Stack.Screen name="ActivityFeed" component={ActivityFeedScreen} options={{ title: t.navigation.activityFeed }} />
           <Stack.Screen name="StatsHallOfFame" component={StatsHallOfFameScreen} options={{ title: t.navigation.hallOfFame }} />
@@ -313,7 +307,7 @@ function AppContent() {
           <Stack.Screen name="Titles" component={TitlesScreen} options={{ title: t.navigation.titles }} />
           <Stack.Screen name="StatsCompare" component={StatsCompareScreen} options={{ title: t.navigation.statsCompare }} />
           <Stack.Screen name="MonthlyBulletin" component={MonthlyBulletinScreen} options={{ title: t.navigation.monthlyBulletin }} />
-          <Stack.Screen name="StatsConstellation" component={StatsConstellationScreen} options={{ title: t.navigation.statsConstellation }} />
+          {/* StatsConstellation removed */}
           <Stack.Screen name="ExerciseCollection" component={ExerciseCollectionScreen} options={{ title: t.navigation.exerciseCollection }} />
           <Stack.Screen name="PersonalChallenges" component={PersonalChallengesScreen} options={{ title: t.navigation.personalChallenges }} />
           <Stack.Screen name="ExerciseCard" component={ExerciseCardScreen} options={{ title: '' }} />
@@ -322,14 +316,12 @@ function AppContent() {
           <Stack.Screen name="StatsTrainingSplit" component={StatsTrainingSplitScreen} options={{ title: t.navigation.statsTrainingSplit }} />
           <Stack.Screen name="StatsPRTimeline" component={StatsPRTimelineScreen} options={{ title: t.navigation.statsPRTimeline }} />
           <Stack.Screen name="StatsBodyComp" component={StatsBodyCompScreen} options={{ title: t.navigation.statsBodyComp }} />
-          <Stack.Screen name="StatsVolumeForecast" component={StatsVolumeForecastScreen} options={{ title: t.navigation.statsVolumeForecast }} />
-          <Stack.Screen name="StatsRestTime" component={StatsRestTimeScreen} options={{ title: t.navigation.statsRestTime }} />
+          {/* StatsVolumeForecast + StatsRestTime removed */}
           <Stack.Screen name="StatsVolumeDistribution" component={StatsVolumeDistributionScreen} options={{ title: t.navigation.statsVolumeDistribution }} />
           <Stack.Screen name="StatsMonthlyProgress" component={StatsMonthlyProgressScreen} options={{ title: t.navigation.statsMonthlyProgress }} />
           <Stack.Screen name="StatsExerciseFrequency" component={StatsExerciseFrequencyScreen} options={{ title: t.navigation.statsExerciseFrequency }} />
           <Stack.Screen name="StatsMuscleBalance" component={StatsMuscleBalanceScreen} options={{ title: t.navigation.statsMuscleBalance }} />
-          <Stack.Screen name="StatsSetQuality" component={StatsSetQualityScreen} options={{ title: t.navigation.statsSetQuality }} />
-          <Stack.Screen name="StatsVolumeRecords" component={StatsVolumeRecordsScreen} options={{ title: t.navigation.statsVolumeRecords }} />
+          {/* StatsSetQuality + StatsVolumeRecords removed */}
         </Stack.Navigator>
       </Suspense>
     </NavigationContainer>

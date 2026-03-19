@@ -250,6 +250,10 @@ export const en: typeof fr = {
       go: 'Go',
       noSession: 'No recent session',
     },
+    freeWorkout: {
+      label: 'Free Workout',
+      sessionName: 'Free',
+    },
     motivational: {
       streak: '🔥 {n} days in a row — keep it up!',
       weeklyRecord: "💥 New weekly record — you're improving!",
@@ -720,6 +724,14 @@ export const en: typeof fr = {
     setsLabel: 'sets',
     restInProgress: 'REST IN PROGRESS',
     skipRest: 'Skip',
+    setTypes: {
+      normal: 'Normal',
+      warmup: 'Warm-up',
+      drop: 'Drop set',
+      failure: 'Failure',
+    },
+    rpeLabel: 'RPE',
+    rpePlaceholder: '1-10',
     density: {
       label: 'Density',
       unit: 'kg/min',
