@@ -13,6 +13,7 @@ import { deleteAllData } from '../../model/utils/databaseHelpers'
 import { useHaptics } from '../../hooks/useHaptics'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useToast } from '../../contexts/ToastContext'
 import { AlertDialog } from '../AlertDialog'
 import { BottomSheet } from '../BottomSheet'
 import { Button } from '../Button'
@@ -30,6 +31,7 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
   const colors = useColors()
   const haptics = useHaptics()
   const { t } = useLanguage()
+  const { showToast } = useToast()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   const [exporting, setExporting] = useState(false)
@@ -59,9 +61,11 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
         mimeType: 'application/json',
         dialogTitle: t.settings.data.exportSheetTitle,
       })
+      showToast({ message: t.toasts.dataExported })
     } catch (error) {
       if (__DEV__) console.error('Export share failed:', error)
       setExportError(true)
+      showToast({ message: t.toasts.error, variant: 'error' })
     } finally {
       setExporting(false)
     }
@@ -83,10 +87,12 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
         )
         await FileSystem.writeAsStringAsync(destUri, content)
         haptics.onSuccess()
+        showToast({ message: t.toasts.dataExported })
       }
     } catch (error) {
       if (__DEV__) console.error('Export download failed:', error)
       setExportError(true)
+      showToast({ message: t.toasts.error, variant: 'error' })
     } finally {
       setExporting(false)
     }
@@ -116,9 +122,11 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
       await importAllData(pendingImportUri)
       haptics.onSuccess()
       setImportSuccess(true)
+      showToast({ message: t.toasts.dataImported })
     } catch (error) {
       if (__DEV__) console.error('Import failed:', error)
       setImportError(true)
+      showToast({ message: t.toasts.error, variant: 'error' })
     } finally {
       setImporting(false)
       setPendingImportUri(null)

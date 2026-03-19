@@ -27,6 +27,7 @@ import { fontSize, spacing, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useToast } from '../contexts/ToastContext'
 import History from '../model/models/History'
 import { predictSessionDuration, DurationPrediction } from '../model/utils/durationPredictorHelpers'
 
@@ -53,6 +54,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const { t } = useLanguage()
+  const { showToast } = useToast()
   const {
     // Target inputs states
     targetSets,
@@ -199,11 +201,12 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
       const success = await addExercise(exerciseId, sets, reps, weight, exo)
       if (success) {
         addModal.close()
+        showToast({ message: t.toasts.exerciseAdded })
       }
     } catch (e) {
       if (__DEV__) console.error('handleAddExercise error:', e)
     }
-  }, [exercises, addExercise, addModal])
+  }, [exercises, addExercise, addModal, showToast, t])
 
   const handleUpdateTargets = useCallback(async () => {
     try {
@@ -217,13 +220,16 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   }, [updateTargets, editModal])
 
   const showRemoveAlert = useCallback((se: SessionExercise, exoName: string) => {
-    alertConfirmRef.current = () => removeExercise(se)
+    alertConfirmRef.current = async () => {
+      await removeExercise(se)
+      showToast({ message: t.toasts.exerciseRemoved })
+    }
     setAlertConfig({
       title: `${t.sessionDetail.delete} ${exoName} ?`,
       message: t.sessionDetail.removeConfirmMessage,
     })
     alertModal.open()
-  }, [t, removeExercise, alertModal])
+  }, [t, removeExercise, alertModal, showToast])
 
   const handleEditTargets = useCallback((se: SessionExercise) => {
     haptics.onPress()

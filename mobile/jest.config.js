@@ -32,6 +32,8 @@ module.exports = {
     '.*\\/contexts\\/ThemeContext': '<rootDir>/__mocks__/ThemeContextMock.ts',
     // Mock LanguageContext pour éviter la dépendance transitoire → database → SQLiteAdapter
     '.*\\/contexts\\/LanguageContext': '<rootDir>/__mocks__/LanguageContextMock.ts',
+    // Mock ToastContext pour éviter l'erreur useToast hors ToastProvider
+    '.*\\/contexts\\/ToastContext': '<rootDir>/__mocks__/ToastContextMock.ts',
     // Mock @expo/vector-icons pour éviter loadedNativeFonts en environnement Jest
     '@expo/vector-icons': '<rootDir>/__mocks__/vectorIconsMock.js',
     // Mock react-native-view-shot pour éviter le rendu off-screen dans les tests

@@ -28,6 +28,7 @@ import type { PresetProgram } from '../model/onboardingPrograms'
 import { fontSize, spacing, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useToast } from '../contexts/ToastContext'
 import type { ThemeColors } from '../theme'
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>
@@ -44,6 +45,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
   const styles = useStyles(colors)
   const haptics = useHaptics()
   const { t } = useLanguage()
+  const { showToast } = useToast()
   const slideAnim = useKeyboardAnimation(-150)
   const {
     // Program states
@@ -149,9 +151,11 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
       const success = await saveProgram()
       if (success) {
         programModal.close()
+        if (!isRenamingProgram) showToast({ message: t.toasts.programCreated })
       }
     } catch (e) {
       if (__DEV__) console.error('[ProgramsScreen] handleSaveProgram:', e)
+      showToast({ message: t.toasts.error, variant: 'error' })
     }
   }
 
@@ -159,8 +163,10 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
     try {
       optionsModal.close()
       await duplicateProgram()
+      showToast({ message: t.toasts.programDuplicated })
     } catch (e) {
       if (__DEV__) console.error('[ProgramsScreen] handleDuplicateProgram:', e)
+      showToast({ message: t.toasts.error, variant: 'error' })
     }
   }
 
@@ -315,7 +321,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
           <TouchableOpacity style={styles.sheetOption} onPress={handleDuplicateProgram}>
             <Ionicons name="copy-outline" size={20} color={colors.text} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={styles.sheetOptionText}>{t.programs.duplicate}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sheetOption} onPress={() => { optionsModal.close(); setAlertConfig({ title: `${t.programs.deleteTitle} ${selectedProgram?.name} ?`, message: t.programs.deleteMessage, onConfirm: async () => { await deleteProgram() } }); alertModal.open(); }}>
+          <TouchableOpacity style={styles.sheetOption} onPress={() => { optionsModal.close(); setAlertConfig({ title: `${t.programs.deleteTitle} ${selectedProgram?.name} ?`, message: t.programs.deleteMessage, onConfirm: async () => { await deleteProgram(); showToast({ message: t.toasts.programDeleted }) } }); alertModal.open(); }}>
             <Ionicons name="trash-outline" size={20} color={colors.danger} style={{ marginRight: spacing.lg, width: 30 }} /><Text style={[styles.sheetOptionText, { color: colors.danger }]}>{t.programs.delete}</Text>
           </TouchableOpacity>
         </BottomSheet>

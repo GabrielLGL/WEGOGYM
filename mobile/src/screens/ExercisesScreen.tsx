@@ -27,6 +27,7 @@ import { fontSize, spacing, borderRadius } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import type { ThemeColors } from '../theme'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useToast } from '../contexts/ToastContext'
 
 type ExercisesNavigation = NativeStackNavigationProp<RootStackParamList>
 
@@ -101,6 +102,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
   const navigation = useNavigation<ExercisesNavigation>()
   const haptics = useHaptics()
   const { t } = useLanguage()
+  const { showToast } = useToast()
   const slideAnim = useKeyboardAnimation(-200)
 
   const masteryMap = useMemo(() => computeExerciseMastery(exercises, sets), [exercises, sets])
@@ -174,9 +176,11 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
       if (success) {
         editModal.close()
         optionsModal.close()
+        showToast({ message: t.toasts.exerciseUpdated })
       }
     } catch (e) {
       if (__DEV__) console.error('[ExercisesScreen] handleUpdateExercise:', e)
+      showToast({ message: t.toasts.error, variant: 'error' })
     }
   }
 
@@ -186,9 +190,11 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
       if (success) {
         alertModal.close()
         optionsModal.close()
+        showToast({ message: t.toasts.exerciseDeleted })
       }
     } catch (e) {
       if (__DEV__) console.error('[ExercisesScreen] handleDeleteExercise:', e)
+      showToast({ message: t.toasts.error, variant: 'error' })
     }
   }
 

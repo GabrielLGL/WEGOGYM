@@ -31,6 +31,7 @@ import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useToast } from '../contexts/ToastContext'
 import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
 import { fontSize, spacing, borderRadius } from '../theme'
@@ -276,6 +277,7 @@ function useDetailStyles(colors: ThemeColors) {
 const ExerciseCatalogScreen: React.FC = () => {
   const colors = useColors()
   const { t } = useLanguage()
+  const { showToast } = useToast()
   const styles = useStyles(colors)
   const haptics = useHaptics()
 
@@ -416,6 +418,7 @@ const ExerciseCatalogScreen: React.FC = () => {
       })
 
       haptics.onSuccess()
+      showToast({ message: t.toasts.exerciseImported })
       detailSheet.close()
     } catch (e) {
       if (__DEV__) console.error('handleImport error:', e)
@@ -424,7 +427,7 @@ const ExerciseCatalogScreen: React.FC = () => {
       setIsImporting(false)
       isImportingRef.current = false
     }
-  }, [haptics, detailSheet, duplicateAlert, importErrorAlert])
+  }, [haptics, detailSheet, duplicateAlert, importErrorAlert, showToast, t])
 
   const handleEndReached = useCallback(() => {
     loadMore(query)
