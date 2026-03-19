@@ -1,11 +1,15 @@
 import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import ViewShot from 'react-native-view-shot'
 import { BottomSheet } from './BottomSheet'
-import { Button } from './Button'
 import { ShareBottomSheet } from './ShareBottomSheet'
 import ShareCard from './ShareCard'
+import SummaryGratitude from './workout-summary/SummaryGratitude'
+import SummaryIntensity from './workout-summary/SummaryIntensity'
+import SummaryComparison from './workout-summary/SummaryComparison'
+import SummaryExerciseList from './workout-summary/SummaryExerciseList'
+import SummaryActions from './workout-summary/SummaryActions'
 import { Q } from '@nozbe/watermelondb'
 import { database } from '../model/index'
 import { updateHistoryNote } from '../model/utils/databaseHelpers'
@@ -67,10 +71,6 @@ function getMotivationMessage(totalPrs: number, volumeGain: number, colors: Them
     return { text: t.motivationProgress, color: colors.warning }
   }
   return { text: t.motivationDefault, color: colors.textSecondary }
-}
-
-function formatWeight(w: number): string {
-  return w % 1 === 0 ? `${w}` : `${w.toFixed(1)}`
 }
 
 export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
@@ -159,13 +159,13 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     }
   }, [])
 
-  const handleNoteChange = (text: string) => {
+  const handleNoteChange = useCallback((text: string) => {
     noteRef.current = text
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       if (historyId) updateHistoryNote(historyId, text).catch(e => { if (__DEV__) console.error('[WorkoutSummarySheet] updateHistoryNote (debounce):', e) })
     }, NOTE_DEBOUNCE_MS)
-  }
+  }, [historyId])
 
   const handleClose = useCallback(() => {
     if (debounceRef.current) {
@@ -211,6 +211,16 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
     }
   }, [shareSheet])
 
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    haptics.onSelect()
+    setSelectedEmoji(prev => prev === emoji ? null : emoji)
+  }, [haptics])
+
+  const handleGratitudeSubmit = useCallback(() => {
+    haptics.onSuccess()
+    setGratitudeSubmitted(true)
+  }, [haptics])
+
   const motivation = getMotivationMessage(totalPrs, recapComparison.volumeGain, colors, t.workoutSummary)
 
   const intensity = useMemo(() => {
@@ -224,8 +234,9 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
   ).filter(m => m.trim().length > 0)
 
   // Exercices avec delta poids max (pour section Progression)
-  const exercisesWithDelta = recapExercises.filter(
-    e => e.prevMaxWeight > 0 && e.currMaxWeight !== e.prevMaxWeight
+  const exercisesWithDelta = useMemo(() =>
+    recapExercises.filter(e => e.prevMaxWeight > 0 && e.currMaxWeight !== e.prevMaxWeight),
+    [recapExercises],
   )
 
   return (
@@ -235,143 +246,21 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
       title={t.workoutSummary.title}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ── Section Gratitude ── */}
-        {!gratitudeSubmitted && (
-          <View style={styles.gratitudeSection}>
-            <Text style={styles.gratitudeQuestion}>{t.gratitude.question}</Text>
-            <View style={styles.emojiRow}>
-              {['💪', '🔥', '😌', '😤'].map(emoji => (
-                <TouchableOpacity
-                  key={emoji}
-                  style={[
-                    styles.emojiBtn,
-                    selectedEmoji === emoji && styles.emojiBtnActive,
-                  ]}
-                  onPress={() => {
-                    haptics.onSelect()
-                    setSelectedEmoji(prev => prev === emoji ? null : emoji)
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={emoji}
-                  accessibilityState={{ selected: selectedEmoji === emoji }}
-                >
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {selectedEmoji && (
-              <>
-                <TextInput
-                  style={styles.gratitudeInput}
-                  placeholder={t.gratitude.placeholder}
-                  placeholderTextColor={colors.placeholder}
-                  value={gratitudeNote}
-                  onChangeText={setGratitudeNote}
-                  maxLength={120}
-                  multiline
-                  accessibilityLabel={t.gratitude.placeholder}
-                />
-                <TouchableOpacity
-                  style={styles.gratitudeSubmitBtn}
-                  onPress={() => {
-                    haptics.onSuccess()
-                    setGratitudeSubmitted(true)
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={t.common.validate}
-                >
-                  <Text style={styles.gratitudeSubmitText}>{t.gratitude.save}</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        )}
-
-        {gratitudeSubmitted && (
-          <View style={styles.gratitudeDoneRow}>
-            <Text style={styles.gratitudeDoneText}>{selectedEmoji} {t.gratitude.saved}</Text>
-          </View>
-        )}
+        <SummaryGratitude
+          selectedEmoji={selectedEmoji}
+          gratitudeNote={gratitudeNote}
+          gratitudeSubmitted={gratitudeSubmitted}
+          onEmojiSelect={handleEmojiSelect}
+          onNoteChange={setGratitudeNote}
+          onSubmit={handleGratitudeSubmit}
+        />
 
         <View style={styles.sectionDivider} />
 
-        {/* ── Section Intensité ── */}
-        {intensity && (
-          <>
-            <View style={styles.intensitySection}>
-              <Text style={styles.intensityTitle}>{t.intensity.title}</Text>
-              <View style={styles.intensityScoreRow}>
-                <Text style={[styles.intensityScore, { color: intensity.color }]}>
-                  {intensity.score}
-                </Text>
-                <Text style={[styles.intensityLabel, { color: intensity.color }]}>
-                  {t.intensity.levels[intensity.label]}
-                </Text>
-              </View>
-              <View style={styles.intensityBarBg}>
-                <View style={[
-                  styles.intensityBarFill,
-                  { width: `${intensity.score}%`, backgroundColor: intensity.color },
-                ]} />
-              </View>
-              <View style={styles.intensityBreakdown}>
-                <Text style={styles.intensityBreakdownItem}>
-                  {t.intensity.volume}: {intensity.breakdown.volumeScore}/33
-                </Text>
-                <Text style={styles.intensityBreakdownItem}>
-                  {t.intensity.prs}: {intensity.breakdown.prScore}/33
-                </Text>
-                <Text style={styles.intensityBreakdownItem}>
-                  {t.intensity.effort}: {intensity.breakdown.effortScore}/34
-                </Text>
-              </View>
-            </View>
-            <View style={styles.sectionDivider} />
-          </>
-        )}
+        {intensity && <SummaryIntensity intensity={intensity} />}
 
-        {/* ── Section Comparaison ── */}
         {comparison?.hasComparison && (
-          <>
-            <View style={styles.comparisonSection}>
-              <Text style={styles.comparisonTitle}>{t.sessionComparison.title}</Text>
-
-              <View style={styles.comparisonOverall}>
-                <Text style={styles.comparisonOverallLabel}>{t.sessionComparison.totalVolume}</Text>
-                <Text style={[
-                  styles.comparisonOverallDelta,
-                  { color: comparison.overallVolumeDelta >= 0 ? colors.primary : colors.danger }
-                ]}>
-                  {comparison.overallVolumeDelta >= 0 ? '↑' : '↓'}
-                  {' '}{Math.abs(comparison.overallVolumeDeltaPercent).toFixed(1)}%
-                  {' '}({comparison.overallVolumeDelta >= 0 ? '+' : ''}{Math.round(comparison.overallVolumeDelta)} kg)
-                </Text>
-              </View>
-
-              {comparison.exercises.filter(e => e.deltas).map((ex) => (
-                <View key={ex.exerciseId} style={styles.comparisonExRow}>
-                  <Text style={styles.comparisonExName} numberOfLines={1}>{ex.exerciseName}</Text>
-                  <View style={styles.comparisonExDeltas}>
-                    <Text style={[
-                      styles.comparisonExDelta,
-                      { color: ex.deltas!.volume >= 0 ? colors.primary : colors.danger }
-                    ]}>
-                      {ex.deltas!.volume >= 0 ? '+' : ''}{Math.round(ex.deltas!.volume)} kg
-                    </Text>
-                    {ex.deltas!.maxWeight !== 0 && (
-                      <Text style={[
-                        styles.comparisonExDelta,
-                        { color: ex.deltas!.maxWeight >= 0 ? colors.primary : colors.danger }
-                      ]}>
-                        max {ex.deltas!.maxWeight >= 0 ? '+' : ''}{ex.deltas!.maxWeight} kg
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              ))}
-            </View>
-            <View style={styles.sectionDivider} />
-          </>
+          <SummaryComparison comparison={comparison} />
         )}
 
         {/* Message motivant */}
@@ -416,126 +305,17 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
           </View>
         </View>
 
-        {/* Section "Ce que tu as fait" */}
-        {recapExercises.length > 0 && (
-          <>
-            <View style={styles.separator} />
-            <Text style={styles.sectionTitle}>{t.workoutSummary.sectionDone}</Text>
-            {recapExercises.map((exo, idx) => {
-              const isComplete = exo.setsValidated >= exo.setsTarget && exo.setsTarget > 0
-              return (
-                <View key={idx} style={styles.exoRow}>
-                  <View style={styles.exoHeader}>
-                    <Text style={styles.exoName}>{exo.exerciseName}</Text>
-                    {exo.setsTarget > 0 && (
-                      isComplete
-                        ? <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-                        : <Text style={styles.incompleteBadge}>
-                            {exo.setsValidated}/{exo.setsTarget}
-                          </Text>
-                    )}
-                  </View>
-                  <Text style={styles.exoSets}>
-                    {exo.sets.map(s => `${s.reps}×${formatWeight(s.weight)} kg`).join('  ·  ')}
-                  </Text>
-                </View>
-              )
-            })}
-          </>
-        )}
-
-        {/* Section "Progression" */}
-        {recapExercises.length > 0 && (
-          <>
-            <View style={styles.separator} />
-            <Text style={styles.sectionTitle}>{t.workoutSummary.sectionProgression}</Text>
-
-            {/* Delta volume total */}
-            {recapComparison.prevVolume === null ? (
-              <Text style={styles.progressionFirstTime}>{t.workoutSummary.firstSession}</Text>
-            ) : (
-              <View style={styles.progressionVolRow}>
-                <Text style={styles.progressionLabel}>{t.workoutSummary.totalVolume}</Text>
-                {recapComparison.volumeGain > 0 ? (
-                  <View style={styles.row}>
-                    <Text style={[styles.progressionDelta, { color: colors.primary }]}>
-                      +{recapComparison.volumeGain.toFixed(1)} kg
-                    </Text>
-                    <Ionicons name="chevron-up-outline" size={12} color={colors.primary} />
-                  </View>
-                ) : recapComparison.volumeGain < 0 ? (
-                  <View style={styles.row}>
-                    <Text style={[styles.progressionDelta, { color: colors.danger }]}>
-                      {recapComparison.volumeGain.toFixed(1)} kg
-                    </Text>
-                    <Ionicons name="chevron-down-outline" size={12} color={colors.danger} />
-                  </View>
-                ) : (
-                  <Text style={[styles.progressionDelta, { color: colors.textSecondary }]}>
-                    {t.workoutSummary.sameVolume}
-                  </Text>
-                )}
-              </View>
-            )}
-
-            {/* Delta poids max par exercice */}
-            {exercisesWithDelta.map((exo, idx) => (
-              <View key={idx} style={styles.progressionExoRow}>
-                <Text style={styles.progressionExoName}>{exo.exerciseName}</Text>
-                <View style={styles.row}>
-                  <Text style={[
-                    styles.progressionDelta,
-                    { color: exo.currMaxWeight > exo.prevMaxWeight ? colors.primary : colors.danger }
-                  ]}>
-                    {formatWeight(exo.prevMaxWeight)} → {formatWeight(exo.currMaxWeight)} kg
-                  </Text>
-                  <Ionicons
-                    name={exo.currMaxWeight > exo.prevMaxWeight ? 'chevron-up-outline' : 'chevron-down-outline'}
-                    size={12}
-                    color={exo.currMaxWeight > exo.prevMaxWeight ? colors.primary : colors.danger}
-                  />
-                </View>
-              </View>
-            ))}
-          </>
-        )}
-
-        <View style={styles.separator} />
-
-        <Text style={styles.noteLabel}>{t.workoutSummary.noteLabel}</Text>
-        <TextInput
-          style={styles.noteInput}
-          multiline
-          numberOfLines={3}
-          defaultValue=""
-          onChangeText={handleNoteChange}
-          placeholder={t.workoutSummary.notePlaceholder}
-          placeholderTextColor={colors.placeholder}
-          textAlignVertical="top"
-          accessibilityLabel={t.workoutSummary.notePlaceholder}
+        <SummaryExerciseList
+          recapExercises={recapExercises}
+          recapComparison={recapComparison}
+          exercisesWithDelta={exercisesWithDelta}
         />
 
-        <Button
-          variant="secondary"
-          size="md"
-          fullWidth
-          onPress={handleSharePress}
-          enableHaptics={false}
-        >
-          {t.share.shareButton}
-        </Button>
-
-        <View style={{ height: spacing.sm }} />
-
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          onPress={handleClose}
-          enableHaptics={false}
-        >
-          {t.workoutSummary.finish}
-        </Button>
+        <SummaryActions
+          onNoteChange={handleNoteChange}
+          onSharePress={handleSharePress}
+          onClose={handleClose}
+        />
       </ScrollView>
 
       {/* Off-screen ViewShot for image capture */}
@@ -568,8 +348,8 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     row: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
+      flexDirection: 'row',
+      alignItems: 'center',
       gap: spacing.xs,
     },
     motivationText: {
@@ -640,256 +420,11 @@ function createStyles(colors: ThemeColors) {
     gamCenter: {
       textAlign: 'center',
     },
-    separator: {
-      height: 1,
-      backgroundColor: colors.separator,
-      marginVertical: spacing.md,
-    },
-    sectionTitle: {
-      color: colors.textSecondary,
-      fontSize: fontSize.xs,
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-      marginBottom: spacing.sm,
-    },
-    exoRow: {
-      marginBottom: spacing.sm,
-    },
-    exoHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      marginBottom: 2,
-    },
-    exoName: {
-      color: colors.text,
-      fontSize: fontSize.sm,
-      fontWeight: '600',
-      flex: 1,
-    },
-    incompleteBadge: {
-      color: colors.textSecondary,
-      fontSize: fontSize.xs,
-      backgroundColor: colors.cardSecondary,
-      paddingHorizontal: spacing.xs,
-      paddingVertical: 1,
-      borderRadius: borderRadius.sm,
-    },
-    exoSets: {
-      color: colors.textSecondary,
-      fontSize: fontSize.xs,
-    },
-    progressionFirstTime: {
-      color: colors.primary,
-      fontSize: fontSize.sm,
-      fontWeight: '600',
-      textAlign: 'center',
-      marginBottom: spacing.sm,
-    },
-    progressionVolRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: spacing.sm,
-    },
-    progressionLabel: {
-      color: colors.text,
-      fontSize: fontSize.sm,
-    },
-    progressionDelta: {
-      fontSize: fontSize.sm,
-      fontWeight: '600',
-    },
-    progressionExoRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: spacing.xs,
-    },
-    progressionExoName: {
-      color: colors.textSecondary,
-      fontSize: fontSize.xs,
-      flex: 1,
-      marginRight: spacing.sm,
-    },
-    noteLabel: {
-      color: colors.textSecondary,
-      fontSize: fontSize.xs,
-      marginBottom: spacing.xs,
-    },
-    noteInput: {
-      backgroundColor: colors.cardSecondary,
-      borderRadius: borderRadius.sm,
-      borderWidth: 1,
-      borderColor: colors.separator,
-      color: colors.text,
-      fontSize: fontSize.md,
-      padding: spacing.md,
-      marginBottom: spacing.lg,
-      minHeight: 80,
-    },
-    gratitudeSection: {
-      paddingHorizontal: spacing.md,
-      paddingTop: spacing.sm,
-      paddingBottom: spacing.md,
-    },
-    gratitudeQuestion: {
-      fontSize: fontSize.sm,
-      color: colors.text,
-      fontWeight: '600',
-      marginBottom: spacing.sm,
-      textAlign: 'center',
-    },
-    emojiRow: {
-      flexDirection: 'row' as const,
-      justifyContent: 'center' as const,
-      gap: spacing.sm,
-      marginBottom: spacing.sm,
-    },
-    emojiBtn: {
-      width: 52,
-      height: 52,
-      borderRadius: borderRadius.md,
-      backgroundColor: colors.cardSecondary,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-    },
-    emojiBtnActive: {
-      backgroundColor: colors.primary + '33',
-      borderWidth: 2,
-      borderColor: colors.primary,
-    },
-    emojiText: {
-      fontSize: 26,
-    },
-    gratitudeInput: {
-      backgroundColor: colors.cardSecondary,
-      borderRadius: borderRadius.sm,
-      padding: spacing.sm,
-      fontSize: fontSize.sm,
-      color: colors.text,
-      minHeight: 60,
-      textAlignVertical: 'top' as const,
-      marginBottom: spacing.sm,
-    },
-    gratitudeSubmitBtn: {
-      backgroundColor: colors.primary,
-      borderRadius: borderRadius.sm,
-      paddingVertical: spacing.xs,
-      alignItems: 'center' as const,
-    },
-    gratitudeSubmitText: {
-      fontSize: fontSize.sm,
-      color: colors.background,
-      fontWeight: '600',
-    },
-    gratitudeDoneRow: {
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      alignItems: 'center' as const,
-    },
-    gratitudeDoneText: {
-      fontSize: fontSize.sm,
-      color: colors.textSecondary,
-    },
     sectionDivider: {
       height: 1,
       backgroundColor: colors.separator,
       marginHorizontal: spacing.md,
       marginBottom: spacing.md,
-    },
-    intensitySection: {
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.md,
-    },
-    intensityTitle: {
-      fontSize: fontSize.sm,
-      color: colors.text,
-      fontWeight: '600',
-      marginBottom: spacing.sm,
-      textAlign: 'center',
-    },
-    intensityScoreRow: {
-      flexDirection: 'row' as const,
-      alignItems: 'baseline' as const,
-      justifyContent: 'center' as const,
-      gap: spacing.sm,
-      marginBottom: spacing.sm,
-    },
-    intensityScore: {
-      fontSize: fontSize.jumbo,
-      fontWeight: '900',
-    },
-    intensityLabel: {
-      fontSize: fontSize.md,
-      fontWeight: '600',
-    },
-    intensityBarBg: {
-      height: 6,
-      backgroundColor: colors.cardSecondary,
-      borderRadius: 3,
-      marginBottom: spacing.sm,
-      overflow: 'hidden' as const,
-    },
-    intensityBarFill: {
-      height: '100%' as const,
-      borderRadius: 3,
-    },
-    intensityBreakdown: {
-      flexDirection: 'row' as const,
-      justifyContent: 'space-around' as const,
-    },
-    intensityBreakdownItem: {
-      fontSize: fontSize.caption,
-      color: colors.textSecondary,
-    },
-    comparisonSection: {
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.md,
-    },
-    comparisonTitle: {
-      fontSize: fontSize.sm,
-      color: colors.text,
-      fontWeight: '600',
-      marginBottom: spacing.sm,
-      textAlign: 'center',
-    },
-    comparisonOverall: {
-      flexDirection: 'row' as const,
-      justifyContent: 'space-between' as const,
-      alignItems: 'center' as const,
-      backgroundColor: colors.cardSecondary,
-      borderRadius: borderRadius.sm,
-      padding: spacing.sm,
-      marginBottom: spacing.sm,
-    },
-    comparisonOverallLabel: {
-      fontSize: fontSize.sm,
-      color: colors.text,
-    },
-    comparisonOverallDelta: {
-      fontSize: fontSize.sm,
-      fontWeight: '700',
-    },
-    comparisonExRow: {
-      flexDirection: 'row' as const,
-      justifyContent: 'space-between' as const,
-      alignItems: 'center' as const,
-      paddingVertical: spacing.xs,
-    },
-    comparisonExName: {
-      flex: 1,
-      fontSize: fontSize.sm,
-      color: colors.text,
-    },
-    comparisonExDeltas: {
-      flexDirection: 'row' as const,
-      gap: spacing.sm,
-    },
-    comparisonExDelta: {
-      fontSize: fontSize.caption,
-      fontWeight: '600',
     },
   })
 }
