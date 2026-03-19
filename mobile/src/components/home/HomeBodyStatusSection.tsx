@@ -438,7 +438,7 @@ function useStyles(colors: ThemeColors) {
     restConfidenceText: {
       fontSize: fontSize.caption,
       fontWeight: '600',
-      color: '#fff',
+      color: colors.primaryText,
     },
     restReason: {
       fontSize: fontSize.bodyMd,

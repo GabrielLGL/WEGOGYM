@@ -93,7 +93,7 @@ function RecordCard({
         </View>
         {record.isNewRecord && (
           <View style={styles.newRecordBadge}>
-            <Ionicons name="flash" size={12} color="#FFF" />
+            <Ionicons name="flash" size={12} color={colors.primaryText} />
             <Text style={styles.newRecordText}>{t.volumeRecords.newRecord}</Text>
           </View>
         )}
@@ -312,7 +312,7 @@ function useStyles(colors: ThemeColors) {
     newRecordText: {
       fontSize: fontSize.caption,
       fontWeight: '700',
-      color: '#FFF',
+      color: colors.primaryText,
     },
     recordVolume: {
       fontSize: fontSize.xxl,

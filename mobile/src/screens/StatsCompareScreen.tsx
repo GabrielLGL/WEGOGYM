@@ -350,7 +350,7 @@ function useStyles(colors: ThemeColors) {
       color: colors.textSecondary,
     },
     chipTextActive: {
-      color: '#fff',
+      color: colors.primaryText,
       fontWeight: '600',
     },
     // Tableau

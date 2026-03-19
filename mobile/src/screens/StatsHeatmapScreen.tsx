@@ -251,7 +251,7 @@ function useStyles(colors: ThemeColors) {
       fontWeight: '500',
     },
     periodLabelActive: {
-      color: '#fff',
+      color: colors.primaryText,
       fontWeight: '700',
     },
     columnWrapper: {
