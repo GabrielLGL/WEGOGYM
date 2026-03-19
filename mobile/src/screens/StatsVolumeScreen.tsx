@@ -32,6 +32,7 @@ import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { useDeferredMount } from '../hooks/useDeferredMount'
+import ScreenLoading from '../components/ScreenLoading'
 
 const BAR_PERIOD_KEYS = ['week', '1m', '3m', 'all'] as const
 type BarPeriodKey = typeof BAR_PERIOD_KEYS[number]
@@ -422,7 +423,7 @@ const StatsVolumeScreen = () => {
   const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {mounted && <ObservableStatsVolumeContent />}
+      {mounted ? <ObservableStatsVolumeContent /> : <ScreenLoading />}
     </View>
   )
 }

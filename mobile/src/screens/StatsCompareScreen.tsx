@@ -19,6 +19,7 @@ import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import { useDeferredMount } from '../hooks/useDeferredMount'
+import ScreenLoading from '../components/ScreenLoading'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -483,7 +484,7 @@ const StatsCompareScreen = () => {
   const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {mounted && <ObservableStatsCompare />}
+      {mounted ? <ObservableStatsCompare /> : <ScreenLoading />}
     </View>
   )
 }

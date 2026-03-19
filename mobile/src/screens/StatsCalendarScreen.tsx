@@ -27,6 +27,7 @@ import { database } from '../model'
 import { AlertDialog } from '../components/AlertDialog'
 import { useHaptics } from '../hooks/useHaptics'
 import { useDeferredMount } from '../hooks/useDeferredMount'
+import ScreenLoading from '../components/ScreenLoading'
 import { useMonthNavigation } from '../hooks/useMonthNavigation'
 import { useCalendarDayDetail } from '../hooks/useCalendarDayDetail'
 import type { DayCell, WeekRow, DayDetail, SessionBlock } from '../hooks/useCalendarDayDetail'
@@ -797,7 +798,7 @@ const StatsCalendarScreen = () => {
   const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {mounted && <ObservableStatsCalendarContent />}
+      {mounted ? <ObservableStatsCalendarContent /> : <ScreenLoading />}
     </View>
   )
 }

@@ -24,6 +24,7 @@ import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useDeferredMount } from '../hooks/useDeferredMount'
+import ScreenLoading from '../components/ScreenLoading'
 import type { ThemeColors } from '../theme'
 
 // ─── Couleurs par niveau ──────────────────────────────────────────────────────
@@ -304,7 +305,7 @@ const StatsStrengthScreen = () => {
   const mounted = useDeferredMount()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {mounted && <ObservableContent />}
+      {mounted ? <ObservableContent /> : <ScreenLoading />}
     </View>
   )
 }
