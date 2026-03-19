@@ -1,3 +1,7 @@
+/**
+ * @future — Préparé pour les alertes de gamification (notifications de surentraînement).
+ * Pas encore intégré dans l'UI. Importé uniquement par son fichier de test.
+ */
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
 import { DAY_MS, WEEK_MS } from '../constants'

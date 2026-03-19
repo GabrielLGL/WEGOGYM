@@ -6,6 +6,7 @@
  */
 
 import type WorkoutSet from '../models/Set'
+import { getMondayOfWeek } from './dateHelpers'
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -52,19 +53,9 @@ export interface VolumeForecast {
 
 // ─── Helpers internes ────────────────────────────────────────────────────────
 
-/** Retourne le lundi 00:00:00 de la semaine contenant `date` */
-function getMonday(date: Date): Date {
-  const d = new Date(date)
-  const day = d.getDay() // 0=dimanche
-  const diff = day === 0 ? -6 : 1 - day
-  d.setDate(d.getDate() + diff)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
 /** Clé de semaine pour grouper (ISO string du lundi) */
 function weekKey(date: Date): string {
-  return getMonday(date).toISOString().slice(0, 10)
+  return getMondayOfWeek(date).toISOString().slice(0, 10)
 }
 
 /** Moyenne pondérée : S-1 poids 4, S-2 poids 3, S-3 poids 2, S-4..S-8 poids 1 */
@@ -121,7 +112,7 @@ export function computeVolumeForecast(sets: WorkoutSet[]): VolumeForecast | null
   if (sets.length === 0) return null
 
   const now = new Date()
-  const currentMonday = getMonday(now)
+  const currentMonday = getMondayOfWeek(now)
 
   // 8 semaines avant la semaine courante
   const eightWeeksAgo = new Date(currentMonday)
@@ -145,7 +136,7 @@ export function computeVolumeForecast(sets: WorkoutSet[]): VolumeForecast | null
       weekMap.set(key, {
         volume: vol,
         setCount: 1,
-        weekStart: getMonday(created),
+        weekStart: getMondayOfWeek(created),
       })
     }
   }

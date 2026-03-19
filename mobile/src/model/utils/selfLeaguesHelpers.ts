@@ -4,6 +4,7 @@
 import type History from '../models/History'
 import type WorkoutSet from '../models/Set'
 import { MINUTE_MS } from '../constants'
+import { getMondayOfWeek } from './dateHelpers'
 
 export type SelfLeaguesMetric = 'volume' | 'sessions' | 'prs' | 'tonnage' | 'duration'
 export type SelfLeaguesPeriodSize = 'week' | 'month'
@@ -59,22 +60,10 @@ function formatMonthLabel(startTs: number): string {
 // ─── Period generation ────────────────────────────────────────────────────────
 
 /**
- * Returns the Monday of the week containing the given date.
- */
-function getMondayOf(date: Date): Date {
-  const d = new Date(date)
-  const day = d.getDay()
-  const diffToMonday = day === 0 ? -6 : 1 - day
-  d.setDate(d.getDate() + diffToMonday)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-/**
  * Returns the Sunday of the week containing the given date.
  */
 function getSundayOf(date: Date): Date {
-  const monday = getMondayOf(date)
+  const monday = getMondayOfWeek(date)
   const sunday = new Date(monday)
   sunday.setDate(monday.getDate() + 6)
   sunday.setHours(23, 59, 59, 999)
@@ -112,8 +101,8 @@ export function computeSelfLeaguePeriods(
 
   if (periodSize === 'week') {
     // Iterate weekly from the Monday of the earliest history to the current week
-    let currentMonday = getMondayOf(new Date(earliestTs))
-    const todayMonday = getMondayOf(new Date(now))
+    let currentMonday = getMondayOfWeek(new Date(earliestTs))
+    const todayMonday = getMondayOfWeek(new Date(now))
 
     while (currentMonday.getTime() <= todayMonday.getTime()) {
       const startDate = currentMonday.getTime()
