@@ -5,7 +5,7 @@
 
 ## Resume executif
 
-L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`. 120+ features implementees sur 14 sprints, 0 erreur TypeScript, score de sante 96/100, ship score 95/100. Le MVP est pret a shipper sur le Play Store. La phase actuelle est le **polish post-ship** : correction des 13 issues restantes du dernier verrif (couleurs hardcodees, HomeScreen monolithique, DRY helpers).
+L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`. 120+ features implementees sur 14 sprints, 0 erreur TypeScript, score de sante 100/100, ship score 100/100. **Phase 2 Polish terminee** (4 rounds, 19 taches). Le MVP est pret a shipper sur le Play Store.
 
 ---
 
@@ -16,7 +16,7 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 | Tests | 2231 (188 suites) |
 | Erreurs TS | 0 |
 | Score sante | 100/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
-| Ship score | 100/100 SHIP IT (20260319-1800) |
+| Ship score | 100/100 SHIP IT (20260319-2327) |
 | Tag MVP | `v0.1.0-mvp-20260319` |
 | Ecrans | 51 |
 | Helpers | 53 |
@@ -155,16 +155,16 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 ### Priorite haute (impact adoption)
 - [ ] Cloud backup (Google Drive / iCloud) — sauvegarde sans compte
 - [ ] Onboarding progressif (guidage par etapes, decouverte features)
-- [ ] Empty states avec CTA sur tous les ecrans sans data
-- [ ] Toast/Snackbar global (feedback visuel apres actions)
-- [ ] Accessibilite (a11y labels, roles, screen reader support)
+- [x] Empty states avec CTA sur tous les ecrans sans data
+- [x] Toast/Snackbar global (feedback visuel apres actions)
+- [x] Accessibilite (a11y labels, roles, screen reader support)
 
 ### Priorite moyenne (differenciation)
 - [ ] Cloud sync multi-device (avec compte optionnel)
 - [ ] Themes debloquables (recompenses cosmetiques)
 - [ ] iOS (App Store)
 - [ ] Widgets iOS
-- [ ] Skeleton loaders sur les ecrans stats
+- [x] Skeleton loaders sur les ecrans stats
 - [ ] Navigation stats groupee (Performance / Corps / Habitudes / Avance)
 - [ ] Videos d'execution des exercices
 - [ ] Nutrition basique (calories / proteines)
@@ -190,15 +190,22 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 - [x] Tests ecrans Sprint 5-14 (30 ecrans testes)
 - [x] Coverage 80%+ atteinte
 
-### Phase 2 — Polish (en cours)
-- [ ] UI Review globale (coherence visuelle 51 ecrans)
-- [ ] 71 couleurs hardcodees → tokens theme (21 fichiers)
+### Phase 2 — Polish (terminee)
+- [x] UI Review globale (coherence visuelle 51 ecrans)
+- [x] Couleurs hardcodees → tokens theme
 - [x] HomeScreen refactor (HomeHeroAction, HomeStatusStrip extraits)
 - [x] DRY getMondayOfWeek (commit b8dcb76)
-- [ ] Perf audit HomeScreen (16+ cartes, re-renders)
-- [ ] Empty states (tous les ecrans sans data)
-- [ ] Error boundaries
-- [ ] Accessibilite (labels, contraste)
+- [x] Perf audit HomeScreen (React.memo, useCallback, useMemo)
+- [x] Empty states (EmptyState component + integration)
+- [x] Error boundaries (ErrorBoundary wrapping app root)
+- [x] Accessibilite (a11y labels sur tous les ecrans interactifs)
+- [x] Toast system (creation + integration)
+- [x] ScreenLoading + loading states
+- [x] Nav type safety (0 `as never`)
+- [x] Dead code cleanup
+- [x] WorkoutSummarySheet split (895 → 5 sub-components)
+- [x] StatsCalendarScreen split (806 → 3 sub-components)
+- [x] FlatList getItemLayout optimization
 - [ ] Test sur device reel (scroll, haptics, notifications)
 
 ### Phase 3 — Release
@@ -264,5 +271,5 @@ mobile/src/
 
 - **Score de sante** : [`docs/bmad/verrif/HEALTH.md`](bmad/verrif/HEALTH.md) (historique time-series)
 - **Dernier verrif** : [`docs/bmad/verrif/20260319-1408/`](bmad/verrif/20260319-1408/)
-- **Verdict ship** : commit `2f9c0c4` — MVP ship verdict 95/100 SHIP IT
+- **Verdict ship** : `docs/bmad/verrif-ship/20260319-2327/VERDICT.md` — 100/100 SHIP IT
 - **Sprints detailles** : `docs/bmad/do/` (un rapport par sprint/feature)
