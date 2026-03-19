@@ -13,9 +13,9 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 | Metrique | Valeur |
 |----------|--------|
-| Tests | 2230 (188 suites) |
+| Tests | 2231 (188 suites) |
 | Erreurs TS | 0 |
-| Score sante | 96/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
+| Score sante | 98/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
 | Ship score | 100/100 SHIP IT (20260319-1800) |
 | Tag MVP | `v0.1.0-mvp-20260319` |
 | Ecrans | 51 |
@@ -218,22 +218,18 @@ Cloud sync, iOS, themes debloquables, partage avance, mode coach, premium (voir 
 
 ## Dette technique
 
-Issues restantes du verrif 20260319-1009 (score 96/100) :
+Issues restantes du verrif 20260319-1408 (score 98/100) :
 
 | # | Probleme | Fichiers | Effort | Groupe |
 |---|----------|----------|--------|--------|
-| A | 71 couleurs hardcodees (#10B981, #F59E0B…) | 21 fichiers screens + helpers | 60min | A |
-| B1 | HomeScreen monolithique (2082 lignes) | HomeScreen.tsx | 90min | B |
-| B2 | Non-null assertion sur motivationData.context | HomeScreen.tsx:476-488 | 10min | B |
-| B3 | Fetch imperatif programs au lieu de withObservables | HomeScreen.tsx:567-574 | 15min | B |
-| C1 | 5 implementations de getMondayOfWeek | 5 helpers | 20min | C |
-| C2 | exerciseFrequencyHelpers trend detection inutile <14j | exerciseFrequencyHelpers.ts | 5min | C |
-| C3 | muscleBalanceHelpers ratio cap masque desequilibres | muscleBalanceHelpers.ts | 5min | C |
-| C4 | handleNavigate non useCallback | StatsScreen.tsx | 5min | C |
-| D1 | muscleRecoveryHelpers volume depend de l'ordre des sets | muscleRecoveryHelpers.ts | 10min | D |
-| D2 | streakMilestonesHelpers semantique streak ambigue | streakMilestonesHelpers.ts | 10min | D |
-| E1 | overtrainingHelpers.ts code mort | overtrainingHelpers.ts | 5min | E |
-| E2 | 12+ fichiers tests `as any` au lieu de testFactories | 12 fichiers tests | 30min | E |
+| A1 | handleGo sans useCallback (stale closure) | HomeHeroAction.tsx | 5min | A |
+| A2 | Inline arrow dans shortcuts.map | HomeHeroAction.tsx | 5min | A |
+| B1 | BackHandler stale closure summaryModal | WorkoutScreen.tsx | 10min | B |
+| B2 | handleConfirmEnd deps incompletes | WorkoutScreen.tsx | 5min | B |
+| C1 | CoachMarks timer cleanup partiel | CoachMarks.tsx | 10min | C |
+| D1 | s.history.id sans optional chaining | HomeInsightsCarousel.tsx | 5min | D |
+| D2 | Render functions instables dans cards | HomeInsightsCarousel.tsx | 15min | D |
+| D3 | Hardcoded fallback 'intermediate' | HomeInsightsCarousel.tsx, HomeInsightsSection.tsx | 5min | D |
 
 Parallelisation : memes lettres = sequentiel, lettres differentes = parallele.
 
@@ -261,6 +257,6 @@ mobile/src/
 ## References
 
 - **Score de sante** : [`docs/bmad/verrif/HEALTH.md`](bmad/verrif/HEALTH.md) (historique time-series)
-- **Dernier verrif** : [`docs/bmad/verrif/20260319-1009/`](bmad/verrif/20260319-1009/)
+- **Dernier verrif** : [`docs/bmad/verrif/20260319-1408/`](bmad/verrif/20260319-1408/)
 - **Verdict ship** : commit `2f9c0c4` — MVP ship verdict 95/100 SHIP IT
 - **Sprints detailles** : `docs/bmad/do/` (un rapport par sprint/feature)
