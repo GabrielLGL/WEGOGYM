@@ -11,6 +11,7 @@ import { Q } from '@nozbe/watermelondb'
 import { Ionicons } from '@expo/vector-icons'
 
 import { database } from '../model'
+import { EmptyState } from '../components/EmptyState'
 import History from '../model/models/History'
 import WorkoutSet from '../model/models/Set'
 import {
@@ -186,8 +187,11 @@ export function SelfLeaguesScreenBase({ histories, sets }: Props) {
       {/* ── Liste ── */}
       {ranking.length < 2 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="trophy-outline" size={48} color={colors.textSecondary} />
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{sl.noData}</Text>
+          <EmptyState
+            icon="trophy-outline"
+            title={t.emptyStates.leaguesTitle}
+            message={t.emptyStates.leaguesMessage}
+          />
         </View>
       ) : (
         <FlatList

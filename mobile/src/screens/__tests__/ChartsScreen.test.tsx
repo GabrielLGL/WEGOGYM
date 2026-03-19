@@ -85,7 +85,7 @@ describe('ChartsContent', () => {
     const { getByText } = render(
       <ChartsContent exercises={[]} />
     )
-    expect(getByText('Sélectionnez un exercice pour commencer.')).toBeTruthy()
+    expect(getByText('Aucune donnée')).toBeTruthy()
   })
 
   it('affiche le message vide quand aucun exercice sélectionné', () => {
@@ -93,7 +93,7 @@ describe('ChartsContent', () => {
     const { getByText } = render(
       <ChartsContent exercises={exercises} />
     )
-    expect(getByText('Sélectionnez un exercice pour commencer.')).toBeTruthy()
+    expect(getByText('Aucune donnée')).toBeTruthy()
   })
 
   it('affiche les exercices dans la liste horizontale', () => {
@@ -120,7 +120,7 @@ describe('ChartsContent', () => {
     fireEvent.press(getByText('Développé couché'))
 
     // After selection, the empty state message should disappear
-    expect(() => getByText('Sélectionnez un exercice pour commencer.')).toThrow()
+    expect(() => getByText('Aucune donnée')).toThrow()
   })
 
   it('affiche les stats quand un exercice est sélectionné avec données', () => {

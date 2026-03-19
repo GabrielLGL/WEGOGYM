@@ -16,6 +16,7 @@ import { AlertDialog } from '../components/AlertDialog'
 import { OnboardingSheet } from '../components/OnboardingSheet'
 import Program from '../model/models/Program'
 import User from '../model/models/User'
+import { EmptyState } from '../components/EmptyState'
 import ProgramSection from '../components/ProgramSection'
 import { useKeyboardAnimation } from '../hooks/useKeyboardAnimation'
 import { useHaptics } from '../hooks/useHaptics'
@@ -190,26 +191,41 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaView style={styles.container}>
         <View style={styles.listWrapper}>
-          <DraggableFlatList
-            data={programs}
-            onDragEnd={async ({ data }) => {
-              try {
-                await database.write(async () => {
-                  const updates = data
-                    .map((p, index) => p.position !== index ? p.prepareUpdate(u => { u.position = index }) : null)
-                    .filter((x): x is Program => x !== null)
-                  if (updates.length) await database.batch(updates)
-                })
-              } catch (error) {
-                if (__DEV__) console.error('[ProgramsScreen] Drag-and-drop batch update failed:', error)
-                setErrorAlertMessage(t.programs.reorderError)
-                errorAlert.open()
-              }
-            }}
-            keyExtractor={i => i.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: spacing.lg }}
-          />
+          {programs.length === 0 ? (
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <EmptyState
+                icon="library-outline"
+                title={t.emptyStates.programsTitle}
+                message={t.emptyStates.programsMessage}
+                actionLabel={t.emptyStates.programsCta}
+                onAction={() => {
+                  haptics.onPress()
+                  createChoiceModal.open()
+                }}
+              />
+            </View>
+          ) : (
+            <DraggableFlatList
+              data={programs}
+              onDragEnd={async ({ data }) => {
+                try {
+                  await database.write(async () => {
+                    const updates = data
+                      .map((p, index) => p.position !== index ? p.prepareUpdate(u => { u.position = index }) : null)
+                      .filter((x): x is Program => x !== null)
+                    if (updates.length) await database.batch(updates)
+                  })
+                } catch (error) {
+                  if (__DEV__) console.error('[ProgramsScreen] Drag-and-drop batch update failed:', error)
+                  setErrorAlertMessage(t.programs.reorderError)
+                  errorAlert.open()
+                }
+              }}
+              keyExtractor={i => i.id}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: spacing.lg }}
+            />
+          )}
         </View>
 
         <Animated.View style={[styles.footerFloating, { transform: [{ translateY: slideAnim }] }]}>

@@ -18,6 +18,7 @@ import ProgressPhoto from '../model/models/ProgressPhoto'
 import { BottomSheet } from '../components/BottomSheet'
 import { AlertDialog } from '../components/AlertDialog'
 import { Button } from '../components/Button'
+import { EmptyState } from '../components/EmptyState'
 import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
 import { useDeferredMount } from '../hooks/useDeferredMount'
@@ -311,11 +312,13 @@ function ProgressPhotosScreenBase({ photos }: Props) {
 
         {/* État vide */}
         {filteredPhotos.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="camera-outline" size={48} color={colors.textSecondary} />
-            <Text style={styles.emptyTitle}>{t.progressPhotos.emptyTitle}</Text>
-            <Text style={styles.emptyText}>{t.progressPhotos.emptyMessage}</Text>
-          </View>
+          <EmptyState
+            icon="camera-outline"
+            title={t.emptyStates.photosTitle}
+            message={t.emptyStates.photosMessage}
+            actionLabel={t.emptyStates.photosCta}
+            onAction={() => { haptics.onPress(); addSheet.open() }}
+          />
         )}
 
         {/* Spacer pour les boutons */}

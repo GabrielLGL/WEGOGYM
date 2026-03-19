@@ -9,6 +9,7 @@ import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 
 import { database } from '../model'
+import { EmptyState } from '../components/EmptyState'
 import Exercise from '../model/models/Exercise'
 import WorkoutSet from '../model/models/Set'
 import { spacing, borderRadius, fontSize } from '../theme'
@@ -186,8 +187,11 @@ function ExerciseCollectionBase({ exercises, sets }: Props) {
   if (total === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyTitle}>{t.exerciseCollection.emptyTitle}</Text>
-        <Text style={styles.emptyMessage}>{t.exerciseCollection.emptyMessage}</Text>
+        <EmptyState
+          icon="barbell-outline"
+          title={t.emptyStates.collectionTitle}
+          message={t.emptyStates.collectionMessage}
+        />
       </View>
     )
   }

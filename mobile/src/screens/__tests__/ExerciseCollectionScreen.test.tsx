@@ -44,7 +44,7 @@ describe('ExerciseCollectionScreenBase', () => {
   it('affiche l état vide sans exercices', () => {
     const Component = Base()
     const { getByText } = render(<Component exercises={[]} sets={[]} />)
-    expect(getByText('Aucun exercice')).toBeTruthy()
+    expect(getByText('Collection vide')).toBeTruthy()
   })
 
   it('affiche la collection avec exercices découverts', () => {

@@ -23,6 +23,7 @@ import History from '../model/models/History'
 import Session from '../model/models/Session'
 import { MUSCLES_LIST, EQUIPMENT_LIST } from '../model/constants'
 import { AlertDialog } from '../components/AlertDialog'
+import { EmptyState } from '../components/EmptyState'
 import { ChipSelector } from '../components/ChipSelector'
 import { useHaptics } from '../hooks/useHaptics'
 import { useModalState } from '../hooks/useModalState'
@@ -298,7 +299,11 @@ export const ChartsContent: React.FC<Props> = ({ exercises }) => {
           <ObservableExerciseStats exerciseId={selectedExoId} />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>{t.charts.emptySelectExercise}</Text>
+            <EmptyState
+              icon="stats-chart-outline"
+              title={t.emptyStates.chartsTitle}
+              message={t.emptyStates.chartsMessage}
+            />
           </View>
         )}
       </View>
