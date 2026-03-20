@@ -170,7 +170,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
     }
   }, [])
 
-  const handleUpdateExercise = async () => {
+  const handleUpdateExercise = useCallback(async () => {
     try {
       const success = await updateExercise()
       if (success) {
@@ -182,9 +182,9 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
       if (__DEV__) console.error('[ExercisesScreen] handleUpdateExercise:', e)
       showToast({ message: t.toasts.error, variant: 'error' })
     }
-  }
+  }, [updateExercise, editModal, optionsModal, showToast, t])
 
-  const handleDeleteExercise = async () => {
+  const handleDeleteExercise = useCallback(async () => {
     try {
       const success = await deleteExercise()
       if (success) {
@@ -196,7 +196,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
       if (__DEV__) console.error('[ExercisesScreen] handleDeleteExercise:', e)
       showToast({ message: t.toasts.error, variant: 'error' })
     }
-  }
+  }, [deleteExercise, alertModal, optionsModal, showToast, t])
 
   const handleOptionsPress = useCallback((item: Exercise) => {
     haptics.onPress()

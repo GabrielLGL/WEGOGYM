@@ -122,7 +122,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
     }
   }, [programs, user])
 
-  const handleProgramSelected = async (preset: PresetProgram) => {
+  const handleProgramSelected = useCallback(async (preset: PresetProgram) => {
     try {
       await importPresetProgram(preset)
       await markOnboardingCompleted()
@@ -132,9 +132,9 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
       if (__DEV__) console.error('[ProgramsScreen] Erreur import programme :', error)
       // Ne pas appeler markOnboardingCompleted en cas d'erreur (AC8)
     }
-  }
+  }, [onboardingModal, haptics])
 
-  const handleSkipOnboarding = async () => {
+  const handleSkipOnboarding = useCallback(async () => {
     try {
       await markOnboardingCompleted()
       onboardingModal.close()
@@ -142,11 +142,11 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
       if (__DEV__) console.error('[ProgramsScreen] handleSkipOnboarding:', error)
       onboardingModal.close()
     }
-  }
+  }, [onboardingModal])
 
   // --- LOGIQUE MÉTIER ---
 
-  const handleSaveProgram = async () => {
+  const handleSaveProgram = useCallback(async () => {
     try {
       const success = await saveProgram()
       if (success) {
@@ -157,9 +157,9 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
       if (__DEV__) console.error('[ProgramsScreen] handleSaveProgram:', e)
       showToast({ message: t.toasts.error, variant: 'error' })
     }
-  }
+  }, [saveProgram, programModal, isRenamingProgram, showToast, t])
 
-  const handleDuplicateProgram = async () => {
+  const handleDuplicateProgram = useCallback(async () => {
     try {
       optionsModal.close()
       await duplicateProgram()
@@ -168,7 +168,7 @@ const ProgramsScreen: React.FC<Props> = ({ programs, user, navigation }) => {
       if (__DEV__) console.error('[ProgramsScreen] handleDuplicateProgram:', e)
       showToast({ message: t.toasts.error, variant: 'error' })
     }
-  }
+  }, [optionsModal, duplicateProgram, showToast, t])
 
   const handleProgramPress = useCallback((program: Program) => {
     haptics.onPress()

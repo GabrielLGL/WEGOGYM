@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import * as Sharing from 'expo-sharing'
@@ -52,7 +52,7 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
     setShowExportOptions(true)
   }
 
-  const handleExportShare = async () => {
+  const handleExportShare = useCallback(async () => {
     setShowExportOptions(false)
     setExporting(true)
     try {
@@ -69,9 +69,9 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
     } finally {
       setExporting(false)
     }
-  }
+  }, [t, showToast])
 
-  const handleExportDownload = async () => {
+  const handleExportDownload = useCallback(async () => {
     setShowExportOptions(false)
     setExporting(true)
     try {
@@ -96,7 +96,7 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
     } finally {
       setExporting(false)
     }
-  }
+  }, [haptics, t, showToast])
 
   const handleImportPress = async () => {
     haptics.onPress()
@@ -114,7 +114,7 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
     }
   }
 
-  const handleImportConfirm = async () => {
+  const handleImportConfirm = useCallback(async () => {
     if (!pendingImportUri) return
     setShowImportConfirm(false)
     setImporting(true)
@@ -131,9 +131,9 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
       setImporting(false)
       setPendingImportUri(null)
     }
-  }
+  }, [pendingImportUri, haptics, t, showToast])
 
-  const handleDeleteAllData = async () => {
+  const handleDeleteAllData = useCallback(async () => {
     setShowDeleteConfirm(false)
     setDeleting(true)
     try {
@@ -146,7 +146,7 @@ export const SettingsDataSection: React.FC<SettingsDataSectionProps> = ({
     } finally {
       setDeleting(false)
     }
-  }
+  }, [user, haptics])
 
   return (
     <>

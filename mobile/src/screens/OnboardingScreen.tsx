@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { View, Text, StyleSheet, ToastAndroid, Platform, ScrollView, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, useRoute } from '@react-navigation/native'
@@ -43,7 +43,7 @@ export default function OnboardingScreen() {
 
   const totalSteps = disclaimerOnly ? 1 : 4
 
-  const handleAcceptDisclaimer = async () => {
+  const handleAcceptDisclaimer = useCallback(async () => {
     haptics.onPress()
     setIsSaving(true)
     try {
@@ -72,7 +72,7 @@ export default function OnboardingScreen() {
       }
       setIsSaving(false)
     }
-  }
+  }, [haptics, disclaimerOnly, navigation, t])
 
   const handleSelectLanguage = async (lang: Language) => {
     haptics.onSelect()
@@ -108,7 +108,7 @@ export default function OnboardingScreen() {
     setStep(2)
   }
 
-  const handleConfirm = async () => {
+  const handleConfirm = useCallback(async () => {
     if (!selectedLevel || !selectedGoal || isSaving) return
 
     setIsSaving(true)
@@ -139,7 +139,7 @@ export default function OnboardingScreen() {
       }
       setIsSaving(false)
     }
-  }
+  }, [selectedLevel, selectedGoal, isSaving, haptics, navigation, t])
 
   const handleOpenCGU = () => {
     haptics.onSelect()

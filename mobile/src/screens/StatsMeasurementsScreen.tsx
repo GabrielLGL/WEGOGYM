@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import {
   View,
   Text,
@@ -107,7 +107,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
   // Validation : au moins 1 champ rempli
   const isFormValid = Object.values(form).some(v => v.trim() !== '')
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!isFormValid) return
     try {
       await database.write(async () => {
@@ -126,9 +126,9 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
     } catch (e) {
       if (__DEV__) console.error('[StatsMeasurementsScreen] handleSave:', e)
     }
-  }
+  }, [isFormValid, form, haptics, addSheet])
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deleteTarget) return
     try {
       await database.write(async () => {
@@ -140,7 +140,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
     } finally {
       setDeleteTarget(null)
     }
-  }
+  }, [deleteTarget, haptics])
 
   return (
     <>
