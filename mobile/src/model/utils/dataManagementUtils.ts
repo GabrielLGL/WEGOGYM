@@ -6,7 +6,6 @@ import { Q } from '@nozbe/watermelondb'
 import * as FileSystem from 'expo-file-system'
 import { database } from '../index'
 import User from '../models/User'
-import { deleteApiKey } from '../../services/secureKeyStore'
 import { cancelAllReminders } from '../../services/notificationService'
 
 /**
@@ -78,7 +77,6 @@ export async function deleteAllData(user: User | null): Promise<void> {
   })
 
   try { await cancelAllReminders() } catch (e) { if (__DEV__) console.warn('[deleteAllData] cancelAllReminders failed:', e) }
-  try { await deleteApiKey() } catch (e) { if (__DEV__) console.warn('[deleteAllData] deleteApiKey failed:', e) }
 
   // Delete export files from documentDirectory
   try {

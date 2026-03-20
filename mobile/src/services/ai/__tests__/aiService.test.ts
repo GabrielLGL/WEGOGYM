@@ -1,13 +1,7 @@
-// Mocks AVANT les imports (hoistés par Jest)
-import { generatePlan, testProviderConnection } from '../aiService'
-import { createClaudeProvider, testClaudeConnection } from '../claudeProvider'
-import { createOpenAIProvider, testOpenAIConnection } from '../openaiProvider'
-import { createGeminiProvider, testGeminiConnection } from '../geminiProvider'
+import { generatePlan } from '../aiService'
 import { offlineEngine } from '../offlineEngine'
 import { database } from '../../../model'
-import { getApiKey } from '../../secureKeyStore'
 import type { AIFormData } from '../types'
-import { mockUser } from '../../../model/utils/__tests__/testFactories'
 
 jest.mock('@nozbe/watermelondb', () => ({
   Q: {
@@ -37,33 +31,6 @@ jest.mock('../offlineEngine', () => ({
   },
 }))
 
-jest.mock('../claudeProvider', () => ({
-  createClaudeProvider: jest.fn().mockReturnValue({
-    generate: jest.fn().mockResolvedValue({ name: 'Plan Claude', sessions: [] }),
-  }),
-  testClaudeConnection: jest.fn().mockResolvedValue(undefined),
-}))
-
-jest.mock('../openaiProvider', () => ({
-  createOpenAIProvider: jest.fn().mockReturnValue({
-    generate: jest.fn().mockResolvedValue({ name: 'Plan OpenAI', sessions: [] }),
-  }),
-  testOpenAIConnection: jest.fn().mockResolvedValue(undefined),
-}))
-
-jest.mock('../geminiProvider', () => ({
-  createGeminiProvider: jest.fn().mockReturnValue({
-    generate: jest.fn().mockResolvedValue({ name: 'Plan Gemini', sessions: [] }),
-  }),
-  testGeminiConnection: jest.fn().mockResolvedValue(undefined),
-}))
-
-jest.mock('../../secureKeyStore', () => ({
-  getApiKey: jest.fn().mockResolvedValue(null),
-}))
-
-const mockGetApiKey = getApiKey as jest.MockedFunction<typeof getApiKey>
-
 const mockDbGet = database.get as jest.Mock
 
 const testForm: AIFormData = {
@@ -80,112 +47,17 @@ describe('aiService', () => {
     jest.clearAllMocks()
   })
 
-  describe('generatePlan — sélection du provider', () => {
-    it('utilise offlineEngine si user est null', async () => {
-      const result = await generatePlan(testForm, null)
+  describe('generatePlan — offline engine', () => {
+    it('utilise offlineEngine', async () => {
+      const result = await generatePlan(testForm)
 
       expect(offlineEngine.generate as jest.Mock).toHaveBeenCalled()
-      expect(createClaudeProvider).not.toHaveBeenCalled()
       expect(result.plan.name).toBe('Plan Offline')
       expect(result.usedFallback).toBe(false)
-    })
-
-    it("utilise offlineEngine si aiProvider est 'offline'", async () => {
-      mockGetApiKey.mockResolvedValueOnce('any-key')
-      const user = mockUser({ aiProvider: 'offline' })
-      const result = await generatePlan(testForm, user)
-
-      expect(offlineEngine.generate as jest.Mock).toHaveBeenCalled()
-      expect(createClaudeProvider).not.toHaveBeenCalled()
-      expect(result.plan.name).toBe('Plan Offline')
-      expect(result.usedFallback).toBe(false)
-    })
-
-    it('utilise offlineEngine si la clé secure store est null', async () => {
-      mockGetApiKey.mockResolvedValueOnce(null)
-      const user = mockUser({ aiProvider: 'claude' })
-      const result = await generatePlan(testForm, user)
-
-      expect(offlineEngine.generate as jest.Mock).toHaveBeenCalled()
-      expect(createClaudeProvider).not.toHaveBeenCalled()
-      expect(result.plan.name).toBe('Plan Offline')
-      expect(result.usedFallback).toBe(false)
-    })
-
-    it("utilise claudeProvider si aiProvider='claude' avec clé dans secure store", async () => {
-      mockGetApiKey.mockResolvedValueOnce('sk-ant-test-key')
-      const user = mockUser({ aiProvider: 'claude' })
-      const result = await generatePlan(testForm, user)
-
-      expect(createClaudeProvider).toHaveBeenCalledWith('sk-ant-test-key')
-      expect(offlineEngine.generate as jest.Mock).not.toHaveBeenCalled()
-      expect(result.plan.name).toBe('Plan Claude')
-      expect(result.usedFallback).toBe(false)
-    })
-
-    it('retombe sur offlineEngine si le provider cloud throw', async () => {
-      ;(createClaudeProvider as jest.MockedFunction<typeof createClaudeProvider>)
-        .mockReturnValueOnce({
-          generate: jest.fn().mockRejectedValue(new Error('API unavailable')),
-        })
-
-      mockGetApiKey.mockResolvedValueOnce('sk-ant-test-key')
-      const user = mockUser({ aiProvider: 'claude' })
-      const result = await generatePlan(testForm, user)
-
-      expect(createClaudeProvider).toHaveBeenCalledWith('sk-ant-test-key')
-      expect(offlineEngine.generate as jest.Mock).toHaveBeenCalled()
-      expect(result.plan.name).toBe('Plan Offline')
-      expect(result.usedFallback).toBe(true)
-      expect(result.fallbackReason).toBe('claude')
-    })
-  })
-
-  describe('testProviderConnection', () => {
-    it("retourne immédiatement si provider='offline'", async () => {
-      await testProviderConnection('offline', 'any-key')
-
-      expect(createClaudeProvider).not.toHaveBeenCalled()
-      expect(createOpenAIProvider).not.toHaveBeenCalled()
-      expect(createGeminiProvider).not.toHaveBeenCalled()
-    })
-
-    it("appelle testClaudeConnection si provider='claude'", async () => {
-      await testProviderConnection('claude', 'sk-ant-test-key')
-
-      expect(testClaudeConnection as jest.Mock).toHaveBeenCalledWith('sk-ant-test-key')
-      expect(createClaudeProvider).not.toHaveBeenCalled()
-    })
-
-    it("appelle testGeminiConnection si provider='gemini'", async () => {
-      await testProviderConnection('gemini', 'ai-google-test-key')
-
-      expect(testGeminiConnection as jest.Mock).toHaveBeenCalledWith('ai-google-test-key')
-      expect(createGeminiProvider).not.toHaveBeenCalled()
-    })
-
-    it("retourne immédiatement si apiKey est vide", async () => {
-      await testProviderConnection('claude', '')
-
-      expect(createClaudeProvider).not.toHaveBeenCalled()
-    })
-
-    it("retourne immédiatement si providerName est vide", async () => {
-      await testProviderConnection('', 'some-key')
-
-      expect(createClaudeProvider).not.toHaveBeenCalled()
-    })
-
-    it("appelle testOpenAIConnection si provider='openai'", async () => {
-      await testProviderConnection('openai', 'sk-openai-key')
-
-      expect(testOpenAIConnection as jest.Mock).toHaveBeenCalledWith('sk-openai-key')
-      expect(createOpenAIProvider).not.toHaveBeenCalled()
     })
   })
 
   describe('generatePlan — buildDBContext branches', () => {
-    // Helper pour configurer le mock de database.get par table
     function setupMockDB({
       exercises = [] as { id: string; name: string; muscles: string[]; equipment?: string }[],
       histories = [] as { id: string }[],
@@ -244,11 +116,9 @@ describe('aiService', () => {
       setupMockDB({ exercises })
 
       const form: AIFormData = { ...testForm, equipment: ['Haltères'], muscleGroups: [] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
+      await generatePlan(form)
 
       const context = (offlineEngine.generate as jest.Mock).mock.calls[0][1]
-      // Only 'Poids libre' + no equipment exercises pass the filter
       expect(context.exercises.some((e: { name: string }) => e.name === 'Bench Press')).toBe(true)
       expect(context.exercises.some((e: { name: string }) => e.name === 'Leg Press')).toBe(false)
     })
@@ -262,11 +132,9 @@ describe('aiService', () => {
       setupMockDB({ exercises })
 
       const form: AIFormData = { ...testForm, equipment: [], muscleGroups: ['Pectoraux'] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
+      await generatePlan(form)
 
       const context = (offlineEngine.generate as jest.Mock).mock.calls[0][1]
-      // Only 'Pectoraux' + no muscles exercises pass the muscle filter
       expect(context.exercises.some((e: { name: string }) => e.name === 'Bench Press')).toBe(true)
       expect(context.exercises.some((e: { name: string }) => e.name === 'Squat')).toBe(false)
     })
@@ -279,8 +147,7 @@ describe('aiService', () => {
       setupMockDB({ exercises })
 
       const form: AIFormData = { ...testForm, equipment: [], muscleGroups: [] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
+      await generatePlan(form)
 
       const context = (offlineEngine.generate as jest.Mock).mock.calls[0][1]
       expect(context.exercises).toHaveLength(2)
@@ -296,36 +163,18 @@ describe('aiService', () => {
       setupMockDB({ exercises, histories, sets, recentExercises })
 
       const form: AIFormData = { ...testForm, equipment: [], muscleGroups: [] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
+      await generatePlan(form)
 
       const context = (offlineEngine.generate as jest.Mock).mock.calls[0][1]
       expect(context.recentMuscles).toContain('Pectoraux')
-    })
-
-    it('ignore les exercises sans muscles dans recentMuscles', async () => {
-      const exercises = [{ id: 'e1', name: 'Exercice Vide', muscles: [], equipment: '' }]
-      const histories = [{ id: 'h1' }]
-      const sets = [{ exercise: { id: 'e1' } }]
-      const recentExercises = [{ id: 'e1', name: 'Exercice Vide', muscles: [], equipment: '' }]
-      setupMockDB({ exercises, histories, sets, recentExercises })
-
-      const form: AIFormData = { ...testForm, equipment: [], muscleGroups: [] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
-
-      const context = (offlineEngine.generate as jest.Mock).mock.calls[0][1]
-      expect(context.recentMuscles).toHaveLength(0)
     })
 
     it('ne fetch pas les sets si aucune history récente', async () => {
       setupMockDB({ exercises: [], histories: [], sets: [] })
 
       const form: AIFormData = { ...testForm, equipment: [], muscleGroups: [] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
+      await generatePlan(form)
 
-      // sets table should not have been queried
       const setsCallMade = mockDbGet.mock.calls.some((call: string[]) => call[0] === 'sets')
       expect(setsCallMade).toBe(false)
     })
@@ -340,8 +189,7 @@ describe('aiService', () => {
       setupMockDB({ exercises, performanceLogs })
 
       const form: AIFormData = { ...testForm, equipment: [], muscleGroups: [] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
+      await generatePlan(form)
 
       const context = (offlineEngine.generate as jest.Mock).mock.calls[0][1]
       expect(context.prs['Bench Press']).toBe(100)
@@ -358,41 +206,10 @@ describe('aiService', () => {
       setupMockDB({ exercises, performanceLogs })
 
       const form: AIFormData = { ...testForm, equipment: [], muscleGroups: [] }
-      const user = mockUser({ aiProvider: 'offline' })
-      await generatePlan(form, user)
+      await generatePlan(form)
 
       const context = (offlineEngine.generate as jest.Mock).mock.calls[0][1]
       expect(context.prs['Squat']).toBe(120)
-    })
-
-    it("utilise openai provider si aiProvider='openai' avec clé dans secure store", async () => {
-      setupMockDB({ exercises: [] })
-      mockGetApiKey.mockResolvedValueOnce('sk-openai-key')
-
-      const user = mockUser({ aiProvider: 'openai' })
-      await generatePlan(testForm, user)
-
-      expect(createOpenAIProvider).toHaveBeenCalledWith('sk-openai-key')
-    })
-
-    it("utilise gemini provider si aiProvider='gemini' avec clé dans secure store", async () => {
-      setupMockDB({ exercises: [] })
-      mockGetApiKey.mockResolvedValueOnce('ai-gemini-key')
-
-      const user = mockUser({ aiProvider: 'gemini' })
-      await generatePlan(testForm, user)
-
-      expect(createGeminiProvider).toHaveBeenCalledWith('ai-gemini-key')
-    })
-
-    it("utilise offlineEngine pour un aiProvider inconnu", async () => {
-      setupMockDB({ exercises: [] })
-      mockGetApiKey.mockResolvedValueOnce('some-key')
-
-      const user = mockUser({ aiProvider: 'unknown_provider' })
-      await generatePlan(testForm, user)
-
-      expect(offlineEngine.generate as jest.Mock).toHaveBeenCalled()
     })
   })
 })

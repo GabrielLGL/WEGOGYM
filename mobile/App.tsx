@@ -8,7 +8,6 @@ import { seedDevData } from './src/model/seedDevData';
 import { seedExerciseDescriptions } from './src/model/utils/exerciseDescriptions';
 import { database } from './src/model/index';
 import { initSentry } from './src/services/sentry';
-import { migrateKeyFromDB } from './src/services/secureKeyStore';
 
 // Initialiser Sentry dès le démarrage de l'app
 initSentry();
@@ -21,13 +20,10 @@ export default function App() {
   const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      seedExercises().then(() => {
-        seedExerciseDescriptions(database);
-        if (__DEV__) seedDevData();
-      }),
-      migrateKeyFromDB(),
-    ]).finally(() => setAppReady(true));
+    seedExercises().then(() => {
+      seedExerciseDescriptions(database);
+      if (__DEV__) seedDevData();
+    }).finally(() => setAppReady(true));
   }, []);
 
   // Quand l'app est prête, cacher le splash natif et laisser l'animé prendre le relai

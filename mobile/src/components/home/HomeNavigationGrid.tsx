@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import FriendSnapshot from '../../model/models/FriendSnapshot'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useHaptics } from '../../hooks/useHaptics'
@@ -12,7 +11,6 @@ import { spacing, borderRadius, fontSize } from '../../theme'
 import type { RootStackParamList } from '../../navigation'
 
 interface HomeNavigationGridProps {
-  friends: FriendSnapshot[]
   navigationGridRef?: React.RefObject<View>
 }
 
@@ -20,10 +18,9 @@ interface GridTile {
   icon: keyof typeof Ionicons.glyphMap
   label: string
   route: keyof RootStackParamList
-  subtitle?: string
 }
 
-function HomeNavigationGridInner({ friends, navigationGridRef }: HomeNavigationGridProps) {
+function HomeNavigationGridInner({ navigationGridRef }: HomeNavigationGridProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -38,16 +35,8 @@ function HomeNavigationGridInner({ friends, navigationGridRef }: HomeNavigationG
     { icon: 'calendar-outline', label: t.home.tiles.calendar, route: 'StatsCalendar' },
     { icon: 'resize-outline', label: t.home.tiles.measures, route: 'StatsMeasurements' },
     { icon: 'camera-outline', label: t.home.tiles.photos, route: 'ProgressPhotos' },
-    { icon: 'git-network-outline', label: t.home.tiles.hexagon, route: 'StatsHexagon' },
-    {
-      icon: 'trophy-outline',
-      label: t.leaderboard.title,
-      route: 'Leaderboard',
-      subtitle: friends.length > 0 ? t.leaderboard.friendCount(friends.length) : undefined,
-    },
-    { icon: 'shield-outline', label: t.home.tiles.challenges, route: 'PersonalChallenges' },
-    { icon: 'newspaper-outline', label: t.home.tiles.activityFeed, route: 'ActivityFeed' },
-  ], [t, friends.length])
+    { icon: 'medal-outline', label: t.stats.hallOfFame, route: 'StatsHallOfFame' },
+  ], [t])
 
   return (
     <View ref={navigationGridRef} style={styles.container}>
@@ -66,9 +55,6 @@ function HomeNavigationGridInner({ friends, navigationGridRef }: HomeNavigationG
           >
             <Ionicons name={tile.icon} size={24} color={colors.primary} />
             <Text style={styles.btnLabel} numberOfLines={1}>{tile.label}</Text>
-            {tile.subtitle && (
-              <Text style={styles.btnSub}>{tile.subtitle}</Text>
-            )}
           </TouchableOpacity>
         ))}
       </View>
@@ -109,10 +95,6 @@ function useStyles(colors: ThemeColors) {
       color: colors.text,
       fontWeight: '600',
       textAlign: 'center',
-    },
-    btnSub: {
-      fontSize: fontSize.caption,
-      color: colors.textSecondary,
     },
   }), [colors])
 }

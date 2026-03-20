@@ -155,18 +155,6 @@ describe('AssistantScreenInner', () => {
     expect(getByText(/1 \//)).toBeTruthy()
   })
 
-  it('affiche le badge provider Gemini', () => {
-    const { getByText } = render(
-      <AssistantScreenInner
-        programs={[]}
-        user={mockUser({ aiProvider: 'gemini' })}
-        navigation={mockNavigation}
-        route={mockRoute()}
-      />
-    )
-    expect(getByText(/Gemini/)).toBeTruthy()
-  })
-
   it('navigue à l\'étape équipement en sélectionnant un objectif', () => {
     const result = render(
       <AssistantScreenInner
@@ -568,8 +556,7 @@ describe('AssistantScreenInner', () => {
 
     await waitFor(() => {
       expect(mockGeneratePlan).toHaveBeenCalledWith(
-        expect.objectContaining({ level: 'débutant' }),
-        expect.anything()
+        expect.objectContaining({ level: 'débutant' })
       )
     })
   })
@@ -603,8 +590,7 @@ describe('AssistantScreenInner', () => {
 
     await waitFor(() => {
       expect(mockGeneratePlan).toHaveBeenCalledWith(
-        expect.objectContaining({ level: 'intermédiaire' }),
-        expect.anything()
+        expect.objectContaining({ level: 'intermédiaire' })
       )
     })
   })

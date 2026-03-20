@@ -74,13 +74,6 @@ function getDaysForSplit(split: AISplit | undefined): number[] {
 
 export const MUSCLES_FOCUS_OPTIONS = ['Équilibré', 'Pecs', 'Dos', 'Épaules', 'Bras', 'Jambes', 'Abdos']
 
-const PROVIDER_LABELS: Record<string, string> = {
-  offline: 'Offline',
-  openai:  'OpenAI',
-  gemini:  'Gemini',
-  claude:  'Claude',
-}
-
 const LEVEL_MAP: Record<string, AILevel> = {
   beginner:     'débutant',
   intermediate: 'intermédiaire',
@@ -103,7 +96,6 @@ export interface UseAssistantWizardResult {
   errorAlertMessage: string
   progressAnim: Animated.Value
   contentAnim: Animated.Value
-  providerLabel: string
   isSession: boolean
   equipmentOptions: string[]
   muscleOptions: StepOption[]
@@ -343,7 +335,6 @@ export function useAssistantWizard({
   // ── Derived ───────────────────────────────────────────────────────────────
 
   const isSession     = Boolean(sessionMode)
-  const providerLabel = PROVIDER_LABELS[user?.aiProvider ?? 'offline'] ?? 'Offline'
   const steps         = useMemo(() => buildSteps(formData, isSession), [buildSteps, formData, isSession])
   const totalSteps    = steps.length
   const step          = steps[currentStep]
@@ -402,13 +393,8 @@ export function useAssistantWizard({
         ...data,
         level: LEVEL_MAP[user?.userLevel ?? ''] ?? 'intermédiaire',
       }
-      const result = await generatePlan(formWithLevel, user)
+      const result = await generatePlan(formWithLevel)
       if (!isMountedRef.current) return
-      let fallbackNotice: string | undefined
-      if (result.usedFallback) {
-        const providerName = PROVIDER_LABELS[result.fallbackReason ?? ''] ?? result.fallbackReason ?? 'cloud'
-        fallbackNotice = `Plan généré hors ligne — ${providerName} indisponible`
-      }
       setCurrentStep(0)
       setFormData(makeEmptyForm())
       contentAnim.setValue(1)
@@ -417,7 +403,6 @@ export function useAssistantWizard({
         mode: (formWithLevel.mode ?? 'program') as 'program' | 'session',
         targetProgramId: formWithLevel.targetProgramId,
       })
-      void fallbackNotice
     } catch {
       if (isMountedRef.current) {
         setErrorAlertMessage(t.assistant.errorMessage)
@@ -556,7 +541,6 @@ export function useAssistantWizard({
     errorAlertMessage,
     progressAnim,
     contentAnim,
-    providerLabel,
     isSession,
     equipmentOptions: EQUIPMENT_OPTIONS,
     muscleOptions: MUSCLE_OPTIONS,

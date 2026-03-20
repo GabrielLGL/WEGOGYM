@@ -78,19 +78,11 @@ export function StatsScreenBase({ user, histories, sets }: Props) {
     { icon: 'list-outline',        label: t.stats.history,      route: 'StatsHistory' },
     // Progression & Records
     { icon: 'medal-outline',       label: t.stats.hallOfFame,   route: 'StatsHallOfFame' },
-    { icon: 'podium-outline',      label: t.stats.prTimeline,      route: 'StatsPRTimeline' },
-    { icon: 'fitness-outline',     label: t.stats.strength,        route: 'StatsStrength' },
-    // Analyse avancée
-    { icon: 'git-branch-outline',  label: t.stats.trainingSplit,   route: 'StatsTrainingSplit' },
-    { icon: 'pie-chart-outline',   label: t.stats.volumeDistribution, route: 'StatsVolumeDistribution' },
-    { icon: 'swap-horizontal-outline', label: t.stats.muscleBalance, route: 'StatsMuscleBalance' },
-    { icon: 'flame-outline',       label: t.stats.heatmap,         route: 'StatsHeatmap' },
-    { icon: 'body-outline',        label: t.stats.bodyComp,        route: 'StatsBodyComp' },
-    // Comparaison & Rapports
+    { icon: 'flame-outline',       label: t.stats.heatmap,      route: 'StatsHeatmap' },
+    // Analyse
     { icon: 'git-compare-outline', label: t.stats.compare,      route: 'StatsCompare' },
-    { icon: 'school-outline',      label: t.stats.bulletin,     route: 'MonthlyBulletin' },
-    { icon: 'trophy-outline',      label: t.stats.selfLeagues,  route: 'SelfLeagues' },
-    // Collection & Gamification
+    { icon: 'fitness-outline',     label: t.stats.strength,     route: 'StatsStrength' },
+    // Collection
     { icon: 'albums-outline',      label: t.stats.collection,   route: 'ExerciseCollection' },
   ], [t])
 

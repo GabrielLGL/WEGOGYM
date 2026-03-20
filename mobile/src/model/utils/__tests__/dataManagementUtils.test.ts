@@ -6,7 +6,6 @@ import * as FileSystem from 'expo-file-system'
 
 import { deleteAllData } from '../dataManagementUtils'
 import { database } from '../../index'
-import { deleteApiKey } from '../../../services/secureKeyStore'
 import { cancelAllReminders } from '../../../services/notificationService'
 import { mockUser } from './testFactories'
 
@@ -22,9 +21,6 @@ jest.mock('expo-file-system', () => ({
   documentDirectory: '/mock/documents/',
   readDirectoryAsync: jest.fn(),
   deleteAsync: jest.fn(),
-}))
-jest.mock('../../../services/secureKeyStore', () => ({
-  deleteApiKey: jest.fn().mockResolvedValue(undefined),
 }))
 jest.mock('../../../services/notificationService', () => ({
   cancelAllReminders: jest.fn().mockResolvedValue(undefined),
@@ -85,7 +81,7 @@ describe('deleteAllData', () => {
 
     expect(mockWrite).toHaveBeenCalledTimes(1)
     expect(cancelAllReminders).toHaveBeenCalled()
-    expect(deleteApiKey).toHaveBeenCalled()
+    // secureKeyStore removed (no cloud providers)
   })
 
   it('works when user is null', async () => {
@@ -106,7 +102,7 @@ describe('deleteAllData', () => {
 
     expect(mockWrite).toHaveBeenCalledTimes(1)
     expect(cancelAllReminders).toHaveBeenCalled()
-    expect(deleteApiKey).toHaveBeenCalled()
+    // secureKeyStore removed (no cloud providers)
   })
 
   it('deletes export files from documentDirectory', async () => {

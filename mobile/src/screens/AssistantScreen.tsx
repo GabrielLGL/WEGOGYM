@@ -67,11 +67,11 @@ export function AssistantScreenInner({ programs: _programs, user, navigation, ro
         <Text style={styles.stepCounter}>{wizard.currentStep + 1} / {wizard.totalSteps}</Text>
         <View style={[styles.badge, styles.badgeContent]}>
           <Ionicons
-            name={wizard.providerLabel === 'Offline' ? 'cloud-offline-outline' : 'flash-outline'}
+            name="cloud-offline-outline"
             size={14}
             color={colors.textSecondary}
           />
-          <Text style={styles.badgeText}>{wizard.providerLabel}</Text>
+          <Text style={styles.badgeText}>Offline</Text>
         </View>
       </View>
 

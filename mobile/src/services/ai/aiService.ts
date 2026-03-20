@@ -2,10 +2,8 @@
  * aiService.ts — Point d'entrée pour la génération de programmes/séances par IA
  *
  * Responsabilités :
- * 1. Sélection du provider (offline, OpenAI, Gemini, Claude) selon les préférences user
- * 2. Construction du contexte DB (exercices filtrés, muscles récents, PRs)
- * 3. Génération avec fallback automatique : si le provider cloud échoue → offline
- * 4. Test de connexion provider pour la configuration dans Settings
+ * 1. Construction du contexte DB (exercices filtrés, muscles récents, PRs)
+ * 2. Génération via le moteur offline (10 splits, 4 objectifs, sans coût API)
  */
 
 import { Q } from '@nozbe/watermelondb'
@@ -14,26 +12,10 @@ import type Exercise from '../../model/models/Exercise'
 import type History from '../../model/models/History'
 import type PerformanceLog from '../../model/models/PerformanceLog'
 import type WorkoutSet from '../../model/models/Set'
-import type User from '../../model/models/User'
 import { offlineEngine } from './offlineEngine'
-import { createClaudeProvider, testClaudeConnection } from './claudeProvider'
-import { createOpenAIProvider, testOpenAIConnection } from './openaiProvider'
-import { createGeminiProvider, testGeminiConnection } from './geminiProvider'
-import type { AIFormData, AIProvider, DBContext, GeneratedPlan, GeneratePlanResult } from './types'
+import type { AIFormData, DBContext, GeneratedPlan, GeneratePlanResult } from './types'
 import { generateProgram, toDatabasePlan } from './programGenerator'
 import type { UserProfile } from './programGenerator'
-import { getApiKey } from '../secureKeyStore'
-
-/** Sélectionne le provider IA selon la config user. Sans clé API → toujours offline. */
-function selectProvider(aiProvider: string | null, apiKey: string | null): AIProvider {
-  if (!apiKey || !aiProvider || aiProvider === 'offline') return offlineEngine
-  switch (aiProvider) {
-    case 'claude': return createClaudeProvider(apiKey)
-    case 'openai': return createOpenAIProvider(apiKey)
-    case 'gemini': return createGeminiProvider(apiKey)
-    default:       return offlineEngine
-  }
-}
 
 /**
  * Construit le contexte DB nécessaire à la génération.
@@ -133,57 +115,16 @@ async function buildDBContext(form: AIFormData): Promise<DBContext> {
 }
 
 /**
- * Génère un plan (programme ou séance) via le provider configuré.
- * En cas d'échec du provider cloud, bascule automatiquement sur le moteur offline
- * et signale le fallback dans le résultat (usedFallback: true).
+ * Génère un plan (programme ou séance) via le moteur offline.
  */
-export async function generatePlan(form: AIFormData, user: User | null): Promise<GeneratePlanResult> {
+export async function generatePlan(form: AIFormData): Promise<GeneratePlanResult> {
   const context = await buildDBContext(form)
-  const apiKey = await getApiKey()
-  const provider = selectProvider(user?.aiProvider ?? null, apiKey)
-
-  if (provider === offlineEngine) {
-    const plan = await offlineEngine.generate(form, context)
-    return { plan, usedFallback: false }
-  }
-
-  try {
-    const plan = await provider.generate(form, context)
-    return { plan, usedFallback: false }
-  } catch (error) {
-    if (__DEV__) console.warn('[aiService] Provider cloud échoué, fallback offline:', error)
-    const plan = await offlineEngine.generate(form, context)
-    return { plan, usedFallback: true, fallbackReason: user?.aiProvider ?? 'cloud' }
-  }
-}
-
-/** Teste la connexion à un provider cloud (utilisé dans SettingsScreen pour valider la clé API) */
-export async function testProviderConnection(
-  providerName: string,
-  apiKey: string
-): Promise<void> {
-  if (!apiKey || !providerName || providerName === 'offline') return
-
-  if (providerName === 'gemini') {
-    await testGeminiConnection(apiKey)
-    return
-  }
-
-  if (providerName === 'openai') {
-    await testOpenAIConnection(apiKey)
-    return
-  }
-
-  if (providerName === 'claude') {
-    await testClaudeConnection(apiKey)
-    return
-  }
+  const plan = await offlineEngine.generate(form, context)
+  return { plan, usedFallback: false }
 }
 
 /**
  * Génère un plan depuis un profil utilisateur structuré (programGenerator).
- * Alternative offline à generatePlan() qui utilise l'offlineEngine.
- * Utilisable depuis n'importe quel écran sans AIFormData.
  *
  * @param profile - Profil utilisateur typé (goal, level, equipment, injuries, etc.)
  * @param programName - Nom du programme à créer

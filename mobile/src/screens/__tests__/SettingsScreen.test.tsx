@@ -36,10 +36,6 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }))
 
-jest.mock('../../services/secureKeyStore', () => ({
-  deleteApiKey: jest.fn().mockResolvedValue(undefined),
-}))
-
 jest.mock('../../model/index', () => ({
   database: {
     write: jest.fn(),

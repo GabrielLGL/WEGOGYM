@@ -27,7 +27,6 @@ import Session from '../model/models/Session'
 import User from '../model/models/User'
 import UserBadge from '../model/models/UserBadge'
 import Exercise from '../model/models/Exercise'
-import FriendSnapshot from '../model/models/FriendSnapshot'
 import Program from '../model/models/Program'
 import { observeCurrentUser } from '../model/utils/databaseHelpers'
 import type { MilestoneEvent } from '../model/utils/gamificationHelpers'
@@ -75,11 +74,10 @@ interface Props {
   sessions: Session[]
   userBadges: UserBadge[]
   exercises: Exercise[]
-  friends: FriendSnapshot[]
   programs: Program[]
 }
 
-function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises, friends, programs }: Props) {
+function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises, programs }: Props) {
   const colors = useColors()
   const styles = useStyles()
   const navigation = useNavigation<HomeNavigation>()
@@ -202,7 +200,6 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
       {/* ── ZONE C — Navigation ── */}
 
       <HomeNavigationGrid
-        friends={friends}
         navigationGridRef={navigationGridRef}
       />
 
@@ -274,7 +271,6 @@ const enhance = withObservables([], () => ({
   sessions: database.get<Session>('sessions').query().observe(),
   userBadges: database.get<UserBadge>('user_badges').query().observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
-  friends: database.get<FriendSnapshot>('friend_snapshots').query().observe(),
   programs: database.get<Program>('programs').query().observe(),
 }))
 

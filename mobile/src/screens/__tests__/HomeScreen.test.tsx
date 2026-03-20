@@ -24,7 +24,6 @@ import type User from '../../model/models/User'
 import type History from '../../model/models/History'
 import type WorkoutSet from '../../model/models/Set'
 import type Session from '../../model/models/Session'
-import type FriendSnapshot from '../../model/models/FriendSnapshot'
 import type Program from '../../model/models/Program'
 
 jest.mock('@gorhom/portal', () => ({
@@ -105,7 +104,6 @@ const renderHome = (overrides: Partial<React.ComponentProps<typeof HomeContent>>
       sessions={[] as unknown as Session[]}
       userBadges={[]}
       exercises={[]}
-      friends={[] as unknown as FriendSnapshot[]}
       programs={[] as unknown as Program[]}
       {...overrides}
     />
@@ -151,8 +149,6 @@ describe('HomeScreen Dashboard', () => {
     expect(getAllByText('Programmes').length).toBeGreaterThanOrEqual(1)
     expect(getAllByText("Biblioth\u00e8que d'exercices").length).toBeGreaterThanOrEqual(1)
     expect(getByText('Mesures')).toBeTruthy()
-    expect(getByText('Classement')).toBeTruthy()
-    expect(getByText('Profil Athl\u00e8te')).toBeTruthy()
   })
 
   it('navigue vers un écran au press sur la grille', () => {
