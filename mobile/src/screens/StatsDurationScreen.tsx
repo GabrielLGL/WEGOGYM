@@ -121,19 +121,41 @@ export function StatsDurationScreenBase({ histories }: Props) {
   const hasPrev = safePage < totalPages - 1
   const hasNext = safePage > 0
 
-  // Fetch session names for current page
+  // Fetch session names for current page (batch query to avoid N+1)
   const pageKey = pageEntries.map(e => e.id).join(',')
   useEffect(() => {
     let cancelled = false
     const fetchNames = async () => {
       const names: Record<string, string> = {}
+      const sessionIds: string[] = []
+      const historyToSessionId: Record<string, string> = {}
       for (const entry of pageEntries) {
         const h = histories.find(hh => hh.id === entry.id)
         if (!h) continue
-        try {
-          const session = await h.session.fetch()
-          names[entry.id] = session?.name || t.statsDuration.sessionFallback
-        } catch {
+        historyToSessionId[entry.id] = h.sessionId
+        sessionIds.push(h.sessionId)
+      }
+      if (sessionIds.length === 0) {
+        if (!cancelled) setSessionNames(names)
+        return
+      }
+      try {
+        const uniqueIds = [...new Set(sessionIds)]
+        const sessions = await database
+          .get('sessions')
+          .query(Q.where('id', Q.oneOf(uniqueIds)))
+          .fetch()
+        const sessionMap = new Map(sessions.map(s => [s.id, (s as any).name as string]))
+        for (const entry of pageEntries) {
+          const sid = historyToSessionId[entry.id]
+          if (sid) {
+            names[entry.id] = sessionMap.get(sid) || t.statsDuration.sessionFallback
+          } else {
+            names[entry.id] = t.statsDuration.sessionFallback
+          }
+        }
+      } catch {
+        for (const entry of pageEntries) {
           names[entry.id] = t.statsDuration.sessionFallback
         }
       }
@@ -159,21 +181,27 @@ export function StatsDurationScreenBase({ histories }: Props) {
     const h = histories.find(hh => hh.id === historyId)
     if (!h) return
     try {
-      const sets = await h.sets.fetch()
+      // Batch-fetch sets for this history
+      const sets = await database
+        .get('sets')
+        .query(Q.where('history_id', historyId))
+        .fetch()
+      // Batch-fetch all exercises referenced by these sets
+      const exerciseIds = [...new Set(sets.map(s => (s as any).exerciseId as string).filter(Boolean))]
+      const exercises = exerciseIds.length > 0
+        ? await database
+            .get('exercises')
+            .query(Q.where('id', Q.oneOf(exerciseIds)))
+            .fetch()
+        : []
+      const exerciseMap = new Map(exercises.map(e => [e.id, (e as any).name as string]))
+
       const exMap = new Map<string, { name: string; repsList: number[] }>()
-      await Promise.all(
-        sets.map(async s => {
-          let exName = t.statsDuration.unknownExercise
-          try {
-            const ex = await s.exercise.fetch()
-            if (ex?.name) exName = ex.name
-          } catch {
-            // exercice supprimé
-          }
-          if (!exMap.has(exName)) exMap.set(exName, { name: exName, repsList: [] })
-          exMap.get(exName)!.repsList.push(s.reps)
-        })
-      )
+      for (const s of sets) {
+        const exName = exerciseMap.get((s as any).exerciseId) || t.statsDuration.unknownExercise
+        if (!exMap.has(exName)) exMap.set(exName, { name: exName, repsList: [] })
+        exMap.get(exName)!.repsList.push((s as any).reps)
+      }
       const details: SessionExDetail[] = []
       exMap.forEach(({ name, repsList }) => {
         const allSame = repsList.every(r => r === repsList[0])
