@@ -113,9 +113,9 @@ describe('exportHelpers — exportAllData', () => {
     expect(data.programs[0].name).toBe('PPL')
   })
 
-  it('filtre ai_api_key de la table users', async () => {
+  it('exporte les champs users sans filtrage', async () => {
     setupDb({
-      users: [makeRecord('users', 'user-1', { ai_api_key: 'secret-key', name: 'Jean' })],
+      users: [makeRecord('users', 'user-1', { name: 'Jean', email: 'test@test.com' })],
     })
 
     await exportAllData()
@@ -123,7 +123,7 @@ describe('exportHelpers — exportAllData', () => {
     const data = JSON.parse(written)
 
     expect(data.users[0].name).toBe('Jean')
-    expect(data.users[0].ai_api_key).toBeUndefined()
+    expect(data.users[0].email).toBe('test@test.com')
   })
 
   it('n\'altère pas les records non-users (conserve tous les champs)', async () => {

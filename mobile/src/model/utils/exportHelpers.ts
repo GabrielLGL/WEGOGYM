@@ -53,11 +53,6 @@ function formatExportDate(): string {
   return `${yyyy}-${mm}-${dd}`
 }
 
-function sanitizeUserRecord(raw: Record<string, unknown>): Record<string, unknown> {
-  const { ai_api_key: _removed, ...safe } = raw
-  return safe
-}
-
 export async function exportAllData(): Promise<string> {
   const data: ExportData = {
     metadata: {
@@ -72,9 +67,6 @@ export async function exportAllData(): Promise<string> {
     const records = await database.get(tableName).query().fetch()
     const rawRecords = records.map(r => {
       const raw = { ...(r as unknown as { _raw: Record<string, unknown> })._raw }
-      if (tableName === 'users') {
-        return sanitizeUserRecord(raw)
-      }
       return raw
     })
     data[tableName] = rawRecords

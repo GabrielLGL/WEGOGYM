@@ -61,6 +61,9 @@ describe('deleteAllData', () => {
       body_measurements: mockCollectionQuery([]),
       user_badges: mockCollectionQuery([]),
       exercises: mockCollectionQuery([]),
+      progress_photos: mockCollectionQuery([]),
+      friend_snapshots: mockCollectionQuery([]),
+      wearable_sync_logs: mockCollectionQuery([]),
     }
     mockGet.mockImplementation((name: string) => collections[name])
 
@@ -95,6 +98,9 @@ describe('deleteAllData', () => {
       body_measurements: mockCollectionQuery([]),
       user_badges: mockCollectionQuery([]),
       exercises: mockCollectionQuery([]),
+      progress_photos: mockCollectionQuery([]),
+      friend_snapshots: mockCollectionQuery([]),
+      wearable_sync_logs: mockCollectionQuery([]),
     }
     mockGet.mockImplementation((name: string) => collections[name])
 
@@ -116,6 +122,9 @@ describe('deleteAllData', () => {
       body_measurements: mockCollectionQuery([]),
       user_badges: mockCollectionQuery([]),
       exercises: mockCollectionQuery([]),
+      progress_photos: mockCollectionQuery([]),
+      friend_snapshots: mockCollectionQuery([]),
+      wearable_sync_logs: mockCollectionQuery([]),
     }
     mockGet.mockImplementation((name: string) => collections[name])
     ;(FileSystem.readDirectoryAsync as jest.Mock).mockResolvedValue([

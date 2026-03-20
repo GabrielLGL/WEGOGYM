@@ -30,6 +30,9 @@ export async function deleteAllData(user: User | null): Promise<void> {
     const bodyMeasurements = await database.get('body_measurements').query().fetch()
     const userBadges = await database.get('user_badges').query().fetch()
     const customExercises = await database.get('exercises').query(Q.where('is_custom', true)).fetch()
+    const progressPhotos = await database.get('progress_photos').query().fetch()
+    const friendSnapshots = await database.get('friend_snapshots').query().fetch()
+    const wearableSyncLogs = await database.get('wearable_sync_logs').query().fetch()
 
     const allRecords = [
       ...programs,
@@ -41,6 +44,9 @@ export async function deleteAllData(user: User | null): Promise<void> {
       ...bodyMeasurements,
       ...userBadges,
       ...customExercises,
+      ...progressPhotos,
+      ...friendSnapshots,
+      ...wearableSyncLogs,
     ]
 
     const batchOps = [
