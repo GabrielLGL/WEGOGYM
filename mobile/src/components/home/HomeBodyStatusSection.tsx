@@ -368,14 +368,14 @@ function useStyles(colors: ThemeColors) {
     fatigueBarBg: {
       height: 6,
       backgroundColor: colors.cardSecondary,
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
       marginBottom: spacing.sm,
       overflow: 'hidden',
       position: 'relative',
     },
     fatigueBarFill: {
       height: '100%',
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
     },
     fatigueMarker: {
       position: 'absolute',
@@ -383,7 +383,7 @@ function useStyles(colors: ThemeColors) {
       width: 2,
       height: 10,
       backgroundColor: colors.text,
-      borderRadius: 1,
+      borderRadius: borderRadius.xxs,
     },
     fatigueStats: {
       fontSize: fontSize.caption,
@@ -406,7 +406,7 @@ function useStyles(colors: ThemeColors) {
     recoveryDot: {
       width: 8,
       height: 8,
-      borderRadius: 4,
+      borderRadius: borderRadius.xs,
     },
     recoveryMuscle: {
       flex: 1,

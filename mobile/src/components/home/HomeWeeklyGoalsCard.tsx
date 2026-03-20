@@ -125,12 +125,12 @@ function useStyles(colors: ThemeColors) {
     goalBarTrack: {
       height: 6,
       backgroundColor: colors.cardSecondary,
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
       overflow: 'hidden',
     },
     goalBarFill: {
       height: '100%',
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
     },
   }), [colors])
 }

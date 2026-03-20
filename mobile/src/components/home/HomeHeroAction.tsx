@@ -231,7 +231,7 @@ function useStyles(colors: ThemeColors) {
     heroDot: {
       width: 8,
       height: 8,
-      borderRadius: 4,
+      borderRadius: borderRadius.xs,
     },
     heroLabel: {
       fontSize: fontSize.sm,
@@ -267,7 +267,7 @@ function useStyles(colors: ThemeColors) {
     readinessBadge: {
       width: 28,
       height: 28,
-      borderRadius: 14,
+      borderRadius: borderRadius.md,
       alignItems: 'center',
       justifyContent: 'center',
     },

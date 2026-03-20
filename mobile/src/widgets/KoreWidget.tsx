@@ -1,12 +1,17 @@
 import React from 'react'
 import { FlexWidget, TextWidget } from 'react-native-android-widget'
 
-// Couleurs Kore — valeurs hex directes (pas d'import theme/index.ts dans le widget)
-const COLOR_BG = '#1C1C1E'
-const COLOR_PRIMARY = '#FF6B35'
-const COLOR_TEXT = '#FFFFFF'
-const COLOR_TEXT_SECONDARY = '#8E8E93'
-const COLOR_SEPARATOR = '#2C2C2E'
+// Couleurs Kore (dark mode) — valeurs hex directes car le widget Android
+// ne peut pas importer theme/index.ts. MUST stay in sync with theme/index.ts.
+const COLOR_BG = '#181b21'            // colors.background
+const COLOR_PRIMARY = '#00cec9'       // colors.primary
+const COLOR_TEXT = '#dfe6e9'          // colors.text
+const COLOR_TEXT_SECONDARY = '#b2bec3' // colors.textSecondary
+const COLOR_SEPARATOR = '#363d4d'     // colors.separator
+
+// NOTE: Strings are hardcoded in French because the widget runs outside
+// the React tree and has no access to the i18n LanguageContext.
+// TODO: pass translated strings via widget props when i18n support is added.
 
 export interface KoreWidgetProps {
   streak: number

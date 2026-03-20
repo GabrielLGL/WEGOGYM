@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { spacing, fontSize } from '../../theme'
+import { spacing, borderRadius, fontSize } from '../../theme'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { ThemeColors } from '../../theme'
@@ -83,13 +83,13 @@ function createStyles(colors: ThemeColors) {
     intensityBarBg: {
       height: 6,
       backgroundColor: colors.cardSecondary,
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
       marginBottom: spacing.sm,
       overflow: 'hidden',
     },
     intensityBarFill: {
       height: '100%',
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
     },
     intensityBreakdown: {
       flexDirection: 'row',

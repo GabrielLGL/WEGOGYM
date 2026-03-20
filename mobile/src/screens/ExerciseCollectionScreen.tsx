@@ -99,12 +99,12 @@ function useCardStyles(colors: ThemeColors) {
       marginTop: 4,
     },
     muscles: {
-      fontSize: 11,
+      fontSize: fontSize.caption,
       color: colors.textSecondary,
       marginTop: 2,
     },
     setsCount: {
-      fontSize: 11,
+      fontSize: fontSize.caption,
       color: colors.textSecondary,
       marginTop: 4,
     },
@@ -116,7 +116,7 @@ function useCardStyles(colors: ThemeColors) {
       letterSpacing: 1,
     },
     lockedLabel: {
-      fontSize: 11,
+      fontSize: fontSize.caption,
       color: colors.placeholder,
       marginTop: 4,
     },

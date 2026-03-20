@@ -118,7 +118,7 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.primary,
     },
     emojiText: {
-      fontSize: 26,
+      fontSize: fontSize.title,
     },
     gratitudeInput: {
       backgroundColor: colors.cardSecondary,

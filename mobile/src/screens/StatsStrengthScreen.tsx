@@ -257,7 +257,7 @@ function useStyles(colors: ThemeColors) {
     dot: {
       width: 10,
       height: 10,
-      borderRadius: 5,
+      borderRadius: borderRadius.xs,
     },
     levelLabel: {
       fontSize: fontSize.sm,

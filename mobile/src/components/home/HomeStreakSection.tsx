@@ -218,7 +218,7 @@ function useStyles(colors: ThemeColors) {
     heatmapCell: {
       width: 18,
       height: 18,
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
     },
     heatmapCellToday: {
       borderWidth: 1.5,
@@ -234,7 +234,7 @@ function useStyles(colors: ThemeColors) {
     heatmapLegendCell: {
       width: 10,
       height: 10,
-      borderRadius: 2,
+      borderRadius: borderRadius.xxs,
     },
     heatmapLegendText: {
       fontSize: fontSize.caption,

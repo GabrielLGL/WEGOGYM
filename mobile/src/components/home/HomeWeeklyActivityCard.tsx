@@ -190,7 +190,7 @@ function useStyles(colors: ThemeColors) {
     dayDot: {
       width: 6,
       height: 6,
-      borderRadius: 3,
+      borderRadius: borderRadius.xxs,
       marginTop: 2,
     },
     dayDetailContent: {
