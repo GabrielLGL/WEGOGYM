@@ -88,7 +88,7 @@ export const SessionDetailContent: React.FC<Props> = ({ session, sessionExercise
   useEffect(() => {
     let cancelled = false
     database.get<History>('histories')
-      .query(Q.where('session_id', session.id))
+      .query(Q.where('session_id', session.id), Q.where('deleted_at', null))
       .fetch()
       .then(results => { if (!cancelled) setHistories(results) })
     return () => { cancelled = true }

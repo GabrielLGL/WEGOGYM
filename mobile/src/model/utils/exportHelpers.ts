@@ -14,6 +14,9 @@ const TABLE_NAMES = [
   'body_measurements',
   'users',
   'user_badges',
+  'progress_photos',
+  'friend_snapshots',
+  'wearable_sync_logs',
 ] as const
 
 interface ExportMetadata {

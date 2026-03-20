@@ -69,6 +69,15 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
   const repsTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const scaleAnim = React.useRef(new Animated.Value(1)).current
 
+  // Sync local state when parent input changes (e.g. progression suggestion)
+  React.useEffect(() => {
+    setLocalWeight(input.weight)
+  }, [input.weight])
+
+  React.useEffect(() => {
+    setLocalReps(input.reps)
+  }, [input.reps])
+
   React.useEffect(() => {
     return () => {
       if (weightTimerRef.current) clearTimeout(weightTimerRef.current)
