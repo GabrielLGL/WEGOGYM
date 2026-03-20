@@ -71,6 +71,7 @@
 | 2026-03-19 | 20 | 20 | 20 | 18 | 20 | **98/100** | ↑ +2 (2231 tests, 188 suites, 4 CRIT + 4 WARN fixés: null safety startTime, ProgressPhoto Relation<>, JSON.parse try/catch, friendCode optional, any→Record, hardcoded color→token, i18n friendCount) |
 | 2026-03-19 | 20 | 20 | 20 | 20 | 20 | **100/100** | ↑ +2 (2231+ tests, dette technique soldée, 0 console non gardé, toutes issues A1-D3 résolues/classées) |
 | 2026-03-20 | 20 | 20 | 20 | 20 | 20 | **100/100** | → stable (2231 tests, 188 suites, schema v39, 1 CRIT + 5 WARN fixés: try/catch quickStart, atomic write, null-safe endTime, hardcoded color, doc sync v39) |
+| 2026-03-20 | 20 | 20 | 20 | 20 | 15 | **95/100** | ↓ -5 (2002 tests, 154 suites, AUDIT CRITIQUE: -21 écrans, -13K LOC, -3 providers, 1 CRIT + 2 WARN fixés, coverage 75.6% post-suppression) |
 
 ---
 

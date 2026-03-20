@@ -1,5 +1,5 @@
 # Kore — Roadmap & Avancement
-> Derniere MAJ : 2026-03-19
+> Derniere MAJ : 2026-03-20
 
 ---
 
@@ -13,19 +13,20 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 | Metrique | Valeur |
 |----------|--------|
-| Tests | 2231 (188 suites) |
+| Tests | 2002 (154 suites) |
 | Erreurs TS | 0 |
 | Score sante | 100/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
 | Ship score | 100/100 SHIP IT (20260319-2327) |
 | Tag MVP | `v0.1.0-mvp-20260319` |
-| Ecrans | 51 |
-| Helpers | 53 |
-| Routes | 52 |
-| Services | 10 |
-| Tables DB | 13 (schema v38) |
+| Ecrans | ~30 (post-audit critique) |
+| Helpers | ~40 (post-audit critique) |
+| Routes | ~30 (post-audit critique) |
+| Services | 7 (cloud AI providers retires) |
+| Tables DB | 13 (schema v39) |
 | Badges | 50+ |
 | Features | #1 → #120 |
 | Sprints | 14 completes |
+| Audit critique | 20260320: -21 ecrans, -13K LOC, -3 providers |
 
 ---
 
@@ -64,16 +65,16 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 - [x] 50+ badges a debloquer en 7 categories — Sprint 1-3
 - [x] Tonnage cumule lifetime avec milestones — Sprint 1-3
 - [x] Celebrations animees (badges, level up, milestones) — Sprint 3
-- [x] Titres athlete — Sprint 7
-- [x] Leaderboard — Sprint 6
-- [x] Self-Leagues — Sprint 3-4
-- [x] Skill Tree — Sprint 3-4
-- [x] Challenges personnels — Sprint 8
-- [x] Activity Feed — Sprint 6
-- [x] Bulletin mensuel — Sprint 8
+- [x] ~~Titres athlete~~ — Supprime (audit critique 20260320, fusionne dans Badges)
+- [x] ~~Leaderboard~~ — Supprime (audit critique 20260320, architecture cassee sans backend)
+- [x] ~~Self-Leagues~~ — Supprime (audit critique 20260320, over-engineered)
+- [x] ~~Skill Tree~~ — Supprime (audit critique 20260320, code mort)
+- [x] ~~Challenges personnels~~ — Supprime (audit critique 20260320, 5eme systeme reward)
+- [x] ~~Activity Feed~~ — Supprime (audit critique 20260320, historique deguise)
+- [x] ~~Bulletin mensuel~~ — Supprime (audit critique 20260320, condescendant)
 - [ ] Themes debloquables (recompenses cosmetiques) — Phase 4
 
-## Features — Stats (21 ecrans)
+## Features — Stats (8 ecrans post-audit)
 
 - [x] Calendrier (grille mensuelle coloree par intensite) — Sprint 5
 - [x] Volume (bar chart hebdo/mensuel, KPIs) — Sprint 5
@@ -81,23 +82,23 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 - [x] Exercices (Top 5 frequence, PRs par exercice) — Sprint 5
 - [x] Mensurations (poids, taille, hanches, bras, poitrine) — Sprint 5
 - [x] Heatmap — Sprint 9
-- [x] PRs Timeline — Sprint 9
-- [x] Training Split — Sprint 9
-- [x] Body Composition — Sprint 9
-- [x] Balance musculaire — Sprint 7
-- [x] Force Standards — Sprint 7
-- [x] Volume Forecast — Sprint 10
-- [x] Rest Time — Sprint 11
-- [x] Volume Distribution — Sprint 11
-- [x] Monthly Progress — Sprint 11
-- [x] Exercise Frequency — Sprint 13
-- [x] Set Quality — Sprint 14
-- [x] Volume Records — Sprint 14
-- [x] Constellation — Sprint 8
-- [x] Hexagon — Sprint 7
 - [x] Hall of Fame — Sprint 7
+- [x] Compare — Sprint 11
+- [x] Force Standards — Sprint 7
 - [x] Rapports hebdomadaires automatiques — Sprint 12
-- [x] Analytics avancees (balance, fatigue, volume optimal) — Sprint 10-13
+- [x] ~~PRs Timeline~~ — Supprime (fusionne dans Hall of Fame)
+- [x] ~~Training Split~~ — Supprime (faible valeur)
+- [x] ~~Body Composition~~ — Supprime (fusionne dans Mensurations)
+- [x] ~~Balance musculaire~~ — Supprime (fusionne dans Heatmap)
+- [x] ~~Volume Forecast~~ — Supprime (code mort)
+- [x] ~~Rest Time~~ — Supprime (code mort)
+- [x] ~~Volume Distribution~~ — Supprime (fusionne dans Heatmap)
+- [x] ~~Monthly Progress~~ — Supprime (fusionne dans Compare)
+- [x] ~~Exercise Frequency~~ — Supprime (fusionne dans Exercices)
+- [x] ~~Set Quality~~ — Supprime (code mort)
+- [x] ~~Volume Records~~ — Supprime (code mort)
+- [x] ~~Constellation~~ — Supprime (code mort)
+- [x] ~~Hexagon~~ — Supprime (vanity metric)
 
 ## Features — HomeScreen (16+ cartes)
 
@@ -124,7 +125,7 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 - [x] 4 objectifs (Bodybuilding, Power, Renfo, Cardio) — Sprint 1-3
 - [x] Gestion des blessures et priorites musculaires — Sprint 1-3
 - [x] Moteur offline (gratuit, toujours disponible) — Sprint 1-3
-- [x] Providers cloud (Claude, OpenAI, Gemini) — Sprint 1-3
+- [x] ~~Providers cloud (Claude, OpenAI, Gemini)~~ — Supprime (audit critique 20260320, pas de users)
 - [x] Previsualisation du programme avant import — Sprint 1-3
 
 ## Features — Settings & Data
@@ -137,7 +138,7 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 - [x] Rappels d'entrainement (notifications planifiees) — Sprint 1-3
 - [x] Export complet JSON — Sprint 1-3
 - [x] Import avec confirmation — Sprint 1-3
-- [x] Donnees sensibles chiffrees (Secure Store) — Sprint 1-3
+- [x] ~~Donnees sensibles chiffrees (Secure Store)~~ — Supprime (audit 20260320, plus de providers cloud)
 - [x] Suppression de compte / donnees (RGPD) — Sprint 1-3
 - [x] Splash screen anime — Sprint 1-3
 
