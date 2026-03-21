@@ -1,5 +1,5 @@
 # Kore — Roadmap & Avancement
-> Derniere MAJ : 2026-03-20
+> Derniere MAJ : 2026-03-21
 
 ---
 
@@ -13,11 +13,11 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 | Metrique | Valeur |
 |----------|--------|
-| Tests | 1943 (147 suites) |
+| Tests | 2046 (156 suites) |
 | Erreurs TS | 0 |
 | Score sante | 95/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
-| Ship score | 100/100 SHIP IT (20260319-2327) |
-| Tag MVP | `v0.1.0-mvp-20260319` |
+| Ship score | 100/100 SHIP IT (20260321-1010) |
+| Tag MVP | `v0.1.0-mvp-20260321` |
 | Ecrans | ~30 (post-audit critique) |
 | Helpers | ~40 (post-audit critique) |
 | Routes | ~30 (post-audit critique) |
