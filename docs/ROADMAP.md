@@ -13,9 +13,9 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 | Metrique | Valeur |
 |----------|--------|
-| Tests | 2002 (154 suites) |
+| Tests | 1943 (147 suites) |
 | Erreurs TS | 0 |
-| Score sante | 100/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
+| Score sante | 95/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
 | Ship score | 100/100 SHIP IT (20260319-2327) |
 | Tag MVP | `v0.1.0-mvp-20260319` |
 | Ecrans | ~30 (post-audit critique) |
@@ -271,6 +271,6 @@ mobile/src/
 ## References
 
 - **Score de sante** : [`docs/bmad/verrif/HEALTH.md`](bmad/verrif/HEALTH.md) (historique time-series)
-- **Dernier verrif** : [`docs/bmad/verrif/20260319-1408/`](bmad/verrif/20260319-1408/)
+- **Dernier verrif** : [`docs/bmad/verrif/20260321-0822/`](bmad/verrif/20260321-0822/)
 - **Verdict ship** : `docs/bmad/verrif-ship/20260319-2327/VERDICT.md` — 100/100 SHIP IT
 - **Sprints detailles** : `docs/bmad/do/` (un rapport par sprint/feature)

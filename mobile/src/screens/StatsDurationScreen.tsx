@@ -15,6 +15,9 @@ import { Ionicons } from '@expo/vector-icons'
 
 import { database } from '../model'
 import History from '../model/models/History'
+import Session from '../model/models/Session'
+import WorkoutSet from '../model/models/Set'
+import Exercise from '../model/models/Exercise'
 import { computeDurationStats, formatDuration } from '../model/utils/statsHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
@@ -142,10 +145,10 @@ export function StatsDurationScreenBase({ histories }: Props) {
       try {
         const uniqueIds = [...new Set(sessionIds)]
         const sessions = await database
-          .get('sessions')
+          .get<Session>('sessions')
           .query(Q.where('id', Q.oneOf(uniqueIds)))
           .fetch()
-        const sessionMap = new Map(sessions.map(s => [s.id, (s as any).name as string]))
+        const sessionMap = new Map(sessions.map(s => [s.id, s.name]))
         for (const entry of pageEntries) {
           const sid = historyToSessionId[entry.id]
           if (sid) {
@@ -183,24 +186,24 @@ export function StatsDurationScreenBase({ histories }: Props) {
     try {
       // Batch-fetch sets for this history
       const sets = await database
-        .get('sets')
+        .get<WorkoutSet>('sets')
         .query(Q.where('history_id', historyId))
         .fetch()
       // Batch-fetch all exercises referenced by these sets
-      const exerciseIds = [...new Set(sets.map(s => (s as any).exerciseId as string).filter(Boolean))]
+      const exerciseIds = [...new Set(sets.map(s => s.exerciseId).filter(Boolean))]
       const exercises = exerciseIds.length > 0
         ? await database
-            .get('exercises')
+            .get<Exercise>('exercises')
             .query(Q.where('id', Q.oneOf(exerciseIds)))
             .fetch()
         : []
-      const exerciseMap = new Map(exercises.map(e => [e.id, (e as any).name as string]))
+      const exerciseMap = new Map(exercises.map(e => [e.id, e.name]))
 
       const exMap = new Map<string, { name: string; repsList: number[] }>()
       for (const s of sets) {
-        const exName = exerciseMap.get((s as any).exerciseId) || t.statsDuration.unknownExercise
+        const exName = exerciseMap.get(s.exerciseId) || t.statsDuration.unknownExercise
         if (!exMap.has(exName)) exMap.set(exName, { name: exName, repsList: [] })
-        exMap.get(exName)!.repsList.push((s as any).reps)
+        exMap.get(exName)!.repsList.push(s.reps)
       }
       const details: SessionExDetail[] = []
       exMap.forEach(({ name, repsList }) => {
