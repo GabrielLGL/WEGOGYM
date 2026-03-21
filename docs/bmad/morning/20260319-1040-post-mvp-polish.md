@@ -32,4 +32,4 @@ Aucun n'est bloquant pour le ship — c'est du polish/dette technique.
 - Score HEALTH.md retour à 100/100
 
 ## Statut
-⏳ En attente
+✅ Obsolete — resolu par audit critique 20260320 (-21 ecrans, -13K LOC) + verrif runs 20260321. HomeScreen 291 lignes (vs 2082), as any 1 occurrence (vs 12), couleurs hardcodees = 0.
