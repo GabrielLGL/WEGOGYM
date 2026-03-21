@@ -271,6 +271,6 @@ mobile/src/
 ## References
 
 - **Score de sante** : [`docs/bmad/verrif/HEALTH.md`](bmad/verrif/HEALTH.md) (historique time-series)
-- **Dernier verrif** : [`docs/bmad/verrif/20260321-0822/`](bmad/verrif/20260321-0822/)
+- **Dernier verrif** : [`docs/bmad/verrif/20260321-0859/`](bmad/verrif/20260321-0859/)
 - **Verdict ship** : `docs/bmad/verrif-ship/20260319-2327/VERDICT.md` — 100/100 SHIP IT
 - **Sprints detailles** : `docs/bmad/do/` (un rapport par sprint/feature)
