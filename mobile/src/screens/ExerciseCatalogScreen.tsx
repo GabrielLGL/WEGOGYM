@@ -286,7 +286,7 @@ const ExerciseCatalogScreen: React.FC = () => {
   const [exercises, setExercises] = useState<CatalogExercise[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [_hasMore, setHasMore] = useState(true)
+
   const [hasError, setHasError] = useState(false)
   const [selectedExercise, setSelectedExercise] = useState<CatalogExercise | null>(null)
   const [isImporting, setIsImporting] = useState(false)
@@ -322,7 +322,6 @@ const ExerciseCatalogScreen: React.FC = () => {
         query: q, offset: 0, limit: PAGE_SIZE, signal: controller.signal,
       })
       setExercises(result.exercises)
-      setHasMore(result.hasMore)
       hasMoreRef.current = result.hasMore
       currentOffsetRef.current = result.exercises.length
     } catch (e) {
@@ -352,7 +351,6 @@ const ExerciseCatalogScreen: React.FC = () => {
         const newExercises = result.exercises.filter(e => !existingIds.has(e.id))
         return [...prev, ...newExercises]
       })
-      setHasMore(result.hasMore)
       hasMoreRef.current = result.hasMore
       currentOffsetRef.current = offset + result.exercises.length
     } catch (e) {

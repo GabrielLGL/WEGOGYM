@@ -30,6 +30,8 @@ interface Props {
   route: RouteProp<RootStackParamList, 'ProgramDetail'>
 }
 
+const INITIAL_ALERT_CONFIG = { title: '', message: '', onConfirm: async () => {} }
+
 const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs, navigation }) => {
   const colors = useColors()
   const styles = useStyles(colors)
@@ -55,7 +57,7 @@ const ProgramDetailScreenInner: React.FC<Props> = ({ program, sessions, programs
   const sessionOptionsModal = useModalState()
   const addChoiceModal = useModalState()
   const alertModal = useModalState()
-  const [alertConfig, setAlertConfig] = useState({ title: '', message: '', onConfirm: async () => {} })
+  const [alertConfig, setAlertConfig] = useState(INITIAL_ALERT_CONFIG)
 
   const renameSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
