@@ -1612,14 +1612,6 @@ export const en: typeof fr = {
     emptyMessage: 'Train for at least 2 months to see your monthly report.',
   },
 
-  overtraining: {
-    title: 'Warning — Overload detected',
-    highFrequency: '{n} sessions this week — that\'s a lot!',
-    noRest: 'You haven\'t taken a real rest day in several days.',
-    volumeSpike: 'Your volume increased by {n}% vs previous weeks.',
-    advice: 'Consider scheduling a recovery day.',
-  },
-
   exerciseCollection: {
     title: 'Exercise Collection',
     subtitle: 'exercises discovered',

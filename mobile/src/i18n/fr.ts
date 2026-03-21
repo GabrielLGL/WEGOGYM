@@ -1613,14 +1613,6 @@ export const fr = {
     emptyMessage: 'Entraîne-toi pendant au moins 2 mois pour voir ton bulletin.',
   },
 
-  overtraining: {
-    title: 'Attention — Surcharge détectée',
-    highFrequency: '{n} séances cette semaine — c\'est beaucoup !',
-    noRest: 'Tu n\'as pas pris de vrai repos depuis plusieurs jours.',
-    volumeSpike: 'Ton volume a augmenté de {n}% vs les semaines précédentes.',
-    advice: 'Pense à prévoir une journée de récupération.',
-  },
-
   exerciseCollection: {
     title: 'Collection d\'exercices',
     subtitle: 'exercices découverts',
