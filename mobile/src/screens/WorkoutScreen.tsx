@@ -245,38 +245,16 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     })
   }, [navigation, session.name, colors, haptics])
 
+  // Effect 1: Load or create the History record (runs once on mount)
   useEffect(() => {
     let cancelled = false
     if (resumeHistoryId) {
-      // Resume: load existing History + its validated sets
       database.get<History>('histories').find(resumeHistoryId)
-        .then(async history => {
+        .then(history => {
           if (cancelled) return
           historyRef.current = history
           startTimestampRef.current = history.startTime.getTime()
           setHistoryId(history.id)
-
-          // Reload already-validated sets from DB
-          const existingSets = await database.get<WorkoutSet>('sets')
-            .query(Q.where('history_id', history.id))
-            .fetch()
-          if (cancelled || existingSets.length === 0) return
-
-          const restored: Record<string, ValidatedSetData> = {}
-          const restoredInputs: Record<string, SetInputData> = {}
-          let restoredVolume = 0
-          for (const s of existingSets) {
-            // Find session exercise matching this set's exercise
-            const se = sessionExercises.find(e => e.exercise.id === s.exerciseId)
-            if (!se) continue
-            const key = `${se.id}_${s.setOrder}`
-            restored[key] = { weight: s.weight, reps: s.reps, isPr: s.isPr }
-            restoredInputs[key] = { weight: String(s.weight), reps: String(s.reps) }
-            restoredVolume += s.weight * s.reps
-          }
-          if (!cancelled) {
-            setRestoredSets({ validated: restored, inputs: restoredInputs, volume: restoredVolume })
-          }
         })
         .catch(e => {
           if (cancelled) return
@@ -284,7 +262,6 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
           startErrorModal.open()
         })
     } else {
-      // New workout: create a fresh History
       createWorkoutHistory(session.id, startTimestampRef.current)
         .then(history => {
           if (cancelled) return
@@ -299,6 +276,40 @@ export const WorkoutContent: React.FC<WorkoutContentProps> = ({
     }
     return () => { cancelled = true }
   }, [])
+
+  // Effect 2: Restore validated sets when resuming — waits for both historyId AND sessionExercises
+  useEffect(() => {
+    if (!resumeHistoryId || !historyId || sessionExercises.length === 0) return
+    // Only restore once (restoredSets starts null, gets set to an object)
+    if (restoredSets !== null) return
+
+    let cancelled = false
+    database.get<WorkoutSet>('sets')
+      .query(Q.where('history_id', historyId))
+      .fetch()
+      .then(existingSets => {
+        if (cancelled || existingSets.length === 0) return
+
+        const restored: Record<string, ValidatedSetData> = {}
+        const restoredInputs: Record<string, SetInputData> = {}
+        let restoredVolume = 0
+        for (const s of existingSets) {
+          const se = sessionExercises.find(e => e.exercise.id === s.exerciseId)
+          if (!se) continue
+          const key = `${se.id}_${s.setOrder}`
+          restored[key] = { weight: s.weight, reps: s.reps, isPr: s.isPr }
+          restoredInputs[key] = { weight: String(s.weight), reps: String(s.reps) }
+          restoredVolume += s.weight * s.reps
+        }
+        if (!cancelled) {
+          setRestoredSets({ validated: restored, inputs: restoredInputs, volume: restoredVolume })
+        }
+      })
+      .catch(e => {
+        if (!cancelled && __DEV__) console.error('[WorkoutScreen] restore sets failed:', e)
+      })
+    return () => { cancelled = true }
+  }, [resumeHistoryId, historyId, sessionExercises, restoredSets])
 
   useEffect(() => {
     setupNotificationChannel()
