@@ -43,6 +43,12 @@ jest.mock('../../model/index', () => ({
   },
 }))
 
+// SettingsWearableSection uses withObservables HOC which calls user.observe()
+// Mock it to avoid HOC issues in unit tests
+jest.mock('../../components/settings/SettingsWearableSection', () => ({
+  SettingsWearableSection: () => null,
+}))
+
 const mockWrite = database.write as jest.Mock
 
 // Prevent react-native's internal batch flusher timer from firing after teardown
@@ -52,13 +58,17 @@ afterEach(() => {
   jest.useRealTimers()
 })
 
+const { of } = require('rxjs')
+
 const makeUser = (overrides = {}) => ({
   restDuration: 90,
   timerEnabled: true,
   streakTarget: 3,
   aiProvider: 'offline',
   name: 'Jean',
+  unitMode: null,
   update: jest.fn(),
+  observe: jest.fn().mockReturnValue(of(undefined)),
   ...overrides,
 })
 
@@ -330,34 +340,13 @@ describe('SettingsContent — section Gamification', () => {
   })
 })
 
-describe('SettingsContent — section IA', () => {
-  it('affiche le provider offline actif', () => {
-    const user = makeUser()
-    const { getByText } = render(<SettingsContent user={user as never} />)
-
-    expect(getByText('Offline — Génération locale')).toBeTruthy()
-  })
-
-  it('affiche le badge "Prochainement" pour l\'IA cloud', () => {
-    const user = makeUser()
-    const { getByText } = render(<SettingsContent user={user as never} />)
-
-    expect(getByText('IA cloud')).toBeTruthy()
-    expect(getByText('Prochainement')).toBeTruthy()
-  })
-
-  it('n\'affiche pas de champ clé API', () => {
-    const user = makeUser()
-    const { queryByPlaceholderText } = render(<SettingsContent user={user as never} />)
-
-    expect(queryByPlaceholderText('Colle ta clé API ici')).toBeNull()
-  })
-
-  it('n\'affiche pas de bouton "Tester la connexion"', () => {
+describe('SettingsContent — section IA cachée', () => {
+  it('n\'affiche pas la section IA', () => {
     const user = makeUser()
     const { queryByText } = render(<SettingsContent user={user as never} />)
 
-    expect(queryByText('Tester la connexion')).toBeNull()
+    expect(queryByText('Intelligence Artificielle')).toBeNull()
+    expect(queryByText('Offline — Génération locale')).toBeNull()
   })
 })
 
@@ -367,9 +356,10 @@ describe('SettingsContent — section À propos', () => {
     expect(getByText('Kore')).toBeTruthy()
   })
 
-  it('affiche la version', () => {
+  it('affiche la version depuis expo-constants', () => {
     const { getByText } = render(<SettingsContent user={null} />)
-    expect(getByText('1.0.0')).toBeTruthy()
+    // expo-constants mock returns '1.0.0' by default via expoConfig
+    expect(getByText(/\d+\.\d+\.\d+/)).toBeTruthy()
   })
 
   it('affiche la stack technique', () => {

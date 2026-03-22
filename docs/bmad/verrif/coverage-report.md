@@ -1,6 +1,53 @@
 
 ---
 
+## Run P10 — 2026-03-21 (session test-coverage #4)
+
+| Métrique   | Avant (P9) | Après (P10) | Delta  |
+|------------|------------|-------------|--------|
+| Statements | 72.93%     | 75.52%      | **+2.59%** |
+| Branches   | 60.44%     | 62.21%      | **+1.77%** |
+| Functions  | 65.86%     | 68.89%      | **+3.03%** |
+| Lines      | 74.91%     | 77.61%      | **+2.70%** |
+
+**1938 → 2046 tests (+108), 147 → 156 suites (+9)** — tous passent (0 failed).
+
+Note : test fantôme `overtrainingHelpers.test.ts` résolu (cache Jest nettoyé).
+
+### Fichiers de test ajoutés
+
+| Fichier | Tests |
+|---------|-------|
+| `services/__tests__/shareService.test.ts` | 22 |
+| `services/__tests__/progressPhotoService.test.ts` | 21 |
+| `services/__tests__/widgetDataService.test.ts` | 5 |
+| `components/__tests__/Toast.test.tsx` | 7 |
+| `components/__tests__/WeeklyReportCard.test.tsx` | 11 |
+| `components/__tests__/HexagonStatsCard.test.tsx` | 7 |
+| `components/__tests__/ShareCard.test.tsx` | 19 |
+| `components/__tests__/AnimatedSplash.test.tsx` | 4 |
+| `components/__tests__/ScreenLoading.test.tsx` | 3 |
+| `components/__tests__/WarmupChecklistSheet.test.tsx` | 8 |
+| `components/__tests__/BadgeCelebration.test.tsx` | +1 (existant) |
+
+### Couverture par fichier — avant/après
+
+| Fichier | Avant | Après |
+|---------|-------|-------|
+| `shareService.ts` | 0% | **100%** |
+| `progressPhotoService.ts` | 0% | **90%** |
+| `Toast.tsx` | 0% | **100%** |
+| `WeeklyReportCard.tsx` | 0% | **100%** |
+| `HexagonStatsCard.tsx` | 0% | **100%** |
+| `ShareCard.tsx` | 5% | **100%** |
+| `AnimatedSplash.tsx` | 0% | **100%** |
+| `ScreenLoading.tsx` | 50% | **100%** |
+| `WarmupChecklistSheet.tsx` | 52% | **100%** |
+| `widgetDataService.ts` | 43% | **58%** |
+| `BadgeCelebration.tsx` | 50% | **56%** |
+
+---
+
 ## Run P9 — 2026-03-07 (session test-coverage #3)
 
 | Métrique   | Avant (P8) | Après (P9) | Delta  |

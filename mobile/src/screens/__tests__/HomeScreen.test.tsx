@@ -53,6 +53,24 @@ jest.mock('expo-haptics', () => ({
   NotificationFeedbackType: { Success: 'Success', Error: 'Error' },
 }))
 
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+}))
+
+jest.mock('../../contexts/UnitContext', () => ({
+  useUnits: () => ({
+    unitMode: 'metric',
+    weightUnit: 'kg',
+    formatWeight: (v: number) => `${v} kg`,
+    parseWeight: (v: number) => v,
+    convertWeight: (v: number) => v,
+    convertToDisplay: (v: number) => v,
+    convertToStorage: (v: number) => v,
+  }),
+  UnitProvider: ({ children }: { children: React.ReactNode }) => children,
+}))
+
 jest.mock('@nozbe/with-observables', () => (
   (_keys: string[], _fn: () => object) =>
     (Component: React.ComponentType<object>) => Component
@@ -105,6 +123,8 @@ const renderHome = (overrides: Partial<React.ComponentProps<typeof HomeContent>>
       userBadges={[]}
       exercises={[]}
       programs={[] as unknown as Program[]}
+      sleepRecords={[]}
+      dailyVitals={[]}
       {...overrides}
     />
   )

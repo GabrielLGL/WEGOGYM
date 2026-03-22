@@ -14,58 +14,80 @@ function makeHistory(daysAgo: number) {
   return { startedAt: new Date(Date.now() - daysAgo * DAY_MS), isAbandoned: false }
 }
 
+/** Crée un historique suffisant : 4+ séances réparties sur 14+ jours */
+function makeSufficientHistories() {
+  return [makeHistory(1), makeHistory(7), makeHistory(14), makeHistory(21)]
+}
+
 describe('computeReadiness', () => {
-  it('score élevé si aucune séance récente (full recovery)', () => {
+  it('retourne null si aucune séance', () => {
     const result = computeReadiness([], [], [])
-    // recovery=100, fatigue ratio=0 → fatigueScore=90, consistency=0days → 20
-    // Score = 100*0.4 + 90*0.35 + 20*0.25 = 76.5 → 77
-    expect(result.score).toBeGreaterThanOrEqual(60)
-    expect(result.level).toBe('good')
+    expect(result).toBeNull()
+  })
+
+  it('retourne null si moins de 4 séances', () => {
+    const histories = [makeHistory(1), makeHistory(7), makeHistory(14)]
+    const result = computeReadiness([], [], histories)
+    expect(result).toBeNull()
+  })
+
+  it('retourne null si historique étalé sur moins de 14 jours', () => {
+    const histories = [makeHistory(1), makeHistory(3), makeHistory(5), makeHistory(10)]
+    const result = computeReadiness([], [], histories)
+    expect(result).toBeNull()
   })
 
   it('level optimal pour score >= 80 avec entraînement régulier', () => {
-    // 4 jours d'entraînement sur 14j → consistencyScore=70
+    // 5 jours d'entraînement sur 21j → consistencyScore=70 ou 90
     // Pas de sets récents dans les 7 derniers jours → recovery=100, fatigue ratio≈0 → 90
-    // Score ≈ 100*0.4 + 90*0.35 + 70*0.25 = 40 + 31.5 + 17.5 = 89
-    const histories = Array.from({ length: 4 }, (_, i) => makeHistory(i + 8))
+    const histories = [makeHistory(8), makeHistory(10), makeHistory(14), makeHistory(17), makeHistory(24)]
     const result = computeReadiness([], [], histories)
-    expect(result.score).toBeGreaterThanOrEqual(80)
-    expect(result.level).toBe('optimal')
+    expect(result).not.toBeNull()
+    expect(result!.score).toBeGreaterThanOrEqual(80)
+    expect(result!.level).toBe('optimal')
   })
 
   it('composants recovery, fatigue et consistency dans [0, 100]', () => {
     const exercises = [makeExercise('e1', ['Pecs'])]
     const sets = Array.from({ length: 10 }, (_, i) => makeSet(i, 'e1'))
-    const histories = Array.from({ length: 10 }, (_, i) => makeHistory(i))
+    const histories = Array.from({ length: 10 }, (_, i) => makeHistory(i * 2))
     const result = computeReadiness(sets, exercises, histories)
+    expect(result).not.toBeNull()
 
-    expect(result.components.recovery).toBeGreaterThanOrEqual(0)
-    expect(result.components.recovery).toBeLessThanOrEqual(100)
-    expect(result.components.fatigue).toBeGreaterThanOrEqual(0)
-    expect(result.components.fatigue).toBeLessThanOrEqual(100)
-    expect(result.components.consistency).toBeGreaterThanOrEqual(0)
-    expect(result.components.consistency).toBeLessThanOrEqual(100)
+    expect(result!.components.recovery).toBeGreaterThanOrEqual(0)
+    expect(result!.components.recovery).toBeLessThanOrEqual(100)
+    expect(result!.components.fatigue).toBeGreaterThanOrEqual(0)
+    expect(result!.components.fatigue).toBeLessThanOrEqual(100)
+    expect(result!.components.consistency).toBeGreaterThanOrEqual(0)
+    expect(result!.components.consistency).toBeLessThanOrEqual(100)
   })
 
   it('score arrondi à l\'entier', () => {
-    const result = computeReadiness([], [], [])
-    expect(result.score).toBe(Math.round(result.score))
+    const histories = makeSufficientHistories()
+    const result = computeReadiness([], [], histories)
+    expect(result).not.toBeNull()
+    expect(result!.score).toBe(Math.round(result!.score))
   })
 
   it('retourne une recommendation avec clé i18n', () => {
-    const result = computeReadiness([], [], [])
-    expect(result.recommendation).toMatch(/^home\.readiness\.recommendations\./)
+    const histories = makeSufficientHistories()
+    const result = computeReadiness([], [], histories)
+    expect(result).not.toBeNull()
+    expect(result!.recommendation).toMatch(/^home\.readiness\.recommendations\./)
   })
 
   it('score plus bas avec entraînement intensif récent', () => {
     const exercises = [makeExercise('e1', ['Pecs', 'Dos', 'Quadriceps'])]
     // Beaucoup de sets récents → fatigue élevée, recovery basse
     const sets = Array.from({ length: 20 }, (_, i) => makeSet(i % 3, 'e1', 150, 12))
-    const histories = Array.from({ length: 7 }, (_, i) => makeHistory(i))
+    const histories = Array.from({ length: 10 }, (_, i) => makeHistory(i * 2))
     const resultHeavy = computeReadiness(sets, exercises, histories)
 
-    const resultRest = computeReadiness([], [], [])
+    const historiesRest = makeSufficientHistories()
+    const resultRest = computeReadiness([], [], historiesRest)
 
-    expect(resultHeavy.score).toBeLessThan(resultRest.score)
+    expect(resultHeavy).not.toBeNull()
+    expect(resultRest).not.toBeNull()
+    expect(resultHeavy!.score).toBeLessThan(resultRest!.score)
   })
 })

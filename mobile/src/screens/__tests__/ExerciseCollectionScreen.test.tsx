@@ -24,6 +24,10 @@ jest.mock('../../model/index', () => ({
   database: { write: jest.fn(), get: jest.fn(() => ({ query: () => ({ observe: () => ({}) }) })) },
 }))
 
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: jest.fn() }),
+}))
+
 // Déclenche l'évaluation du module → capture du Base
 require('../ExerciseCollectionScreen')
 
@@ -67,10 +71,10 @@ describe('ExerciseCollectionScreenBase', () => {
       makeExercise('e2', 'Deadlift', ['Dos']),
     ]
     const sets = [makeSet_('e1', 1)]
-    const { getByText } = render(<Component exercises={exercises} sets={sets} />)
+    const { getByText, getByTestId } = render(<Component exercises={exercises} sets={sets} />)
     // e1 est découvert, e2 est verrouillé (nom masqué par ?)
     expect(getByText('Bench Press')).toBeTruthy()
-    expect(getByText('🔒')).toBeTruthy()
+    expect(getByTestId('icon-lock')).toBeTruthy()
   })
 
   it('affiche la barre de progression', () => {

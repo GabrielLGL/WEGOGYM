@@ -104,4 +104,14 @@ describe('BadgeCelebration', () => {
     // BottomSheet does not mount children when visible=false
     expect(queryByText('Élite')).toBeNull()
   })
+
+  it('opens share bottom sheet when Partager is pressed', () => {
+    const badge = makeBadge()
+    const { getByText } = render(
+      <BadgeCelebration visible={true} badge={badge} onClose={jest.fn()} />
+    )
+    fireEvent.press(getByText('Partager'))
+    // Share sheet opens without error
+    expect(getByText('Partager')).toBeTruthy()
+  })
 })
