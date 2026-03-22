@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { View, Text, Switch, TouchableOpacity, FlatList, Platform } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Ionicons } from '@expo/vector-icons'
 import { database } from '../../model/index'
 import User from '../../model/models/User'
@@ -7,6 +8,7 @@ import {
   requestNotificationPermission,
   setupReminderChannel,
   updateReminders,
+  cancelStreakDangerNotification,
 } from '../../services/notificationService'
 import { useHaptics } from '../../hooks/useHaptics'
 import { useColors } from '../../contexts/ThemeContext'
@@ -45,15 +47,64 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
 }) => {
   const colors = useColors()
   const haptics = useHaptics()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const [showTimePicker, setShowTimePicker] = useState(false)
   const [tempHour, setTempHour] = useState(reminderHour)
   const [tempMinute, setTempMinute] = useState(reminderMinute)
   const [permissionDenied, setPermissionDenied] = useState(false)
+  const [streakAlertsEnabled, setStreakAlertsEnabled] = useState(true)
+
+  useEffect(() => {
+    AsyncStorage.getItem('streak-alerts-enabled').then(value => {
+      if (value !== null) {
+        setStreakAlertsEnabled(value !== 'false')
+      }
+    })
+  }, [])
+
+  const handleToggleStreakAlerts = async (enabled: boolean) => {
+    try {
+      setStreakAlertsEnabled(enabled)
+      haptics.onPress()
+      await AsyncStorage.setItem('streak-alerts-enabled', String(enabled))
+      if (!enabled) {
+        const existingId = await AsyncStorage.getItem('streak-danger-id')
+        if (existingId) {
+          await cancelStreakDangerNotification(existingId)
+          await AsyncStorage.removeItem('streak-danger-id')
+        }
+      }
+    } catch (error) {
+      if (__DEV__) console.error('[SettingsNotifications] toggleStreakAlerts error:', error)
+    }
+  }
 
   const HOURS = useMemo(() => Array.from({ length: 24 }, (_, i) => i), [])
   const MINUTES = useMemo(() => Array.from({ length: 12 }, (_, i) => i * 5), [])
+
+  // Compute next reminder date/time
+  const nextReminderLabel = useMemo(() => {
+    if (!remindersEnabled || reminderDays.length === 0) return null
+    const now = new Date()
+    const todayIso = now.getDay() === 0 ? 7 : now.getDay() // JS Sun=0 → ISO Sun=7
+    const nowMinutes = now.getHours() * 60 + now.getMinutes()
+    const targetMinutes = reminderHour * 60 + reminderMinute
+
+    // Find the next matching day (0..6 days ahead)
+    for (let offset = 0; offset < 7; offset++) {
+      const candidateIso = ((todayIso - 1 + offset) % 7) + 1
+      if (!reminderDays.includes(candidateIso)) continue
+      if (offset === 0 && nowMinutes >= targetMinutes) continue // today but already past
+      const nextDate = new Date(now)
+      nextDate.setDate(now.getDate() + offset)
+      nextDate.setHours(reminderHour, reminderMinute, 0, 0)
+      const dayName = nextDate.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long' })
+      const time = `${String(reminderHour).padStart(2, '0')}:${String(reminderMinute).padStart(2, '0')}`
+      return `${dayName.charAt(0).toUpperCase()}${dayName.slice(1)} ${time}`
+    }
+    return null
+  }, [remindersEnabled, reminderDays, reminderHour, reminderMinute])
 
   const saveReminders = useCallback(async (enabled: boolean, days: number[], hour: number, minute: number) => {
     if (!user) return
@@ -73,18 +124,22 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
   }, [user, t])
 
   const handleToggleReminders = async (enabled: boolean) => {
-    if (enabled) {
-      const granted = await requestNotificationPermission()
-      if (!granted) {
-        setPermissionDenied(true)
-        return
+    try {
+      if (enabled) {
+        const granted = await requestNotificationPermission()
+        if (!granted) {
+          setPermissionDenied(true)
+          return
+        }
+        await setupReminderChannel()
+        setPermissionDenied(false)
       }
-      await setupReminderChannel()
-      setPermissionDenied(false)
+      setRemindersEnabled(enabled)
+      haptics.onPress()
+      await saveReminders(enabled, reminderDays, reminderHour, reminderMinute)
+    } catch (error) {
+      if (__DEV__) console.error('[SettingsNotifications] toggleReminders error:', error)
     }
-    setRemindersEnabled(enabled)
-    haptics.onPress()
-    await saveReminders(enabled, reminderDays, reminderHour, reminderMinute)
   }
 
   const handleToggleDay = async (isoDay: number) => {
@@ -208,7 +263,7 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
             </View>
 
             <TouchableOpacity
-              style={[styles.settingRow, styles.settingRowLast]}
+              style={[styles.settingRow, nextReminderLabel ? undefined : styles.settingRowLast]}
               onPress={() => {
                 setTempHour(reminderHour)
                 setTempMinute(reminderMinute)
@@ -230,6 +285,20 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
                 <Ionicons name="chevron-forward" size={16} color={colors.primary} />
               </View>
             </TouchableOpacity>
+
+            {nextReminderLabel && (
+              <View style={[styles.settingRow, styles.settingRowLast]}>
+                <View style={styles.settingInfo}>
+                  <View style={styles.settingLabelRow}>
+                    <Ionicons name="arrow-forward-circle-outline" size={16} color={colors.primary} />
+                    <Text style={[styles.settingLabel, { color: colors.primary }]}>
+                      {t.settings.reminders.nextReminder}
+                    </Text>
+                  </View>
+                  <Text style={styles.settingDescription}>{nextReminderLabel}</Text>
+                </View>
+              </View>
+            )}
           </>
         )}
       </View>
@@ -327,6 +396,22 @@ export const SettingsNotificationsSection: React.FC<SettingsNotificationsSection
             </TouchableOpacity>
           ))}
           <Text style={styles.streakTargetLabel}>{t.settings.gamification.sessionsPerWeek}</Text>
+        </View>
+
+        <View style={[styles.settingRow, styles.settingRowLast]}>
+          <View style={styles.settingInfo}>
+            <View style={styles.settingLabelRow}>
+              <Ionicons name="alert-circle-outline" size={16} color={colors.textSecondary} />
+              <Text style={styles.settingLabel}>{t.settings.gamification.streakDanger.settingLabel}</Text>
+            </View>
+            <Text style={styles.settingDescription}>{t.settings.gamification.streakDanger.settingDescription}</Text>
+          </View>
+          <Switch
+            value={streakAlertsEnabled}
+            onValueChange={handleToggleStreakAlerts}
+            trackColor={{ false: colors.cardSecondary, true: colors.primary }}
+            thumbColor={colors.switchThumb}
+          />
         </View>
       </View>
     </>

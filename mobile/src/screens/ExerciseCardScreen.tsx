@@ -18,6 +18,7 @@ import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import type { RootStackParamList } from '../navigation'
 
@@ -122,6 +123,7 @@ function ExerciseCardContent({ exercise, sets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t, language } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
 
   const best1RM = useMemo(() => {
     if (!sets.length) return 0
@@ -149,10 +151,12 @@ function ExerciseCardContent({ exercise, sets }: Props) {
   )
 
   const lastPRDate = useMemo(
-    () =>
-      prSets.length > 0
-        ? new Date(Math.max(...prSets.map(s => s.createdAt?.getTime() ?? 0)))
-        : null,
+    () => {
+      const validPrs = prSets.filter(s => s.createdAt != null)
+      return validPrs.length > 0
+        ? new Date(Math.max(...validPrs.map(s => s.createdAt!.getTime())))
+        : null
+    },
     [prSets]
   )
 
@@ -163,10 +167,11 @@ function ExerciseCardContent({ exercise, sets }: Props) {
     return 'expert'
   }, [totalSessions])
 
+  const convertedTonnage = convertWeight(totalTonnage)
   const tonnageDisplay =
-    totalTonnage >= 1000
-      ? `${(totalTonnage / 1000).toFixed(1)} t`
-      : `${totalTonnage} kg`
+    convertedTonnage >= 1000
+      ? `${(convertedTonnage / 1000).toFixed(1)} t`
+      : `${Math.round(convertedTonnage)} ${weightUnit}`
 
   return (
     <ScrollView
@@ -193,7 +198,7 @@ function ExerciseCardContent({ exercise, sets }: Props) {
       <View style={styles.kpiRow}>
         <KpiCell
           label={t.exerciseCard.orm}
-          value={best1RM > 0 ? `~${best1RM} kg` : '—'}
+          value={best1RM > 0 ? `~${Math.round(convertWeight(best1RM))} ${weightUnit}` : '—'}
           colors={colors}
         />
         <KpiCell
