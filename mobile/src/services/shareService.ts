@@ -58,12 +58,13 @@ function formatDuration(seconds: number): string {
 export function generateWorkoutShareText(
   data: WorkoutShareData,
   t: Translations,
+  weightUnit = 'kg',
 ): string {
   const lines: string[] = []
 
   lines.push(`\u{1F3CB}\u{FE0F} ${t.share.workoutTitle}`)
   lines.push(
-    `\u23F1\u{FE0F} ${formatDuration(data.durationSeconds)} | \u{1F4CA} ${formatNumber(data.totalVolume)} kg | ${data.totalSets} ${t.share.sets}`,
+    `\u23F1\u{FE0F} ${formatDuration(data.durationSeconds)} | \u{1F4CA} ${formatNumber(data.totalVolume)} ${weightUnit} | ${data.totalSets} ${t.share.sets}`,
   )
   lines.push(
     `\u2B50 +${data.xpGained} XP | ${t.share.level} ${data.level} | \u{1F525} ${data.currentStreak} ${t.share.streakWeeks}`,
@@ -101,12 +102,13 @@ export function generateBadgeShareText(
 export function generatePRShareText(
   data: PRShareData,
   t: Translations,
+  weightUnit = 'kg',
 ): string {
   const lines: string[] = []
 
   lines.push(`\u{1F947} ${t.share.prTitle}`)
-  lines.push(`${data.exerciseName} : ${formatNumber(data.weight)} kg \u00D7 ${data.reps} reps`)
-  lines.push(`\u{1F4C8} ${t.share.estimated1RM} : ${formatNumber(data.estimated1RM)} kg`)
+  lines.push(`${data.exerciseName} : ${formatNumber(data.weight)} ${weightUnit} \u00D7 ${data.reps} reps`)
+  lines.push(`\u{1F4C8} ${t.share.estimated1RM} : ${formatNumber(data.estimated1RM)} ${weightUnit}`)
   lines.push('')
   lines.push(t.share.hashtags)
 

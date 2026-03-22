@@ -129,7 +129,11 @@ export function buildHeatmapData(histories: History[]): HeatmapDay[] {
   return days
 }
 
-export function formatVolume(kg: number, locale = 'fr-FR'): string {
+export function formatVolume(kg: number, locale = 'fr-FR', unitMode: 'metric' | 'imperial' = 'metric'): string {
+  if (unitMode === 'imperial') {
+    const lbs = Math.round(kg * 2.20462)
+    return `${lbs.toLocaleString(locale)} lbs`
+  }
   return `${Math.round(kg).toLocaleString(locale)} kg`
 }
 

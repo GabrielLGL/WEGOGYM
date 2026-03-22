@@ -30,9 +30,15 @@ function getTs(d: Date | number): number {
   return d instanceof Date ? d.getTime() : d
 }
 
+/** Nombre minimum de séances pour un ratio ACWR significatif */
+const MIN_SESSIONS_FATIGUE = 4
+const MIN_HISTORY_SPAN_MS = 14 * DAY_MS
+
 /**
  * Calcule l'indice de fatigue basé sur le ratio volume récent vs moyenne.
  * Utilise le modèle ACWR (Acute:Chronic Workload Ratio) simplifié.
+ *
+ * Retourne `null` si l'historique est insuffisant (< 4 séances ou < 14 jours).
  *
  * @param sets - Séries avec poids, répétitions et date
  * @param histories - Historiques de séances (soft-delete aware)
@@ -40,12 +46,19 @@ function getTs(d: Date | number): number {
 export function computeFatigueIndex(
   sets: Array<{ weight: number; reps: number; createdAt: Date | number }>,
   histories: Array<{ createdAt: Date | number; deletedAt: Date | null; isAbandoned: boolean }>,
-): FatigueResult {
+): FatigueResult | null {
   const now = Date.now()
   const sevenDaysAgo = now - WEEK_MS
   const eightWeeksAgo = now - 8 * WEEK_MS
 
   const activeHistories = histories.filter(h => h.deletedAt === null && !h.isAbandoned)
+
+  // Guard : données insuffisantes pour un ratio ACWR fiable
+  if (activeHistories.length < MIN_SESSIONS_FATIGUE) return null
+  const timestamps = activeHistories.map(h => getTs(h.createdAt))
+  const span = Math.max(...timestamps) - Math.min(...timestamps)
+  if (span < MIN_HISTORY_SPAN_MS) return null
+
   const recentSets = sets.filter(s => getTs(s.createdAt) >= eightWeeksAgo)
 
   // ── Acute load : volume des 7 derniers jours ──

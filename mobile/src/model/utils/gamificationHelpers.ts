@@ -172,7 +172,11 @@ export function calculateSessionTonnage(
 }
 
 /** Formate un tonnage en string lisible. */
-export function formatTonnage(totalKg: number): string {
+export function formatTonnage(totalKg: number, unitMode: 'metric' | 'imperial' = 'metric'): string {
+  if (unitMode === 'imperial') {
+    const lbs = Math.round(totalKg * 2.20462)
+    return lbs >= 2000 ? `${(lbs / 1000).toFixed(1)}k lbs` : `${lbs.toLocaleString()} lbs`
+  }
   if (totalKg >= KG_PER_TONNE) {
     return `${(totalKg / KG_PER_TONNE).toFixed(1)} t`
   }

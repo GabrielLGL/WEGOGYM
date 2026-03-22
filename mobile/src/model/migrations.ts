@@ -176,5 +176,57 @@ export const migrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 40,
+      steps: [
+        createTable({
+          name: 'sleep_records',
+          columns: [
+            { name: 'date', type: 'number' },
+            { name: 'duration_minutes', type: 'number' },
+            { name: 'deep_minutes', type: 'number', isOptional: true },
+            { name: 'light_minutes', type: 'number', isOptional: true },
+            { name: 'rem_minutes', type: 'number', isOptional: true },
+            { name: 'awake_minutes', type: 'number', isOptional: true },
+            { name: 'source', type: 'string' },
+            { name: 'created_at', type: 'number' },
+            { name: 'updated_at', type: 'number' },
+          ],
+        }),
+        createTable({
+          name: 'daily_vitals',
+          columns: [
+            { name: 'date', type: 'number' },
+            { name: 'resting_hr', type: 'number', isOptional: true },
+            { name: 'hrv_rmssd', type: 'number', isOptional: true },
+            { name: 'source', type: 'string' },
+            { name: 'created_at', type: 'number' },
+            { name: 'updated_at', type: 'number' },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 41,
+      steps: [
+        addColumns({
+          table: 'users',
+          columns: [
+            { name: 'unit_mode', type: 'string', isOptional: true },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 42,
+      steps: [
+        addColumns({
+          table: 'exercises',
+          columns: [
+            { name: 'is_favorite', type: 'boolean', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })

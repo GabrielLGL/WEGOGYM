@@ -3,7 +3,7 @@ import AppleHealthKit, {
   HealthKitPermissions,
   HealthObserver,
 } from 'react-native-health'
-import type { WearableServiceInterface, WeightRecord, WorkoutRecord } from './wearableService'
+import type { WearableServiceInterface, WeightRecord, WorkoutRecord, SleepRecord, VitalsRecord } from './wearableService'
 
 const LBS_TO_KG = 0.453592
 
@@ -127,5 +127,14 @@ export class HealthKitService implements WearableServiceInterface {
         }
       )
     })
+  }
+
+  // Stubs — implementation HealthKit en Phase iOS
+  async fetchSleepRecords(_from: Date, _to: Date): Promise<SleepRecord[]> {
+    return []
+  }
+
+  async fetchVitals(_from: Date, _to: Date): Promise<VitalsRecord[]> {
+    return []
   }
 }

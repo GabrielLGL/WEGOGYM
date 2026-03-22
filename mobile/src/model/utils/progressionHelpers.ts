@@ -7,6 +7,9 @@
  *   - Null/vide : pas de suggestion
  */
 
+import type { UnitMode } from './unitHelpers'
+import { getWeightUnit, convertWeight } from './unitHelpers'
+
 const WEIGHT_INCREMENT = 2.5
 
 export interface ProgressionSuggestion {
@@ -57,12 +60,16 @@ export function parseRepsTarget(
 export function suggestProgression(
   lastWeight: number,
   lastReps: number,
-  repsTarget: string | undefined | null
+  repsTarget: string | undefined | null,
+  unitMode: UnitMode = 'metric',
 ): ProgressionSuggestion | null {
   if (lastWeight <= 0 || lastReps <= 0) return null
 
   const parsed = parseRepsTarget(repsTarget)
   if (!parsed) return null
+
+  const wu = getWeightUnit(unitMode)
+  const displayIncrement = convertWeight(WEIGHT_INCREMENT, unitMode)
 
   if (parsed.type === 'range') {
     if (lastReps >= parsed.max) {
@@ -70,7 +77,7 @@ export function suggestProgression(
       return {
         suggestedWeight: lastWeight + WEIGHT_INCREMENT,
         suggestedReps: parsed.min,
-        label: `+${WEIGHT_INCREMENT} kg`,
+        label: `+${displayIncrement} ${wu}`,
       }
     }
     // Range pas atteint → meme poids, +1 rep
@@ -85,6 +92,6 @@ export function suggestProgression(
   return {
     suggestedWeight: lastWeight + WEIGHT_INCREMENT,
     suggestedReps: parsed.value,
-    label: `+${WEIGHT_INCREMENT} kg`,
+    label: `+${displayIncrement} ${wu}`,
   }
 }

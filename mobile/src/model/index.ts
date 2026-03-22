@@ -16,6 +16,8 @@ import UserBadge from './models/UserBadge'
 import ProgressPhoto from './models/ProgressPhoto'
 import FriendSnapshot from './models/FriendSnapshot'
 import WearableSyncLog from './models/WearableSyncLog'
+import SleepRecord from './models/SleepRecord'
+import DailyVitals from './models/DailyVitals'
 
 const adapter = new SQLiteAdapter({
   schema: mySchema,
@@ -46,5 +48,7 @@ export const database = new Database({
     ProgressPhoto,
     FriendSnapshot,
     WearableSyncLog,
+    SleepRecord,
+    DailyVitals,
   ],
 })

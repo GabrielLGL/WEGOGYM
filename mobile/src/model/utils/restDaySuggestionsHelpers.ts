@@ -100,7 +100,7 @@ export function computeRestSuggestion(
     createdAt: s.createdAt,
   }))
   const fatigueResult = computeFatigueIndex(fatigueSets, fatigueHistories)
-  const acwr = fatigueResult.ratio
+  const acwr = fatigueResult?.ratio ?? 0
 
   // Muscles sous 50% de récupération
   const recoveryEntries = computeMuscleRecovery(sets, exercises)

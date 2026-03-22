@@ -9,9 +9,14 @@ import type { FatigueResult } from '../../model/utils/fatigueIndexHelpers'
 import { computeMuscleRecovery, getRecoveryColor } from '../../model/utils/muscleRecoveryHelpers'
 import { computeReadiness } from '../../model/utils/workoutReadinessHelpers'
 import type { ReadinessResult, ReadinessLevel } from '../../model/utils/workoutReadinessHelpers'
+import { computeSleepScore } from '../../model/utils/sleepHelpers'
+import type { SleepInput, SleepScore } from '../../model/utils/sleepHelpers'
+import { computeVitalsScore } from '../../model/utils/vitalsHelpers'
+import type { VitalsInput, VitalsScore } from '../../model/utils/vitalsHelpers'
 import { computeRestSuggestion } from '../../model/utils/restDaySuggestionsHelpers'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useUnits } from '../../contexts/UnitContext'
 import { useHaptics } from '../../hooks/useHaptics'
 import type { ThemeColors } from '../../theme'
 import { spacing, borderRadius, fontSize } from '../../theme'
@@ -20,6 +25,9 @@ interface HomeBodyStatusSectionProps {
   sets: WorkoutSet[]
   exercises: Exercise[]
   histories: History[]
+  sleepRecords?: SleepInput[]
+  vitalsRecords?: VitalsInput[]
+  weeklyTarget?: number
 }
 
 function getReadinessLevel(v: number): ReadinessLevel {
@@ -38,20 +46,34 @@ function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
   }
 }
 
-function HomeBodyStatusSectionInner({ sets, exercises, histories }: HomeBodyStatusSectionProps) {
+function HomeBodyStatusSectionInner({ sets, exercises, histories, sleepRecords, vitalsRecords, weeklyTarget }: HomeBodyStatusSectionProps) {
   const colors = useColors()
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
   const haptics = useHaptics()
   const styles = useStyles(colors)
   const [expanded, setExpanded] = useState(false)
+
+  const sleepData = useMemo<SleepScore | null>(() => {
+    if (!sleepRecords?.length) return null
+    return computeSleepScore(sleepRecords)
+  }, [sleepRecords])
+
+  const vitalsData = useMemo<VitalsScore | null>(() => {
+    if (!vitalsRecords?.length) return null
+    return computeVitalsScore(vitalsRecords)
+  }, [vitalsRecords])
 
   const readinessData = useMemo<ReadinessResult | null>(() => {
     if (!sets.length) return null
     const mappedSets = sets.map(s => ({ weight: s.weight, reps: s.reps, exerciseId: s.exerciseId, createdAt: s.createdAt }))
     const mappedExercises = exercises.map(e => ({ id: e.id, muscles: e.muscles }))
     const mappedHistories = histories.map(h => ({ startedAt: h.startTime, isAbandoned: h.isAbandoned }))
-    return computeReadiness(mappedSets, mappedExercises, mappedHistories)
-  }, [sets, exercises, histories])
+    return computeReadiness(mappedSets, mappedExercises, mappedHistories, {
+      sleepScore: sleepData?.score ?? null,
+      vitalsScore: vitalsData?.score ?? null,
+    }, weeklyTarget)
+  }, [sets, exercises, histories, sleepData, vitalsData])
 
   const fatigueResult = useMemo<FatigueResult | null>(() => {
     if (!sets.length) return null
@@ -75,7 +97,9 @@ function HomeBodyStatusSectionInner({ sets, exercises, histories }: HomeBodyStat
 
   if (!readinessData && !fatigueResult) return null
 
-  const tiredMuscleCount = recoveryEntries.filter(e => e.status === 'fatigued' || e.status === 'recovering').length
+  const avgRecoveryPct = recoveryEntries.length > 0
+    ? Math.round(recoveryEntries.reduce((sum, e) => sum + e.recoveryPercent, 0) / recoveryEntries.length)
+    : null
 
   const handleToggle = () => {
     haptics.onSelect()
@@ -120,10 +144,20 @@ function HomeBodyStatusSectionInner({ sets, exercises, histories }: HomeBodyStat
               <Text style={styles.summaryLabel}>{t.home.fatigue.title.split(' ')[0]}</Text>
             </View>
           )}
-          {recoveryEntries.length > 0 && (
+          {avgRecoveryPct != null && (
             <View style={styles.summaryMetric}>
-              <Text style={styles.summaryValue}>{tiredMuscleCount}</Text>
-              <Text style={styles.summaryLabel}>{t.home.recovery.title.split(' ')[0]}</Text>
+              <Text style={[styles.summaryValue, { color: getReadinessColor(getReadinessLevel(avgRecoveryPct), colors) }]}>
+                {avgRecoveryPct}%
+              </Text>
+              <Text style={styles.summaryLabel}>{t.home.readiness.recovery.split(' ')[0]}</Text>
+            </View>
+          )}
+          {sleepData && (
+            <View style={styles.summaryMetric}>
+              <Text style={styles.summaryValue}>
+                {Math.floor(sleepData.durationMinutes / 60)}h{String(sleepData.durationMinutes % 60).padStart(2, '0')}
+              </Text>
+              <Text style={styles.summaryLabel}>{t.home.sleep?.title ?? 'Sommeil'}</Text>
             </View>
           )}
         </View>
@@ -157,6 +191,12 @@ function HomeBodyStatusSectionInner({ sets, exercises, histories }: HomeBodyStat
                   <ReadinessBar label={t.home.readiness.recovery} value={readinessData.components.recovery} />
                   <ReadinessBar label={t.home.readiness.fatigue} value={readinessData.components.fatigue} />
                   <ReadinessBar label={t.home.readiness.consistency} value={readinessData.components.consistency} />
+                  {readinessData.components.sleep != null && (
+                    <ReadinessBar label={t.home.sleep?.title ?? 'Sommeil'} value={readinessData.components.sleep} />
+                  )}
+                  {readinessData.components.vitals != null && (
+                    <ReadinessBar label={t.home.vitals?.title ?? 'Vitals'} value={readinessData.components.vitals} />
+                  )}
                 </View>
                 <Text style={styles.readinessRec}>
                   {t.home.readiness.recommendations[readinessData.level]}
@@ -196,9 +236,9 @@ function HomeBodyStatusSectionInner({ sets, exercises, histories }: HomeBodyStat
                   <View style={[styles.fatigueMarker, { left: '50%' }]} />
                 </View>
                 <Text style={styles.fatigueStats}>
-                  {t.home.fatigue.thisWeek}: {Math.round(fatigueResult.weeklyVolume)} kg
+                  {t.home.fatigue.thisWeek}: {Math.round(convertWeight(fatigueResult.weeklyVolume))} {weightUnit}
                   {'  •  '}
-                  {t.home.fatigue.average}: {Math.round(fatigueResult.avgWeeklyVolume)} kg
+                  {t.home.fatigue.average}: {Math.round(convertWeight(fatigueResult.avgWeeklyVolume))} {weightUnit}
                 </Text>
               </View>
             )

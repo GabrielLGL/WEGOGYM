@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { View, Text, Switch, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { Q } from '@nozbe/watermelondb'
+import withObservables from '@nozbe/with-observables'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useHaptics } from '../../hooks/useHaptics'
@@ -11,8 +12,8 @@ import { BottomSheet } from '../BottomSheet'
 import { Button } from '../Button'
 import User from '../../model/models/User'
 import WearableSyncLog from '../../model/models/WearableSyncLog'
-import BodyMeasurement from '../../model/models/BodyMeasurement'
 import { getWearableService, WEARABLE_PROVIDER } from '../../services/wearableService'
+import { performWearableSync } from '../../services/wearableSyncService'
 import { spacing, fontSize, borderRadius } from '../../theme'
 import type { SettingsStyles } from './settingsStyles'
 
@@ -35,7 +36,7 @@ function formatTimeAgo(timestamp: Date | number | null, t: ReturnType<typeof use
   return t.wearable.timeAgo.daysAgo.replace('{n}', String(days))
 }
 
-export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = ({ user, styles }) => {
+const SettingsWearableSectionRaw: React.FC<SettingsWearableSectionProps> = ({ user, styles }) => {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -58,16 +59,21 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
     if (!user) return
     try {
       const service = await getWearableService()
-      if (!service) return
+      if (!service) {
+        if (__DEV__) console.warn('[Wearable] No service available')
+        return
+      }
 
       const available = await service.isAvailable()
       if (!available) {
+        if (__DEV__) console.warn('[Wearable] Health Connect not available on this device')
         setPermissionAlertVisible(true)
         return
       }
 
       const granted = await service.requestPermissions()
       if (!granted) {
+        if (__DEV__) console.warn('[Wearable] Permissions not granted')
         setPermissionAlertVisible(true)
         return
       }
@@ -79,8 +85,8 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
       })
       haptics.onSuccess()
 
-      // First sync
-      await performSync(user)
+      // First sync — force backfill since permissions were just granted
+      await performSyncForce(user)
     } catch (error) {
       if (__DEV__) console.error('[Wearable] Connect error:', error)
       setPermissionAlertVisible(true)
@@ -121,85 +127,22 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
   const performSync = useCallback(async (currentUser: User) => {
     setSyncing(true)
     try {
-      const service = await getWearableService()
-      if (!service) return
+      const result = await performWearableSync(currentUser)
+      if (result.status === 'success') haptics.onSuccess()
+    } catch {
+      // Error already logged by wearableSyncService
+    } finally {
+      setSyncing(false)
+    }
+  }, [haptics])
 
-      const lastSync = currentUser.wearableLastSyncAt
-      const from = lastSync ? new Date(lastSync) : new Date(Date.now() - 30 * 86400000) // 30 days back
-      const to = new Date()
-
-      const weights = await service.fetchWeightRecords(from, to)
-
-      let recordsSynced = 0
-      if (weights.length > 0) {
-        await database.write(async () => {
-          const measurementsCollection = database.get<BodyMeasurement>('body_measurements')
-
-          for (const w of weights) {
-            // Check if measurement already exists for this date (same day)
-            const dayStart = new Date(w.timestamp)
-            dayStart.setHours(0, 0, 0, 0)
-            const dayEnd = new Date(w.timestamp)
-            dayEnd.setHours(23, 59, 59, 999)
-
-            const existing = await measurementsCollection.query(
-              Q.where('date', Q.gte(dayStart.getTime())),
-              Q.where('date', Q.lte(dayEnd.getTime()))
-            ).fetchCount()
-
-            if (existing === 0) {
-              await measurementsCollection.create(m => {
-                m.date = w.timestamp
-                m.weight = w.weightKg
-              })
-              recordsSynced++
-            }
-          }
-
-          // Create sync log
-          await database.get<WearableSyncLog>('wearable_sync_logs').create(log => {
-            log.syncAt = new Date()
-            log.provider = WEARABLE_PROVIDER!
-            log.status = 'success'
-            log.recordsSynced = recordsSynced
-          })
-
-          // Update last sync
-          await currentUser.update(u => {
-            u.wearableLastSyncAt = new Date()
-          })
-        })
-      } else {
-        // No new data
-        await database.write(async () => {
-          await database.get<WearableSyncLog>('wearable_sync_logs').create(log => {
-            log.syncAt = new Date()
-            log.provider = WEARABLE_PROVIDER!
-            log.status = 'success'
-            log.recordsSynced = 0
-          })
-          await currentUser.update(u => {
-            u.wearableLastSyncAt = new Date()
-          })
-        })
-      }
-
-      haptics.onSuccess()
-    } catch (error) {
-      if (__DEV__) console.error('[Wearable] Sync error:', error)
-      // Log the error
-      try {
-        await database.write(async () => {
-          await database.get<WearableSyncLog>('wearable_sync_logs').create(log => {
-            log.syncAt = new Date()
-            log.provider = WEARABLE_PROVIDER!
-            log.status = 'error'
-            log.errorMessage = error instanceof Error ? error.message : 'Unknown error'
-          })
-        })
-      } catch {
-        // Ignore logging error
-      }
+  const performSyncForce = useCallback(async (currentUser: User) => {
+    setSyncing(true)
+    try {
+      const result = await performWearableSync(currentUser, true)
+      if (result.status === 'success') haptics.onSuccess()
+    } catch {
+      // Error already logged by wearableSyncService
     } finally {
       setSyncing(false)
     }
@@ -422,3 +365,10 @@ export const SettingsWearableSection: React.FC<SettingsWearableSectionProps> = (
     </>
   )
 }
+
+export const SettingsWearableSection = withObservables(
+  ['user'],
+  ({ user }: SettingsWearableSectionProps) => ({
+    user: user ? user.observe() : user,
+  })
+)(SettingsWearableSectionRaw)

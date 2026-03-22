@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react'
+import React, { useRef, useCallback, useState } from 'react'
 import { View, Text, TextInput, Switch } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { database } from '../../model/index'
@@ -33,11 +33,16 @@ export const SettingsTimerSection: React.FC<SettingsTimerSectionProps> = ({
   const haptics = useHaptics()
   const { t } = useLanguage()
   const restDurationRef = useRef(user?.restDuration?.toString() ?? '90')
+  const [timerError, setTimerError] = useState<string | null>(null)
 
   const handleSaveRestDuration = useCallback(async () => {
     if (!user) return
     const duration = parseInt(restDurationRef.current, 10)
-    if (isNaN(duration) || duration < 10 || duration > 600) return
+    if (isNaN(duration) || duration < 10 || duration > 600) {
+      setTimerError(t.settings.timer.durationError)
+      return
+    }
+    setTimerError(null)
     try {
       await database.write(async () => {
         await user.update((u) => {
@@ -48,7 +53,7 @@ export const SettingsTimerSection: React.FC<SettingsTimerSectionProps> = ({
     } catch (error) {
       if (__DEV__) console.error('Failed to update rest duration:', error)
     }
-  }, [user, haptics])
+  }, [user, haptics, t])
 
   const handleToggleTimer = async (enabled: boolean) => {
     if (!user) return
@@ -140,6 +145,7 @@ export const SettingsTimerSection: React.FC<SettingsTimerSectionProps> = ({
               />
               <Text style={styles.inputUnit}>{t.common.seconds}</Text>
             </View>
+            {timerError && <Text style={styles.reminderPermissionMsg}>{timerError}</Text>}
           </View>
 
           <View style={styles.settingRow}>

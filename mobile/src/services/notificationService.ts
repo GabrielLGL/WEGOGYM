@@ -2,6 +2,7 @@ import { Platform } from 'react-native'
 
 const CHANNEL_ID = 'rest-timer'
 const REMINDER_CHANNEL_ID = 'training-reminders'
+const STREAK_CHANNEL_ID = 'streak-danger'
 const VIBRATION_PATTERN = [0, 400, 200, 400]
 
 // Lazy-load expo-notifications to avoid crashing when the native module
@@ -138,6 +139,54 @@ export async function cancelAllReminders(): Promise<void> {
       await Notifications.cancelScheduledNotificationAsync(notif.identifier)
     }
   }
+}
+
+// --- Streak Danger ---
+
+export async function setupStreakChannel(): Promise<void> {
+  const Notifications = getNotifications()
+  if (!Notifications || Platform.OS !== 'android') return
+  await Notifications.setNotificationChannelAsync(STREAK_CHANNEL_ID, {
+    name: 'Alerte streak',
+    importance: Notifications.AndroidImportance.HIGH,
+    sound: 'default',
+    vibrationPattern: VIBRATION_PATTERN,
+  })
+}
+
+export async function scheduleStreakDangerNotification(
+  triggerDate: Date,
+  title: string,
+  body: string
+): Promise<string | null> {
+  const Notifications = getNotifications()
+  if (!Notifications) return null
+
+  const seconds = Math.max(1, Math.round((triggerDate.getTime() - Date.now()) / 1000))
+
+  try {
+    const identifier = await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: 'default',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        channelId: STREAK_CHANNEL_ID,
+        seconds,
+      },
+    })
+    return identifier
+  } catch {
+    return null
+  }
+}
+
+export async function cancelStreakDangerNotification(identifier: string): Promise<void> {
+  const Notifications = getNotifications()
+  if (!Notifications) return
+  await Notifications.cancelScheduledNotificationAsync(identifier)
 }
 
 export async function updateReminders(

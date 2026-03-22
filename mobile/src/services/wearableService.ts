@@ -17,6 +17,24 @@ export interface WorkoutRecord {
   source: 'health_connect' | 'healthkit'
 }
 
+export interface SleepRecord {
+  startTime: number
+  endTime: number
+  durationMinutes: number
+  deepMinutes: number | null
+  lightMinutes: number | null
+  remMinutes: number | null
+  awakeMinutes: number | null
+  source: 'health_connect' | 'healthkit'
+}
+
+export interface VitalsRecord {
+  timestamp: number
+  restingHr: number | null
+  hrvRmssd: number | null
+  source: 'health_connect' | 'healthkit'
+}
+
 export interface WearableServiceInterface {
   /** Vérifie si le provider est disponible sur cette plateforme */
   isAvailable(): Promise<boolean>
@@ -32,6 +50,12 @@ export interface WearableServiceInterface {
 
   /** Importe les séances sport depuis la période donnée */
   fetchWorkoutRecords(from: Date, to: Date): Promise<WorkoutRecord[]>
+
+  /** Importe les sessions de sommeil */
+  fetchSleepRecords(from: Date, to: Date): Promise<SleepRecord[]>
+
+  /** Importe les données vitales (resting HR, HRV) */
+  fetchVitals(from: Date, to: Date): Promise<VitalsRecord[]>
 }
 
 // --- Sélection automatique par plateforme ---

@@ -148,125 +148,214 @@ const PROGRAMS: ProgramDef[] = [
   },
 ]
 
-// --- Historique des séances (30 derniers jours) ---
-const WORKOUTS: WorkoutDef[] = [
-  {
-    sessionName: 'Push', daysAgo: 28, durationMin: 65, note: 'Bonne séance, épaules chaudes',
-    exercises: [
-      { name: 'Développé Couché Barre', sets: [[75, 10], [75, 10], [80, 8], [80, 8]] },
-      { name: 'Développé Incliné Haltères', sets: [[28, 12], [28, 12], [30, 10]] },
-      { name: 'Écartés Poulie', sets: [[15, 15], [15, 15], [15, 12]] },
-      { name: 'Développé Militaire', sets: [[45, 8], [45, 8], [50, 6], [50, 6]] },
-      { name: 'Élévations Latérales', sets: [[10, 15], [10, 15], [12, 12]] },
-      { name: 'Extensions Poulie Haute', sets: [[22, 12], [22, 12], [25, 10]] },
-    ],
-  },
-  {
-    sessionName: 'Pull', daysAgo: 26, durationMin: 58, note: null,
-    exercises: [
-      { name: 'Tractions', sets: [[0, 8], [0, 8], [0, 7], [0, 6]] },
-      { name: 'Rowing Barre', sets: [[65, 10], [65, 10], [70, 8], [70, 8]] },
-      { name: 'Tirage Poitrine', sets: [[50, 12], [50, 12], [55, 10]] },
-      { name: 'Face Pull', sets: [[18, 15], [18, 15], [20, 12]] },
-      { name: 'Curl Barre EZ', sets: [[25, 12], [25, 12], [30, 10]] },
-      { name: 'Curl Marteau', sets: [[12, 10], [12, 10], [14, 8]] },
-    ],
-  },
-  {
-    sessionName: 'Legs', daysAgo: 24, durationMin: 72, note: 'PR squat !',
-    exercises: [
-      { name: 'Squat Arrière', sets: [[90, 5], [95, 5], [100, 5], [100, 4], [100, 3]] },
-      { name: 'Presse à Cuisses', sets: [[160, 12], [160, 12], [180, 10], [180, 10]] },
-      { name: 'Leg Extension', sets: [[35, 15], [35, 15], [40, 12]] },
-      { name: 'Soulevé de Terre Roumain', sets: [[70, 10], [70, 10], [80, 8], [80, 8]] },
-      { name: 'Leg Curl Allongé', sets: [[30, 12], [30, 12], [35, 10]] },
-      { name: 'Extensions Mollets Debout', sets: [[50, 15], [50, 15], [60, 12], [60, 12]] },
-    ],
-  },
-  {
-    sessionName: 'Push', daysAgo: 21, durationMin: 60, note: null,
-    exercises: [
-      { name: 'Développé Couché Barre', sets: [[77.5, 10], [77.5, 10], [80, 8], [82.5, 6]] },
-      { name: 'Développé Incliné Haltères', sets: [[28, 12], [30, 10], [30, 10]] },
-      { name: 'Écartés Poulie', sets: [[15, 15], [17.5, 12], [17.5, 12]] },
-      { name: 'Développé Militaire', sets: [[45, 8], [47.5, 8], [50, 6], [50, 6]] },
-      { name: 'Élévations Latérales', sets: [[10, 15], [12, 12], [12, 12]] },
-      { name: 'Extensions Poulie Haute', sets: [[22, 12], [25, 10], [25, 10]] },
-    ],
-  },
-  {
-    sessionName: 'Pull', daysAgo: 19, durationMin: 55, note: 'Fatigue dos',
-    exercises: [
-      { name: 'Tractions', sets: [[0, 8], [0, 7], [0, 6], [0, 6]] },
-      { name: 'Rowing Barre', sets: [[65, 10], [70, 8], [70, 8], [70, 7]] },
-      { name: 'Tirage Poitrine', sets: [[50, 12], [55, 10], [55, 10]] },
-      { name: 'Face Pull', sets: [[18, 15], [20, 12], [20, 12]] },
-      { name: 'Curl Barre EZ', sets: [[27.5, 12], [27.5, 12], [30, 10]] },
-      { name: 'Curl Marteau', sets: [[12, 10], [14, 8], [14, 8]] },
-    ],
-  },
-  {
-    sessionName: 'Legs', daysAgo: 17, durationMin: 70, note: null,
-    exercises: [
-      { name: 'Squat Arrière', sets: [[95, 5], [100, 5], [100, 4], [102.5, 3], [102.5, 3]] },
-      { name: 'Presse à Cuisses', sets: [[170, 12], [180, 10], [180, 10], [190, 8]] },
-      { name: 'Leg Extension', sets: [[37.5, 15], [40, 12], [40, 12]] },
-      { name: 'Soulevé de Terre Roumain', sets: [[75, 10], [80, 8], [80, 8], [82.5, 6]] },
-      { name: 'Leg Curl Allongé', sets: [[30, 12], [35, 10], [35, 10]] },
-      { name: 'Extensions Mollets Debout', sets: [[55, 15], [60, 12], [60, 12], [65, 10]] },
-    ],
-  },
-  {
-    sessionName: 'Full Body A', daysAgo: 14, durationMin: 50, note: null,
-    exercises: [
-      { name: 'Squat Arrière', sets: [[85, 8], [85, 8], [90, 6], [90, 6]] },
-      { name: 'Développé Couché Barre', sets: [[70, 8], [75, 8], [75, 7], [75, 7]] },
-      { name: 'Rowing Barre', sets: [[60, 8], [65, 8], [65, 8], [65, 7]] },
-      { name: 'Développé Militaire', sets: [[37.5, 10], [40, 8], [40, 8]] },
-      { name: 'Curl Haltères', sets: [[12, 12], [12, 12], [14, 10]] },
-    ],
-  },
-  {
-    sessionName: 'Push', daysAgo: 10, durationMin: 63, note: 'Augmenté DC à 85',
-    exercises: [
-      { name: 'Développé Couché Barre', sets: [[80, 10], [80, 8], [82.5, 6], [85, 4]] },
-      { name: 'Développé Incliné Haltères', sets: [[30, 12], [30, 10], [32, 8]] },
-      { name: 'Écartés Poulie', sets: [[17.5, 15], [17.5, 12], [20, 10]] },
-      { name: 'Développé Militaire', sets: [[47.5, 8], [50, 6], [50, 6], [52.5, 4]] },
-      { name: 'Élévations Latérales', sets: [[12, 15], [12, 12], [14, 10]] },
-      { name: 'Extensions Poulie Haute', sets: [[25, 12], [25, 10], [27.5, 8]] },
-    ],
-  },
-  {
-    sessionName: 'Pull', daysAgo: 7, durationMin: 57, note: null,
-    exercises: [
-      { name: 'Tractions', sets: [[0, 9], [0, 8], [0, 7], [0, 7]] },
-      { name: 'Rowing Barre', sets: [[70, 10], [70, 10], [72.5, 8], [75, 6]] },
-      { name: 'Tirage Poitrine', sets: [[55, 12], [55, 10], [57.5, 10]] },
-      { name: 'Face Pull', sets: [[20, 15], [20, 12], [22, 10]] },
-      { name: 'Curl Barre EZ', sets: [[30, 12], [30, 10], [32.5, 8]] },
-      { name: 'Curl Marteau', sets: [[14, 10], [14, 10], [16, 8]] },
-    ],
-  },
-  {
-    sessionName: 'Legs', daysAgo: 3, durationMin: 75, note: 'Nouveau PR squat 110',
-    exercises: [
-      { name: 'Squat Arrière', sets: [[100, 5], [105, 3], [107.5, 2], [110, 1], [100, 5]] },
-      { name: 'Presse à Cuisses', sets: [[180, 12], [190, 8], [200, 6], [200, 6]] },
-      { name: 'Leg Extension', sets: [[40, 15], [42.5, 12], [45, 10]] },
-      { name: 'Soulevé de Terre Roumain', sets: [[80, 10], [85, 6], [85, 6], [85, 5]] },
-      { name: 'Leg Curl Allongé', sets: [[35, 12], [37.5, 10], [37.5, 10]] },
-      { name: 'Extensions Mollets Debout', sets: [[60, 15], [65, 12], [65, 12], [70, 10]] },
-    ],
-  },
+// --- Helpers pour générer un historique réaliste sur 6 mois ---
+
+/** Arrondit au 0.5 le plus proche (ex: 77.3 → 77.5) */
+const r = (v: number) => Math.round(v * 2) / 2
+
+/** Simple random int [min, max] déterministe via seed */
+let _seed = 42
+const rand = (min: number, max: number) => {
+  _seed = (_seed * 16807 + 0) % 2147483647
+  return min + (_seed % (max - min + 1))
+}
+
+/** Génère des sets avec rampe ascendante réaliste */
+const makeSets = (baseW: number, baseR: number, count: number): SetTuple[] => {
+  const sets: SetTuple[] = []
+  for (let i = 0; i < count; i++) {
+    const w = r(baseW + (i * baseW * 0.03))
+    const reps = Math.max(1, baseR - i)
+    sets.push([w, reps])
+  }
+  return sets
+}
+
+/** Définitions de progression par exercice (poids de départ, reps, nb sets) */
+interface ProgressDef {
+  name: string
+  startWeight: number
+  reps: number
+  sets: number
+  weeklyGain: number // kg/semaine
+}
+
+const PUSH_PROG: ProgressDef[] = [
+  { name: 'Développé Couché Barre', startWeight: 60, reps: 10, sets: 4, weeklyGain: 1.0 },
+  { name: 'Développé Incliné Haltères', startWeight: 20, reps: 12, sets: 3, weeklyGain: 0.5 },
+  { name: 'Écartés Poulie', startWeight: 10, reps: 15, sets: 3, weeklyGain: 0.3 },
+  { name: 'Développé Militaire', startWeight: 35, reps: 8, sets: 4, weeklyGain: 0.8 },
+  { name: 'Élévations Latérales', startWeight: 6, reps: 15, sets: 3, weeklyGain: 0.2 },
+  { name: 'Extensions Poulie Haute', startWeight: 15, reps: 12, sets: 3, weeklyGain: 0.3 },
 ]
 
-// --- Mesures corporelles (progression sur 3 mois) ---
+const PULL_PROG: ProgressDef[] = [
+  { name: 'Tractions', startWeight: 0, reps: 6, sets: 4, weeklyGain: 0 },
+  { name: 'Rowing Barre', startWeight: 50, reps: 10, sets: 4, weeklyGain: 0.8 },
+  { name: 'Tirage Poitrine', startWeight: 40, reps: 12, sets: 3, weeklyGain: 0.5 },
+  { name: 'Face Pull', startWeight: 12, reps: 15, sets: 3, weeklyGain: 0.3 },
+  { name: 'Curl Barre EZ', startWeight: 20, reps: 12, sets: 3, weeklyGain: 0.4 },
+  { name: 'Curl Marteau', startWeight: 8, reps: 10, sets: 3, weeklyGain: 0.2 },
+]
+
+const LEGS_PROG: ProgressDef[] = [
+  { name: 'Squat Arrière', startWeight: 70, reps: 5, sets: 5, weeklyGain: 1.5 },
+  { name: 'Presse à Cuisses', startWeight: 120, reps: 12, sets: 4, weeklyGain: 2.0 },
+  { name: 'Leg Extension', startWeight: 25, reps: 15, sets: 3, weeklyGain: 0.5 },
+  { name: 'Soulevé de Terre Roumain', startWeight: 50, reps: 10, sets: 4, weeklyGain: 1.2 },
+  { name: 'Leg Curl Allongé', startWeight: 20, reps: 12, sets: 3, weeklyGain: 0.5 },
+  { name: 'Extensions Mollets Debout', startWeight: 35, reps: 15, sets: 4, weeklyGain: 0.8 },
+]
+
+const FB_A_PROG: ProgressDef[] = [
+  { name: 'Squat Arrière', startWeight: 65, reps: 8, sets: 4, weeklyGain: 1.0 },
+  { name: 'Développé Couché Barre', startWeight: 55, reps: 8, sets: 4, weeklyGain: 0.8 },
+  { name: 'Rowing Barre', startWeight: 45, reps: 8, sets: 4, weeklyGain: 0.7 },
+  { name: 'Développé Militaire', startWeight: 30, reps: 10, sets: 3, weeklyGain: 0.5 },
+  { name: 'Curl Haltères', startWeight: 8, reps: 12, sets: 3, weeklyGain: 0.2 },
+]
+
+const FB_B_PROG: ProgressDef[] = [
+  { name: 'Soulevé de Terre', startWeight: 80, reps: 5, sets: 4, weeklyGain: 1.5 },
+  { name: 'Développé Incliné Haltères', startWeight: 18, reps: 10, sets: 4, weeklyGain: 0.4 },
+  { name: 'Tractions', startWeight: 0, reps: 6, sets: 4, weeklyGain: 0 },
+  { name: 'Élévations Latérales', startWeight: 6, reps: 15, sets: 3, weeklyGain: 0.2 },
+  { name: 'Dips (Triceps focus)', startWeight: 0, reps: 8, sets: 3, weeklyGain: 0 },
+]
+
+const HIIT_PROG: ProgressDef[] = [
+  { name: 'Tapis de Course', startWeight: 0, reps: 1, sets: 1, weeklyGain: 0 },
+  { name: 'Burpees', startWeight: 0, reps: 12, sets: 3, weeklyGain: 0 },
+  { name: 'Mountain Climbers', startWeight: 0, reps: 15, sets: 3, weeklyGain: 0 },
+  { name: 'Corde à sauter', startWeight: 0, reps: 1, sets: 3, weeklyGain: 0 },
+]
+
+const CORE_PROG: ProgressDef[] = [
+  { name: 'Crunch', startWeight: 0, reps: 15, sets: 4, weeklyGain: 0 },
+  { name: 'Relevé de jambes', startWeight: 0, reps: 12, sets: 3, weeklyGain: 0 },
+  { name: 'Planche', startWeight: 0, reps: 1, sets: 3, weeklyGain: 0 },
+  { name: 'Russian Twist', startWeight: 5, reps: 15, sets: 3, weeklyGain: 0.2 },
+  { name: 'Gainage Latéral', startWeight: 0, reps: 1, sets: 3, weeklyGain: 0 },
+]
+
+const NOTES = [
+  null, null, null, null, null, // majorité sans note
+  'Bonne séance', 'Fatigue', 'Grosse énergie', 'Pas top, mal dormi',
+  'Séance rapide mais efficace', 'Pump incroyable', null, null,
+  'Focus sur la contraction', 'Dernière série difficile',
+]
+
+/**
+ * Génère ~80 workouts sur 180 jours en suivant un cycle PPL principal
+ * avec quelques Full Body et Cardio intercalés.
+ */
+function generateWorkouts(): WorkoutDef[] {
+  _seed = 42 // reset seed pour résultats déterministes
+  const workouts: WorkoutDef[] = []
+
+  // Planning : PPL-rest-PPL-rest avec variantes
+  // Cycle de 8 jours : Push-Pull-Legs-Rest-FB/HIIT-Push-Pull-Legs (puis rest 1-2j)
+  const schedule: { session: string; prog: ProgressDef[] }[] = [
+    { session: 'Push', prog: PUSH_PROG },
+    { session: 'Pull', prog: PULL_PROG },
+    { session: 'Legs', prog: LEGS_PROG },
+  ]
+
+  const extras: { session: string; prog: ProgressDef[] }[] = [
+    { session: 'Full Body A', prog: FB_A_PROG },
+    { session: 'Full Body B', prog: FB_B_PROG },
+    { session: 'HIIT', prog: HIIT_PROG },
+    { session: 'Core', prog: CORE_PROG },
+  ]
+
+  let day = 180 // commence il y a 180 jours
+  let weekNum = 0
+  let pplCycle = 0
+
+  while (day > 0) {
+    // Un cycle PPL complet
+    for (let i = 0; i < 3 && day > 0; i++) {
+      const s = schedule[i]
+      const w = weekNum
+      const exercises: WorkoutExercise[] = s.prog.map(p => {
+        const baseW = p.startWeight + p.weeklyGain * w
+        // Tractions/bodyweight : progression en reps, pas en poids
+        if (p.startWeight === 0 && p.weeklyGain === 0) {
+          const reps = Math.min(p.reps + Math.floor(w * 0.15), p.reps + 6)
+          return {
+            name: p.name,
+            sets: Array.from({ length: p.sets }, (_, j) => [0, Math.max(1, reps - j)] as SetTuple),
+          }
+        }
+        return { name: p.name, sets: makeSets(baseW, p.reps, p.sets) }
+      })
+
+      const duration = rand(45, 80)
+      const noteIdx = rand(0, NOTES.length - 1)
+      workouts.push({
+        sessionName: s.session,
+        daysAgo: day,
+        durationMin: duration,
+        note: NOTES[noteIdx],
+        exercises,
+      })
+      day -= rand(1, 2) // 1-2 jours entre séances PPL
+    }
+
+    // Jour de repos
+    day -= rand(1, 2)
+
+    // Une séance extra tous les ~2 cycles PPL
+    if (pplCycle % 2 === 0 && day > 0) {
+      const extra = extras[pplCycle % extras.length]
+      const exercises: WorkoutExercise[] = extra.prog.map(p => {
+        const baseW = p.startWeight + p.weeklyGain * weekNum
+        if (p.startWeight === 0 && p.weeklyGain === 0) {
+          const reps = Math.min(p.reps + Math.floor(weekNum * 0.1), p.reps + 4)
+          return {
+            name: p.name,
+            sets: Array.from({ length: p.sets }, (_, j) => [0, Math.max(1, reps - j)] as SetTuple),
+          }
+        }
+        return { name: p.name, sets: makeSets(baseW, p.reps, p.sets) }
+      })
+      workouts.push({
+        sessionName: extra.session,
+        daysAgo: day,
+        durationMin: rand(35, 55),
+        note: null,
+        exercises,
+      })
+      day -= rand(1, 2)
+    }
+
+    // Repos entre cycles
+    day -= rand(1, 2)
+    pplCycle++
+    weekNum = Math.floor((180 - day) / 7)
+  }
+
+  return workouts
+}
+
+// --- Historique des séances (6 derniers mois, ~80 séances) ---
+const WORKOUTS: WorkoutDef[] = generateWorkouts()
+
+// --- Mesures corporelles (progression sur 6 mois, bi-mensuel) ---
 const MEASUREMENTS: MeasurementDef[] = [
-  { daysAgo: 90, weight: 82.5, waist: 85, hips: 98, chest: 105, arms: 36 },
-  { daysAgo: 60, weight: 81.0, waist: 83, hips: 97, chest: 106, arms: 36.5 },
-  { daysAgo: 30, weight: 80.0, waist: 82, hips: 97, chest: 107, arms: 37 },
-  { daysAgo: 1, weight: 79.5, waist: 81, hips: 96, chest: 108, arms: 37.5 },
+  { daysAgo: 180, weight: 85.0, waist: 88, hips: 100, chest: 103, arms: 35 },
+  { daysAgo: 165, weight: 84.5, waist: 87.5, hips: 100, chest: 103.5, arms: 35 },
+  { daysAgo: 150, weight: 84.0, waist: 87, hips: 99.5, chest: 104, arms: 35.5 },
+  { daysAgo: 135, weight: 83.5, waist: 86.5, hips: 99, chest: 104.5, arms: 35.5 },
+  { daysAgo: 120, weight: 83.0, waist: 86, hips: 99, chest: 105, arms: 36 },
+  { daysAgo: 105, weight: 82.5, waist: 85.5, hips: 98.5, chest: 105.5, arms: 36 },
+  { daysAgo: 90, weight: 82.0, waist: 85, hips: 98, chest: 106, arms: 36.5 },
+  { daysAgo: 75, weight: 81.5, waist: 84.5, hips: 98, chest: 106.5, arms: 36.5 },
+  { daysAgo: 60, weight: 81.0, waist: 84, hips: 97.5, chest: 107, arms: 37 },
+  { daysAgo: 45, weight: 80.5, waist: 83, hips: 97, chest: 107.5, arms: 37 },
+  { daysAgo: 30, weight: 80.0, waist: 82.5, hips: 97, chest: 108, arms: 37.5 },
+  { daysAgo: 15, weight: 79.5, waist: 82, hips: 96.5, chest: 108, arms: 37.5 },
+  { daysAgo: 1, weight: 79.0, waist: 81, hips: 96, chest: 108.5, arms: 38 },
 ]
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -280,10 +369,12 @@ export const seedDevData = async () => {
     await database.write(async () => {
       // Guard : ne pas re-seeder si des programmes existent déjà
       const programCount = await database.get<Program>('programs').query().fetchCount()
+      if (__DEV__) console.log(`[SeedDev] programCount = ${programCount}`)
       if (programCount > 0) return
 
       // Récupérer tous les exercices existants → Map<nom, Exercise>
       const allExercises = await database.get<Exercise>('exercises').query().fetch()
+      if (__DEV__) console.log(`[SeedDev] exercises found = ${allExercises.length}`)
       const byName = new Map(allExercises.map(e => [e.name, e]))
 
       const batch: Model[] = []

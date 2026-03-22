@@ -62,6 +62,9 @@ export default class User extends Model {
   @field('wearable_sync_weight') wearableSyncWeight!: boolean
   @date('wearable_last_sync_at') wearableLastSyncAt!: Date | null
 
+  // Unités de poids — version 41
+  @text('unit_mode') unitMode!: string | null  // 'metric' | 'imperial', default metric (null = metric)
+
   // Rappels d'entraînement — version 31
   @field('reminders_enabled') remindersEnabled!: boolean
   @text('reminder_days') reminderDays!: string | null  // JSON: "[1,3,5]" (ISO weekday)

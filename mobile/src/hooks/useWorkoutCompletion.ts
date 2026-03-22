@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useRef } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Q } from '@nozbe/watermelondb'
 import { database } from '../model/index'
 import History from '../model/models/History'
@@ -17,6 +18,11 @@ import {
   getLastSessionVolume,
 } from '../model/utils/databaseHelpers'
 import { DAY_MS } from '../model/constants'
+import {
+  setupStreakChannel,
+  scheduleStreakDangerNotification,
+  cancelStreakDangerNotification,
+} from '../services/notificationService'
 import {
   calculateSessionXP,
   calculateSessionTonnage,
@@ -111,6 +117,7 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
     let newBadges: BadgeDefinition[] = []
 
     // ── Gamification ──
+    let weekSessionCount = 0
     if (user && completedSets > 0 && historyCompleted) {
       try {
         const setsArray = Object.values(validatedSets).map(s => ({
@@ -126,7 +133,7 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
 
         const currentWeek = getCurrentISOWeek()
         const weekStart = getWeekStartTimestamp(currentWeek)
-        const weekSessionCount = await database
+        weekSessionCount = await database
           .get<History>('histories')
           .query(
             Q.where('deleted_at', null),
@@ -217,6 +224,55 @@ export function useWorkoutCompletion(params: UseWorkoutCompletionParams) {
         newBadges = detectedBadges
       } catch (e) {
         if (__DEV__) console.error('[useWorkoutCompletion] gamification update:', e)
+      }
+
+      // ── Streak danger notification ──
+      try {
+        // Cancel any existing streak notification
+        const existingStreakNotifId = await AsyncStorage.getItem('streak-danger-id')
+        if (existingStreakNotifId) {
+          await cancelStreakDangerNotification(existingStreakNotifId)
+          await AsyncStorage.removeItem('streak-danger-id')
+        }
+
+        const streakTarget = user.streakTarget || 3
+        if (weekSessionCount < streakTarget && user.remindersEnabled) {
+          const streakAlertsEnabled = await AsyncStorage.getItem('streak-alerts-enabled')
+          if (streakAlertsEnabled !== 'false') {
+            const now2 = new Date()
+            // ISO day: Mon=1..Sun=7
+            const jsDay = now2.getDay()
+            const currentDayOfWeek = jsDay === 0 ? 7 : jsDay
+            const daysLeft = 7 - currentDayOfWeek
+
+            if (daysLeft >= 1) {
+              // Trigger tomorrow at 9:00 AM, or 2 days before week end, whichever is sooner
+              const tomorrow9am = new Date(now2)
+              tomorrow9am.setDate(tomorrow9am.getDate() + 1)
+              tomorrow9am.setHours(9, 0, 0, 0)
+
+              const twoDaysBeforeEnd = new Date(now2)
+              twoDaysBeforeEnd.setDate(twoDaysBeforeEnd.getDate() + Math.max(1, daysLeft - 2))
+              twoDaysBeforeEnd.setHours(9, 0, 0, 0)
+
+              const triggerDate = tomorrow9am.getTime() <= twoDaysBeforeEnd.getTime()
+                ? tomorrow9am
+                : twoDaysBeforeEnd
+
+              await setupStreakChannel()
+              const notifId = await scheduleStreakDangerNotification(
+                triggerDate,
+                'Streak en danger !',
+                'Plus que quelques jours pour garder ton streak cette semaine !'
+              )
+              if (notifId) {
+                await AsyncStorage.setItem('streak-danger-id', notifId)
+              }
+            }
+          }
+        }
+      } catch (e) {
+        if (__DEV__) console.error('[useWorkoutCompletion] streak notification:', e)
       }
     }
 
