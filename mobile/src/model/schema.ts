@@ -1,7 +1,7 @@
 /**
  * schema.ts — Schéma de la base de données WatermelonDB (SQLite)
  *
- * Version actuelle : 39
+ * Version actuelle : 42
  *
  * Tables et relations principales :
  * - programs          : Programmes d'entraînement (nom, position, équipement)
@@ -22,7 +22,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 39, // v39 : set_type + rpe fields in sets table
+  version: 42, // v42 : is_favorite on exercises
   tables: [
     tableSchema({
       name: 'programs',
@@ -75,6 +75,7 @@ export const mySchema = appSchema({
         { name: 'notes', type: 'string', isOptional: true },
         { name: 'animation_key', type: 'string', isOptional: true },
         { name: 'description', type: 'string', isOptional: true },
+        { name: 'is_favorite', type: 'boolean', isOptional: true },
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' }
       ]
@@ -124,6 +125,7 @@ export const mySchema = appSchema({
             {name: 'wearable_provider', type: 'string', isOptional: true},
             {name: 'wearable_sync_weight', type: 'boolean', isOptional: false},
             {name: 'wearable_last_sync_at', type: 'number', isOptional: true},
+            {name: 'unit_mode', type: 'string', isOptional: true},
             {name: 'created_at', type: 'number'},
             {name: 'updated_at', type: 'number'}
         ]
@@ -214,6 +216,31 @@ export const mySchema = appSchema({
         { name: 'status', type: 'string' },
         { name: 'records_synced', type: 'number', isOptional: true },
         { name: 'error_message', type: 'string', isOptional: true },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+      ]
+    }),
+    tableSchema({
+      name: 'sleep_records',
+      columns: [
+        { name: 'date', type: 'number' },
+        { name: 'duration_minutes', type: 'number' },
+        { name: 'deep_minutes', type: 'number', isOptional: true },
+        { name: 'light_minutes', type: 'number', isOptional: true },
+        { name: 'rem_minutes', type: 'number', isOptional: true },
+        { name: 'awake_minutes', type: 'number', isOptional: true },
+        { name: 'source', type: 'string' },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+      ]
+    }),
+    tableSchema({
+      name: 'daily_vitals',
+      columns: [
+        { name: 'date', type: 'number' },
+        { name: 'resting_hr', type: 'number', isOptional: true },
+        { name: 'hrv_rmssd', type: 'number', isOptional: true },
+        { name: 'source', type: 'string' },
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' },
       ]

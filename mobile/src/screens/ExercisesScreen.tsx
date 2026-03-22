@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, memo, useRef, useMemo } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, SafeAreaView, ScrollView, Animated, Platform, BackHandler, Keyboard } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, SectionList, TextInput, SafeAreaView, ScrollView, Animated, Platform, BackHandler, Keyboard } from 'react-native'
 import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler'
 import { Ionicons } from '@expo/vector-icons'
 import withObservables from '@nozbe/with-observables'
@@ -37,6 +37,7 @@ interface ExerciseItemProps {
   item: Exercise
   onOptionsPress: (item: Exercise) => void
   onPress: (item: Exercise) => void
+  onFavoriteToggle: (item: Exercise) => void
   colors: ThemeColors
   masteryLevel?: number
 }
@@ -49,13 +50,24 @@ function getMasteryColor(level: number, colors: ThemeColors): string {
 }
 
 const ExerciseItem = memo<ExerciseItemProps>(
-  function ExerciseItem({ item, onOptionsPress, onPress, colors, masteryLevel }) {
+  function ExerciseItem({ item, onOptionsPress, onPress, onFavoriteToggle, colors, masteryLevel }) {
     const styles = useExerciseItemStyles(colors)
     const { t } = useLanguage()
     const muscleNames = item.muscles?.map(m => t.muscleNames[m as keyof typeof t.muscleNames] ?? m) ?? []
     const equipmentLabel = t.equipmentNames[item.equipment as keyof typeof t.equipmentNames] ?? item.equipment
     return (
       <TouchableOpacity style={styles.exoItem} onPress={() => onPress(item)} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={item.name} accessibilityHint={muscleNames.join(', ')}>
+        <TouchableOpacity
+          style={styles.favoriteBtn}
+          onPress={() => onFavoriteToggle(item)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons
+            name={item.isFavorite ? 'heart' : 'heart-outline'}
+            size={18}
+            color={item.isFavorite ? colors.danger : colors.border}
+          />
+        </TouchableOpacity>
         <View style={styles.exoInfo}>
           <View style={styles.titleRow}>
             <Text style={styles.exoTitle}>{item.name}</Text>
@@ -89,9 +101,11 @@ const ExerciseItem = memo<ExerciseItemProps>(
     prev.item === next.item &&
     prev.item.name === next.item.name &&
     prev.item.equipment === next.item.equipment &&
+    prev.item.isFavorite === next.item.isFavorite &&
     JSON.stringify(prev.item.muscles) === JSON.stringify(next.item.muscles) &&
     prev.onOptionsPress === next.onOptionsPress &&
     prev.onPress === next.onPress &&
+    prev.onFavoriteToggle === next.onFavoriteToggle &&
     prev.colors === next.colors &&
     prev.masteryLevel === next.masteryLevel,
 )
@@ -107,7 +121,7 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
 
   const masteryMap = useMemo(() => computeExerciseMastery(exercises, sets), [exercises, sets])
   const [keyboardVisible, setKeyboardVisible] = useState(false)
-  const { searchQuery, setSearchQuery, filterMuscle, setFilterMuscle, filterEquipment, setFilterEquipment, filteredExercises } = useExerciseFilters(exercises)
+  const { searchQuery, setSearchQuery, filterMuscle, setFilterMuscle, filterEquipment, setFilterEquipment, filterFavorites, setFilterFavorites, filteredExercises } = useExerciseFilters(exercises)
   const {
     selectedExercise,
     setSelectedExercise,
@@ -198,6 +212,19 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
     }
   }, [deleteExercise, alertModal, optionsModal, showToast, t])
 
+  const handleFavoriteToggle = useCallback(async (item: Exercise) => {
+    haptics.onSelect()
+    try {
+      await database.write(async () => {
+        await item.update(e => {
+          e.isFavorite = !e.isFavorite
+        })
+      })
+    } catch (e) {
+      if (__DEV__) console.error('[ExercisesScreen] handleFavoriteToggle:', e)
+    }
+  }, [haptics])
+
   const handleOptionsPress = useCallback((item: Exercise) => {
     haptics.onPress()
     setSelectedExercise(item)
@@ -217,19 +244,28 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
   }, [infoSheetExercise, infoSheet, navigation])
 
   const renderExerciseItem = useCallback(({ item }: { item: Exercise }) => (
-    <ExerciseItem item={item} onOptionsPress={handleOptionsPress} onPress={handleRowPress} colors={colors} masteryLevel={masteryMap.get(item.id)?.level} />
-  ), [handleOptionsPress, handleRowPress, colors, masteryMap])
+    <ExerciseItem item={item} onOptionsPress={handleOptionsPress} onPress={handleRowPress} onFavoriteToggle={handleFavoriteToggle} colors={colors} masteryLevel={masteryMap.get(item.id)?.level} />
+  ), [handleOptionsPress, handleRowPress, handleFavoriteToggle, colors, masteryMap])
 
   const renderSeparator = useCallback(() => <View style={styles.separator} />, [styles])
 
-  const getItemLayout = useCallback(
-    (_data: unknown, index: number) => ({
-      length: ITEM_HEIGHT,
-      offset: (ITEM_HEIGHT + SEPARATOR_HEIGHT) * index,
-      index,
-    }),
-    [],
-  )
+  const sections = useMemo(() => {
+    const groups = new Map<string, Exercise[]>()
+    for (const ex of filteredExercises) {
+      const muscle = ex.muscles?.[0] ?? t.exercises.otherSection
+      const label = t.muscleNames[muscle as keyof typeof t.muscleNames] ?? muscle
+      if (!groups.has(label)) groups.set(label, [])
+      groups.get(label)!.push(ex)
+    }
+    return Array.from(groups, ([title, data]) => ({ title, data }))
+      .sort((a, b) => a.title.localeCompare(b.title))
+  }, [filteredExercises, t])
+
+  const renderSectionHeader = useCallback(({ section }: { section: { title: string } }) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionHeaderText}>{section.title}</Text>
+    </View>
+  ), [styles])
 
   return (
     <View style={styles.baseContainer}>
@@ -275,6 +311,19 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
             )}
           </View>
           <View style={styles.searchFilters}>
+            <View style={styles.favFilterRow}>
+              <TouchableOpacity
+                style={[styles.favChip, filterFavorites && styles.favChipActive]}
+                onPress={() => {
+                  haptics.onSelect()
+                  setFilterFavorites(!filterFavorites)
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name={filterFavorites ? 'heart' : 'heart-outline'} size={14} color={filterFavorites ? colors.danger : colors.textSecondary} />
+                <Text style={[styles.favChipText, filterFavorites && styles.favChipTextActive]}>{t.exercises.favorites}</Text>
+              </TouchableOpacity>
+            </View>
             <ChipSelector
               items={MUSCLES_LIST}
               selectedValue={filterMuscle}
@@ -294,20 +343,39 @@ const ExercisesContent: React.FC<Props> = ({ exercises, sets }) => {
           </View>
         </View>
 
+          {exercises.length < 10 && (
+            <TouchableOpacity
+              style={styles.catalogBanner}
+              onPress={() => {
+                haptics.onPress()
+                navigation.navigate('ExerciseCatalog')
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="globe-outline" size={22} color={colors.primary} />
+              <View style={styles.catalogBannerText}>
+                <Text style={styles.catalogBannerTitle}>{t.exercises.catalogBannerTitle}</Text>
+                <Text style={styles.catalogBannerSubtitle}>{t.exercises.catalogBannerSubtitle}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          )}
+
           <View style={styles.listWrapper}>
-            <FlatList
-              data={filteredExercises}
+            <SectionList
+              sections={sections}
               keyExtractor={item => item.id}
               renderItem={renderExerciseItem}
+              renderSectionHeader={renderSectionHeader}
               style={styles.list}
               contentContainerStyle={styles.listContent}
               ItemSeparatorComponent={renderSeparator}
-              getItemLayout={getItemLayout}
               ListEmptyComponent={<Text style={styles.emptyList}>{t.exercises.noExercises}</Text>}
               initialNumToRender={15}
               maxToRenderPerBatch={10}
               windowSize={5}
               removeClippedSubviews={Platform.OS === 'android'}
+              stickySectionHeadersEnabled={false}
             />
           </View>
 
@@ -393,6 +461,7 @@ const SEPARATOR_HEIGHT = 1
 function useExerciseItemStyles(colors: ThemeColors) {
   return useMemo(() => StyleSheet.create({
     exoItem: { paddingVertical: spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    favoriteBtn: { marginRight: spacing.sm, padding: spacing.xs },
     exoInfo: { flex: 1 },
     titleRow: { flexDirection: 'row', alignItems: 'center' },
     exoTitle: { color: colors.text, fontSize: fontSize.md, fontWeight: '600' },
@@ -416,6 +485,17 @@ function useStyles(colors: ThemeColors) {
     searchInput: { flex: 1, color: colors.text, fontSize: fontSize.md },
     closeSearchText: { color: colors.primary, marginLeft: spacing.sm, fontWeight: '600' },
     searchFilters: { marginBottom: spacing.xs },
+    favFilterRow: { flexDirection: 'row', marginBottom: spacing.sm },
+    favChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.xs, paddingHorizontal: spacing.ms, borderRadius: borderRadius.lg, backgroundColor: colors.cardSecondary, borderWidth: 1, borderColor: colors.border },
+    favChipActive: { backgroundColor: colors.danger + '26', borderColor: colors.danger },
+    favChipText: { color: colors.textSecondary, fontSize: fontSize.xs, fontWeight: '600' },
+    favChipTextActive: { color: colors.danger },
+    catalogBanner: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.lg, marginBottom: spacing.sm, padding: spacing.md, backgroundColor: colors.primaryBg, borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.primary, gap: spacing.ms },
+    catalogBannerText: { flex: 1 },
+    catalogBannerTitle: { color: colors.text, fontSize: fontSize.sm, fontWeight: '600' },
+    catalogBannerSubtitle: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2 },
+    sectionHeader: { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg, backgroundColor: colors.background },
+    sectionHeaderText: { color: colors.primary, fontSize: fontSize.xs, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
     filterRow: { flexDirection: 'row' },
     filterRowSecond: { marginTop: spacing.sm },
     listWrapper: { flex: 1 },
