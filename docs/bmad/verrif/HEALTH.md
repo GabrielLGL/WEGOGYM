@@ -74,6 +74,7 @@
 | 2026-03-20 | 20 | 20 | 20 | 20 | 15 | **95/100** | ↓ -5 (2002 tests, 154 suites, AUDIT CRITIQUE: -21 écrans, -13K LOC, -3 providers, 1 CRIT + 2 WARN fixés, coverage 75.6% post-suppression) |
 | 2026-03-21 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1943 tests, 147 suites, cov 74.92%, 2 CRIT + 1 WARN fixés: deadlock deleteAllData, reset fields, as any→generics) |
 | 2026-03-21 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (1943 tests, 147 suites, cov 74.88%, 0 CRIT, projet clean) |
+| 2026-03-22 | 20 | 20 | 20 | 20 | 15 | **95/100** | → stable (2047 tests, 156 suites, 1 CRIT + 3 WARN + 1 SUGG fixés: UnitContextMock stable refs, schema comment v42, hardcoded colors→tokens) |
 
 ---
 

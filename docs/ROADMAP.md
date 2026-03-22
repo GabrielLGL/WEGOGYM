@@ -13,7 +13,7 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 | Metrique | Valeur |
 |----------|--------|
-| Tests | 2046 (156 suites) |
+| Tests | 2047 (156 suites) |
 | Erreurs TS | 0 |
 | Score sante | 95/100 ([HEALTH.md](bmad/verrif/HEALTH.md)) |
 | Ship score | 100/100 SHIP IT (20260321-1010) |
@@ -22,7 +22,7 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 | Helpers | ~40 (post-audit critique) |
 | Routes | ~30 (post-audit critique) |
 | Services | 7 (cloud AI providers retires) |
-| Tables DB | 13 (schema v39) |
+| Tables DB | 15 (schema v42) |
 | Badges | 50+ |
 | Features | #1 → #120 |
 | Sprints | 14 completes |
@@ -144,7 +144,7 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 
 ## Features — Services
 
-- [x] Wearables (Health Connect + HealthKit) — Sprint 8+
+- [x] Wearables (Health Connect + HealthKit) — Sprint 8+ (pesees uniquement, voir Phase HC-1/2/3 pour integration complete)
 - [x] Widget Android (streak, prochain workout) — Sprint 8+
 - [x] Photos de progression (before/after) — Sprint 8+
 - [x] Partage (texte + image) — Sprint 8+
@@ -168,7 +168,120 @@ L'app est **feature-complete pour un MVP** et a ete taguee `v0.1.0-mvp-20260319`
 - [x] Skeleton loaders sur les ecrans stats
 - [ ] Navigation stats groupee (Performance / Corps / Habitudes / Avance)
 - [ ] Videos d'execution des exercices
-- [ ] Nutrition basique (calories / proteines)
+- [ ] Nutrition (connexion MyFitnessPal / apps similaires + saisie manuelle)
+
+### Health Connect — Integration complete (3 phases)
+
+L'integration actuelle ne sync que les pesees. Plan pour exploiter le maximum de donnees Health Connect.
+
+**Donnees disponibles via Health Connect :** SleepSession (phases deep/light/REM/awake), RestingHeartRate, HRV (HeartRateVariabilityRmssd), Steps, ActiveCaloriesBurned, TotalCaloriesBurned, BodyFat, LeanBodyMass, HeartRate (samples), Vo2Max, ExerciseSession, Weight, Nutrition (29 champs macro/micro).
+
+> **Note :** Health Connect ne fournit pas de "sleep score" ni "energy score" — ce sont des scores proprietaires (Samsung Health, Fitbit, Garmin). On calcule nos propres scores a partir des donnees brutes (phases de sommeil, duree, HRV, resting HR), bases sur la **tendance personnelle** de l'utilisateur (moyenne glissante 14j) plutot que des seuils fixes.
+
+#### Phase HC-1a — Auto-sync (priorite haute, ~1 jour)
+
+- [ ] **Auto-sync au lancement** — Declencher `performSync()` apres affichage du Home (useEffect dans HomeScreen, pas App.tsx) si `wearable_provider !== null` (connecte = tout synce). Le flag `wearable_sync_weight` ne controle que le sous-ensemble poids. Cooldown 30min entre 2 syncs. Indicateur discret (icone sync dans le header). Extraire la logique sync du composant Settings vers `services/wearableSyncService.ts`. Backfill initial limite a 30 jours (comme le poids)
+
+#### Phase HC-1b — Sommeil (priorite haute, ~2-3 jours)
+
+- [ ] **Import SleepSession** — Nouvelle table `sleep_records` (duration_minutes, deep_minutes, light_minutes, rem_minutes, awake_minutes, source). Deduplication : garder la session la plus longue par periode 24h (00h-00h). Sessions < 3h exclues du score sommeil (siestes stockees mais non comptees). Backfill initial 30 jours
+- [ ] **Widget sommeil Home** — Duree derniere nuit, barre empilee des phases, score de qualite base sur la tendance perso (compare a la moyenne 14j de l'utilisateur, pas des seuils fixes)
+- [ ] **Helper `sleepHelpers.ts`** — `getSleepQuality(tonight, avg14d)`, `getLastNightSleep(records)`
+- [ ] **Nouvelle permission Android** — `SleepSession` (read) dans AndroidManifest.xml + healthConnectService.ts
+- [ ] **Interface HealthKit** — Ajouter `fetchSleepRecords(from, to)` dans `WearableServiceInterface` (implementation HealthKit en Phase iOS)
+
+#### Phase HC-1c — HR / HRV (priorite haute, ~2 jours)
+
+- [ ] **Import Resting HR + HRV** — Nouvelle table `daily_vitals` avec colonnes typees : `resting_hr` (number, BPM), `hrv_rmssd` (number, ms). Une ligne par jour. Pas de table EAV generique. Backfill initial 30 jours. Colonne `vo2max` ajoutee en HC-3 via migration de schema (pas de champ speculative)
+- [ ] **Nouvelles permissions Android** — `RestingHeartRate`, `HeartRateVariabilityRmssd` (read)
+- [ ] **Interface HealthKit** — Ajouter `fetchRestingHeartRate(from, to)`, `fetchHRV(from, to)` dans `WearableServiceInterface`
+
+#### Phase HC-1d — Readiness enrichi (priorite haute, ~2 jours, depend de HC-1b + HC-1c)
+
+> **Dependances :** HC-1a, HC-1b et HC-1c sont independants et peuvent etre faits en parallele. HC-1d depend de HC-1b et HC-1c (le readiness enrichi a besoin des donnees sommeil et vitals).
+
+- [ ] **Ponderations dynamiques** — Le readiness score s'adapte aux donnees disponibles :
+  - Toutes les donnees HC : Recovery 25% + Fatigue ACWR 25% + Sommeil 20% + HRV/HR 20% + Consistency 10%
+  - Sommeil seul (pas de montre HR) : Recovery 30% + Fatigue 30% + Sommeil 25% + Consistency 15%
+  - Aucune donnee HC : ponderations actuelles inchangees (Recovery 40% + Fatigue 35% + Consistency 25%)
+  - Regle : les poids se redistribuent proportionnellement sur les facteurs disponibles. Jamais de trou dans le score
+- [ ] **Logique HRV/HR** — Comparaison valeur lissee (moyenne mobile 3j) vs moyenne glissante 30j. Seuil : ±1 ecart-type de la fenetre 30j (personnalise : HRV stable = seuil serre, HRV variable = seuil large). Resting HR : logique inverse (plus bas = mieux)
+- [ ] **Enrichir HomeBodyStatusSection** — Integrer sommeil et HR dans la carte readiness existante (pas de nouvelle carte). Sommeil (duree + qualite), HR repos (tendance), readiness enrichi. Objectif : l'utilisateur voit sa condition et s'adapte lui-meme. Le Home a deja 16+ cartes — on enrichit, on n'empile pas
+
+#### Phase HC-2 — Enrichissement (priorite moyenne)
+
+- [ ] **Recovery Score — ecran dedie** — Nouvel ecran `RecoveryScreen` : jauge circulaire 0-100, decomposition des facteurs (adapte aux donnees dispo), historique 7/14/30j calcule a la volee depuis `sleep_records` + `daily_vitals` + `histories` (useMemo avec deps stables). Pas de table `recovery_scores` — le recalcul est trivial et evite la dette si la formule evolue. Fallback perf : si les calculs deviennent lents (6+ mois de donnees, telephone bas de gamme), ajouter une colonne optionnelle `readiness_cache` dans `daily_vitals`
+- [ ] **Pas + Calories** — Nouvelle table `daily_activity` (steps, active_calories, total_calories). Chip activite quotidienne sur le Home. Integration StatsCalendar : jours actifs en couleur differente
+- [ ] **Body Fat + Lean Mass** — Ajouter colonnes `body_fat`, `lean_body_mass` sur `body_measurements`. Sync depuis HC. Courbe overlay dans StatsMeasurementsScreen
+- ~~Nutrition~~ — Retiree de HC. A traiter comme feature standalone avec connexion MyFitnessPal / apps similaires (voir Priorite basse)
+- [ ] **Badges Health Connect (~10 badges, 3 categories)**
+  - `sleep` : 7 nuits au-dessus de sa moyenne 14j en 7j, 30 nuits au-dessus de sa moyenne, 7 nuits avec >25% deep sleep. Guard : badges sommeil actifs uniquement apres 14 jours de donnees (eviter badges gratuits au bootstrap)
+  - `recovery` : Score >80 pendant 7j, 10 seances lancees en "optimal", 3 jours de repos quand readiness < 40 (on mesure le fait, pas l'intention)
+  - `consistency_health` : 7j sync consecutifs, sommeil+poids+HR dans la meme semaine, 30j de donnees consecutifs
+  - ~~`steps`~~ — Retire : Kore est une app de musculation, pas un tracker d'activite. Les badges pas dilueraient l'identite du produit
+- [ ] **XP Smart Training** — Bonus +10 XP quand l'utilisateur s'entraine avec un Recovery Score "optimal"
+
+#### Phase HC-3 — Avance (priorite basse)
+
+- [ ] **HR pendant l'entrainement** — Apres fin de seance, lire HeartRate samples entre start/end time. Calculer avg_hr/max_hr a la volee au moment du sync — ne PAS stocker les samples bruts (restent dans Health Connect). Nouvelles colonnes `histories` : avg_hr, max_hr, calories_burned (source : TotalCaloriesBurned de HC pour la fenetre de la seance, pas d'estimation locale). Afficher dans detail historique. Si `daily_activity.active_calories` existe aussi (HC-2), priorite a la valeur par seance de `histories` dans le detail, `daily_activity` pour le resume quotidien
+- [ ] **VO2Max** — Lire Vo2Max, ajouter colonne `vo2max` dans `daily_vitals` via migration schema. Widget "Forme physique" dans Stats
+- [ ] **Stats avancees sommeil** — Ecran dedie sommeil avec tendances 7/30j, correlation sommeil vs performance (tonnage, PRs)
+
+#### Resume des changements DB pour Health Connect
+
+| Nouvelle table | Phase | Colonnes cles |
+|----------------|-------|---------------|
+| `sleep_records` | HC-1b | date, duration_minutes, deep/light/rem/awake_minutes, source |
+| `daily_vitals` | HC-1c | date, resting_hr, hrv_rmssd (1 ligne/jour, colonnes typees). vo2max ajoute en HC-3 |
+| `daily_activity` | HC-2 | date, steps, active_calories, total_calories, source |
+
+| Colonnes ajoutees | Table | Phase |
+|-------------------|-------|-------|
+| body_fat, lean_body_mass | body_measurements | HC-2 |
+| avg_hr, max_hr, calories_burned | histories | HC-3 |
+
+> **Notes :** Pas de table `recovery_scores` — le score est calcule a la volee depuis les donnees brutes. Pas de table `health_metrics` EAV — remplacee par `daily_vitals` avec colonnes typees. Colonne `vo2max` ajoutee a `daily_vitals` en HC-3 seulement (pas de champ speculatif).
+
+#### Degradation gracieuse
+
+Le plan doit fonctionner dans tous les cas :
+
+| Scenario | Comportement |
+|----------|-------------|
+| Pas de montre connectee | Readiness = ponderations actuelles (entrainement seul). Pas de widget sommeil/HR. Badges HC non affiches |
+| HC connecte mais montre sans HR/HRV | Sommeil affiché si dispo, readiness redistribue le poids HR sur les autres facteurs |
+| HC connecte puis deconnecte | Donnees historiques conservees (lectures). Widget Home masque. Readiness revient aux ponderations sans HC |
+| Donnees partielles (ex: pas de deep sleep) | Score sommeil base uniquement sur la duree. Barre des phases affiche ce qui est dispo |
+
+#### Parite HealthKit (iOS)
+
+Chaque feature HC-x a un pendant HealthKit a implementer lors du port iOS. L'interface `WearableServiceInterface` doit etre etendue des HC-1b avec les methodes :
+- `fetchSleepRecords(from, to): Promise<SleepRecord[]>`
+- `fetchRestingHeartRate(from, to): Promise<HeartRateRecord[]>`
+- `fetchHRV(from, to): Promise<HRVRecord[]>`
+- `fetchSteps(from, to): Promise<StepsRecord[]>` (HC-2)
+- `fetchHeartRate(from, to): Promise<HeartRateSample[]>` (HC-3)
+
+L'implementation Android est prioritaire. Les stubs HealthKit renvoient `[]` jusqu'au port iOS.
+
+#### Philosophie UX
+
+L'objectif n'est **pas** de modifier automatiquement les programmes de l'utilisateur. Quand quelqu'un suit un programme, il s'y tient. Health Connect sert a :
+1. **Informer** — Resume quotidien indicatif (sommeil, recup, HR) pour que l'utilisateur s'adapte lui-meme
+2. **Enrichir les stats** — Correlations sommeil/performance, tendances HR, recovery historique
+3. **Gamifier** — Badges, XP bonus, streaks sante (lies a la muscu, pas de vanity metrics)
+4. **Pas de friction** — Sync auto silencieux, pas de popups "tu devrais te reposer"
+5. **Degrader gracieusement** — Chaque feature fonctionne avec les donnees disponibles, pas de score casse
+
+#### Metriques de succes
+
+A suivre pour valider l'adoption et guider les decisions HC-2/3 :
+- **Taux de connexion HC** — % d'utilisateurs qui connectent Health Connect (via `wearable_sync_logs`)
+- **Retention sync a 30j** — % d'utilisateurs encore connectes apres 30 jours
+- **Records synces/semaine** — Volume de donnees importees (indicateur d'utilisation reelle)
+- **Engagement widget sommeil** — Le widget est-il vu ? (proxy : l'utilisateur scrolle-t-il jusqu'a la carte readiness)
+
+---
 
 ### Priorite basse (long terme)
 - [ ] Wear OS / Apple Watch companion app
@@ -242,10 +355,9 @@ Cloud sync, iOS, themes debloquables, partage avance, mode coach, premium (voir 
 
 ## Dette technique
 
-Toutes les issues du verrif 20260319-1408 sont resolues ou classees faux positif :
-- **A1-A2, B1-B2** : corriges dans commit `a088050` (useCallback, stale closures)
-- **C1, D1-D3** : classes faux positif apres verification manuelle
-- Score : 0 issue ouverte (date : 2026-03-19)
+Toutes les issues du verrif 20260322-2154 sont resolues :
+- 1 CRIT + 3 WARN + 1 SUGG fixes dans commit `fb82f16`
+- Score : 0 issue ouverte (date : 2026-03-22)
 
 ---
 
