@@ -46,6 +46,7 @@ import SleepRecordModel from '../model/models/SleepRecord'
 import DailyVitalsModel from '../model/models/DailyVitals'
 import { computeSleepScore } from '../model/utils/sleepHelpers'
 import { computeVitalsScore } from '../model/utils/vitalsHelpers'
+import { useHomeDerivedData } from '../hooks/useHomeDerivedData'
 import type { RootStackParamList } from '../navigation'
 
 import {
@@ -91,7 +92,18 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
   const styles = useStyles()
   const navigation = useNavigation<HomeNavigation>()
   const route = useRoute<HomeRoute>()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+
+  // Pre-compute derived metrics once (shared across children)
+  const derived = useHomeDerivedData({
+    users: user ? [user] : [],
+    histories,
+    sets,
+    sessions,
+    language,
+    dayLabels: t.home.dayLabels,
+    sessionFallback: t.statsVolume.sessionFallback,
+  })
 
   // Coach marks refs
   const headerCardRef = useRef<View>(null)
@@ -188,6 +200,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         sets={sets}
         headerCardRef={headerCardRef}
         settingsBtnRef={settingsBtnRef}
+        motivationalPhrase={derived.motivationalPhrase}
       />
 
       <HomeHeroAction
@@ -213,6 +226,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         sets={sets}
         sessions={sessions}
         weeklyCardRef={weeklyCardRef}
+        precomputedWeeklyActivity={derived.weeklyActivity}
       />
 
       {/* ── ZONE B — Premier scroll ── */}

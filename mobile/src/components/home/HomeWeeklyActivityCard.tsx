@@ -19,6 +19,8 @@ interface HomeWeeklyActivityCardProps {
   sets: WorkoutSet[]
   sessions: Session[]
   weeklyCardRef: React.RefObject<View>
+  /** Pre-computed weekly activity data (avoids duplicate computation) */
+  precomputedWeeklyActivity?: ReturnType<typeof buildWeeklyActivity>
 }
 
 interface DayDetail {
@@ -27,7 +29,7 @@ interface DayDetail {
   sessions: Array<{ sessionName: string; setCount: number; durationMin: number | null; volumeKg: number }>
 }
 
-function HomeWeeklyActivityCardInner({ histories, sets, sessions, weeklyCardRef }: HomeWeeklyActivityCardProps) {
+function HomeWeeklyActivityCardInner({ histories, sets, sessions, weeklyCardRef, precomputedWeeklyActivity }: HomeWeeklyActivityCardProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const { weightUnit, convertWeight } = useUnits()
@@ -35,10 +37,11 @@ function HomeWeeklyActivityCardInner({ histories, sets, sessions, weeklyCardRef 
   const styles = useStyles(colors)
   const [selectedDay, setSelectedDay] = useState<DayDetail | null>(null)
 
-  const weeklyActivity = useMemo(
-    () => buildWeeklyActivity(histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback),
-    [histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback],
+  const computed = useMemo(
+    () => precomputedWeeklyActivity ?? buildWeeklyActivity(histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback),
+    [precomputedWeeklyActivity, histories, sets, sessions, t.home.dayLabels, t.statsVolume.sessionFallback],
   )
+  const weeklyActivity = computed
 
   const handleDayPress = (day: typeof weeklyActivity[0]) => {
     if (day.sessions.length === 0) return

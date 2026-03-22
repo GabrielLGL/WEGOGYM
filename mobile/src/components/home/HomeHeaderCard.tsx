@@ -20,19 +20,22 @@ interface HomeHeaderCardProps {
   sets: WorkoutSet[]
   headerCardRef: React.RefObject<View>
   settingsBtnRef: React.RefObject<View>
+  /** Pre-computed motivational phrase (avoids duplicate computation) */
+  motivationalPhrase?: string
 }
 
-function HomeHeaderCardInner({ user, histories, sets, headerCardRef, settingsBtnRef }: HomeHeaderCardProps) {
+function HomeHeaderCardInner({ user, histories, sets, headerCardRef, settingsBtnRef, motivationalPhrase: precomputed }: HomeHeaderCardProps) {
   const colors = useColors()
   const { t, language } = useLanguage()
   const haptics = useHaptics()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const styles = useStyles(colors)
 
-  const motivationalPhrase = useMemo(
-    () => computeMotivationalPhrase(histories, sets, language),
-    [histories, sets, language],
+  const computedPhrase = useMemo(
+    () => precomputed ?? computeMotivationalPhrase(histories, sets, language),
+    [precomputed, histories, sets, language],
   )
+  const motivationalPhrase = computedPhrase
 
   return (
     <View ref={headerCardRef} style={styles.headerCard}>
