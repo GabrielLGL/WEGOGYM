@@ -9,7 +9,7 @@ import Exercise from '../../model/models/Exercise'
 import Session from '../../model/models/Session'
 import Program from '../../model/models/Program'
 import { computeReadiness } from '../../model/utils/workoutReadinessHelpers'
-import type { ReadinessLevel } from '../../model/utils/workoutReadinessHelpers'
+import type { ReadinessLevel, HealthConnectData } from '../../model/utils/workoutReadinessHelpers'
 import { createQuickStartSession } from '../../model/utils/workoutSessionUtils'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
@@ -24,6 +24,8 @@ interface HomeHeroActionProps {
   exercises: Exercise[]
   sessions: Session[]
   programs: Program[]
+  healthData?: HealthConnectData
+  weeklyTarget?: number
 }
 
 function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
@@ -35,7 +37,7 @@ function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
   }
 }
 
-function HomeHeroActionInner({ histories, sets, exercises, sessions, programs }: HomeHeroActionProps) {
+function HomeHeroActionInner({ histories, sets, exercises, sessions, programs, healthData, weeklyTarget }: HomeHeroActionProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -66,8 +68,8 @@ function HomeHeroActionInner({ histories, sets, exercises, sessions, programs }:
     const mappedSets = sets.map(s => ({ weight: s.weight, reps: s.reps, exerciseId: s.exerciseId, createdAt: s.createdAt }))
     const mappedExercises = exercises.map(e => ({ id: e.id, muscles: e.muscles }))
     const mappedHistories = histories.map(h => ({ startedAt: h.startTime, isAbandoned: h.isAbandoned }))
-    return computeReadiness(mappedSets, mappedExercises, mappedHistories)
-  }, [sets, exercises, histories])
+    return computeReadiness(mappedSets, mappedExercises, mappedHistories, healthData, weeklyTarget)
+  }, [sets, exercises, histories, healthData, weeklyTarget])
 
   const isRestRecommended = readiness && readiness.level === 'low'
 

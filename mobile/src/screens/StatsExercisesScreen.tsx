@@ -22,6 +22,7 @@ import { formatRelativeDate } from '../model/utils/databaseHelpers'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import { useExerciseFilters } from '../hooks/useExerciseFilters'
 import { useDeferredMount } from '../hooks/useDeferredMount'
@@ -37,8 +38,8 @@ interface Props {
 export function StatsExercisesScreenBase({ sets, exercises, histories }: Props) {
   const colors = useColors()
   const { t } = useLanguage()
+  const { weightUnit: unit, convertWeight } = useUnits()
   const styles = useStyles(colors)
-  const unit = t.statsMeasurements.weightUnit
   const {
     searchQuery,
     setSearchQuery,
@@ -140,9 +141,9 @@ export function StatsExercisesScreenBase({ sets, exercises, histories }: Props) 
                   </View>
                   <View style={styles.prRight}>
                     <Text style={styles.prValue}>
-                      {t.statsExercises.prValue.replace('{weight}', String(pr.weight)).replace('{unit}', unit).replace('{reps}', String(pr.reps))}
+                      {t.statsExercises.prValue.replace('{weight}', String(convertWeight(pr.weight))).replace('{unit}', unit).replace('{reps}', String(pr.reps))}
                     </Text>
-                    <Text style={styles.prOrm}>{t.statsExercises.prOrm.replace('{orm}', String(pr.orm1)).replace('{unit}', unit)}</Text>
+                    <Text style={styles.prOrm}>{t.statsExercises.prOrm.replace('{orm}', String(convertWeight(pr.orm1))).replace('{unit}', unit)}</Text>
                   </View>
                 </View>
               ))}

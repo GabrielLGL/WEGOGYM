@@ -5,6 +5,7 @@ import { LineChart } from 'react-native-chart-kit'
 import { spacing, borderRadius, fontSize } from '../../theme'
 import type { ThemeColors } from '../../theme'
 import type { Translations } from '../../i18n'
+import { useUnits } from '../../contexts/UnitContext'
 
 export type ChartMetric = 'weight' | 'reps' | 'orm' | 'volume'
 
@@ -28,6 +29,7 @@ function ExerciseHistoryChart({
   t,
 }: ExerciseHistoryChartProps) {
   const styles = useStyles(colors)
+  const { weightUnit, convertWeight } = useUnits()
 
   return (
     <>
@@ -54,7 +56,7 @@ function ExerciseHistoryChart({
             chartConfig={chartConfig}
             style={styles.chart}
             fromZero
-            formatYLabel={val => (chartMetric === 'weight' || chartMetric === 'orm') ? `${val}${t.statsMeasurements.weightUnit}` : val}
+            formatYLabel={val => (chartMetric === 'weight' || chartMetric === 'orm') ? `${convertWeight(Number(val))}${weightUnit}` : val}
             formatXLabel={val => (chartData.labels.length > 6 ? '' : val)}
           />
         </View>

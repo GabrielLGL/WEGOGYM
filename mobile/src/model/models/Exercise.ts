@@ -39,6 +39,9 @@ export default class Exercise extends Model {
   // Colonne 'description' optionnelle — description textuelle de l'exécution de l'exercice
   @text('description') description?: string
 
+  // Colonne 'is_favorite' optionnelle — marque l'exercice comme favori
+  @field('is_favorite') isFavorite?: boolean
+
   // Colonne de date de création, gérée automatiquement et en lecture seule
   @readonly @date('created_at') createdAt!: Date
 

@@ -24,6 +24,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import type { RecapExerciseData, RecapComparisonData } from '../types/workout'
 
@@ -91,6 +92,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
   const colors = useColors()
   const styles = useMemo(() => createStyles(colors), [colors])
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
   const noteRef = useRef('')
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const viewShotRef = useRef<ViewShot>(null)
@@ -195,12 +197,12 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         currentStreak,
         newBadges,
         exerciseNames: recapExercises.map(e => e.exerciseName),
-      }, t)
+      }, t, weightUnit)
       await shareText(text)
     } catch (e) {
       if (__DEV__) console.warn('[WorkoutSummarySheet] shareText error:', e)
     }
-  }, [shareSheet, durationSeconds, totalVolume, totalSets, totalPrs, xpGained, level, currentStreak, newBadges, recapExercises, t])
+  }, [shareSheet, durationSeconds, totalVolume, totalSets, totalPrs, xpGained, level, currentStreak, newBadges, recapExercises, t, weightUnit])
 
   const handleShareImage = useCallback(async () => {
     shareSheet.close()
@@ -282,7 +284,7 @@ export const WorkoutSummarySheet: React.FC<WorkoutSummarySheetProps> = ({
         {/* Stats grid 2×2 */}
         <View style={styles.statsGrid}>
           <StatBlock label={t.workoutSummary.duration} value={formatSecondsToMMSS(durationSeconds)} icon="timer-outline" colors={colors} />
-          <StatBlock label={t.workoutSummary.volume} value={`${totalVolume.toFixed(1)} kg`} icon="barbell-outline" colors={colors} />
+          <StatBlock label={t.workoutSummary.volume} value={`${convertWeight(totalVolume).toFixed(1)} ${weightUnit}`} icon="barbell-outline" colors={colors} />
           <StatBlock label={t.workoutSummary.sets} value={`${totalSets} ${t.workoutSummary.setsValidated}`} icon="checkmark-circle-outline" colors={colors} />
           <StatBlock label={t.workoutSummary.records} value={`${totalPrs} PR`} icon="trophy-outline" colors={colors} />
         </View>

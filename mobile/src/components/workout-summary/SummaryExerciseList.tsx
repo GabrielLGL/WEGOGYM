@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { spacing, borderRadius, fontSize } from '../../theme'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useUnits } from '../../contexts/UnitContext'
 import type { ThemeColors } from '../../theme'
 import type { RecapExerciseData, RecapComparisonData } from '../../types/workout'
 
@@ -25,6 +26,7 @@ const SummaryExerciseList: React.FC<SummaryExerciseListProps> = ({
   const colors = useColors()
   const styles = useMemo(() => createStyles(colors), [colors])
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
 
   if (recapExercises.length === 0) return null
 
@@ -48,7 +50,7 @@ const SummaryExerciseList: React.FC<SummaryExerciseListProps> = ({
               )}
             </View>
             <Text style={styles.exoSets}>
-              {exo.sets.map(s => `${s.reps}×${formatWeight(s.weight)} kg`).join('  ·  ')}
+              {exo.sets.map(s => `${s.reps}×${formatWeight(convertWeight(s.weight))} ${weightUnit}`).join('  ·  ')}
             </Text>
           </View>
         )
@@ -66,14 +68,14 @@ const SummaryExerciseList: React.FC<SummaryExerciseListProps> = ({
           {recapComparison.volumeGain > 0 ? (
             <View style={styles.row}>
               <Text style={[styles.progressionDelta, { color: colors.primary }]}>
-                +{recapComparison.volumeGain.toFixed(1)} kg
+                +{convertWeight(recapComparison.volumeGain).toFixed(1)} {weightUnit}
               </Text>
               <Ionicons name="chevron-up-outline" size={12} color={colors.primary} />
             </View>
           ) : recapComparison.volumeGain < 0 ? (
             <View style={styles.row}>
               <Text style={[styles.progressionDelta, { color: colors.danger }]}>
-                {recapComparison.volumeGain.toFixed(1)} kg
+                {convertWeight(recapComparison.volumeGain).toFixed(1)} {weightUnit}
               </Text>
               <Ionicons name="chevron-down-outline" size={12} color={colors.danger} />
             </View>
@@ -93,7 +95,7 @@ const SummaryExerciseList: React.FC<SummaryExerciseListProps> = ({
               styles.progressionDelta,
               { color: exo.currMaxWeight > exo.prevMaxWeight ? colors.primary : colors.danger }
             ]}>
-              {formatWeight(exo.prevMaxWeight)} → {formatWeight(exo.currMaxWeight)} kg
+              {formatWeight(convertWeight(exo.prevMaxWeight))} → {formatWeight(convertWeight(exo.currMaxWeight))} {weightUnit}
             </Text>
             <Ionicons
               name={exo.currMaxWeight > exo.prevMaxWeight ? 'chevron-up-outline' : 'chevron-down-outline'}

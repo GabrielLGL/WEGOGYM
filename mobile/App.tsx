@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import AppNavigator from './src/navigation';
 import AnimatedSplash from './src/components/AnimatedSplash';
@@ -20,6 +22,13 @@ export default function App() {
   const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
+    // Health Connect : le ActivityResultLauncher doit être enregistré pendant onCreate
+    if (Platform.OS === 'android') {
+      import('react-native-health-connect').then(({ initialize }) => {
+        initialize().catch(() => {});
+      });
+    }
+
     seedExercises().then(() => {
       seedExerciseDescriptions(database);
       if (__DEV__) seedDevData();
@@ -34,12 +43,14 @@ export default function App() {
   }, [appReady]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      {splashDone ? (
-        <AppNavigator />
-      ) : (
-        <AnimatedSplash appReady={appReady} onFinish={() => setSplashDone(true)} />
-      )}
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {splashDone ? (
+          <AppNavigator />
+        ) : (
+          <AnimatedSplash appReady={appReady} onFinish={() => setSplashDone(true)} />
+        )}
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

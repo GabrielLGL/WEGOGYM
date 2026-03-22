@@ -14,6 +14,7 @@ import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { ThemeColors } from '../theme'
 import type { Language } from '../i18n'
+import type { Ionicons } from '@expo/vector-icons'
 import {
   USER_LEVELS,
   USER_GOALS,
@@ -22,6 +23,24 @@ import {
   type UserGoal,
 } from '../model/constants'
 import type { RootStackParamList } from '../navigation'
+
+const LEVEL_ICONS: Record<UserLevel, React.ComponentProps<typeof Ionicons>['name']> = {
+  beginner: 'leaf-outline',
+  intermediate: 'flame-outline',
+  advanced: 'diamond-outline',
+}
+
+const GOAL_ICONS: Record<UserGoal, React.ComponentProps<typeof Ionicons>['name']> = {
+  mass: 'barbell-outline',
+  strength: 'flash-outline',
+  recomp: 'body-outline',
+  health: 'heart-outline',
+}
+
+const LANG_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
+  fr: 'chatbubble-outline',
+  en: 'globe-outline',
+}
 
 type OnboardingNavigation = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>
 
@@ -196,12 +215,14 @@ export default function OnboardingScreen() {
                 description={t.onboarding.language.frDesc}
                 selected={language === 'fr'}
                 onPress={() => handleSelectLanguage('fr')}
+                icon={LANG_ICONS.fr}
               />
               <OnboardingCard
                 label={t.onboarding.language.en}
                 description={t.onboarding.language.enDesc}
                 selected={language === 'en'}
                 onPress={() => handleSelectLanguage('en')}
+                icon={LANG_ICONS.en}
               />
             </View>
 
@@ -237,6 +258,7 @@ export default function OnboardingScreen() {
                   description={t.onboarding.levelDescriptions[level]}
                   selected={selectedLevel === level}
                   onPress={() => setSelectedLevel(level)}
+                  icon={LEVEL_ICONS[level]}
                 />
               ))}
             </View>
@@ -274,6 +296,7 @@ export default function OnboardingScreen() {
                   description={t.onboarding.goalDescriptions[goal]}
                   selected={selectedGoal === goal}
                   onPress={() => setSelectedGoal(goal)}
+                  icon={GOAL_ICONS[goal]}
                 />
               ))}
             </View>

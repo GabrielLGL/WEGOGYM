@@ -8,7 +8,7 @@ import Exercise from '../../model/models/Exercise'
 import User from '../../model/models/User'
 import { getMondayOfCurrentWeek } from '../../model/utils/statsHelpers'
 import { computeReadiness } from '../../model/utils/workoutReadinessHelpers'
-import type { ReadinessLevel } from '../../model/utils/workoutReadinessHelpers'
+import type { ReadinessLevel, HealthConnectData } from '../../model/utils/workoutReadinessHelpers'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useHaptics } from '../../hooks/useHaptics'
@@ -21,6 +21,7 @@ interface HomeStatusStripProps {
   histories: History[]
   sets: WorkoutSet[]
   exercises: Exercise[]
+  healthData?: HealthConnectData
 }
 
 function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
@@ -32,7 +33,7 @@ function getReadinessColor(level: ReadinessLevel, colors: ThemeColors) {
   }
 }
 
-function HomeStatusStripInner({ user, histories, sets, exercises }: HomeStatusStripProps) {
+function HomeStatusStripInner({ user, histories, sets, exercises, healthData }: HomeStatusStripProps) {
   const colors = useColors()
   const { t } = useLanguage()
   const haptics = useHaptics()
@@ -76,8 +77,8 @@ function HomeStatusStripInner({ user, histories, sets, exercises }: HomeStatusSt
     const mappedSets = sets.map(s => ({ weight: s.weight, reps: s.reps, exerciseId: s.exerciseId, createdAt: s.createdAt }))
     const mappedExercises = exercises.map(e => ({ id: e.id, muscles: e.muscles }))
     const mappedHistories = histories.map(h => ({ startedAt: h.startTime, isAbandoned: h.isAbandoned }))
-    return computeReadiness(mappedSets, mappedExercises, mappedHistories)
-  }, [sets, exercises, histories])
+    return computeReadiness(mappedSets, mappedExercises, mappedHistories, healthData, user?.streakTarget ?? 3)
+  }, [sets, exercises, histories, healthData, user?.streakTarget])
 
   const chips = [
     {

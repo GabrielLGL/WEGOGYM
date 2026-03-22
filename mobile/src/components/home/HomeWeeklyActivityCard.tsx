@@ -7,6 +7,7 @@ import { buildWeeklyActivity } from '../../model/utils/statsHelpers'
 import { BottomSheet } from '../BottomSheet'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useUnits } from '../../contexts/UnitContext'
 import { useHaptics } from '../../hooks/useHaptics'
 import type { ThemeColors } from '../../theme'
 import { spacing, borderRadius, fontSize } from '../../theme'
@@ -29,6 +30,7 @@ interface DayDetail {
 function HomeWeeklyActivityCardInner({ histories, sets, sessions, weeklyCardRef }: HomeWeeklyActivityCardProps) {
   const colors = useColors()
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
   const haptics = useHaptics()
   const styles = useStyles(colors)
   const [selectedDay, setSelectedDay] = useState<DayDetail | null>(null)
@@ -112,7 +114,7 @@ function HomeWeeklyActivityCardInner({ histories, sets, sessions, weeklyCardRef 
                 <Text style={styles.dayDetailMeta}>
                   {s.setCount} {t.home.series}
                   {s.durationMin !== null ? ` · ${s.durationMin}m` : ''}
-                  {` · ${Math.round(s.volumeKg)} kg`}
+                  {` · ${Math.round(convertWeight(s.volumeKg))} ${weightUnit}`}
                 </Text>
               </View>
             ))}

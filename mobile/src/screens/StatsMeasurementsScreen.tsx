@@ -25,6 +25,7 @@ import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { parseNumericInput } from '../model/utils/databaseHelpers'
@@ -66,6 +67,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   const haptics = useHaptics()
   const { t, language } = useLanguage()
+  const { weightUnit, convertWeight, convertToMetric } = useUnits()
   const addSheet = useModalState()
   const [deleteTarget, setDeleteTarget] = useState<BodyMeasurement | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
@@ -86,7 +88,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
 
   // Graphique pour la métrique sélectée
   const metricKey = selectedMetric as MetricKey
-  const getUnit = (key: MetricKey) => key === 'weight' ? t.statsMeasurements.weightUnit : t.statsMeasurements.lengthUnit
+  const getUnit = (key: MetricKey) => key === 'weight' ? weightUnit : t.statsMeasurements.lengthUnit
 
   const chartData = useMemo(() => {
     const points = measurements
@@ -100,7 +102,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
           ? new Date(m.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })
           : ''
       ),
-      datasets: [{ data: points.map(m => m[metricKey] as number) }],
+      datasets: [{ data: points.map(m => metricKey === 'weight' ? convertWeight(m[metricKey] as number) : m[metricKey] as number) }],
     }
   }, [measurements, metricKey, locale])
 
@@ -113,7 +115,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
       await database.write(async () => {
         await database.get<BodyMeasurement>('body_measurements').create(record => {
           record.date = Date.now()
-          record.weight = form.weight ? parseNumericInput(form.weight) : null
+          record.weight = form.weight ? convertToMetric(parseNumericInput(form.weight)) : null
           record.waist = form.waist ? parseNumericInput(form.waist) : null
           record.hips = form.hips ? parseNumericInput(form.hips) : null
           record.arms = form.arms ? parseNumericInput(form.arms) : null
@@ -170,7 +172,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
               {METRIC_KEYS.map(key => (
                 latest[key] != null ? (
                   <View key={key} style={styles.latestCard}>
-                    <Text style={styles.latestValue}>{latest[key]}{getUnit(key)}</Text>
+                    <Text style={styles.latestValue}>{key === 'weight' ? convertWeight(latest[key] as number) : latest[key]}{getUnit(key)}</Text>
                     <Text style={styles.latestLabel}>{metricsLabelMap[key]}</Text>
                   </View>
                 ) : null
@@ -226,7 +228,7 @@ export function StatsMeasurementsScreenBase({ measurements }: Props) {
                     </Text>
                     <Text style={styles.historyValues} numberOfLines={1}>
                       {[
-                        m.weight ? `${m.weight}${t.statsMeasurements.weightUnit}` : null,
+                        m.weight ? `${convertWeight(m.weight)}${weightUnit}` : null,
                         m.waist ? `${t.statsMeasurements.waistAbbr}:${m.waist}${t.statsMeasurements.lengthUnit}` : null,
                         m.hips ? `${t.statsMeasurements.hipsAbbr}:${m.hips}${t.statsMeasurements.lengthUnit}` : null,
                         m.arms ? `${t.statsMeasurements.armsAbbr}:${m.arms}${t.statsMeasurements.lengthUnit}` : null,

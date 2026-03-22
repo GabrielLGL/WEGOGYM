@@ -6,6 +6,7 @@ import { computeWeeklyGoals } from '../../model/utils/weeklyGoalsHelpers'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { ThemeColors } from '../../theme'
+import { useUnits } from '../../contexts/UnitContext'
 import { spacing, borderRadius, fontSize } from '../../theme'
 
 interface HomeWeeklyGoalsCardProps {
@@ -16,6 +17,7 @@ interface HomeWeeklyGoalsCardProps {
 export function HomeWeeklyGoalsCard({ histories, sets }: HomeWeeklyGoalsCardProps) {
   const colors = useColors()
   const { t, language } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
   const styles = useStyles(colors)
 
   const weeklyGoals = useMemo(() => {
@@ -61,13 +63,13 @@ export function HomeWeeklyGoalsCard({ histories, sets }: HomeWeeklyGoalsCardProp
       <View style={styles.goalRow}>
         <Text style={styles.goalLabel}>{t.home.weeklyGoals.volume}</Text>
         <Text style={styles.goalValue}>
-          {weeklyGoals.volumeKg >= 1000
-            ? `${(weeklyGoals.volumeKg / 1000).toFixed(1)}t`
-            : `${weeklyGoals.volumeKg} kg`}
+          {convertWeight(weeklyGoals.volumeKg) >= 1000
+            ? `${(convertWeight(weeklyGoals.volumeKg) / 1000).toFixed(1)}t`
+            : `${Math.round(convertWeight(weeklyGoals.volumeKg))} ${weightUnit}`}
           {' / '}
-          {weeklyGoals.volumeTarget >= 1000
-            ? `${(weeklyGoals.volumeTarget / 1000).toFixed(0)}t`
-            : `${weeklyGoals.volumeTarget} kg`}
+          {convertWeight(weeklyGoals.volumeTarget) >= 1000
+            ? `${(convertWeight(weeklyGoals.volumeTarget) / 1000).toFixed(0)}t`
+            : `${Math.round(convertWeight(weeklyGoals.volumeTarget))} ${weightUnit}`}
         </Text>
       </View>
       <View style={styles.goalBarTrack}>

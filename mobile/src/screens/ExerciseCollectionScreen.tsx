@@ -4,7 +4,10 @@ import {
   Text,
   FlatList,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
 import withObservables from '@nozbe/with-observables'
 import { Q } from '@nozbe/watermelondb'
 
@@ -17,6 +20,7 @@ import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import type { ThemeColors } from '../theme'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,16 +38,17 @@ interface CardProps {
   colors: ThemeColors
   setsLabel: string
   lockedLabel: string
+  onPress?: () => void
 }
 
-function ExerciseCard({ entry, colors, setsLabel, lockedLabel }: CardProps) {
+function ExerciseCard({ entry, colors, setsLabel, lockedLabel, onPress }: CardProps) {
   const styles = useCardStyles(colors)
   const { exercise, discovered, setsCount } = entry
 
   if (!discovered) {
     return (
       <View style={[styles.card, styles.lockedCard]}>
-        <Text style={styles.lockIcon}>🔒</Text>
+        <Ionicons name="lock-closed" size={18} color={colors.textSecondary} testID="icon-lock" />
         <Text style={styles.lockedName} numberOfLines={2}>
           {exercise.name.replace(/./g, '?')}
         </Text>
@@ -55,8 +60,8 @@ function ExerciseCard({ entry, colors, setsLabel, lockedLabel }: CardProps) {
   const muscles = exercise.muscles.slice(0, 2).join(', ')
 
   return (
-    <View style={[styles.card, styles.discoveredCard]}>
-      <Text style={styles.checkIcon}>✅</Text>
+    <TouchableOpacity style={[styles.card, styles.discoveredCard]} onPress={onPress} activeOpacity={0.7}>
+      <Ionicons name="checkmark-circle" size={18} color={colors.success} />
       <Text style={styles.exerciseName} numberOfLines={2}>
         {exercise.name}
       </Text>
@@ -66,7 +71,7 @@ function ExerciseCard({ entry, colors, setsLabel, lockedLabel }: CardProps) {
       <Text style={styles.setsCount}>
         {setsCount} {setsLabel}
       </Text>
-    </View>
+    </TouchableOpacity>
   )
 }
 
@@ -86,11 +91,8 @@ function useCardStyles(colors: ThemeColors) {
     lockedCard: {
       backgroundColor: colors.cardSecondary,
     },
-    checkIcon: {
-      fontSize: fontSize.md,
-    },
-    lockIcon: {
-      fontSize: fontSize.md,
+    iconContainer: {
+      marginBottom: 2,
     },
     exerciseName: {
       fontSize: fontSize.xs,
@@ -134,6 +136,7 @@ function ExerciseCollectionBase({ exercises, sets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()
+  const navigation = useNavigation<NativeStackNavigationProp<{ ExerciseCard: { exerciseId: string } }>>()
 
   const { entries, discoveredCount } = useMemo(() => {
     // Construire un Map exerciseId → {setsCount, lastDoneMs}
@@ -205,7 +208,10 @@ function ExerciseCollectionBase({ exercises, sets }: Props) {
       contentContainerStyle={styles.list}
       ListHeaderComponent={
         <View style={styles.headerCard}>
-          <Text style={styles.headerTitle}>✦ {t.exerciseCollection.title}</Text>
+          <Text style={styles.headerTitle}>
+            <Ionicons name="sparkles" size={20} color={colors.primary} />
+            {' '}{t.exerciseCollection.title}
+          </Text>
           <Text style={styles.headerSubtitle}>
             {discoveredCount} / {total} {t.exerciseCollection.subtitle}
           </Text>
@@ -223,6 +229,7 @@ function ExerciseCollectionBase({ exercises, sets }: Props) {
           colors={colors}
           setsLabel={t.exerciseCollection.sets}
           lockedLabel={t.exerciseCollection.locked}
+          onPress={item.discovered ? () => navigation.navigate('ExerciseCard', { exerciseId: item.exercise.id }) : undefined}
         />
       )}
       columnWrapperStyle={styles.row}

@@ -60,6 +60,8 @@ export default function CreateExerciseScreen() {
   const [description, setDescription] = useState('')
   const errorAlert = useModalState()
   const [errorMessage, setErrorMessage] = useState('')
+  const duplicateAlert = useModalState()
+  const [duplicateName, setDuplicateName] = useState('')
 
   const isFormValid = validateExerciseInput(name, muscles, equipment).valid
 
@@ -69,7 +71,7 @@ export default function CreateExerciseScreen() {
     )
   }
 
-  const handleCreate = async () => {
+  const createExercise = async () => {
     try {
       await database.write(async () => {
         await database.get<Exercise>('exercises').create(e => {
@@ -82,6 +84,24 @@ export default function CreateExerciseScreen() {
       })
       haptics.onSuccess()
       navigation.goBack()
+    } catch {
+      setErrorMessage(t.exercises.createError)
+      errorAlert.open()
+    }
+  }
+
+  const handleCreate = async () => {
+    try {
+      const allExercises = await database.get<Exercise>('exercises').query().fetch()
+      const duplicate = allExercises.find(
+        e => e.name.toLowerCase().trim() === name.toLowerCase().trim()
+      )
+      if (duplicate) {
+        setDuplicateName(duplicate.name)
+        duplicateAlert.open()
+        return
+      }
+      await createExercise()
     } catch {
       setErrorMessage(t.exercises.createError)
       errorAlert.open()
@@ -164,6 +184,17 @@ export default function CreateExerciseScreen() {
         confirmText={t.common.ok}
         confirmColor={colors.primary}
         hideCancel
+      />
+
+      <AlertDialog
+        visible={duplicateAlert.isOpen}
+        title={t.exercises.duplicateTitle}
+        message={`${t.exercises.duplicateMessage} ${duplicateName}`}
+        onConfirm={() => { duplicateAlert.close(); createExercise() }}
+        onCancel={duplicateAlert.close}
+        confirmText={t.exercises.duplicateConfirm}
+        cancelText={t.common.cancel}
+        confirmColor={colors.primary}
       />
     </KeyboardAvoidingView>
   )

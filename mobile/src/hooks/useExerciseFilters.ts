@@ -27,19 +27,25 @@ export function useExerciseFilters(exercises: Exercise[]) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterMuscle, setFilterMuscle] = useState<string | null>(null)
   const [filterEquipment, setFilterEquipment] = useState<string | null>(null)
+  const [filterFavorites, setFilterFavorites] = useState(false)
 
   const filteredExercises = useMemo(() => {
-    return filterAndSearchExercises(exercises, {
+    let result = filterAndSearchExercises(exercises, {
       muscle: filterMuscle,
       equipment: filterEquipment,
       searchQuery: searchQuery,
     })
-  }, [exercises, searchQuery, filterMuscle, filterEquipment])
+    if (filterFavorites) {
+      result = result.filter(e => e.isFavorite)
+    }
+    return result
+  }, [exercises, searchQuery, filterMuscle, filterEquipment, filterFavorites])
 
   const resetFilters = () => {
     setSearchQuery('')
     setFilterMuscle(null)
     setFilterEquipment(null)
+    setFilterFavorites(false)
   }
 
   return {
@@ -49,6 +55,8 @@ export function useExerciseFilters(exercises: Exercise[]) {
     setFilterMuscle,
     filterEquipment,
     setFilterEquipment,
+    filterFavorites,
+    setFilterFavorites,
     filteredExercises,
     resetFilters,
   }

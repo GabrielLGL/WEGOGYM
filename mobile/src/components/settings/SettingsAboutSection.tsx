@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import Constants from 'expo-constants'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { SettingsStyles } from './settingsStyles'
@@ -47,7 +48,7 @@ export const SettingsAboutSection: React.FC<SettingsAboutSectionProps> = ({ styl
 
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>{t.settings.about.version}</Text>
-          <Text style={styles.infoValue}>1.0.0</Text>
+          <Text style={styles.infoValue}>{Constants.expoConfig?.version ?? '1.0.0'}</Text>
         </View>
 
         <View style={[styles.infoRow, styles.settingRowLast]}>

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useUnits } from '../../contexts/UnitContext'
 import type { ThemeColors } from '../../theme'
 import { spacing, borderRadius, fontSize } from '../../theme'
 import type { DayDetail, SessionBlock } from '../../hooks/useCalendarDayDetail'
@@ -24,6 +25,7 @@ function CalendarDayDetailInner({
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
 
   return (
     <View style={styles.detailCard}>
@@ -85,7 +87,7 @@ function CalendarDayDetailInner({
                             <Text
                               style={[styles.detailSetText, s.isPr && styles.detailSetPr]}
                             >
-                              {s.weight > 0 ? `${s.weight} ${t.statsMeasurements.weightUnit}` : t.historyDetail.bodyweight} × {s.reps}
+                              {s.weight > 0 ? `${convertWeight(s.weight)} ${weightUnit}` : t.historyDetail.bodyweight} × {s.reps}
                             </Text>
                             {s.isPr && <Ionicons name="ribbon" size={12} color={colors.primary} />}
                           </View>

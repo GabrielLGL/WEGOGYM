@@ -32,6 +32,7 @@ import { useDeferredMount } from '../hooks/useDeferredMount'
 import { fontSize, borderRadius, spacing } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import { createChartConfig } from '../theme/chartConfig'
 import { buildExerciseStatsFromData } from '../model/utils/databaseHelpers'
@@ -61,7 +62,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const alertModal = useModalState()
   const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US'
-  const unit = t.statsMeasurements.weightUnit
+  const { weightUnit: unit, convertWeight } = useUnits()
   const [selectedStat, setSelectedStat] = useState<ExerciseSessionStat | null>(null)
 
   const chartConfig = createChartConfig({ decimalPlaces: 1, showDots: true, colors })
@@ -117,7 +118,7 @@ const ExerciseStatsContent: React.FC<ExerciseStatsContentProps> = ({
         <Text style={styles.logDate}>{item.startTime.toLocaleDateString(dateLocale)}</Text>
         {item.sets.map((s, idx) => (
           <Text key={idx} style={styles.setDetailText}>
-            {t.charts.setDetail.replace('{order}', String(s.setOrder)).replace('{weight}', String(s.weight)).replace('{unit}', unit).replace('{reps}', String(s.reps))}
+            {t.charts.setDetail.replace('{order}', String(s.setOrder)).replace('{weight}', String(convertWeight(s.weight))).replace('{unit}', unit).replace('{reps}', String(s.reps))}
           </Text>
         ))}
       </View>

@@ -26,6 +26,9 @@ import { ToastProvider } from '../contexts/ToastContext'
 import { useHaptics } from '../hooks/useHaptics'
 import { ThemeProvider, useTheme } from '../contexts/ThemeContext'
 import { LanguageProvider, useLanguage } from '../contexts/LanguageContext'
+import { UnitProvider } from '../contexts/UnitContext'
+import { resolveUnitMode } from '../model/utils/unitHelpers'
+import type { UnitMode } from '../model/utils/unitHelpers'
 import type { ThemeMode } from '../theme'
 import type { Language } from '../i18n'
 
@@ -134,7 +137,13 @@ function GlobalBackHandler({ navigationRef, exitMessage }: { navigationRef: Navi
       const currentRoute = nav.getCurrentRoute();
       if (!currentRoute) return false;
 
-      const isHome = (currentRoute.name as string) === 'Home';
+      const routeName = currentRoute.name as string;
+      const isHome = routeName === 'Home';
+      const isOnboarding = routeName === 'Onboarding';
+
+      if (isOnboarding) {
+        return true;
+      }
 
       if (isHome) {
         if (backPressRef.current === 0) {
@@ -283,6 +292,7 @@ function AppContent() {
 export default function AppNavigator() {
   const [initialMode, setInitialMode] = useState<ThemeMode>('dark')
   const [initialLang, setInitialLang] = useState<Language>('fr')
+  const [initialUnit, setInitialUnit] = useState<UnitMode>('metric')
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -295,6 +305,7 @@ export default function AppNavigator() {
       if (savedLang === 'fr' || savedLang === 'en') {
         setInitialLang(savedLang)
       }
+      setInitialUnit(resolveUnitMode(user?.unitMode ?? null))
       if (user?.remindersEnabled) {
         let days = [1, 3, 5]
         try { days = user.reminderDays ? JSON.parse(user.reminderDays) : days } catch { /* corrupted data, use default */ }
@@ -312,13 +323,15 @@ export default function AppNavigator() {
   return (
     <ErrorBoundary>
       <LanguageProvider initialLang={initialLang}>
-        <ThemeProvider initialMode={initialMode}>
-          <PortalProvider>
-            <ToastProvider>
-              <AppContent />
-            </ToastProvider>
-          </PortalProvider>
-        </ThemeProvider>
+        <UnitProvider initialMode={initialUnit}>
+          <ThemeProvider initialMode={initialMode}>
+            <PortalProvider>
+              <ToastProvider>
+                <AppContent />
+              </ToastProvider>
+            </PortalProvider>
+          </ThemeProvider>
+        </UnitProvider>
       </LanguageProvider>
     </ErrorBoundary>
   )

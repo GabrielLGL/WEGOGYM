@@ -15,7 +15,8 @@ import { OnboardingCard } from '../components/OnboardingCard'
 import { LevelBadge } from '../components/LevelBadge'
 import { XPProgressBar } from '../components/XPProgressBar'
 import { xpToNextLevel } from '../model/utils/gamificationHelpers'
-import { spacing } from '../theme'
+import { spacing, fontSize } from '../theme'
+import { useUnits, type UnitMode } from '../contexts/UnitContext'
 import {
   USER_LEVELS,
   USER_GOALS,
@@ -25,7 +26,6 @@ import {
 import {
   SettingsTimerSection,
   SettingsNotificationsSection,
-  SettingsAISection,
   SettingsDataSection,
   SettingsAboutSection,
   SettingsWearableSection,
@@ -54,6 +54,9 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
   const [editingLevel, setEditingLevel] = useState(false)
   const [editingGoal, setEditingGoal] = useState(false)
 
+  // Units (from context)
+  const { unitMode, setUnitMode: setUnitModeCtx } = useUnits()
+
   // Reminders state
   const [remindersEnabled, setRemindersEnabled] = useState(user?.remindersEnabled ?? false)
   const [reminderDays, setReminderDays] = useState<number[]>(() => {
@@ -78,6 +81,12 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
     setReminderHour(user.reminderHour ?? 18)
     setReminderMinute(user.reminderMinute ?? 0)
   }, [user])
+
+  const handleChangeUnit = async (mode: UnitMode) => {
+    if (unitMode === mode) return
+    haptics.onSelect()
+    await setUnitModeCtx(mode)
+  }
 
   const handleSaveName = useCallback(async () => {
     if (!user) return
@@ -338,6 +347,32 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
               </TouchableOpacity>
             ))}
           </View>
+          {/* Unités de poids */}
+          <View style={[styles.settingRow, styles.settingRowLast]}>
+            <View style={styles.settingInfo}>
+              <View style={styles.settingLabelRow}>
+                <Ionicons name="barbell-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.settingLabel}>{t.settings.appearance.units}</Text>
+              </View>
+              <Text style={styles.settingDescription}>{t.settings.appearance.unitsDescription}</Text>
+            </View>
+          </View>
+          <View style={styles.languageRow}>
+            {(['metric', 'imperial'] as UnitMode[]).map(mode => (
+              <TouchableOpacity
+                key={mode}
+                style={[styles.languageBtn, unitMode === mode && styles.languageBtnActive]}
+                onPress={() => handleChangeUnit(mode)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: unitMode === mode }}
+              >
+                <Text style={[styles.languageBtnText, unitMode === mode && styles.languageBtnTextActive]}>
+                  {mode === 'metric' ? t.settings.appearance.metric : t.settings.appearance.imperial}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         {/* Group: ENTRAÎNEMENT */}
@@ -370,12 +405,6 @@ const SettingsContent: React.FC<Props> = ({ user }) => {
           streakTarget={streakTarget}
           setStreakTarget={setStreakTarget}
         />
-
-        {/* Group: ASSISTANT */}
-        <Text style={styles.groupLabel}>{t.settings.groups.assistant}</Text>
-
-        {/* AI */}
-        <SettingsAISection styles={styles} />
 
         {/* Wearables */}
         <SettingsWearableSection user={user} styles={styles} />

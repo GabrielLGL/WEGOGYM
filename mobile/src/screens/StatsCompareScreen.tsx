@@ -17,6 +17,7 @@ import { MINUTE_MS, DAY_MS } from '../model/constants'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import ScreenLoading from '../components/ScreenLoading'
@@ -89,9 +90,10 @@ function computePeriodStats(
   return { label, sessions: filtered.length, volumeKg, prs, avgDurationMin }
 }
 
-function formatVolumePeriod(kg: number): string {
-  if (kg >= 1000) return `${Math.round(kg / 100) / 10} t`
-  return `${Math.round(kg)} kg`
+function formatVolumePeriod(kg: number, weightUnit: string, convertWeight: (kg: number) => number): string {
+  const converted = convertWeight(kg)
+  if (converted >= 1000) return `${Math.round(converted / 100) / 10} t`
+  return `${Math.round(converted)} ${weightUnit}`
 }
 
 // ─── Composant principal ──────────────────────────────────────────────────────
@@ -107,6 +109,7 @@ export function StatsCompareBase({ histories, sets }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
 
   const [periodA, setPeriodA] = useState<ComparePeriod>('this_month')
   const [periodB, setPeriodB] = useState<ComparePeriod>('last_month')
@@ -168,8 +171,8 @@ export function StatsCompareBase({ histories, sets }: Props) {
     },
     {
       label: t.compare.metrics.volume,
-      valueA: formatVolumePeriod(statsA.volumeKg),
-      valueB: formatVolumePeriod(statsB.volumeKg),
+      valueA: formatVolumePeriod(statsA.volumeKg, weightUnit, convertWeight),
+      valueB: formatVolumePeriod(statsB.volumeKg, weightUnit, convertWeight),
       aWins: statsA.volumeKg > statsB.volumeKg,
       equal: statsA.volumeKg === statsB.volumeKg,
     },

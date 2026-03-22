@@ -37,6 +37,7 @@ import { useDeferredMount } from '../hooks/useDeferredMount'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import type { RootStackParamList } from '../navigation'
 
@@ -72,6 +73,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t, language } = useLanguage()
+  const { weightUnit, convertWeight, convertToMetric } = useUnits()
   const haptics = useHaptics()
   const navigation = useNavigation<HistoryDetailNavProp>()
   const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US'
@@ -88,13 +90,13 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
       const newEdits: Record<string, SetEdit> = {}
       for (const s of sets) {
         newEdits[s.id] = prev[s.id] ?? {
-          weight: String(s.weight),
+          weight: String(convertWeight(s.weight)),
           reps: String(s.reps),
         }
       }
       return newEdits
     })
-  }, [sets])
+  }, [sets, convertWeight])
 
   // Sync note when history changes
   useEffect(() => {
@@ -125,10 +127,10 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
     for (const s of sets) {
       const edit = edits[s.id]
       if (!edit) continue
-      if (edit.weight !== String(s.weight) || edit.reps !== String(s.reps)) return true
+      if (edit.weight !== String(convertWeight(s.weight)) || edit.reps !== String(s.reps)) return true
     }
     return false
-  }, [edits, sets, noteText, history.note])
+  }, [edits, sets, noteText, history.note, convertWeight])
 
   // Duration display
   const durationText = useMemo(() => {
@@ -168,7 +170,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
         for (const s of sets) {
           const edit = edits[s.id]
           if (!edit) continue
-          const newWeight = parseFloat(edit.weight) || 0
+          const newWeight = convertToMetric(parseFloat(edit.weight) || 0)
           const newReps = parseInt(edit.reps, 10) || 0
           if (newWeight !== s.weight || newReps !== s.reps) {
             batch.push(
@@ -306,6 +308,7 @@ function HistoryDetailContent({ history, sets, session }: ContentProps) {
           colors={colors}
           styles={styles}
           t={t}
+          weightUnit={weightUnit}
         />
       ))}
 
@@ -373,6 +376,7 @@ interface ExerciseCardInnerProps {
   colors: ThemeColors
   styles: ReturnType<typeof useStyles>
   t: ReturnType<typeof useLanguage>['t']
+  weightUnit: string
 }
 
 function ExerciseCardInner({
@@ -386,6 +390,7 @@ function ExerciseCardInner({
   colors,
   styles,
   t,
+  weightUnit,
 }: ExerciseCardInnerProps) {
   const exerciseInfo = [exercise.muscles?.join(', '), exercise.equipment].filter(Boolean).join(' · ')
 
@@ -411,7 +416,7 @@ function ExerciseCardInner({
               keyboardType="numeric"
               selectTextOnFocus
             />
-            <Text style={styles.setUnit}>{t.statsMeasurements.weightUnit}</Text>
+            <Text style={styles.setUnit}>{weightUnit}</Text>
             <TextInput
               style={styles.setInput}
               value={edit?.reps ?? String(s.reps)}

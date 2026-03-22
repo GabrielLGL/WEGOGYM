@@ -15,6 +15,7 @@ import { WorkoutSetRow } from './WorkoutExerciseCard'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import type { SetInputData, ValidatedSetData, LastPerformance } from '../types/workout'
 
@@ -57,12 +58,14 @@ const SupersetExerciseInfoContent: React.FC<SupersetExerciseInfoContentProps> = 
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const { t } = useLanguage()
+  const { unitMode } = useUnits()
 
   const suggestion = lastPerformance
     ? suggestProgression(
         lastPerformance.avgWeight,
         lastPerformance.avgReps,
-        sessionExercise.repsTarget
+        sessionExercise.repsTarget,
+        unitMode,
       )
     : null
 

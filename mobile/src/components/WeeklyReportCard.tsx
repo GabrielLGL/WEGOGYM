@@ -15,6 +15,7 @@ import { spacing, borderRadius, fontSize } from '../theme'
 import type { ThemeColors } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import { useHaptics } from '../hooks/useHaptics'
 
 interface WeeklyReportCardProps {
@@ -26,12 +27,13 @@ interface WeeklyReportCardProps {
   onPress: () => void
 }
 
-function formatVolumeCompact(kg: number): string {
-  if (kg >= 1000) {
-    const tons = Math.round(kg / 100) / 10
+function formatVolumeCompact(kg: number, weightUnit = 'kg', convertWeight?: (kg: number) => number): string {
+  const value = convertWeight ? convertWeight(kg) : kg
+  if (value >= 1000) {
+    const tons = Math.round(value / 100) / 10
     return `${tons.toLocaleString('fr-FR')} t`
   }
-  return `${Math.round(kg).toLocaleString('fr-FR')} kg`
+  return `${Math.round(value).toLocaleString('fr-FR')} ${weightUnit}`
 }
 
 export function WeeklyReportCard({
@@ -45,6 +47,7 @@ export function WeeklyReportCard({
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
   const haptics = useHaptics()
 
   const handlePress = () => {
@@ -90,7 +93,7 @@ export function WeeklyReportCard({
         </View>
         <View style={styles.kpiSeparator} />
         <View style={styles.kpiItem}>
-          <Text style={styles.kpiValue}>{formatVolumeCompact(totalVolumeKg)}</Text>
+          <Text style={styles.kpiValue}>{formatVolumeCompact(totalVolumeKg, weightUnit, convertWeight)}</Text>
           <Text style={styles.kpiLabel}>{t.stats.volume}</Text>
         </View>
         <View style={styles.kpiSeparator} />

@@ -18,6 +18,7 @@ import Exercise from '../model/models/Exercise'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 import type { RootStackParamList } from '../navigation'
@@ -68,9 +69,11 @@ interface RowProps {
   language: string
   t: ReturnType<typeof useLanguage>['t']
   onPress: (exerciseId: string) => void
+  weightUnit: string
+  convertWeight: (kg: number) => number
 }
 
-const HallOfFameRow = memo<RowProps>(function HallOfFameRow({ entry, rank, colors, language, t, onPress }: RowProps) {
+const HallOfFameRow = memo<RowProps>(function HallOfFameRow({ entry, rank, colors, language, t, onPress, weightUnit, convertWeight }: RowProps) {
   const styles = useRowStyles(colors)
   const isMedal = rank <= 3
   const medalColor = getMedalColor(rank, colors)
@@ -94,8 +97,8 @@ const HallOfFameRow = memo<RowProps>(function HallOfFameRow({ entry, rank, color
 
         <Text style={styles.performance}>
           {entry.bestWeight > 0
-            ? `${entry.bestWeight} kg × ${entry.bestReps}  →  ${t.hallOfFame.orm}${entry.estimated1RM} ${t.hallOfFame.ormUnit}`
-            : `${entry.bestReps} reps  →  ${t.hallOfFame.orm}${entry.estimated1RM} ${t.hallOfFame.ormUnit}`
+            ? `${Math.round(convertWeight(entry.bestWeight))} ${weightUnit} × ${entry.bestReps}  →  ${t.hallOfFame.orm}${Math.round(convertWeight(entry.estimated1RM))} ${weightUnit}`
+            : `${entry.bestReps} reps  →  ${t.hallOfFame.orm}${Math.round(convertWeight(entry.estimated1RM))} ${weightUnit}`
           }
         </Text>
 
@@ -191,6 +194,7 @@ export function StatsHallOfFameScreenBase({ sets, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t, language } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   // Lookup exerciseId → Exercise
@@ -243,8 +247,10 @@ export function StatsHallOfFameScreenBase({ sets, exercises }: Props) {
       language={language}
       t={t}
       onPress={handleRowPress}
+      weightUnit={weightUnit}
+      convertWeight={convertWeight}
     />
-  ), [colors, language, t, handleRowPress])
+  ), [colors, language, t, handleRowPress, weightUnit, convertWeight])
 
   return (
     <FlatList

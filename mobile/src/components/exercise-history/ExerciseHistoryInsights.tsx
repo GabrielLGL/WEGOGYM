@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { spacing, borderRadius, fontSize } from '../../theme'
 import type { ThemeColors } from '../../theme'
 import type { Translations } from '../../i18n'
+import { useUnits } from '../../contexts/UnitContext'
 import type { PRPrediction } from '../../model/utils/prPredictionHelpers'
 import type { PlateauData } from '../../model/utils/plateauHelpers'
 import type { OverloadTrend } from '../../model/utils/progressiveOverloadHelpers'
@@ -35,6 +36,7 @@ function ExerciseHistoryInsights({
   onExercisePress,
 }: ExerciseHistoryInsightsProps) {
   const styles = useStyles(colors)
+  const { weightUnit, convertWeight } = useUnits()
 
   return (
     <>
@@ -119,7 +121,7 @@ function ExerciseHistoryInsights({
                 📈 {t.exerciseHistory.prediction.currentOrm}
               </Text>
               <Text style={styles.predictionValue}>
-                ~{prediction.currentBest1RM.toFixed(1)} {t.statsMeasurements.weightUnit}
+                ~{convertWeight(prediction.currentBest1RM).toFixed(1)} {weightUnit}
               </Text>
             </View>
             <View style={styles.predictionRow}>
@@ -127,7 +129,7 @@ function ExerciseHistoryInsights({
                 🎯 {t.exerciseHistory.prediction.nextTarget}
               </Text>
               <Text style={[styles.predictionValue, styles.predictionTarget]}>
-                ~{prediction.targetWeight.toFixed(1)} {t.statsMeasurements.weightUnit}
+                ~{convertWeight(prediction.targetWeight).toFixed(1)} {weightUnit}
               </Text>
             </View>
             {prediction.weeksToTarget > 52 ? (

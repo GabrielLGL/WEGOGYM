@@ -34,12 +34,18 @@ import type { BadgeDefinition } from '../model/utils/badgeConstants'
 import { MilestoneCelebration } from '../components/MilestoneCelebration'
 import { BadgeCelebration } from '../components/BadgeCelebration'
 import { spacing } from '../theme'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import { CoachMarks } from '../components/CoachMarks'
 import type { CoachMarkStep } from '../components/CoachMarks'
 import { useCoachMarks } from '../hooks/useCoachMarks'
 import { buildWidgetData, saveWidgetData } from '../services/widgetDataService'
+import { performWearableSync } from '../services/wearableSyncService'
+import SleepRecordModel from '../model/models/SleepRecord'
+import DailyVitalsModel from '../model/models/DailyVitals'
+import { computeSleepScore } from '../model/utils/sleepHelpers'
+import { computeVitalsScore } from '../model/utils/vitalsHelpers'
 import type { RootStackParamList } from '../navigation'
 
 import {
@@ -75,10 +81,13 @@ interface Props {
   userBadges: UserBadge[]
   exercises: Exercise[]
   programs: Program[]
+  sleepRecords: SleepRecordModel[]
+  dailyVitals: DailyVitalsModel[]
 }
 
-function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises, programs }: Props) {
+function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userBadges, exercises, programs, sleepRecords, dailyVitals }: Props) {
   const colors = useColors()
+  const insets = useSafeAreaInsets()
   const styles = useStyles()
   const navigation = useNavigation<HomeNavigation>()
   const route = useRoute<HomeRoute>()
@@ -125,6 +134,29 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
       .catch(() => undefined)
   }, [user?.currentStreak, user?.level, histories?.length])
 
+  // Wearable auto-sync (non-blocking, after Home is displayed)
+  useEffect(() => {
+    if (!user?.wearableProvider) return
+    performWearableSync(user).catch(() => undefined)
+  }, [user?.wearableProvider])
+
+  // Health Connect scores (computed once, shared between StatusStrip and BodyStatus)
+  const healthConnectData = useMemo(() => {
+    const sleepScore = sleepRecords.length > 0
+      ? computeSleepScore(sleepRecords.map(r => ({
+          date: r.date, durationMinutes: r.durationMinutes,
+          deepMinutes: r.deepMinutes, lightMinutes: r.lightMinutes,
+          remMinutes: r.remMinutes, awakeMinutes: r.awakeMinutes,
+        })))?.score ?? null
+      : null
+    const vitalsScore = dailyVitals.length > 0
+      ? computeVitalsScore(dailyVitals.map(v => ({
+          date: v.date, restingHr: v.restingHr, hrvRmssd: v.hrvRmssd,
+        })))?.score ?? null
+      : null
+    return { sleepScore, vitalsScore }
+  }, [sleepRecords, dailyVitals])
+
   // Coach marks
   const { shouldShow: shouldShowCoachMarks, markCompleted: markTutorialCompleted } = useCoachMarks(user)
   const showCoachMarks = shouldShowCoachMarks && currentCelebration === null
@@ -141,7 +173,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
       colors={[colors.bgGradientStart, colors.bgGradientEnd]}
       start={{ x: 0, y: 0 }}
       end={{ x: 0.3, y: 1 }}
-      style={{ flex: 1 }}
+      style={{ flex: 1, paddingTop: insets.top }}
     >
     <ScrollView
       style={[styles.container, { backgroundColor: 'transparent' }]}
@@ -164,6 +196,8 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         exercises={exercises}
         sessions={sessions}
         programs={programs}
+        healthData={healthConnectData}
+        weeklyTarget={user?.streakTarget ?? 3}
       />
 
       <HomeStatusStrip
@@ -171,6 +205,7 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         histories={histories}
         sets={sets}
         exercises={exercises}
+        healthData={healthConnectData}
       />
 
       <HomeWeeklyActivityCard
@@ -193,6 +228,20 @@ function HomeScreenBase({ user, histories, historiesCount, sets, sessions, userB
         sets={sets}
         exercises={exercises}
         histories={histories}
+        sleepRecords={sleepRecords.map(r => ({
+          date: r.date,
+          durationMinutes: r.durationMinutes,
+          deepMinutes: r.deepMinutes,
+          lightMinutes: r.lightMinutes,
+          remMinutes: r.remMinutes,
+          awakeMinutes: r.awakeMinutes,
+        }))}
+        vitalsRecords={dailyVitals.map(v => ({
+          date: v.date,
+          restingHr: v.restingHr,
+          hrvRmssd: v.hrvRmssd,
+        }))}
+        weeklyTarget={user?.streakTarget ?? 3}
       />
 
       <HomeStreakSection histories={histories} />
@@ -236,7 +285,7 @@ function useStyles() {
     },
     content: {
       padding: spacing.md,
-      paddingTop: 44 + spacing.sm,
+      paddingTop: spacing.sm,
       paddingBottom: spacing.xl,
     },
   }), [])
@@ -272,6 +321,14 @@ const enhance = withObservables([], () => ({
   userBadges: database.get<UserBadge>('user_badges').query().observe(),
   exercises: database.get<Exercise>('exercises').query().observe(),
   programs: database.get<Program>('programs').query().observe(),
+  sleepRecords: database.get<SleepRecordModel>('sleep_records').query(
+    Q.where('date', Q.gte(Date.now() - NINETY_DAYS_MS)),
+    Q.sortBy('date', Q.desc),
+  ).observe(),
+  dailyVitals: database.get<DailyVitalsModel>('daily_vitals').query(
+    Q.where('date', Q.gte(Date.now() - NINETY_DAYS_MS)),
+    Q.sortBy('date', Q.desc),
+  ).observe(),
 }))
 
 const Enhanced = enhance(HomeScreenBase)

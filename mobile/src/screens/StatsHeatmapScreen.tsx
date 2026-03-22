@@ -17,6 +17,7 @@ import type { MuscleHeatmapEntry, HeatmapPeriod } from '../model/utils/muscleHea
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useColors } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import { useDeferredMount } from '../hooks/useDeferredMount'
 
@@ -27,9 +28,11 @@ interface MuscleCardProps {
   colors: ThemeColors
   sessionLabel: string
   noDataLabel: string
+  weightUnit: string
+  convertWeight: (kg: number) => number
 }
 
-const MuscleCard = memo<MuscleCardProps>(function MuscleCard({ entry, colors, sessionLabel, noDataLabel }: MuscleCardProps) {
+const MuscleCard = memo<MuscleCardProps>(function MuscleCard({ entry, colors, sessionLabel, noDataLabel, weightUnit, convertWeight }: MuscleCardProps) {
   const styles = useCardStyles(colors)
   const isActive = entry.totalVolume > 0
 
@@ -39,7 +42,7 @@ const MuscleCard = memo<MuscleCardProps>(function MuscleCard({ entry, colors, se
   const intensityPct = Math.round(entry.intensity * 100)
 
   const volumeLabel = isActive
-    ? `${Math.round(entry.totalVolume).toLocaleString('fr-FR')} kg`
+    ? `${Math.round(convertWeight(entry.totalVolume)).toLocaleString('fr-FR')} ${weightUnit}`
     : '—'
 
   return (
@@ -154,6 +157,7 @@ export function StatsHeatmapScreenBase({ sets, exercises }: Props) {
   const colors = useColors()
   const styles = useStyles(colors)
   const { t } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
 
   const [period, setPeriod] = useState<HeatmapPeriod>(30)
 
@@ -186,8 +190,10 @@ export function StatsHeatmapScreenBase({ sets, exercises }: Props) {
       colors={colors}
       sessionLabel={t.muscleHeatmap.sessions}
       noDataLabel={t.muscleHeatmap.noData}
+      weightUnit={weightUnit}
+      convertWeight={convertWeight}
     />
-  ), [colors, t.muscleHeatmap.sessions, t.muscleHeatmap.noData])
+  ), [colors, t.muscleHeatmap.sessions, t.muscleHeatmap.noData, weightUnit, convertWeight])
 
   return (
     <View style={styles.container}>

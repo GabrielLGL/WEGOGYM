@@ -7,6 +7,7 @@ import type { ThemeColors } from '../../theme'
 import type { Translations } from '../../i18n'
 import type { ExerciseSessionStat } from '../../model/utils/exerciseStatsUtils'
 import type { RepMaxEstimate } from '../../model/utils/repMaxHelpers'
+import { useUnits } from '../../contexts/UnitContext'
 
 interface ExerciseHistoryStatsProps {
   pr: { weight: number; reps: number } | null
@@ -32,6 +33,7 @@ function ExerciseHistoryStats({
   onHistoryPress,
 }: ExerciseHistoryStatsProps) {
   const styles = useStyles(colors)
+  const { weightUnit, convertWeight } = useUnits()
   const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US'
 
   return (
@@ -44,8 +46,8 @@ function ExerciseHistoryStats({
         </View>
         {pr ? (
           <>
-            <Text style={styles.prValue}>{pr.weight} {t.statsMeasurements.weightUnit} × {pr.reps} {t.workout.reps}</Text>
-            <Text style={styles.prOneRM}>{t.exerciseHistory.prOneRM}{oneRM} {t.exerciseHistory.prOneRMUnit}</Text>
+            <Text style={styles.prValue}>{convertWeight(pr.weight)} {weightUnit} × {pr.reps} {t.workout.reps}</Text>
+            <Text style={styles.prOneRM}>{t.exerciseHistory.prOneRM}{oneRM != null ? convertWeight(oneRM) : '—'} {t.exerciseHistory.prOneRMUnit}</Text>
           </>
         ) : (
           <Text style={styles.prEmpty}>{t.exerciseHistory.prEmpty}</Text>
@@ -58,15 +60,15 @@ function ExerciseHistoryStats({
           <Text style={styles.repMaxTitle}>{t.exerciseHistory.repMax.title}</Text>
           <View style={styles.repMaxRow}>
             <View style={styles.repMaxStat}>
-              <Text style={styles.repMaxValue}>{repMaxData.estimated1RM} {t.statsMeasurements.weightUnit}</Text>
+              <Text style={styles.repMaxValue}>{convertWeight(repMaxData.estimated1RM)} {weightUnit}</Text>
               <Text style={styles.repMaxLabel}>{t.exerciseHistory.repMax.estimated1RM}</Text>
             </View>
             <View style={styles.repMaxStat}>
-              <Text style={styles.repMaxValue}>{repMaxData.estimated3RM} {t.statsMeasurements.weightUnit}</Text>
+              <Text style={styles.repMaxValue}>{convertWeight(repMaxData.estimated3RM)} {weightUnit}</Text>
               <Text style={styles.repMaxLabel}>{t.exerciseHistory.repMax.estimated3RM}</Text>
             </View>
             <View style={styles.repMaxStat}>
-              <Text style={styles.repMaxValue}>{repMaxData.estimated5RM} {t.statsMeasurements.weightUnit}</Text>
+              <Text style={styles.repMaxValue}>{convertWeight(repMaxData.estimated5RM)} {weightUnit}</Text>
               <Text style={styles.repMaxLabel}>{t.exerciseHistory.repMax.estimated5RM}</Text>
             </View>
           </View>
@@ -107,7 +109,7 @@ function ExerciseHistoryStats({
                 <View style={styles.historySets}>
                   {stat.sets.map((s, si) => (
                     <Text key={si} style={styles.setChip}>
-                      {s.weight > 0 ? `${s.weight} ${t.statsMeasurements.weightUnit}` : t.exerciseHistory.bodyweight} × {s.reps}
+                      {s.weight > 0 ? `${convertWeight(s.weight)} ${weightUnit}` : t.exerciseHistory.bodyweight} × {s.reps}
                     </Text>
                   ))}
                 </View>

@@ -14,6 +14,7 @@ import { useHaptics } from '../hooks/useHaptics'
 import { spacing, borderRadius, fontSize } from '../theme'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useUnits } from '../contexts/UnitContext'
 import type { ThemeColors } from '../theme'
 import type { SetInputData, ValidatedSetData, LastPerformance } from '../types/workout'
 
@@ -62,6 +63,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
   // Hooks AVANT tout return conditionnel (règle des hooks React)
   const { colors } = useTheme()
   const { t } = useLanguage()
+  const { weightUnit } = useUnits()
   const styles = useMemo(() => createStyles(colors), [colors])
   const [localWeight, setLocalWeight] = React.useState(input.weight)
   const [localReps, setLocalReps] = React.useState(input.reps)
@@ -133,7 +135,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           <Ionicons name="checkmark" size={16} color={colors.background} />
         </View>
         <Text style={styles.validatedWeight}>{validated.weight}</Text>
-        <Text style={styles.validatedUnit}>{t.statsMeasurements.weightUnit}</Text>
+        <Text style={styles.validatedUnit}>{weightUnit}</Text>
         <Text style={styles.validatedMultiply}>×</Text>
         <Text style={styles.validatedWeight}>{validated.reps}</Text>
         <Text style={styles.validatedUnit}>{t.workout.reps}</Text>
@@ -179,7 +181,7 @@ export const WorkoutSetRow = React.memo(function WorkoutSetRow({
           textAlign="center"
           accessibilityLabel={t.accessibility.weightInput + ', ' + t.accessibility.validateSet + ' ' + setOrder}
         />
-        <Text style={styles.inputSuffix}>{t.statsMeasurements.weightUnit}</Text>
+        <Text style={styles.inputSuffix}>{weightUnit}</Text>
       </View>
       <View style={[styles.inputBlock, styles.inputBlockReps, repsError && styles.inputBlockError]}>
         <TextInput
@@ -229,6 +231,7 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
   const styles = useMemo(() => createStyles(colors), [colors])
   const haptics = useHaptics()
   const { t } = useLanguage()
+  const { convertWeight, weightUnit, unitMode } = useUnits()
   const [isEditingSessionNote, setIsEditingSessionNote] = React.useState(false)
   const sessionNoteRef = React.useRef(sessionExercise.notes ?? '')
 
@@ -248,7 +251,8 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
     ? suggestProgression(
         lastPerformance.avgWeight,
         lastPerformance.avgReps,
-        sessionExercise.repsTarget
+        sessionExercise.repsTarget,
+        unitMode,
       )
     : null
 
@@ -342,7 +346,7 @@ const WorkoutExerciseCardContent: React.FC<WorkoutExerciseCardContentProps> = ({
       )}
       {lastPerformance && (
         <Text style={styles.lastPerfText}>
-          {t.workout.lastPerfLabel} {lastPerformance.avgWeight} kg × {lastPerformance.avgReps} {t.workout.lastPerfOn} {lastPerformance.setsCount} {lastPerformance.setsCount > 1 ? t.workout.lastPerfSets : t.workout.lastPerfSet}
+          {t.workout.lastPerfLabel} {convertWeight(lastPerformance.avgWeight)} {weightUnit} × {lastPerformance.avgReps} {t.workout.lastPerfOn} {lastPerformance.setsCount} {lastPerformance.setsCount > 1 ? t.workout.lastPerfSets : t.workout.lastPerfSet}
         </Text>
       )}
       {suggestion && (

@@ -19,6 +19,7 @@ import { useColors } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { ThemeColors } from '../../theme'
 import { spacing, borderRadius, fontSize } from '../../theme'
+import { useUnits } from '../../contexts/UnitContext'
 import type { RootStackParamList } from '../../navigation'
 
 interface HomeInsightsCarouselProps {
@@ -36,6 +37,7 @@ interface InsightCard {
 function HomeInsightsCarouselInner({ histories, sets, exercises, user }: HomeInsightsCarouselProps) {
   const colors = useColors()
   const { t, language } = useLanguage()
+  const { weightUnit, convertWeight } = useUnits()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const styles = useStyles(colors)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -139,9 +141,9 @@ function HomeInsightsCarouselInner({ histories, sets, exercises, user }: HomeIns
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {weeklyReportData.totalVolumeKg >= 1000
-                  ? `${(weeklyReportData.totalVolumeKg / 1000).toFixed(1)}t`
-                  : `${Math.round(weeklyReportData.totalVolumeKg)}kg`}
+                {convertWeight(weeklyReportData.totalVolumeKg) >= 1000
+                  ? `${(convertWeight(weeklyReportData.totalVolumeKg) / 1000).toFixed(1)}t`
+                  : `${Math.round(convertWeight(weeklyReportData.totalVolumeKg))}${weightUnit}`}
               </Text>
               <Text style={styles.statLabel}>{t.home.lastWorkout.volume}</Text>
             </View>
